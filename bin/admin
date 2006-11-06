@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+# Admin -- oddb -- 09.07.2003 -- hwyss@ywesee.com 
+
+$:.push(File.expand_path('../lib', File.dirname(__FILE__)))
+
+$KCODE = 'u'
+
+require 'drb'
+require 'sbsm/drb'
+require 'oddb'
+require 'oddb/config'
+require 'encoding/character/utf-8'
+require 'readline'
+include Readline
+
+Kernel.trap('INT') {
+  if($current.respond_to?(:exit))
+    $current.exit
+    $current = nil
+  else
+    puts "<ctrl-c> is used to kill admin-threads."
+    puts "Type <quit> or <exit> to exit."
+  end
+}
+
+prompt = 'oddb> '
+DRb.start_service('druby://localhost:0')
+oddb = DRbObject.new(nil, ODDB.config.server_url)
+last_error = nil
+priority = -1
+while(line = readline(prompt, true))
+  result = ''
+  result.extend(DRb::DRbUndumped)
+  line.strip!
+  $stdout.print "-> "
+  if(match = /puts\s+(.*)/.match(line))
+    line = "ODDB.logger.debug('admin') { #{match[1]} }"
+  end
+  case line.downcase
+  when 'exit', 'quit'
+    $stdout.puts 'Goodbye'
+    break
+  when 'bt', 'backtrace'
+    if last_error.respond_to?(:backtrace)
+      $stdout.puts last_error.backtrace 
+    else
+      $stdout.puts 'No Error'
+    end
+  when /^last_error/
+    begin
+      $stdout.puts eval(line)
+    rescue Exception => last_error
+      $stdout.puts last_error
+    end
+  when /sp\s+(-?\d+)/, /set_priority\s+(-?\d+)/ 
+    priority = $~[1].to_i
+    $stdout.puts "setting Priority to #{priority}"
+  else
+    begin
+      bgflag = line.slice!(/\s*\&\s*$/)
+      $current = oddb._admin(line, result, priority)
+      unless(bgflag)
+        $current.join
+      end
+      $stdout.puts result
+    rescue Exception => last_error
+      $stdout.puts last_error
+    end
+  end
+  $current = nil
+  $stdout.flush
+end
