@@ -6,10 +6,18 @@ require 'oddb/model'
 module ODDB
   module Drugs
     class Product < Model
+      belongs_to :atc
+      belongs_to :company
+      has_many :sequences
+      is_coded
       multilingual :name
-      attr_reader :sequences
       def initialize
         @sequences = []
+      end
+      def packages
+        @sequences.inject([]) { |memo, seq|
+          memo.concat(seq.packages)
+        }
       end
     end
   end

@@ -23,6 +23,9 @@ module ODDB
           super(meth, *args, &block)
         end
       end
+      def to_s
+        @canonical.values.sort.first
+      end
       def ==(other)
         case other
         when String

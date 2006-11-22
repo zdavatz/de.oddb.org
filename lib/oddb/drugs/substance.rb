@@ -6,9 +6,10 @@ require 'oddb/model'
 module ODDB
   module Drugs
     class Substance < Model
-      multilingual :name
+      belongs_to :group
       has_many :active_agents
-      has_many :codes
+      is_coded
+      multilingual :name
     end
   end
 end

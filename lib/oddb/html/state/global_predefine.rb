@@ -8,6 +8,10 @@ module ODDB
     module State
 class Global < SBSM::State
 end
+      module Drugs
+class Global < Global
+end
+      end
     end
   end
 end

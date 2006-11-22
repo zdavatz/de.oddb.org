@@ -12,5 +12,8 @@ module ODDB
         self.send(conn).odba_store
       }
     end
+    class << self
+      alias :all :odba_extent
+    end
   end
 end

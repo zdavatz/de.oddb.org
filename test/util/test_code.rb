@@ -42,6 +42,18 @@ module ODDB
         assert_equal("found", {code1 => "found"}[code2])
         assert_nil({code1 => "found"}[code3])
       end
+      def test_dated_values
+        code = Code.new(:registration, 245, 'ch')
+        assert_equal("00245", code.to_s)
+        code.value = 244, Date.today - 10
+        assert_equal(245, code.value)
+        assert_equal(244, code.value(Date.today - 1))
+        code.value = 246, Date.today + 10
+        assert_equal(245, code.value)
+        assert_equal(244, code.value(Date.today - 1))
+        assert_equal(245, code.value(Date.today + 1))
+        assert_equal(246, code.value(Date.today + 10))
+      end
     end
   end
 end

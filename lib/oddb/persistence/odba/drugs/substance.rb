@@ -10,6 +10,11 @@ module ODDB
       odba_index :name, 'name.all'
       odba_index :code, :codes, {:type => 'type.to_s', :country => 'country', 
         :value => 'to_s'}, Util::Code
+      attr_reader :group
+      def group=(group)
+        group.add_substance(self)
+        @group = group
+      end
     end
   end
 end

@@ -6,8 +6,8 @@ require 'oddb/model'
 module ODDB
   module Drugs
     class GalenicForm < Model
+      is_coded
       multilingual :description
-      has_many :codes
     end
   end
 end

@@ -3,7 +3,6 @@
 
 require 'oddb/drugs/product'
 require 'oddb/persistence/odba/model'
-require 'oddb/persistence/odba/util/code'
 
 module ODDB
   module Drugs

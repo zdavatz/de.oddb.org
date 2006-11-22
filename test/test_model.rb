@@ -3,17 +3,24 @@
 
 $: << File.expand_path('../lib', File.dirname(__FILE__))
 
+require 'flexmock'
 require 'test/unit'
 require 'oddb/model'
 
 module ODDB
   class TestModel < Test::Unit::TestCase
+    include FlexMock::TestCase
     class Foo < Model
       multilingual :name
       has_many :difficulties
     end
     class Bar < Model
       has_many :not_in_foos
+    end
+    class Baz < Model
+      belongs_to :foo
+    end
+    class SelfName < Model
     end
     def setup
       @foo = Foo.new
@@ -32,6 +39,31 @@ module ODDB
       assert_respond_to(@foo, :remove_difficulty)
       @foo.remove_difficulty('a difficult String')
       assert_equal([], @foo.difficulties)
+    end
+    def test_belongs_to
+      baz = Baz.new
+      assert_respond_to(baz, :foo)
+      assert_respond_to(baz, :foo=)
+      assert_nil(baz.foo)
+      foo = flexmock('foo')
+      foo.should_receive(:add_baz).times(1).with(baz)
+      foo.should_receive(:save).times(2)
+      baz.foo = foo
+      assert_equal(foo, baz.foo)
+      baz.foo = foo
+      assert_equal(foo, baz.foo)
+      other = flexmock('other')
+      foo.should_receive(:remove_baz).times(1).with(baz)
+      other.should_receive(:add_baz).times(1).with(baz)
+      other.should_receive(:save).times(2)
+      baz.foo = other
+      assert_equal(other, baz.foo)
+      other.should_receive(:remove_baz).times(1).with(baz)
+      baz.foo = nil
+      assert_nil(baz.foo)
+    end
+    def test_singular
+      assert_equal('self_name', SelfName.singular)
     end
   end
 end

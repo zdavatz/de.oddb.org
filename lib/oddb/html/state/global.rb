@@ -7,6 +7,9 @@ module ODDB
   module Html
     module State
 class Global < SBSM::State
+  def search
+    _search(@session.persistent_user_input(:query))
+  end
 end
     end
   end

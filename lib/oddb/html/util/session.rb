@@ -3,6 +3,8 @@
 
 require 'oddb/config'
 require 'oddb/html/state/drugs/init'
+require 'oddb/html/state/global'
+require 'oddb/html/state/drugs/global'
 require 'oddb/html/util/lookandfeel'
 require 'sbsm/redirector'
 require 'sbsm/session'
@@ -18,6 +20,9 @@ class Session < SBSM::Session
   DEFAULT_ZONE = 'drugs'
   EXPIRES = ODDB.config.session_timeout
   LOOKANDFEEL = Lookandfeel
+  def navigation
+    state.navigation
+  end
 end
     end
   end

@@ -2,6 +2,7 @@
 # Html::View::Template -- de.oddb.org -- 27.10.2006 -- hwyss@ywesee.com
 
 require 'htmlgrid/divtemplate'
+require 'sbsm/time'
 require 'oddb/html/view/foot'
 require 'oddb/html/view/head'
 
@@ -11,15 +12,23 @@ module ODDB
 class Template < HtmlGrid::DivTemplate
   FOOT = Foot
   HEAD = Head
+  HTTP_HEADERS = {
+    "Content-Type"	=>	"text/html; charset=utf-8",
+    "Cache-Control"	=>	"private, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+    "Pragma"				=>	"no-cache",
+    "Expires"				=>	Time.now.rfc1123,
+    "P3P"						=>	"CP='OTI NID CUR OUR STP ONL UNI PRE'",
+  }
   COMPONENTS = {
     [0,0] => :head,
     [0,1] => :content,  
     [0,2] => :foot,
   }
+  CSS_ID_MAP = ['head', 'content', 'foot']
   def title(context)
     parts = [:html_title, @session.zone,
       *@session.state.direct_event].collect { |key| 
-      @lookandfeel.lookup(key) }.compact
+      @lookandfeel.lookup(key) { key if(key.is_a?(String)) } }.compact
     context.title { parts.join(' | ') }
   end
 end

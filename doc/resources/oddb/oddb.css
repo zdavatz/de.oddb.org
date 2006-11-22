@@ -1,7 +1,67 @@
+body {
+  font-family: Helvetica, Arial, Verdana, sans-serif;
+  font-size: 12px
+}
+div#foot, th {
+  background-color: #2ba476;
+  color: white;
+  padding: 4px;
+}
+div#foot a:link,  
+div#foot a:visited,
+th a:link, th a:visited {
+  text-decoration: none;
+  color: white;
+}
+div#foot a,
+div#foot a:visited:hover,
+div#foot a:link:hover,
+th a, th a:visited:hover, th a:link:hover {
+  text-decoration: none;
+  color: blue;
+}
 div#home-search {
   margin-top: 100px;
+  margin-bottom: 100px;
   text-align: center;
 }
 div#home-search input[type=text] {
   width: 200px;
+}
+div#navigation {
+  float: right;
+}
+div#result-search {
+  text-align: right;
+}
+div#result-search input[type=text] {
+  width: 200px;
+}
+img {
+  border: 0px;
+}
+table {
+  width: 100%;
+}
+td {
+  padding: 4px;
+}
+th {
+  text-align: left;
+}
+tr.bg {
+  background-color: #dcefd6;
+}
+td.product {
+  font-size: 14px;
+  font-weight: bold;
+}
+td.company {
+  font-style: italic;
+}
+.price_public, .festbetrag, .price_difference, .doses {
+  text-align: right;
+}
+.festbetragsstufe, .zuzahlungsbefreit {
+  text-align: center;
 }

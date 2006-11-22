@@ -5,9 +5,14 @@ require 'oddb/config'
 require 'odba/connection_pool'
 require 'odba/drbwrapper'
 
-require 'oddb/persistence/odba/util/code'
+require 'oddb/persistence/odba/business/company'
+require 'oddb/persistence/odba/drugs/atc'
+require 'oddb/persistence/odba/drugs/galenic_form'
+require 'oddb/persistence/odba/drugs/package'
 require 'oddb/persistence/odba/drugs/product'
 require 'oddb/persistence/odba/drugs/substance'
+require 'oddb/persistence/odba/drugs/substance_group'
+require 'oddb/persistence/odba/drugs/unit'
 
 module ODDB
   module Persistence

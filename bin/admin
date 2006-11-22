@@ -60,7 +60,7 @@ while(line = readline(prompt, true))
       bgflag = line.slice!(/\s*\&\s*$/)
       $current = oddb._admin(line, result, priority)
       unless(bgflag)
-        $current.join
+        last_error = $current.join
       end
       $stdout.puts result
     rescue Exception => last_error

@@ -16,6 +16,7 @@ module ODDB
     'db_user'           => 'oddb',
     'db_auth'           => 'oddb',
     'db_backend'        => :psql,
+    'http_server'       => 'http://localhost',
     'log_file'          => STDERR,
     'log_level'         => 'INFO',
     'persistence'       => 'odba',

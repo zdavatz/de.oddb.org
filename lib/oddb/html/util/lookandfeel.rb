@@ -9,15 +9,31 @@ module ODDB
 class Lookandfeel < SBSM::Lookandfeel
   DICTIONARIES = {
     "de"  =>  {
-      :cpr_link     => 'ywesee.com',
-      :drugs        => 'Medikamente',
-      :home_drugs   => 'Home',
-      :html_title   => 'ODDB',
-      :logo         => 'de.oddb.org - peer reviewed open drug database',
-      :oddb_version => 'Commit-ID',
-      :query        => 'Bitte HIER Such-Stichwort eingeben',
-      :reset        => 'Zurücksetzen',
-      :search       => 'Suchen',
+      :drugs        				=> 'Medikamente',
+      :empty_packages       => <<-EOS,
+Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte
+überprüfen Sie die Schreibweise und versuchen Sie es noch
+einmal.
+    EOS
+      :home         				=> 'Home',
+      :html_title   				=> 'ODDB',
+      :lgpl_license 				=> 'LGPL',
+      :logo         				=> 'de.oddb.org - peer reviewed open drug database',
+      :oddb_version 				=> 'Commit-ID',
+      :query_info    				=> 'Bitte HIER Such-Stichwort eingeben',
+      :reset        				=> 'Zurücksetzen',
+      :search           		=> 'Suchen',
+      :th_atc               => 'ATC-Code',
+      :th_company           => 'Hersteller',
+      :th_doses             => 'Stärke',
+      :th_festbetrag        => 'FB',
+      :th_festbetragsstufe  => 'FB-Stufe',
+      :th_price_public  		=> 'PP',
+      :th_product   				=> 'Präparat',
+      :th_size      				=> 'Packungsgrösse',
+      :th_zuzahlungsbefreit => 'Zuzahlungsbefreit',
+      :yes                  => 'Ja',
+      :ywesee       				=> 'ywesee.com',
     }
   }
   RESOURCES = {

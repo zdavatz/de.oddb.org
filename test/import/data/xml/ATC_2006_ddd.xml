@@ -1,0 +1,35 @@
+<xml xmlns:s='uuid:BDC6E3F0-6DA3-11d1-A2A3-00AA00C14882'
+	xmlns:dt='uuid:C2F41010-65B3-11d1-A29F-00AA00C14882'
+	xmlns:rs='urn:schemas-microsoft-com:rowset'
+	xmlns:z='#RowsetSchema'>
+<s:Schema id='RowsetSchema'>
+	<s:ElementType name='row' content='eltOnly' rs:updatable='true'>
+		<s:AttributeType name='ATCCode' rs:number='1' rs:nullable='true' rs:writeunknown='true' rs:basecatalog='ATC'
+			 rs:basetable='#t1' rs:basecolumn='ATCCode'>
+			<s:datatype dt:type='string' rs:dbtype='str' dt:maxLength='10'/>
+		</s:AttributeType>
+		<s:AttributeType name='DDD' rs:number='2' rs:nullable='true' rs:writeunknown='true' rs:basecatalog='ATC' rs:basetable='#t1'
+			 rs:basecolumn='DDD'>
+			<s:datatype dt:type='string' rs:dbtype='str' dt:maxLength='20'/>
+		</s:AttributeType>
+		<s:AttributeType name='UnitType' rs:number='3' rs:nullable='true' rs:writeunknown='true' rs:basecatalog='ATC'
+			 rs:basetable='#t1' rs:basecolumn='UnitType'>
+			<s:datatype dt:type='string' rs:dbtype='str' dt:maxLength='255'/>
+		</s:AttributeType>
+		<s:AttributeType name='AdmCode' rs:number='4' rs:nullable='true' rs:writeunknown='true' rs:basecatalog='ATC'
+			 rs:basetable='#t1' rs:basecolumn='AdmCode'>
+			<s:datatype dt:type='string' rs:dbtype='str' dt:maxLength='255'/>
+		</s:AttributeType>
+		<s:AttributeType name='DDDComment' rs:number='5' rs:nullable='true' rs:writeunknown='true' rs:basecatalog='ATC'
+			 rs:basetable='#t1' rs:basecolumn='DDDComment'>
+			<s:datatype dt:type='string' rs:dbtype='str' dt:maxLength='255'/>
+		</s:AttributeType>
+		<s:extends type='rs:rowbase'/>
+	</s:ElementType>
+</s:Schema>
+<rs:data>
+	<z:row ATCCode='A01AB02' DDD='60' UnitType='mg' AdmCode='O'/>
+	<z:row ATCCode='A10BB01' DDD='7' UnitType='mg' AdmCode='O' DDDComment='mikrokristall. Substanz'/>
+	<z:row ATCCode='A10BB01' DDD='10' UnitType='mg' AdmCode='O'/>
+</rs:data>
+</xml>

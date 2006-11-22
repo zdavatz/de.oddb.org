@@ -7,7 +7,7 @@ require 'encoding/character/utf-8'
 DRb.start_service('druby://localhost:0')
 
 begin
-	SBSM::Request.new(ENV["DRB_SERVER"]).process
+	::SBSM::Request.new(ENV["DRB_SERVER"]).process
 rescue Exception => e
 	$stderr << "Client Error: " << e.message << "\n"
 	$stderr << e.class << "\n"

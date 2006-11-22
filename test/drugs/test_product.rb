@@ -3,17 +3,28 @@
 
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
+require 'flexmock'
 require 'test/unit'
 require 'oddb/drugs/product'
 
 module ODDB
   module Drugs
     class TestProduct < Test::Unit::TestCase
+      include FlexMock::TestCase
       def setup
         @product = Product.new
       end
       def test_name
         assert_instance_of(Util::Multilingual, @product.name)
+      end
+      def test_packages
+        seq1 = flexmock('sequence')
+        seq2 = flexmock('sequence')
+        seq1.should_receive(:packages).and_return(%w{foo bar})
+        seq2.should_receive(:packages).and_return(%w{baz})
+        @product.add_sequence(seq1)
+        @product.add_sequence(seq2)
+        assert_equal(%w{foo bar baz}, @product.packages)
       end
     end
   end

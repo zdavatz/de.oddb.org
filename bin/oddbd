@@ -6,7 +6,8 @@ $KCODE = 'u'
 require 'drb'
 require 'logger'
 require 'oddb/config'
-require 'oddb/util/server'
+require 'oddb/drugs'
+require 'oddb/util'
 require 'encoding/character/utf-8'
 
 
@@ -16,7 +17,7 @@ module ODDB
   case @config.persistence
   when 'odba'
     DRb.install_id_conv ODBA::DRbIdConv.new
-    persistence = ODDB::Persistence::ODBA
+    @persistence = ODDB::Persistence::ODBA
   when 'og'
     DRb.install_id_conv DRb::TimerIdConv.new
     Og.setup({
@@ -27,9 +28,8 @@ module ODDB
       :evolve_schema => true,
       :evolve_schema_cautious => false,
     })
-    persistence = ODDB::Persistence::Og
+    @persistence = ODDB::Persistence::Og
   end
-  PERSISTENCE = persistence
 
   log_file = @config.log_file
   if(log_file.is_a?(String))

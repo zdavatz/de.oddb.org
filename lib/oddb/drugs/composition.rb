@@ -2,11 +2,39 @@
 # Drugs::Composition -- de.oddb.org -- 01.09.2006 -- hwyss@ywesee.com
 
 require 'oddb/model'
+require 'oddb/drugs/dose'
 
 module ODDB
   module Drugs
     class Composition < Model
-      multilingual :name
+      attr_accessor :galenic_form, :equivalence_factor
+      has_many :active_agents
+      def active_agent(substance)
+        active_agents.find { |agent| agent.substance == substance }
+      end
+      def doses
+        active_agents.collect { |agent| agent.dose }
+      end
+      def include?(substance, dose=nil, unit=nil)
+        if(dose)
+          include_active_agent?(substance, dose, unit)
+        else
+          include_substance?(substance)
+        end
+      end
+      def include_active_agent?(substance, dose, unit=nil)
+        unless(dose.is_a?(Drugs::Dose))
+          dose = Drugs::Dose.new(dose, unit)
+        end
+        active_agents.any? { |act|
+          act.substance == substance && act.dose == dose
+        }
+      end
+      def include_substance?(substance)
+        active_agents.any? { |act|
+          act.substance == substance
+        }
+      end
     end
   end
 end

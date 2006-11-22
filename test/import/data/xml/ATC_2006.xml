@@ -1,0 +1,47 @@
+<xml xmlns:s='uuid:BDC6E3F0-6DA3-11d1-A2A3-00AA00C14882'
+	xmlns:dt='uuid:C2F41010-65B3-11d1-A29F-00AA00C14882'
+	xmlns:rs='urn:schemas-microsoft-com:rowset'
+	xmlns:z='#RowsetSchema'>
+<s:Schema id='RowsetSchema'>
+	<s:ElementType name='row' content='eltOnly' rs:updatable='true'>
+		<s:AttributeType name='ATCCode' rs:number='1' rs:writeunknown='true' rs:basecatalog='ATC' rs:basetable='#t1'
+			 rs:basecolumn='ATCCode'>
+			<s:datatype dt:type='string' rs:dbtype='str' dt:maxLength='10' rs:maybenull='false'/>
+		</s:AttributeType>
+		<s:AttributeType name='Name' rs:number='2' rs:nullable='true' rs:writeunknown='true' rs:basecatalog='ATC' rs:basetable='#t1'
+			 rs:basecolumn='Name'>
+			<s:datatype dt:type='string' rs:dbtype='str' dt:maxLength='255'/>
+		</s:AttributeType>
+		<s:AttributeType name='Comment' rs:number='3' rs:nullable='true' rs:writeunknown='true' rs:basecatalog='ATC'
+			 rs:basetable='#t1' rs:basecolumn='Comment'>
+			<s:datatype dt:type='string' rs:dbtype='str' dt:maxLength='255'/>
+		</s:AttributeType>
+		<s:extends type='rs:rowbase'/>
+	</s:ElementType>
+</s:Schema>
+<rs:data>
+	<z:row ATCCode='A' Name='ALIMENTÄRES SYSTEM UND STOFFWECHSEL'/>
+	<z:row ATCCode='A01' Name='STOMATOLOGIKA'/>
+	<z:row ATCCode='A01A' Name='STOMATOLOGIKA'/>
+	<z:row ATCCode='A01AA' Name='Mittel zur Kariesprophylaxe'/>
+	<z:row ATCCode='A01AA01' Name='Natriumfluorid'/>
+	<z:row ATCCode='A01AA30' Name='Kombinationen'/>
+	<z:row ATCCode='A01AB' Name='Antiinfektiva und Antiseptika zur oralen Lokalbehandlung'/>
+	<z:row ATCCode='A01AB02' Name='Wasserstoffperoxid'/>
+	<z:row ATCCode='V' Name='VARIA'/>
+	<z:row ATCCode='V01' Name='ALLERGENE'/>
+	<z:row ATCCode='V01A' Name='ALLERGENE'/>
+	<z:row ATCCode='V01AA' Name='Allergen-Extrakte'/>
+	<z:row ATCCode='V01AA01' Name='Federn'/>
+	<z:row ATCCode='V03' Name='ALLE ÜBRIGEN THERAPEUTISCHEN MITTEL'/>
+	<z:row ATCCode='V03A' Name='ALLE ÜBRIGEN THERAPEUTISCHEN MITTEL'/>
+	<z:row ATCCode='V03AB' Name='Antidote'/>
+	<z:row ATCCode='V03AB01' Name='Ipecacuanha'/>
+	<z:row ATCCode='V03AZ01' Name='Ethanol'/>
+	<z:row ATCCode='V04' Name='DIAGNOSTIKA'/>
+	<z:row ATCCode='V04C' Name='ANDERE DIAGNOSTIKA'/>
+	<z:row ATCCode='V04CC04' Name='Ceruletid'/>
+	<z:row ATCCode='V04CD' Name='Hypophysenfunktions-Tests'/>
+	<z:row ATCCode='V04CD05' Name='Somatorelin'/>
+</rs:data>
+</xml>

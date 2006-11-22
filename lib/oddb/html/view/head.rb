@@ -17,13 +17,14 @@ class Head < HtmlGrid::DivComposite
     #[1,1]    =>  View::TabNavigation,
   }
   def logo(model)
-    target = :home_drugs
+    target = :home
     logo = HtmlGrid::Image.new(:logo, model, @session, self)
     if(@session.direct_event == target)
       logo
     else
       link = HtmlGrid::Link.new(target, model, @session, self)
       link.value = logo
+      link.href = @lookandfeel._event_url(target)
       link
     end
   end
