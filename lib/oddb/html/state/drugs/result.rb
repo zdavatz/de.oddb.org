@@ -33,18 +33,19 @@ class Result < Drugs::Global
   def sort_by(key)
     sorter = case key
              when :atc
-               Proc.new { |pac| (atc = pac.atc) && atc.code }
+               Proc.new { |pac| (atc = pac.atc) && atc.code || '' }
              when :company, :product
                Proc.new { |pac| 
                  (multilingual = pac.send(key)) \
-                   && multilingual.name.send(@session.language) }
+                   && multilingual.name.send(@session.language) || '' }
              when :festbetrag, :price_public
                Proc.new { |pac| 
-                 (price = pac.price(key)) && price.value }
+                 (price = pac.price(key)) && price.value || 0 }
              when :festbetragsstufe, :zuzahlungsbefreit
-               Proc.new { |pac| (code = pac.code(key)) && code.value }
+               Proc.new { |pac| 
+								 (code = pac.code(key)) && code.value || '' }
              else
-               Proc.new { |pac| pac.send(key) }
+               Proc.new { |pac| pac.send(key) || '' }
              end
     @model.packages = @model.packages.sort_by(&sorter)
     if(@sortvalue == key)
