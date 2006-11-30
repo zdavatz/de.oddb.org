@@ -3,6 +3,7 @@
 $: << File.expand_path('../lib', File.dirname(__FILE__))
 $KCODE = 'u'
 
+require 'fastthread'
 require 'drb'
 require 'logger'
 require 'oddb/config'
