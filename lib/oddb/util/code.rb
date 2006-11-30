@@ -26,7 +26,8 @@ module ODDB
           else
             "%s"
           end
-        else "%s"
+        else 
+          "%s"
         end
       end
       def to_s
