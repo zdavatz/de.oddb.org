@@ -95,7 +95,7 @@ class Packages < HtmlGrid::List
   def row_css(model, bg_flag)
     css = super
     if((code = model.code(:zuzahlungsbefreit)) && code.value)
-      css += ' zuzahlungsbefreit'
+      css = ['zuzahlungsbefreit', css].compact.join(' ')
     end
     css
   end

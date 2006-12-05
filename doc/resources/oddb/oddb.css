@@ -56,7 +56,7 @@ tr.bg {
 tr.zuzahlungsbefreit {
   background-color: #fbfd98;
 }
-tr.zuzahlungsbefreit bg {
+tr.zuzahlungsbefreit.bg {
   background-color: #fafc6d;
 }
 td.product {
@@ -69,6 +69,6 @@ td.company {
 .price_public, .festbetrag, .price_difference, .doses {
   text-align: right;
 }
-.festbetragsstufe, .zuzahlungsbefreit {
+.festbetragsstufe, td.zuzahlungsbefreit {
   text-align: center;
 }
