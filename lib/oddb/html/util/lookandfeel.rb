@@ -15,6 +15,11 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte
 überprüfen Sie die Schreibweise und versuchen Sie es noch
 einmal.
     EOS
+      :festbetragsstufe     => ' (Gesetzestext)',
+      :festbetragsstufe_url => 'http://www.sozialgesetzbuch-bundessozialhilfegesetz.de/buch/sgbv/35.html',
+      :festbetragsstufe_1   => 'Arzneimittel mit denselben Wirkstoffen',
+      :festbetragsstufe_2   => 'Arzneimittel mit pharmakologisch-therapeutisch vergleichbaren Wirkstoffen, insbesondere mit chemisch verwandten Stoffen',
+      :festbetragsstufe_3   => 'Arzneimittel mit therapeutisch vergleichbarer Wirkung, insbesondere Arzneimittelkombinationen',
       :home         				=> 'Home',
       :html_title   				=> 'ODDB',
       :lgpl_license 				=> 'LGPL',

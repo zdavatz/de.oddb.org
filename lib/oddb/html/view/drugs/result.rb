@@ -2,6 +2,9 @@
 # Html::View::Drugs::Result -- de.oddb.org -- 07.11.2006 -- hwyss@ywesee.com
 
 require 'htmlgrid/list'
+require 'htmlgrid/dojotoolkit'
+require 'htmlgrid/div'
+require 'htmlgrid/span'
 require 'oddb/html/view/search'
 require 'oddb/html/view/drugs/template'
 
@@ -54,7 +57,29 @@ class Packages < HtmlGrid::List
     model.price(:festbetrag)
   end
   def festbetragsstufe(model)
-    model.code(:festbetragsstufe)
+    @fb_count = @fb_count.to_i.next
+    if(code = model.code(:festbetragsstufe))
+      span = HtmlGrid::Span.new(model, @session, self)
+      span.value = code
+      tooltip = HtmlGrid::Div.new(model, @session, self)
+      link = HtmlGrid::Link.new(:festbetragsstufe, 
+                                model, @session, self)
+      link.href = @lookandfeel.lookup(:festbetragsstufe_url)
+      tooltip.value = [
+        @lookandfeel.lookup("festbetragsstufe_#{code}"),
+        link, 
+      ]
+      span.css_id = "fb_#{@fb_count}"
+      span.dojo_tooltip = tooltip
+      span
+    end
+  end
+  def parts(model)
+    model.parts.collect { |part| 
+      part.composition.active_agents.collect { |act|
+        [act.substance.name.send(@session.language), act.dose].join(' ')
+      }
+    }
   end
   def price_difference(model)
     if(pf = model.price(:festbetrag))
@@ -66,6 +91,13 @@ class Packages < HtmlGrid::List
   end
   def product(model)
     model.name.send(@session.language)
+  end
+  def row_css(model, bg_flag)
+    css = super
+    if((code = model.code(:zuzahlungsbefreit)) && code.value)
+      css += ' zuzahlungsbefreit'
+    end
+    css
   end
   def size(model)
     model.parts.collect { |part|
@@ -96,7 +128,11 @@ class ResultComposite < HtmlGrid::DivComposite
   end
 end
 class Result < Template
+  include HtmlGrid::DojoToolkit::DojoTemplate
   CONTENT = ResultComposite
+  DOJO_DEBUG = true
+  DOJO_REQUIRE = [ 'dojo.widget.Tooltip' ]
+  DOJO_PARSE_WIDGETS = false
 end
       end
     end
