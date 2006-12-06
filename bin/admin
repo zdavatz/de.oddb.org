@@ -33,8 +33,9 @@ while(line = readline(prompt, true))
   result.extend(DRb::DRbUndumped)
   line.strip!
   $stdout.print "-> "
-  if(match = /puts\s+(.*)/.match(line))
-    line = "ODDB.logger.debug('admin') { #{match[1]} }"
+  if(match = /(.*?)\s*puts\s+(.*)/.match(line))
+    line = "ODDB.logger.info('admin') { #{match[1]} #{match[2]} }"
+    puts line
   end
   case line.downcase
   when 'exit', 'quit'
