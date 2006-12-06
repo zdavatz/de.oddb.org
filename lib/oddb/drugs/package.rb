@@ -6,7 +6,8 @@ require 'oddb/model'
 module ODDB
   module Drugs
     class Package < Model
-      belongs_to :sequence, :atc, :company, :doses, :name, :product
+      belongs_to :sequence, :atc, :company, :doses, :name, :product, 
+        :substances
       has_many :parts
       has_many :prices
       is_coded

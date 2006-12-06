@@ -36,6 +36,9 @@ module ODDB
           act.substance == substance
         }
       end
+      def substances
+        active_agents.collect { |agent| agent.substance }
+      end
     end
   end
 end

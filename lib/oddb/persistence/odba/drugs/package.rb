@@ -10,7 +10,9 @@ module ODDB
     class Package < Model
       odba_index :code, :codes, {:type => 'type.to_s', 
         :country => 'country', :value => 'to_s'}, Util::Code
+      odba_index :atc, 'atc.code'
       odba_index :name, 'name.all'
+      odba_index :substance, :substances, 'name.all', Drugs::Substance
     end
   end
 end

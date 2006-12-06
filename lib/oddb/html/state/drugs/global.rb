@@ -24,6 +24,9 @@ class Global < State::Global
       memo.concat(comp.packages)
     }
     if(packages.empty?)
+      packages = ODDB::Drugs::Package.search_by_substance(query)
+    end
+    if(packages.empty?)
       packages = ODDB::Drugs::Package.search_by_name(query)
     end
     result.packages = packages
