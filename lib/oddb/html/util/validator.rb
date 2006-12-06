@@ -7,7 +7,7 @@ module ODDB
   module Html
     module Util
 class Validator < SBSM::Validator
-  EVENTS = [ :home, :search, :sort ]
+  EVENTS = [ :home, :list, :search, :sort ]
   STRINGS = [ :query ]
   ENUMS = {
     :sortvalue => [ 'atc', 'company', 'doses', 'festbetrag',

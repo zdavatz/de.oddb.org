@@ -69,6 +69,15 @@ td.product {
 td.company {
   font-style: italic;
 }
+td.info {
+  padding: 8px; 
+  font-weight: bold;
+}
+td.warn {
+  padding: 8px; 
+  color: #F70;
+  font-weight: bold;
+}
 .price_public, .festbetrag, .price_difference, .doses {
   text-align: right;
 }

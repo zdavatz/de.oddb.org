@@ -46,6 +46,13 @@ class Packages < HtmlGrid::List
       company.name.send(@session.language)
     end
   end
+  def compose_empty_list(offset)
+    if(key = @model.error)
+      fill_row(offset, key, 'warn')
+    else
+      super(offset, 'info')
+    end
+  end
   def doses(model)
     model.doses.join(' + ')
   end
@@ -119,23 +126,26 @@ class Packages < HtmlGrid::List
       ## Inefficient - if there are performance problems, remove the
       #  next two lines and set dojo_title only where necessary
       link = HtmlGrid::Link.new(titlekey, @model, @session, self)
+      sortlink.dojo_title = link
       # TODO: make the hrefs dynamic (latest update)
       case titlekey
-      when "tt_price_public", "tt_price_difference"
-        link.href = "ftp://ftp.dimdi.de/pub/amg/satzbeschr_011006.pdf"
-        sortlink.dojo_title = link
-      when "tt_festbetrag"
-        link.href = "http://www.dimdi.de/static/de/amg/fbag/index.htm"
-        sortlink.dojo_title = link
-      when "tt_festbetragsstufe"
-        link.href = "http://www.die-gesundheitsreform.de/glossar/festbetraege.html"
-        sortlink.dojo_title = link
-      when "tt_zuzahlungsbefreit"
-        link.href = "http://www.die-gesundheitsreform.de/presse/pressethemen/avwg/index.html"
-        sortlink.dojo_title = link
       when "tt_atc"
         link.href = "http://www.whocc.no/atcddd/atcsystem.html"
-        sortlink.dojo_title = link
+      when "tt_company"
+        link.href = "http://www.die-gesundheitsreform.de/presse/pressethemen/avwg/pdf/liste_zuzahlungsbefreite_arzneimittel.pdf"
+      when "tt_doses"
+        link.value = @lookandfeel.lookup(:tt_doses_link)
+        link.href = "ftp://ftp.dimdi.de/pub/amg/darform_011006.txt"
+        sortlink.dojo_title = [ title, link ]
+      when "tt_festbetrag"
+        link.href = "http://www.dimdi.de/static/de/amg/fbag/index.htm"
+      when "tt_festbetragsstufe"
+        link.href = "http://www.die-gesundheitsreform.de/glossar/festbetraege.html"
+      when "tt_price_public", "tt_price_difference"
+        link.href = "ftp://ftp.dimdi.de/pub/amg/satzbeschr_011006.pdf"
+      when "tt_zuzahlungsbefreit"
+        link.value = link.href = "http://www.bkk.de/bkk/powerslave,id,1054,nodeid,.html"
+        sortlink.dojo_title = [ title.strip, link ]
       else
         sortlink.dojo_title = title
       end
@@ -151,13 +161,9 @@ end
 class ResultComposite < HtmlGrid::DivComposite
   COMPONENTS = {
     [0,0] => InlineSearch, 
-    [0,1] => :packages, 
+    [0,1] => Packages, 
   }
   CSS_ID_MAP = ['result-search']
-  def packages(model)
-    packages = model.packages
-    Packages.new(model.packages, @session, self)
-  end
 end
 class Result < Template
   include HtmlGrid::DojoToolkit::DojoTemplate

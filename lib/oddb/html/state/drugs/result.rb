@@ -55,7 +55,7 @@ class Result < Drugs::Global
              else
                Proc.new { |pac| pac.send(key) || '' }
              end
-    @model.packages = @model.packages.sort_by(&sorter)
+    @model = @model.sort_by(&sorter)
     if(@sortvalue == key)
       @reverse = !@reverse
       if(@reverse)

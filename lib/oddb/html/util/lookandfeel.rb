@@ -10,6 +10,7 @@ class Lookandfeel < SBSM::Lookandfeel
   DICTIONARIES = {
     "de"  =>  {
       :drugs                => 'Medikamente',
+      :e_query_short        => 'Ihr Such-Stichwort ergibt ein sehr grosses Resultat. Bitte verwenden Sie mindestens 3 Buchstaben.',
       :empty_packages       => <<-EOS,
 Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte
 überprüfen Sie die Schreibweise und versuchen Sie es noch
@@ -53,6 +54,9 @@ studies was needed. At the same symposium the Drug Utilization Research
 Group (DURG) was established and tasked with the development of
 internationally applicable methods for drug utilization research...
       EOS
+      :tt_company           => 'Der Hersteller oder Zulassungsinhaber des Produkts',
+      :tt_doses             => 'Die Stärke bezieht sich auf Darreichungsform-Einheit (Tablette, Zäpfchen, Sirup, etc). Siehe auch: ',
+      :tt_doses_link        => 'Darreichungsformen',
       :tt_festbetrag        => <<-EOS,
 Festbetrag: DIMDI hat die Aufgabe, die von den Spitzenverbänden der
 Krankenkassen erstellten und veröffentlichten Übersichten über
@@ -73,14 +77,20 @@ therapeutischen Wirkung vergleichbar sind...
       EOS
       :tt_price_difference  => 'Absolute Differenz zwischen Preis und Festbetrag',
       :tt_price_public      => 'Preis: Apothekenverkaufspreis inkl. MwSt. in Euro',
+      :tt_product           => 'Präparat ist der Handelsname des Medikaments',
       :tt_zuzahlungsbefreit => <<-EOS,
-Im Jahr 2005 lagen die Ausgaben für Arzneimittel über den Aufwendungen
-für die ambulante ärztliche Behandlung. In Deutschland werden noch
-immer zu viele teure Medikamente verordnet, obwohl es gleichwertige,
-deutlich preiswertere Alternativen gibt. Das Arzneimittelversorgungs-
-Wirtschaftlichkeitsgesetz (AVWG), das am 1. Mai 2006 in Kraft getreten
-ist, schafft Anreize für mehr Wirtschaftlichkeit bei der Verordnung von
-Arzneimitteln...
+Zuzahlungsbefreite Arzneimittel:
+
+Die Spitzenverbände der Krankenkassen haben am 11.05.2006 gemeinsam und
+einheitlich für bestimmte zu Lasten ihrer Krankenkassen abgegebene
+Arzneimittel Zuzahlungsbefreiungsgrenzen festgelegt.
+
+Bei der Verordnung von Arzneimitteln, deren Apothekenverkaufspreise
+inkl. MwSt. den Wert der jeweiligen Zuzahlungsbefreiungrenze nicht
+überschreiten, sind Versicherte ab dem 1. Juli 2006 von der
+gesetzlichen Zuzahlung nach § 31 Abs. 3 Satz 1 SGB V befreit.
+
+Quelle: 
       EOS
       :yes                  => 'Ja',
       :ywesee               => 'ywesee.com',

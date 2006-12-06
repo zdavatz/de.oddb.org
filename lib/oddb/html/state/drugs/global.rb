@@ -6,6 +6,7 @@ require 'oddb/drugs/package'
 require 'oddb/html/state/global'
 require 'oddb/html/state/drugs/init'
 require 'oddb/html/state/drugs/result'
+require 'oddb/html/util/annotated_list'
 require 'ostruct'
 
 module ODDB
@@ -17,19 +18,25 @@ class Global < State::Global
     :home => Drugs::Init,
   }
   def _search(query)
-    result = OpenStruct.new
+    result = Util::AnnotatedList.new
     result.query = query
-    companies = ODDB::Business::Company.search_by_name(query)
-    packages = companies.inject([]) { |memo, comp|
-      memo.concat(comp.packages)
-    }
-    if(packages.empty?)
-      packages = ODDB::Drugs::Package.search_by_substance(query)
+    if(query.length < 3)
+      result.error = :e_query_short
+    else
+      result.concat(ODDB::Drugs::Package.search_by_atc(query))
+      if(result.empty?)
+        companies = ODDB::Business::Company.search_by_name(query)
+        companies.each { |comp|
+          result.concat(comp.packages)
+        }
+      end
+      if(result.empty?)
+        result.concat(ODDB::Drugs::Package.search_by_substance(query))
+      end
+      if(result.empty?)
+        result.concat(ODDB::Drugs::Package.search_by_name(query))
+      end
     end
-    if(packages.empty?)
-      packages = ODDB::Drugs::Package.search_by_name(query)
-    end
-    result.packages = packages
     Result.new(@session, result)
   end
   def navigation
