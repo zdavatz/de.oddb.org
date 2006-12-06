@@ -36,7 +36,7 @@ module ODDB
       def connectors
         @connectors ||= []
       end
-      def has_many(plural)
+      def has_many(plural, *delegators)
         define_method(plural) {
           instance_variable_get("@#{plural}") or begin
             instance_variable_set("@#{plural}", Array.new)
@@ -52,6 +52,15 @@ module ODDB
           self.send(plural).delete(inst)
         }
         connectors.push(plural)
+        delegators.each { |key|
+          define_method(key) {
+            memo = []
+            self.send(plural).each { |inst|
+              memo.concat(inst.send(key))
+            }
+            memo
+          }
+        }
       end
       def is_coded
         has_many :codes
