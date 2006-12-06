@@ -118,13 +118,15 @@ module ODDB
         #  multiple compositions or active agents. Simply identify
         #  existing active agents by their substance and dose.
         sequence, composition, substance, dose = nil
-        if((substance = import_substance(row)) \
-           && (dose = cell(row, 5)))
+        substances = import_substances(row)
+        if(dose = cell(row, 5))
           dose = Drugs::Dose.new(dose, 'mg')
-          sequence = product.sequences.find { |seq|
-            seq.include?(substance, dose)
-          } 
         end
+        sequence = product.sequences.find { |seq|
+          doses = seq.doses
+          seq.substances == substances \
+            && (doses.empty? || doses.inject { |a, b| a + b } == dose)
+        } 
         if(sequence.nil?)
           sequence = Drugs::Sequence.new
           composition = Drugs::Composition.new
@@ -133,11 +135,16 @@ module ODDB
           sequence.save
         end
         composition = sequence.compositions.first
-        unless(composition.include?(substance))
-          active_agent = Drugs::ActiveAgent.new(substance, dose)
-          composition.add_active_agent(active_agent)
-          composition.save
+        if(substances.size > 1)
+          dose = nil
         end
+        substances.each { |substance|
+          unless(composition.include?(substance))
+            active_agent = Drugs::ActiveAgent.new(substance, dose)
+            composition.add_active_agent(active_agent)
+            composition.save
+          end
+        }
         unitname = nil
         if(galform = import_galenic_form(row))
           unitname = galform.description.de
@@ -154,8 +161,8 @@ module ODDB
                                         :type    => "galenic_form",
                                         :country => 'DE')
       end
-      def import_substance(row)
-        sub = nil
+      def import_substances(row)
+        subs = []
         if(abbr = cell(row, 1))
           sub = Drugs::Substance.find_by_code(:value   => abbr, 
                                               :type    => "substance",
@@ -164,18 +171,24 @@ module ODDB
              && (group = Drugs::SubstanceGroup.find_by_name(cell(row, 2))))
             sub.group = group
             sub.save
+            subs.push(sub)
           end
         end
-        assumed_name = cell(row, 2)
-        if(sub.nil?)
-          sub = Drugs::Substance.find_by_name(assumed_name)
+        if(subs.empty?)
+          subs = cell(row, 2).split('+').collect { |name| 
+            assumed_name = name.strip
+            unless(assumed_name.empty?)
+              sub = Drugs::Substance.find_by_name(assumed_name)
+              if(sub.nil?)
+                sub = Drugs::Substance.new
+                sub.name.de = assumed_name
+                sub.save
+              end
+              sub
+            end
+          }
         end
-        if(sub.nil?)
-          sub = Drugs::Substance.new
-          sub.name.de = assumed_name
-          sub.save
-        end
-        sub
+        subs.compact
       end
     end
     class DimdiSubstance < Excel
