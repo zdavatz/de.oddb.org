@@ -115,29 +115,30 @@ class Packages < HtmlGrid::List
     sortlink = super
     sortlink.css_id = thkey
     titlekey = thkey.sub(/^th/, "tt")
-    title = @lookandfeel.lookup(titlekey)
-    ## Inefficient - if there are performance problems, remove the
-    #  next two lines and set dojo_title only where necessary
-    link = HtmlGrid::Link.new(titlekey, @model, @session, self)
-    # TODO: make the hrefs dynamic (latest update)
-    case titlekey
-    when "tt_price_public", "tt_price_difference"
-      link.href = "ftp://ftp.dimdi.de/pub/amg/satzbeschr_011006.pdf"
-      sortlink.dojo_title = link
-    when "tt_festbetrag"
-      link.href = "http://www.dimdi.de/static/de/amg/fbag/index.htm"
-      sortlink.dojo_title = link
-    when "tt_festbetragsstufe"
-      link.href = "http://www.die-gesundheitsreform.de/glossar/festbetraege.html"
-      sortlink.dojo_title = link
-    when "tt_zuzahlungsbefreit"
-      link.href = "http://www.die-gesundheitsreform.de/presse/pressethemen/avwg/index.html"
-      sortlink.dojo_title = link
-    when "tt_atc"
-      link.href = "http://www.whocc.no/atcddd/atcsystem.html"
-      sortlink.dojo_title = link
-    else
-      sortlink.dojo_title = title
+    if(title = @lookandfeel.lookup(titlekey))
+      ## Inefficient - if there are performance problems, remove the
+      #  next two lines and set dojo_title only where necessary
+      link = HtmlGrid::Link.new(titlekey, @model, @session, self)
+      # TODO: make the hrefs dynamic (latest update)
+      case titlekey
+      when "tt_price_public", "tt_price_difference"
+        link.href = "ftp://ftp.dimdi.de/pub/amg/satzbeschr_011006.pdf"
+        sortlink.dojo_title = link
+      when "tt_festbetrag"
+        link.href = "http://www.dimdi.de/static/de/amg/fbag/index.htm"
+        sortlink.dojo_title = link
+      when "tt_festbetragsstufe"
+        link.href = "http://www.die-gesundheitsreform.de/glossar/festbetraege.html"
+        sortlink.dojo_title = link
+      when "tt_zuzahlungsbefreit"
+        link.href = "http://www.die-gesundheitsreform.de/presse/pressethemen/avwg/index.html"
+        sortlink.dojo_title = link
+      when "tt_atc"
+        link.href = "http://www.whocc.no/atcddd/atcsystem.html"
+        sortlink.dojo_title = link
+      else
+        sortlink.dojo_title = title
+      end
     end
     sortlink
   end
