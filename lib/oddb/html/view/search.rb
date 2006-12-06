@@ -41,11 +41,13 @@ class Search < HtmlGrid::DivForm
     [0,0] => :query,
     [0,1] => :submit,
     [1,1] => :reset,
+    [0,2] => "explain_search",
   }
   SYMBOL_MAP = {
     :query => SearchBar,
     :reset => HtmlGrid::Reset,
   }
+  CSS_MAP = {2 => "explain"}
 end
 class InlineSearch < HtmlGrid::DivForm
   EVENT = :search

@@ -5,6 +5,9 @@ body, input {
 a {
   text-decoration: none;
 }
+div.explain {
+  padding: 4px;
+}
 div#foot, th {
   background-color: #2ba476;
   color: white;

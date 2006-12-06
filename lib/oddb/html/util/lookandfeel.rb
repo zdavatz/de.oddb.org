@@ -15,6 +15,10 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte
 überprüfen Sie die Schreibweise und versuchen Sie es noch
 einmal.
     EOS
+      :explain_search       => <<-EOS,
+Vergleichen Sie einfach und schnell Medikamentenpreise.
+Suchen Sie nach Medikamentname oder Wirkstoff.
+      EOS
       :festbetragsstufe     => ' (Gesetzestext)',
       :festbetragsstufe_url => 'http://www.sozialgesetzbuch-bundessozialhilfegesetz.de/buch/sgbv/35.html',
       :festbetragsstufe_1   => 'Arzneimittel mit denselben Wirkstoffen',
