@@ -195,7 +195,7 @@ module ODDB
         substance
       end
     end
-    class DimdiZuzahlungsBefreite < Excel
+    class DimdiZuzahlungsBefreiung < Excel
       def import_row(row)
         ## for now: ignore packages that can not be linked to an 
         #  existing product by PZN
@@ -232,6 +232,7 @@ module ODDB
           end
           import_active_agent(sequence, row, 8)
           import_active_agent(sequence, row, 11)
+          import_active_agent(sequence, row, 14)
           package.save
         end
       end
@@ -261,6 +262,7 @@ module ODDB
             else
               previous.delete if(previous)
               chemical = Drugs::ActiveAgent.new(substance, dose)
+              chemical.save
               agent.chemical_equivalence = chemical
               agent.save
             end

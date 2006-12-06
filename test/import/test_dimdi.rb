@@ -219,13 +219,13 @@ module ODDB
         assert_equal('ABTL', code.value)
       end
     end
-    class TestDimdiZuzahlungsBefreite < Test::Unit::TestCase
+    class TestDimdiZuzahlungsBefreiung < Test::Unit::TestCase
       def setup
         Drugs::Product.instances.clear
         Drugs::Substance.instances.clear
         @data_dir = File.expand_path('data', File.dirname(__FILE__))
         @path = File.expand_path('xls/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls', @data_dir) 
-        @import = DimdiZuzahlungsBefreite.new
+        @import = DimdiZuzahlungsBefreiung.new
       end
       def test_import
         atc = Drugs::Atc.new('M04AA51')

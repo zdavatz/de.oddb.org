@@ -6,6 +6,9 @@ require 'oddb/model'
 module ODDB
   class Model
     include ODBA::Persistable
+    def delete
+      odba_delete
+    end
     def save
       odba_isolated_store
       self.class.connectors.each { |conn|
