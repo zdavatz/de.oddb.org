@@ -78,6 +78,7 @@ module ODDB
             end
             part.unit = unit
           end
+          part.composition = sequence.compositions.first
           part.save
           package.add_part(part)
           package.sequence = sequence
@@ -235,7 +236,8 @@ module ODDB
         end
       end
       def import_active_agent(sequence, row, offset)
-        if(substance = import_substance(cell(row, offset)))
+        name = cell(row, offset)
+        if(substance = import_substance(name))
           ## for now: don't expect multiple compositions
           composition = sequence.compositions.first
           if(composition.nil?)
@@ -245,9 +247,23 @@ module ODDB
           end
           dose = Drugs::Dose.new(cell(row, offset + 1), 
                                  cell(row, offset + 2))
+          candidate_names = [ name[/^\S+/], name[/^[^-]+/] ].uniq
+          agent = nil
           if(agent = composition.active_agent(substance))
             agent.dose = dose
             agent.save
+          elsif(candidate_names.any? { |name| 
+            agent = composition.active_agent(name) } )
+            previous = agent.chemical_equivalence
+            if(previous && previous.substance == substance)
+              previous.dose = dose
+              previous.save
+            else
+              previous.delete if(previous)
+              chemical = Drugs::ActiveAgent.new(substance, dose)
+              agent.chemical_equivalence = chemical
+              agent.save
+            end
           else
             agent = Drugs::ActiveAgent.new(substance, dose)
             composition.add_active_agent(agent)

@@ -10,6 +10,9 @@ module ODDB
       has_many :active_agents
       is_coded
       multilingual :name
+      def ==(other)
+        super || name == other
+      end
     end
   end
 end

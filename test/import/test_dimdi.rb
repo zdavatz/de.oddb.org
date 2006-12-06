@@ -240,6 +240,7 @@ module ODDB
         existing.sequence = sequence
         sequence.product = product
         input = open(@path)
+        assert_nil(existing.code(:zuzahlungsbefreit))
         @import.import(input)
         assert_equal(1, Drugs::Product.instances.size)
         assert_equal([product], Drugs::Product.instances)
@@ -256,6 +257,9 @@ module ODDB
         assert_equal(Drugs::Dose.new(100, 'mg'), agent1.dose)
         assert_equal('Benzbromaron', agent2.substance.name.de)
         assert_equal(Drugs::Dose.new(20, 'mg'), agent2.dose)
+        code = existing.code(:zuzahlungsbefreit)
+        assert_instance_of(Util::Code, code)
+        assert_equal(true, code.value)
 
         # do it again, nothing should change
         input = open(@path)
@@ -275,6 +279,8 @@ module ODDB
         assert_equal(Drugs::Dose.new(100, 'mg'), agent1.dose)
         assert_equal('Benzbromaron', agent2.substance.name.de)
         assert_equal(Drugs::Dose.new(20, 'mg'), agent2.dose)
+        assert_instance_of(Util::Code, code)
+        assert_equal(true, code.value)
       end
     end
   end
