@@ -3,6 +3,7 @@
 
 require 'oddb/html/state/global_predefine'
 require 'oddb/html/view/drugs/result'
+require 'oddb/util/money'
 
 module ODDB
   module Html
@@ -39,16 +40,17 @@ class Result < Drugs::Global
                  (multilingual = pac.send(key)) \
                    && multilingual.name.send(@session.language) || '' }
              when :festbetrag, :price_public
-               Proc.new { |pac| 
-                 (price = pac.price(key)) && price.value || 0 }
+               nilval = ODDB::Util::Money.new(0)
+               Proc.new { |pac| pac.price(key) || nilval }
              when :festbetragsstufe, :zuzahlungsbefreit
                Proc.new { |pac| 
 								 (code = pac.code(key)) && code.value || '' }
              when :price_difference
+               nilval = ODDB::Util::Money.new(-9999999)
                Proc.new { |pac| 
                  ((pf = pac.price(:festbetrag)) \
                    && (pp = pac.price(:public)) \
-                   && pp - pf) || -9999999
+                   && pp - pf) || nilval
                }
              else
                Proc.new { |pac| pac.send(key) || '' }
