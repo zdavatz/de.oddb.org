@@ -11,8 +11,8 @@ class Validator < SBSM::Validator
   STRINGS = [ :query ]
   ENUMS = {
     :sortvalue => [ 'atc', 'company', 'doses', 'festbetrag',
-      'festbetragsstufe', 'price_public', 'product', 'zuzahlungsbefreit',
-      'size', 
+      'festbetragsstufe', 'price_difference', 'price_public', 'product',
+      'zuzahlungsbefreit', 'size', 
     ],
   }
 end

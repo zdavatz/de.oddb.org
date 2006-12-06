@@ -44,6 +44,12 @@ class Result < Drugs::Global
              when :festbetragsstufe, :zuzahlungsbefreit
                Proc.new { |pac| 
 								 (code = pac.code(key)) && code.value || '' }
+             when :price_difference
+               Proc.new { |pac| 
+                 ((pf = pac.price(:festbetrag)) \
+                   && (pp = pac.price(:public)) \
+                   && pp - pf) || -9999999
+               }
              else
                Proc.new { |pac| pac.send(key) || '' }
              end

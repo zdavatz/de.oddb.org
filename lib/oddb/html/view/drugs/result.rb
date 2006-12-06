@@ -57,20 +57,17 @@ class Packages < HtmlGrid::List
     model.price(:festbetrag)
   end
   def festbetragsstufe(model)
-    @fb_count = @fb_count.to_i.next
     if(code = model.code(:festbetragsstufe))
       span = HtmlGrid::Span.new(model, @session, self)
       span.value = code
-      tooltip = HtmlGrid::Div.new(model, @session, self)
       link = HtmlGrid::Link.new(:festbetragsstufe, 
                                 model, @session, self)
       link.href = @lookandfeel.lookup(:festbetragsstufe_url)
-      tooltip.value = [
+      span.dojo_title = [
         @lookandfeel.lookup("festbetragsstufe_#{code}"),
         link, 
       ]
-      span.css_id = "fb_#{@fb_count}"
-      span.dojo_tooltip = tooltip
+      span.css_id = "fb_#{@list_index}"
       span
     end
   end
@@ -90,7 +87,11 @@ class Packages < HtmlGrid::List
     model.price(:public)
   end
   def product(model)
-    model.name.send(@session.language)
+    span = HtmlGrid::Span.new(model, @session, self)
+    span.value = model.name.send(@session.language)
+    span.css_id = "cid_#{@list_index}"
+    span.dojo_title = @lookandfeel.lookup(:pzn, model.code(:cid, 'DE'))
+    span
   end
   def row_css(model, bg_flag)
     css = super
@@ -109,6 +110,36 @@ class Packages < HtmlGrid::List
       end
       parts.join(' ')
     }.join(' + ')
+  end
+  def sort_link(thkey, *rest)
+    sortlink = super
+    sortlink.css_id = thkey
+    titlekey = thkey.sub(/^th/, "tt")
+    title = @lookandfeel.lookup(titlekey)
+    ## Inefficient - if there are performance problems, remove the
+    #  next two lines and set dojo_title only where necessary
+    link = HtmlGrid::Link.new(titlekey, @model, @session, self)
+    # TODO: make the hrefs dynamic (latest update)
+    case titlekey
+    when "tt_price_public", "tt_price_difference"
+      link.href = "ftp://ftp.dimdi.de/pub/amg/satzbeschr_011006.pdf"
+      sortlink.dojo_title = link
+    when "tt_festbetrag"
+      link.href = "http://www.dimdi.de/static/de/amg/fbag/index.htm"
+      sortlink.dojo_title = link
+    when "tt_festbetragsstufe"
+      link.href = "http://www.die-gesundheitsreform.de/glossar/festbetraege.html"
+      sortlink.dojo_title = link
+    when "tt_zuzahlungsbefreit"
+      link.href = "http://www.die-gesundheitsreform.de/presse/pressethemen/avwg/index.html"
+      sortlink.dojo_title = link
+    when "tt_atc"
+      link.href = "http://www.whocc.no/atcddd/atcsystem.html"
+      sortlink.dojo_title = link
+    else
+      sortlink.dojo_title = title
+    end
+    sortlink
   end
   def zuzahlungsbefreit(model)
     if((code = model.code(:zuzahlungsbefreit)) && code.value)
@@ -132,7 +163,7 @@ class Result < Template
   CONTENT = ResultComposite
   DOJO_DEBUG = true
   DOJO_REQUIRE = [ 'dojo.widget.Tooltip' ]
-  DOJO_PARSE_WIDGETS = false
+  DOJO_PARSE_WIDGETS = true
 end
       end
     end
