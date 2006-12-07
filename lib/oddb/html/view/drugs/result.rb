@@ -2,7 +2,6 @@
 # Html::View::Drugs::Result -- de.oddb.org -- 07.11.2006 -- hwyss@ywesee.com
 
 require 'htmlgrid/list'
-require 'htmlgrid/dojotoolkit'
 require 'htmlgrid/div'
 require 'htmlgrid/span'
 require 'oddb/html/view/search'
@@ -166,11 +165,7 @@ class ResultComposite < HtmlGrid::DivComposite
   CSS_ID_MAP = ['result-search']
 end
 class Result < Template
-  include HtmlGrid::DojoToolkit::DojoTemplate
   CONTENT = ResultComposite
-  DOJO_DEBUG = true
-  DOJO_REQUIRE = [ 'dojo.widget.Tooltip' ]
-  DOJO_PARSE_WIDGETS = true
 end
       end
     end

@@ -11,6 +11,7 @@ module ODDB
 class Init < Template
   CONTENT = Search
   CSS_ID_MAP = ['head', 'home-search', 'foot']
+  HEAD = WelcomeHead
 end
       end
     end

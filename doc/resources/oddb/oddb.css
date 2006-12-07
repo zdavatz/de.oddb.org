@@ -41,6 +41,11 @@ div#result-search {
 div#result-search input[type=text] {
   width: 200px;
 }
+div#welcome {
+  margin-top: 75px;
+  float: right;
+  text-align: right;
+}
 img {
   border: 0px;
 }

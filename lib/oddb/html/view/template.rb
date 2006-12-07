@@ -2,6 +2,7 @@
 # Html::View::Template -- de.oddb.org -- 27.10.2006 -- hwyss@ywesee.com
 
 require 'htmlgrid/divtemplate'
+require 'htmlgrid/dojotoolkit'
 require 'sbsm/time'
 require 'oddb/html/view/foot'
 require 'oddb/html/view/head'
@@ -10,6 +11,7 @@ module ODDB
   module Html
     module View
 class Template < HtmlGrid::DivTemplate
+  include HtmlGrid::DojoToolkit::DojoTemplate
   FOOT = Foot
   HEAD = Head
   HTTP_HEADERS = {
@@ -25,6 +27,9 @@ class Template < HtmlGrid::DivTemplate
     [0,2] => :foot,
   }
   CSS_ID_MAP = ['head', 'content', 'foot']
+  DOJO_DEBUG = true
+  DOJO_REQUIRE = [ 'dojo.widget.Tooltip' ]
+  DOJO_PARSE_WIDGETS = true
   def title(context)
     parts = [:html_title, @session.zone,
       *@session.state.direct_event].collect { |key| 

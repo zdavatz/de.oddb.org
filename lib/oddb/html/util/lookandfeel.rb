@@ -10,6 +10,9 @@ class Lookandfeel < SBSM::Lookandfeel
   DICTIONARIES = {
     "de"  =>  {
       :drugs                => 'Medikamente',
+      :drugs_atc_codes      => "ATC-Codes, DDD's:",
+      :drugs_copay_free     => 'Zuzahlungsbefreite Arzneimittel:',
+      :drugs_fixprices      => 'Arzneimittelfestbeträge:',
       :e_query_short        => 'Ihr Such-Stichwort ergibt ein sehr grosses Resultat. Bitte verwenden Sie mindestens 3 Buchstaben.',
       :empty_packages       => <<-EOS,
 Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte
@@ -92,6 +95,12 @@ gesetzlichen Zuzahlung nach § 31 Abs. 3 Satz 1 SGB V befreit.
 
 Quelle: 
       EOS
+      :welcome_drugs        => <<-EOS,
+Willkommen bei de.oddb.org, dem
+aktuellsten Medikamenten-Portal von Deutschland.
+** Herkunftsdeklaration der Daten **
+      EOS
+      :welcome_drugs_link   => 'Herkunftsdeklaration',
       :yes                  => 'Ja',
       :ywesee               => 'ywesee.com',
     }
