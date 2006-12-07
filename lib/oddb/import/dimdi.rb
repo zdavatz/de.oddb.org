@@ -38,6 +38,13 @@ module ODDB
       end
     end
     class DimdiProduct < Excel
+      def assign_substance_group(sub, groupname)
+        if(sub.group.nil? \
+           && (group = import_substance_group(groupname)))
+          sub.group = group
+          sub.save
+        end
+      end
       def import_row(row)
         name = capitalize_all(cell(row, 0))
         product = Drugs::Product.find_by_name(name)
@@ -163,20 +170,16 @@ module ODDB
       end
       def import_substances(row)
         subs = []
-        if(abbr = cell(row, 1))
-          sub = Drugs::Substance.find_by_code(:value   => abbr, 
-                                              :type    => "substance",
-                                              :country => "DE")
-          if(sub && !sub.group \
-             && (group = Drugs::SubstanceGroup.find_by_name(cell(row, 2))))
-            sub.group = group
-            sub.save
-            subs.push(sub)
-          end
+        groupname = cell(row, 2)
+        if((abbr = cell(row, 1)) \
+           && (sub = Drugs::Substance.find_by_code(:value   => abbr, 
+                       :type    => "substance", :country => "DE")))
+          assign_substance_group(sub, groupname)
+          subs.push(sub)
         end
         if(subs.empty?)
-          subs = cell(row, 2).split('+').collect { |name| 
-            assumed_name = name.strip
+          subs = groupname.split('+').collect { |name| 
+            assumed_name = name.strip[/^\S+/]
             unless(assumed_name.empty?)
               sub = Drugs::Substance.find_by_name(assumed_name)
               if(sub.nil?)
@@ -184,11 +187,24 @@ module ODDB
                 sub.name.de = assumed_name
                 sub.save
               end
+              assign_substance_group(sub, groupname)
               sub
             end
           }
         end
         subs.compact
+      end
+      def import_substance_group(groupname)
+        groupname = groupname.to_s.strip
+        if(groupname.length > 3)
+          group = Drugs::SubstanceGroup.find_by_name(groupname)
+          if(group.nil?)
+            group = Drugs::SubstanceGroup.new
+            group.name.de = groupname
+            group.save
+          end
+          group
+        end
       end
     end
     class DimdiSubstance < Excel
