@@ -171,14 +171,19 @@ module ODDB
       def import_substances(row)
         subs = []
         groupname = cell(row, 2)
-        if((abbr = cell(row, 1)) \
-           && (sub = Drugs::Substance.find_by_code(:value   => abbr, 
-                       :type    => "substance", :country => "DE")))
-          assign_substance_group(sub, groupname)
-          subs.push(sub)
+        if(abbr = cell(row, 1))
+          if(sub = Drugs::Substance.find_by_code(:value => abbr, 
+                     :type => "substance", :country => "DE"))
+            assign_substance_group(sub, groupname)
+            subs.push(sub)
+          else
+            subs = Drugs::Substance.search_by_code(:value => abbr,
+                     :type => "substance-combination", :country => 'DE')
+          end
         end
         if(subs.empty?)
-          subs = groupname.split('+').collect { |name| 
+          names = groupname.split('+')
+          subs = names.collect { |name| 
             assumed_name = name.strip[/^\S+/]
             unless(assumed_name.empty?)
               sub = Drugs::Substance.find_by_name(assumed_name)
@@ -187,7 +192,9 @@ module ODDB
                 sub.name.de = assumed_name
                 sub.save
               end
-              assign_substance_group(sub, groupname)
+              if(names.size == 1)
+                assign_substance_group(sub, groupname)
+              end
               sub
             end
           }
@@ -210,18 +217,42 @@ module ODDB
     class DimdiSubstance < Excel
       def import_row(row)
         abbr = cell(row, 0)
-        name = capitalize_all(cell(row, 1))
-        substance = Drugs::Substance.find_by_code(:value   => abbr,
-                                                  :type    => "substance",
-                                                  :country => "DE")
+        names = capitalize_all(cell(row, 1)).split('+')
+        if(names.size == 1)
+          import_substance(abbr, names.pop)
+        else
+          import_substances(abbr, names)
+        end
+      end
+      def import_substance(abbr, name)
+        substance = Drugs::Substance.find_by_code(:value => abbr,
+                      :type => "substance", :country => "DE")
         substance ||= Drugs::Substance.find_by_name(name)
+        unsaved = false
         unless(substance)
           substance = Drugs::Substance.new
           substance.name.de = name
-          substance.add_code(Util::Code.new("substance", abbr, 'DE'))
+          unsaved = true
         end
-        substance.save
+        unless(substance.code('substance', 'DE'))
+          substance.add_code(Util::Code.new("substance", abbr, 'DE'))
+          unsaved = true
+        end
+        substance.save if(unsaved)
         substance
+      end
+      def import_substances(abbr, names)
+        code = Util::Code.new('substance-combination', abbr, 'DE')
+        names.collect { |name|
+          substance = Drugs::Substance.find_by_name(name)
+          unless(substance)
+            substance = Drugs::Substance.new
+            substance.name.de = name
+          end
+          substance.add_code(code)
+          substance.save
+          substance
+        }
       end
     end
     class DimdiZuzahlungsBefreiung < Excel
@@ -322,6 +353,28 @@ module ODDB
             substance
           end
         end
+      end
+      def postprocess
+        Drugs::Product.all { |product|
+          unless(product.company)
+            keys = product.name.de.split
+            key = keys.pop
+            if(key == 'Comp')
+              key = keys.pop
+            end
+            company = Business::Company.find_by_name(key)
+            if(company.nil?)
+              companies = Business::Company.search_by_name(key)
+              if(companies.size == 1)
+                company = companies.pop
+              end
+            end
+            if(company)
+              product.company = company
+              product.save
+            end
+          end
+        }
       end
     end
   end

@@ -29,6 +29,7 @@ module ODDB
       def import(io)
         workbook = parse(io)
         import_worksheet(workbook.worksheet(0))
+        postprocess()
       end
       def import_worksheet(worksheet)
         worksheet.each(@skip_rows) { |row|
@@ -37,6 +38,8 @@ module ODDB
       end
       def parse(io)
         Spreadsheet::ParseExcel.parse(io)
+      end
+      def postprocess
       end
     end
   end
