@@ -57,6 +57,21 @@ div#welcome {
 img {
   border: 0px;
 }
+span#delicious {
+  background-image: url(/resources/images/delicious.gif);
+}
+span#digg {
+  background-image: url(/resources/images/digg.gif);
+}
+span#stumble {
+  background-image: url(/resources/images/stumble.gif);
+}
+span.social {
+  background-repeat: no-repeat;
+  background-attachment: scroll;
+  margin-left: 8px;
+  padding-left: 20px;
+}
 table {
   width: 100%;
 }

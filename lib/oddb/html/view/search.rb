@@ -29,7 +29,7 @@ class SearchBar < HtmlGrid::InputText
     script << "+escape(#{@name}.value.replace(/\\//, '%2F'));"
     script << "if(this.search_type)"
     script << "href += '/search_type/' + this.search_type.value;"
-    script << "href += '#best_result';"
+    #script << "href += '#best_result';"
     script << "document.location.href=href; } return false"
     self.onsubmit = script
   end
@@ -42,12 +42,31 @@ class Search < HtmlGrid::DivForm
     [0,1] => :submit,
     [1,1] => :reset,
     [0,2] => "explain_search",
+    [0,3] => :social_bookmarks,
   }
   SYMBOL_MAP = {
     :query => SearchBar,
     :reset => HtmlGrid::Reset,
   }
   CSS_MAP = {2 => "explain"}
+  SOCIAL_BOOKMARKS = [
+    [ :sb_delicious, "http://del.icio.us/post?url=%s&title=%s" ],
+    [ :sb_stumble, "http://www.stumbleupon.com/submit?url=%s&title=%s" ],
+    [ :sb_digg, "http://digg.com/submit?phase=2&url=%stitle=%s" ],
+  ]
+  def social_bookmarks(model)
+    url = @lookandfeel.base_url
+    title = escape(@lookandfeel.lookup(:explain_search))
+    SOCIAL_BOOKMARKS.collect { |key, fmt|
+      span = HtmlGrid::Span.new(model, @session, self)
+      link = HtmlGrid::Link.new(key, model, @session, self)
+      link.href = sprintf(fmt, url, title)
+      span.css_class = 'social'
+      span.css_id = key.to_s[3..-1]
+      span.value = link
+      span
+    }
+  end
 end
 class InlineSearch < HtmlGrid::DivForm
   EVENT = :search
