@@ -42,7 +42,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :reset                => 'Zurücksetzen',
       :sb_digg              => 'Digg',
       :sb_delicious         => 'Bookmark',
-      :sb_sphere            => 'Sphere It',
+      :sb_simpy             => 'Simpy',
       :sb_stumble           => 'Stumble',
       :search               => 'Suchen',
       :th_atc               => 'ATC-Code',

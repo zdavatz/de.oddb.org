@@ -53,6 +53,8 @@ class Search < HtmlGrid::DivForm
     [ :sb_delicious, "http://del.icio.us/post?url=%s&title=%s" ],
     [ :sb_stumble, "http://www.stumbleupon.com/submit?url=%s&title=%s" ],
     [ :sb_digg, "http://digg.com/submit?phase=2&url=%stitle=%s" ],
+    [ :sb_simpy, 
+      "http://www.simpy.com/simpy/LinkAdd.do?href=%s&note=%s"],
   ]
   def social_bookmarks(model)
     url = @lookandfeel.base_url

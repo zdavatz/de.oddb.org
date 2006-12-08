@@ -63,6 +63,9 @@ span#delicious {
 span#digg {
   background-image: url(/resources/images/digg.gif);
 }
+span#simpy {
+  background-image: url(/resources/images/simpy.gif);
+}
 span#stumble {
   background-image: url(/resources/images/stumble.gif);
 }
@@ -71,6 +74,7 @@ span.social {
   background-attachment: scroll;
   margin-left: 8px;
   padding-left: 20px;
+  padding-top: 1px;
 }
 table {
   width: 100%;
