@@ -75,11 +75,9 @@ class InlineSearch < HtmlGrid::DivForm
   COMPONENTS = {
     [0,0] => :query,
     [1,0] => :submit,
-    [2,0] => :reset,
   }
   SYMBOL_MAP = {
     :query => SearchBar,
-    :reset => HtmlGrid::Reset,
   }
 end
     end
