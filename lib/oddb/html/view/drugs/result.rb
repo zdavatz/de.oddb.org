@@ -16,7 +16,7 @@ class Packages < HtmlGrid::List
   BACKGROUND_SUFFIX = ''
   COMPONENTS = {
     [0,0] => :product,
-    [1,0] => :doses, 
+    [1,0] => :active_agents,
     [2,0] => :size, 
     [3,0] => :price_public,
     [4,0] => :festbetrag,
@@ -35,9 +35,31 @@ class Packages < HtmlGrid::List
   EMPTY_LIST_KEY = :empty_packages
   LEGACY_INTERFACE = false
   SORT_DEFAULT = nil
+  def active_agents(model)
+    agents = model.active_agents.collect { |agent|
+      [
+        agent.substance.name.send(@session.language), ' ',
+        agent.dose, "\n",
+      ]
+    }
+    size = agents.size
+    if(size == 1)
+      agents.first
+    else
+      span = HtmlGrid::Span.new(model, @session, self)
+      span.value = @lookandfeel.lookup(:active_agents, size)
+      span.css_id = "sub_#@list_index"
+      span.dojo_title = agents
+      span
+    end
+  end
   def atc(model)
     if(atc = model.atc)
-      atc.code
+      span = HtmlGrid::Span.new(model, @session, self)
+      span.value = atc.code
+      span.css_id = "atc_#@list_index"
+      span.dojo_title = atc.name.send(@session.language)
+      span
     end
   end
   def company(model)
@@ -51,9 +73,6 @@ class Packages < HtmlGrid::List
     else
       super(offset, 'info')
     end
-  end
-  def doses(model)
-    model.doses.join(' + ')
   end
   def daily_cost(model)
     if(atc = model.atc)
@@ -73,7 +92,7 @@ class Packages < HtmlGrid::List
         @lookandfeel.lookup("festbetragsstufe_#{code}"),
         link, 
       ]
-      span.css_id = "fb_#{@list_index}"
+      span.css_id = "fb_#@list_index"
       span
     end
   end
@@ -95,7 +114,7 @@ class Packages < HtmlGrid::List
   def product(model)
     span = HtmlGrid::Span.new(model, @session, self)
     span.value = model.name.send(@session.language)
-    span.css_id = "cid_#{@list_index}"
+    span.css_id = "cid_#@list_index"
     span.dojo_title = @lookandfeel.lookup(:pzn, model.code(:cid, 'DE'))
     span
   end
