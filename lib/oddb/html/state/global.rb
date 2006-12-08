@@ -7,8 +7,19 @@ module ODDB
   module Html
     module State
 class Global < SBSM::State
+  def partitioned_keys(keys)
+    keys.partition { |key|
+      /^[a-z]$/.match(key)
+    }
+  end
+  def products
+    _products(@session.persistent_user_input(:range))
+  end
   def search
     _search(@session.persistent_user_input(:query))
+  end
+  def navigation
+    [:contact, :home]
   end
 end
     end

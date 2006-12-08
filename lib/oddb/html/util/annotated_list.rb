@@ -7,7 +7,14 @@ module ODDB
 class AnnotatedList < Array
   attr_accessor :error, :query
   def sort_by(*args, &block)
-    self.dup.clear.concat(super(*args, &block))
+    _delegate(super(*args, &block))
+  end
+  def [](*args, &block)
+    _delegate(super(*args, &block))
+  end
+  private
+  def _delegate(content)
+    self.dup.clear.concat(content)
   end
 end
     end

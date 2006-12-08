@@ -9,6 +9,8 @@ module ODDB
 class Lookandfeel < SBSM::Lookandfeel
   DICTIONARIES = {
     "de"  =>  {
+      :choose_range         => 'Bitte wählen Sie den anzuzeigenden Bereich',
+      :contact              => 'Kontakt',
       :drugs                => 'Medikamente',
       :drugs_atc_codes      => "ATC-Codes, DDD's:",
       :drugs_copay_free     => 'Zuzahlungsbefreite Arzneimittel:',
@@ -33,6 +35,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :lgpl_license         => 'LGPL',
       :logo                 => 'de.oddb.org - peer reviewed open drug database',
       :oddb_version         => 'Commit-ID',
+      :products             => 'Arzneimittel A-Z',
       :pzn0                 => 'Pharmazentralnummer: ',
       :pzn1                 => '',
       :query_info           => 'Bitte HIER Such-Stichwort eingeben',

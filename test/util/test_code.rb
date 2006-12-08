@@ -54,6 +54,13 @@ module ODDB
         assert_equal(245, code.value(Date.today + 1))
         assert_equal(246, code.value(Date.today + 10))
       end
+      def test_include
+        code1 = Code.new(:registration, 245, 'ch')
+        code2 = Code.new(:registration, 245, 'de')
+        code = Code.new(:registration, 245, 'ch')
+        assert_equal(true, [code1].include?(code))
+        assert_equal(false, [code2].include?(code))
+      end
     end
   end
 end

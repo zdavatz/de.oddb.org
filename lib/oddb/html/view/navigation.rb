@@ -11,11 +11,16 @@ class Navigation < HtmlGrid::Div
     super
     @value = @lookandfeel.navigation.collect { |event|
       link = HtmlGrid::Link.new(event, @model, @session, self) 
-      unless(@session.direct_event == event)
+      if(self.respond_to?(event))
+        self.send(event, link)
+      elsif(@session.direct_event != event)
         link.href = @lookandfeel._event_url(event)
       end
       link
     }
+  end
+  def contact(link)
+    link.href = "http://wiki.oddb.org/wiki.php/ODDB/Kontakt"
   end
 end
     end

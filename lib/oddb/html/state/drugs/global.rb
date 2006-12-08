@@ -5,6 +5,7 @@ require 'oddb/business/company'
 require 'oddb/drugs/package'
 require 'oddb/html/state/global'
 require 'oddb/html/state/drugs/init'
+require 'oddb/html/state/drugs/products'
 require 'oddb/html/state/drugs/result'
 require 'oddb/html/util/annotated_list'
 require 'ostruct'
@@ -17,6 +18,21 @@ class Global < State::Global
   EVENT_MAP = {
     :home => Drugs::Init,
   }
+  def _products(query)
+    result = Util::AnnotatedList.new
+    result.query = query
+    if(query)
+      if(query == '0-9')
+        alpha, others = partitioned_keys(ODDB::Drugs::Product.name_keys(1))
+        others.each { |key|
+          result.concat(ODDB::Drugs::Product.search_by_name(key))
+        }
+      else
+        result.concat(ODDB::Drugs::Product.search_by_name(query.downcase))
+      end
+    end
+    Products.new(@session, result)
+  end
   def _search(query)
     result = Util::AnnotatedList.new
     result.query = query
@@ -40,7 +56,7 @@ class Global < State::Global
     Result.new(@session, result)
   end
   def navigation
-    [:home]
+    [:products].concat(super)
   end
 end
       end

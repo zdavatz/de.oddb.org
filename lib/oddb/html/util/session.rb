@@ -23,6 +23,9 @@ class Session < SBSM::Session
   def navigation
     state.navigation
   end
+  def pagelength
+    100
+  end
 end
     end
   end
