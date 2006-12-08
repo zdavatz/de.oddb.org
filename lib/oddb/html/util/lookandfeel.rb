@@ -58,6 +58,9 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :th_product             => 'Präparat',
       :th_size                => 'Packungsgrösse',
       :th_zuzahlungsbefreit   => 'Zuzahlungsbefreit',
+      :title_found0           => 'Suchergebnis für "',
+      :title_found1           => '", Total ',
+      :title_found2           => ' Präparate',
       :tt_atc                 => <<-EOS,
 The field of drug utilization research has attracted increasing
 interest since its infancy in the 1960s. At a symposium in Oslo 

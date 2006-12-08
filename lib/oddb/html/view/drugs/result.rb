@@ -184,10 +184,14 @@ class Packages < HtmlGrid::List
 end
 class ResultComposite < HtmlGrid::DivComposite
   COMPONENTS = {
-    [0,0] => InlineSearch, 
-    [0,1] => Packages, 
+    [0,0] => :title_found, 
+    [0,1] => InlineSearch, 
+    [0,2] => Packages, 
   }
-  CSS_ID_MAP = ['result-search']
+  CSS_ID_MAP = ['result-found', 'result-search']
+  def title_found(model)
+    @lookandfeel.lookup(:title_found, @model.query, @model.size)
+  end
 end
 class Result < Template
   CONTENT = ResultComposite

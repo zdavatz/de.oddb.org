@@ -24,6 +24,9 @@ div#foot a:link:hover,
 th a, th a:visited:hover, th a:link:hover {
   color: blue;
 }
+div#head {
+  margin-bottom: 30px;
+}
 div#home-search {
   margin-top: 100px;
   margin-bottom: 100px;
@@ -43,7 +46,14 @@ div#navigation a:first-child {
   padding: 0px 4px;
   border-left: 0px;
 }
+div#result-found {
+  font-weight: bold;
+  font-size: 14px;
+  padding: 4px;
+  float: left;
+}
 div#result-search {
+  padding-top: 4px;
   text-align: right;
 }
 div#result-search input[type=text] {
