@@ -54,6 +54,9 @@ div#welcome {
   float: right;
   text-align: right;
 }
+form {
+  margin: 0px;
+}
 img {
   border: 0px;
 }
