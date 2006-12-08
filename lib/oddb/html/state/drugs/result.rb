@@ -13,16 +13,23 @@ class Result < Drugs::Global
   include Util::Sort
   VIEW = View::Drugs::Result
   def init
-    sort_by(:price_public)
-    sort_by(:size)
-    sort_by(:doses)
-    sort_by(:product)
+    if(@session.user_input(:sortvalue))
+      sort
+    else
+      sort_by(:price_public)
+      sort_by(:size)
+      sort_by(:doses)
+      sort_by(:product)
+    end
   end
   def direct_event
     [:search, :query, @model.query]
   end
   def _search(query)
     if(@model.query == query)
+      if(@session.user_input(:sortvalue))
+        sort
+      end
       self
     else
       super

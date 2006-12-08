@@ -9,9 +9,9 @@ module ODDB
 class Validator < SBSM::Validator
   ENUMS = {
     :range     => ("A".."Z").to_a.push('0-9'),
-    :sortvalue => [ 'atc', 'company', 'doses', 'festbetrag',
-      'festbetragsstufe', 'price_difference', 'price_public', 'product',
-      'zuzahlungsbefreit', 'size', 
+    :sortvalue => [ 'active_agents', 'atc', 'company', 'doses',
+      'festbetrag', 'festbetragsstufe', 'price_difference',
+      'price_public', 'product', 'zuzahlungsbefreit', 'size', 
     ],
   }
   EVENTS = [ :home, :products, :search, :sort ]

@@ -136,8 +136,14 @@ class Packages < HtmlGrid::List
       parts.join(' ')
     }.join(' + ')
   end
-  def sort_link(thkey, *rest)
-    sortlink = super
+  def sort_link(thkey, matrix, component)
+    sortlink = HtmlGrid::Link.new(thkey, @model, @session, self)
+    args = [
+      'query', @session.user_input(:query),
+      'sortvalue', component.to_s,
+    ]
+    sortlink.href = @lookandfeel._event_url(:search , args)
+    sortlink.css_class = css_head_map[matrix]
     sortlink.css_id = thkey
     titlekey = thkey.sub(/^th/, "tt")
     if(title = @lookandfeel.lookup(titlekey))

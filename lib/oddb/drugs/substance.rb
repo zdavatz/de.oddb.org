@@ -6,12 +6,16 @@ require 'oddb/model'
 module ODDB
   module Drugs
     class Substance < Model
+      include Comparable
       belongs_to :group
       has_many :active_agents
       is_coded
       multilingual :name
       def ==(other)
         super || name == other
+      end
+      def <=>(other)
+        name <=> other.name
       end
     end
   end

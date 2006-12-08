@@ -4,6 +4,7 @@
 module ODDB
   module Util
     class Multilingual
+      include Comparable
       attr_reader :canonical
       attr_reader :synonyms
       def initialize
@@ -36,6 +37,9 @@ module ODDB
         else
           false
         end
+      end
+      def <=>(other)
+        all.sort <=> other.all.sort
       end
     end
   end
