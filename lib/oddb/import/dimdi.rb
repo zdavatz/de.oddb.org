@@ -60,7 +60,11 @@ module ODDB
           code = Util::Code.new(:festbetragsgruppe, fpgroup, 'DE')
           product.add_code(code)
         end
-        candidates = Drugs::Atc.search_by_name(cell(row, 2))
+        atc_name = cell(row, 2)
+        candidates = Drugs::Atc.search_by_exact_name(atc_name)
+        if(candidates.empty?)
+          candidates = Drugs::Atc.search_by_name(atc_name)
+        end
         if(candidates.size == 1)
           product.atc = candidates.first
         end
