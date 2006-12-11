@@ -9,6 +9,34 @@ module ODDB
   module Html
     module View
       module Drugs
+module PackageMethods
+  def code_festbetragsgruppe(model)
+    model.product.code(:festbetragsgruppe, 'DE')
+  end
+  def code_festbetragsstufe(model)
+    if(code = model.code(:festbetragsstufe))
+      span = HtmlGrid::Span.new(model, @session, self)
+      span.value = code
+      link = HtmlGrid::Link.new(:festbetragsstufe, 
+                                model, @session, self)
+      link.href = @lookandfeel.lookup(:festbetragsstufe_url)
+      span.dojo_title = [
+        @lookandfeel.lookup("festbetragsstufe_#{code}"),
+        link, 
+      ]
+      span.css_id = "fb_#@list_index"
+      span.label = true
+      span
+    end
+  end
+  def code_zuzahlungsbefreit(model)
+    if((code = model.code(:zuzahlungsbefreit)) && code.value)
+      @lookandfeel.lookup(:yes)
+    else 
+      @lookandfeel.lookup(:no)
+    end
+  end
+end
 class Part < HtmlGrid::List
   COMPONENTS = {
     [1,0] => :substance,
@@ -30,6 +58,7 @@ class Part < HtmlGrid::List
   end
 end
 class PackageInnerComposite < HtmlGrid::Composite
+  include PackageMethods
   COMPONENTS = {
     [0,0] => :name, 
     [2,0] => :code_pzn, 
@@ -39,6 +68,7 @@ class PackageInnerComposite < HtmlGrid::Composite
     [2,2] => :price_festbetrag,
     [0,3] => :code_festbetragsstufe,
     [2,3] => :code_festbetragsgruppe,
+    [0,4] => :code_zuzahlungsbefreit,
   }
   LABELS = true
   LEGACY_INTERFACE = false
@@ -51,11 +81,8 @@ class PackageInnerComposite < HtmlGrid::Composite
   def code_pzn(model)
     model.code(:cid, 'DE')
   end
-  def code_festbetragsgruppe(model)
-    model.product.code(:festbetragsgruppe, 'DE')
-  end
-  def code_festbetragsstufe(model)
-    model.code(:festbetragsstufe, 'DE')
+  def code_zuzahlungsbefreit(model)
+    @lookandfeel.lookup(model.code(:zuzahlungsbefreit) ? :yes : :no)
   end
   def company(model)
     if(company = model.company)

@@ -5,6 +5,7 @@ require 'htmlgrid/list'
 require 'htmlgrid/div'
 require 'htmlgrid/span'
 require 'oddb/html/view/search'
+require 'oddb/html/view/drugs/package'
 require 'oddb/html/view/drugs/template'
 
 module ODDB
@@ -12,6 +13,7 @@ module ODDB
     module View
       module Drugs
 class Packages < HtmlGrid::List
+  include PackageMethods
   BACKGROUND_ROW = 'bg'
   BACKGROUND_SUFFIX = ''
   COMPONENTS = {
@@ -21,8 +23,8 @@ class Packages < HtmlGrid::List
     [3,0] => :price_public,
     [4,0] => :festbetrag,
     [5,0] => :price_difference,
-    [6,0] => :festbetragsstufe,
-    [7,0] => :zuzahlungsbefreit,
+    [6,0] => :code_festbetragsstufe,
+    [7,0] => :code_zuzahlungsbefreit,
     [8,0] => :atc,
     [9,0] => :company,
   }
@@ -82,28 +84,6 @@ class Packages < HtmlGrid::List
   end
   def festbetrag(model)
     model.price(:festbetrag)
-  end
-  def festbetragsstufe(model)
-    if(code = model.code(:festbetragsstufe))
-      span = HtmlGrid::Span.new(model, @session, self)
-      span.value = code
-      link = HtmlGrid::Link.new(:festbetragsstufe, 
-                                model, @session, self)
-      link.href = @lookandfeel.lookup(:festbetragsstufe_url)
-      span.dojo_title = [
-        @lookandfeel.lookup("festbetragsstufe_#{code}"),
-        link, 
-      ]
-      span.css_id = "fb_#@list_index"
-      span
-    end
-  end
-  def parts(model)
-    model.parts.collect { |part| 
-      part.composition.active_agents.collect { |act|
-        [act.substance.name.send(@session.language), act.dose].join(' ')
-      }
-    }
   end
   def price_difference(model)
     if(pf = model.price(:festbetrag))
@@ -177,11 +157,6 @@ class Packages < HtmlGrid::List
       end
     end
     sortlink
-  end
-  def zuzahlungsbefreit(model)
-    if((code = model.code(:zuzahlungsbefreit)) && code.value)
-      @lookandfeel.lookup(:yes)
-    end
   end
 end
 class ResultComposite < HtmlGrid::DivComposite
