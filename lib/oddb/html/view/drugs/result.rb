@@ -36,6 +36,9 @@ class Packages < HtmlGrid::List
   LEGACY_INTERFACE = false
   SORT_DEFAULT = nil
   def active_agents(model)
+    code = model.code(:cid, 'DE')
+    link = HtmlGrid::Link.new(:no_active_agents, model, @session, self)
+    link.href = @lookandfeel._event_url(:package, [:pzn, code.value])
     agents = model.active_agents.collect { |agent|
       [
         agent.substance.name.send(@session.language), ' ',
@@ -44,14 +47,13 @@ class Packages < HtmlGrid::List
     }
     size = agents.size
     if(size == 1)
-      agents.first
+      link.value = agents.first
     else
-      span = HtmlGrid::Span.new(model, @session, self)
-      span.value = @lookandfeel.lookup(:active_agents, size)
-      span.css_id = "sub_#@list_index"
-      span.dojo_title = agents
-      span
+      link.value = @lookandfeel.lookup(:active_agents, size)
+      link.css_id = "sub_#@list_index"
+      link.dojo_title = agents
     end
+    link
   end
   def atc(model)
     if(atc = model.atc)
@@ -189,6 +191,7 @@ class ResultComposite < HtmlGrid::DivComposite
     [0,2] => Packages, 
   }
   CSS_ID_MAP = ['result-found', 'result-search']
+  CSS_MAP = { 2 => 'result' }
   def title_found(model)
     @lookandfeel.lookup(:title_found, @model.query, @model.size)
   end

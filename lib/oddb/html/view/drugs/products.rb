@@ -29,8 +29,6 @@ class ProductsList < Packages
     link = HtmlGrid::Link.new(:product, model, @session, self)
     name = model.name.send(@session.language)
     link.value = name
-    link.css_id = "cid_#{@list_index}"
-    link.dojo_title = @lookandfeel.lookup(:pzn, model.code(:cid, 'DE'))
     link.href = @lookandfeel._event_url(:search, :query => name)
     link
   end
@@ -41,6 +39,7 @@ class ProductsComposite < HtmlGrid::DivComposite
     [0,1] => :products, 
   }
   CSS_ID_MAP = ['result-search']
+  CSS_MAP = { 1 => 'result' }
   def products(model)
     offset = [@session.user_input(:offset).to_i, model.size].min
     ProductsList.new(model[offset, @session.pagelength], @session, self)

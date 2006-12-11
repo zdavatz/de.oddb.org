@@ -14,8 +14,8 @@ class Validator < SBSM::Validator
       'price_public', 'product', 'zuzahlungsbefreit', 'size', 
     ],
   }
-  EVENTS = [ :home, :products, :search, :sort ]
-  NUMERIC = [ :offset ]
+  EVENTS = [ :home, :package, :products, :search, :sort ]
+  NUMERIC = [ :offset, :pzn ]
   STRINGS = [ :query ]
 end
     end

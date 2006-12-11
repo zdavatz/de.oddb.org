@@ -4,11 +4,15 @@ body, input {
 }
 a {
   text-decoration: none;
+  color: blue;
+}
+a:hover {
+  color: black;
 }
 div.explain {
   padding: 4px;
 }
-div#foot, th {
+div#foot, div#title, th {
   background-color: #2ba476;
   color: white;
   padding: 4px;
@@ -46,18 +50,25 @@ div#navigation a:first-child {
   padding: 0px 4px;
   border-left: 0px;
 }
+div.result table { 
+  width: 100%;
+}
 div#result-found {
   font-weight: bold;
   font-size: 14px;
   padding: 4px;
+  padding-top: 0px;
   float: left;
 }
 div#result-search {
-  padding-top: 4px;
   text-align: right;
 }
 div#result-search input[type=text] {
   width: 200px;
+}
+div#snapback {
+  float: left;
+  padding: 4px;
 }
 div#welcome {
   margin-top: 75px;
@@ -69,6 +80,9 @@ form {
 }
 img {
   border: 0px;
+}
+label {
+  font-weight: bold;
 }
 span#delicious {
   background-image: url(/resources/images/delicious.gif);
@@ -89,13 +103,10 @@ span.social {
   padding-left: 20px;
   padding-top: 1px;
 }
-table {
-  width: 100%;
-}
 td {
   padding: 4px;
 }
-td#alphaheader {
+td#alphaheader, div.divider {
   padding: 4px;
   background-color: #cf9;
   font-weight: bold;

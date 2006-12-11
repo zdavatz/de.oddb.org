@@ -5,6 +5,7 @@ require 'oddb/business/company'
 require 'oddb/drugs/package'
 require 'oddb/html/state/global'
 require 'oddb/html/state/drugs/init'
+require 'oddb/html/state/drugs/package'
 require 'oddb/html/state/drugs/products'
 require 'oddb/html/state/drugs/result'
 require 'oddb/html/util/annotated_list'
@@ -18,6 +19,16 @@ class Global < State::Global
   EVENT_MAP = {
     :home => Drugs::Init,
   }
+  def package
+    if((code = @session.user_input(:pzn)) \
+       && (package = ODDB::Drugs::Package.find_by_code(:type => 'cid',
+                       :value   => code, :country => 'DE')))
+      Package.new(@session, package)
+    end
+  end
+  def navigation
+    [:products].concat(super)
+  end
   def _products(query)
     result = Util::AnnotatedList.new
     result.query = query
@@ -54,9 +65,6 @@ class Global < State::Global
       end
     end
     Result.new(@session, result)
-  end
-  def navigation
-    [:products].concat(super)
   end
 end
       end

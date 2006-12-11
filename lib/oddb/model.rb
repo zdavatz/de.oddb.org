@@ -75,6 +75,9 @@ module ODDB
             instance_variable_set("@#{key}", Util::Multilingual.new)
           end
         }
+        define_method(:to_s) { 
+          self.send(key).to_s
+        }
       end
       def singular
         basename.gsub(/([a-z])([A-Z])/, '\1_\2').downcase
