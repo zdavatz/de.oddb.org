@@ -137,6 +137,11 @@ class Packages < HtmlGrid::List
       case titlekey
       when "tt_atc"
         link.href = "http://www.whocc.no/atcddd/atcsystem.html"
+      when "tt_code_festbetragsstufe"
+        link.href = "http://www.die-gesundheitsreform.de/glossar/festbetraege.html"
+      when "tt_code_zuzahlungsbefreit"
+        link.value = link.href = "http://www.bkk.de/bkk/powerslave,id,1054,nodeid,.html"
+        sortlink.dojo_title = [ title.strip, link ]
       when "tt_company"
         link.href = "http://www.die-gesundheitsreform.de/presse/pressethemen/avwg/pdf/liste_zuzahlungsbefreite_arzneimittel.pdf"
       when "tt_doses"
@@ -145,13 +150,8 @@ class Packages < HtmlGrid::List
         sortlink.dojo_title = [ title, link ]
       when "tt_festbetrag"
         link.href = "http://www.dimdi.de/static/de/amg/fbag/index.htm"
-      when "tt_festbetragsstufe"
-        link.href = "http://www.die-gesundheitsreform.de/glossar/festbetraege.html"
       when "tt_price_public", "tt_price_difference"
         link.href = "ftp://ftp.dimdi.de/pub/amg/satzbeschr_011006.pdf"
-      when "tt_zuzahlungsbefreit"
-        link.value = link.href = "http://www.bkk.de/bkk/powerslave,id,1054,nodeid,.html"
-        sortlink.dojo_title = [ title.strip, link ]
       else
         sortlink.dojo_title = title
       end
