@@ -46,6 +46,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :no                     => 'Nein',
       :no_active_agents       => 'Keine Wirkstoffe in der DB',
       :oddb_version           => 'Commit-ID',
+      :package                => 'Packungsgrösse und Wirkstoffe',
       :parts                  => 'Teilpackungen',
       :price_festbetrag       => 'Festbetrag',
       :price_public           => 'Publikumspreis',

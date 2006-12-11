@@ -112,7 +112,7 @@ class PackageComposite < HtmlGrid::DivComposite
     [0,1] => InlineSearch, 
     [0,2] => :name,
     [0,3] => PackageInnerComposite,
-    [0,4] => "parts",
+    [0,4] => :parts,
   }
   CSS_ID_MAP = [ 'snapback', 'result-search', 'title' ]
   CSS_MAP = { 4 => 'divider' }
@@ -134,6 +134,10 @@ class PackageComposite < HtmlGrid::DivComposite
       name.push(' - ', company.name)
     end
     name
+  end
+  def parts(model)
+    key = model.parts.size > 1 ? :parts : :package
+    @lookandfeel.lookup(key)
   end
   def snapback(model)
     if(query = @session.persistent_user_input(:query))
