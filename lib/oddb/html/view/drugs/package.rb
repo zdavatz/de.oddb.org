@@ -69,6 +69,7 @@ class PackageInnerComposite < HtmlGrid::Composite
     [0,3] => :code_festbetragsstufe,
     [2,3] => :code_festbetragsgruppe,
     [0,4] => :code_zuzahlungsbefreit,
+    [2,4] => :equivalence_factor,
   }
   LABELS = true
   LEGACY_INTERFACE = false
@@ -88,6 +89,15 @@ class PackageInnerComposite < HtmlGrid::Composite
     if(company = model.company)
       company.name
     end
+  end
+  def equivalence_factor(model)
+    link = HtmlGrid::Link.new(:equivalence_factor, model, @session, self)
+    link.href = "http://www.gesetze-im-internet.de/fgnv/anlage_5.html"
+    link.value = model.parts.collect { |part| 
+      part.composition.equivalence_factor 
+    }.compact
+    link.label = true
+    link
   end
   def price_festbetrag(model)
     model.price(:festbetrag)

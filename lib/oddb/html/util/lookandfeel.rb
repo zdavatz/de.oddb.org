@@ -29,6 +29,7 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte
 überprüfen Sie die Schreibweise und versuchen Sie es noch
 einmal.
     EOS
+      :equivalence_factor     => 'Wirkstärkenäquivalenzfaktor (waef)',
       :explain_search         => <<-EOS,
 Vergleichen Sie einfach und schnell Medikamentenpreise.
 Suchen Sie nach Medikamentname oder Wirkstoff.
