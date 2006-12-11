@@ -85,16 +85,7 @@ studies was needed. At the same symposium the Drug Utilization Research
 Group (DURG) was established and tasked with the development of
 internationally applicable methods for drug utilization research...
       EOS
-      :tt_company               => 'Der Hersteller oder Zulassungsinhaber des Produkts',
-      :tt_doses                 => 'Die Stärke bezieht sich auf Darreichungsform-Einheit (Tablette, Zäpfchen, Sirup, etc). Siehe auch: ',
-      :tt_doses_link            => 'Darreichungsformen',
-      :tt_festbetrag            => <<-EOS,
-Festbetrag: DIMDI hat die Aufgabe, die von den Spitzenverbänden der
-Krankenkassen erstellten und veröffentlichten Übersichten über
-sämtliche Festbeträge und die betroffenen Arzneimittel im Internet
-abruffähig zu veröffentlichen...
-      EOS
-      :tt_festbetragsstufe      => <<-EOS,
+      :tt_code_festbetragsstufe => <<-EOS,
 Gruppen "vergleichbarer" Arzneimittel können nach unterschiedlichen
 Kriterien gebildet werden, deshalb werden drei Stufen der Vergleich-
 barkeit unterschieden: Festbetragsgruppen der Stufe 1 werden aus
@@ -106,10 +97,7 @@ Festbetragsgruppen der Stufe 3 werden aus Arzneimitteln gebildet,
 die nicht hinsichtlich ihrer Wirkstoffe, aber hinsichtlich ihrer
 therapeutischen Wirkung vergleichbar sind...
       EOS
-      :tt_price_difference      => 'Absolute Differenz zwischen Preis und Festbetrag',
-      :tt_price_public          => 'Preis: Apothekenverkaufspreis inkl. MwSt. in Euro',
-      :tt_product               => 'Präparat ist der Handelsname des Medikaments',
-      :tt_zuzahlungsbefreit     => <<-EOS,
+      :tt_code_zuzahlungsbefreit     => <<-EOS,
 Zuzahlungsbefreite Arzneimittel:
 
 Die Spitzenverbände der Krankenkassen haben am 11.05.2006 gemeinsam und
@@ -123,6 +111,18 @@ gesetzlichen Zuzahlung nach § 31 Abs. 3 Satz 1 SGB V befreit.
 
 Quelle: 
       EOS
+      :tt_company               => 'Der Hersteller oder Zulassungsinhaber des Produkts',
+      :tt_doses                 => 'Die Stärke bezieht sich auf Darreichungsform-Einheit (Tablette, Zäpfchen, Sirup, etc). Siehe auch: ',
+      :tt_doses_link            => 'Darreichungsformen',
+      :tt_festbetrag            => <<-EOS,
+Festbetrag: DIMDI hat die Aufgabe, die von den Spitzenverbänden der
+Krankenkassen erstellten und veröffentlichten Übersichten über
+sämtliche Festbeträge und die betroffenen Arzneimittel im Internet
+abruffähig zu veröffentlichen...
+      EOS
+      :tt_price_difference      => 'Absolute Differenz zwischen Preis und Festbetrag',
+      :tt_price_public          => 'Preis: Apothekenverkaufspreis inkl. MwSt. in Euro',
+      :tt_product               => 'Präparat ist der Handelsname des Medikaments',
       :welcome_drugs            => <<-EOS,
 Willkommen bei de.oddb.org, dem
 aktuellsten Medikamenten-Portal von Deutschland.
