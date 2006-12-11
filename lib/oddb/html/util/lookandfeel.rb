@@ -125,7 +125,7 @@ abruffähig zu veröffentlichen...
       :tt_product               => 'Präparat ist der Handelsname des Medikaments',
       :welcome_drugs            => <<-EOS,
 Willkommen bei de.oddb.org, dem
-aktuellsten Medikamenten-Portal von Deutschland.
+aktuellsten Medikamenten-Portal Deutschlands.
 ** Herkunftsdeklaration der Daten **
       EOS
       :welcome_drugs_link       => 'Herkunftsdeklaration',
