@@ -35,6 +35,11 @@ module ODDB
         assert_equal(false, [code1].include?(code4))
         assert_equal(false, [code1].include?(code5))
       end
+      def test_format
+        code1 = Code.new(:registration, 245, 'ch')
+        code1.format = "code:%05i"
+        assert_equal("code:00245", code1.to_s)
+      end
       def test_hash_key
         code1 = Code.new(:registration, 245, 'ch')
         code2 = Code.new(:registration, 245, 'ch')

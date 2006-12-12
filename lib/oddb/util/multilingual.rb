@@ -25,7 +25,7 @@ module ODDB
         end
       end
       def to_s
-        @canonical.values.sort.first
+        @canonical.values.sort.first.to_s
       end
       def ==(other)
         case other

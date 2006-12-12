@@ -12,6 +12,13 @@ module ODDB
       def initialize(administration)
         @administration = administration
       end
+      def to_s
+        if(@comment)
+          sprintf("%s: %s (%s)", @administration, @dose, @comment)
+        else
+          sprintf("%s: %s", @administration, @dose)
+        end
+      end
     end
   end
 end

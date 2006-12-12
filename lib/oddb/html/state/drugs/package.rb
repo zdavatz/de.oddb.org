@@ -10,6 +10,13 @@ module ODDB
       module Drugs
 class Package < Global
   VIEW = View::Drugs::Package
+  def direct_event
+    direct_event = [:package]
+    if(code = @model.code(:cid, 'DE'))
+      direct_event.push(code.value)
+    end
+    direct_event
+  end
 end
       end
     end

@@ -9,46 +9,6 @@ require 'oddb/import/dimdi'
 require 'stub/model'
 
 module ODDB
-  module Business
-    class Company < Model
-      simulate_database(:name)
-    end
-  end
-  module Drugs
-    class ActiveAgent < Model
-      simulate_database
-    end
-    class Atc < Model
-      simulate_database(:name)
-    end
-    class Composition < Model
-      simulate_database
-    end
-    class GalenicForm < Model
-      simulate_database(:description)
-    end
-    class Package < Model
-      simulate_database
-    end
-    class Part < Model
-      simulate_database
-    end
-    class Product < Model
-      simulate_database(:name)
-    end
-    class Sequence < Model
-      simulate_database
-    end
-    class Substance < Model
-      simulate_database(:name)
-    end
-    class SubstanceGroup < Model
-      simulate_database(:name)
-    end
-    class Unit < Model
-      simulate_database(:name)
-    end
-  end
   module Import
     class TestDimdiGalenicForm < Test::Unit::TestCase
       def setup
@@ -96,6 +56,9 @@ module ODDB
         @import = DimdiProduct.new
       end
       def test_import_base_data
+        atc = Drugs::Atc.new('M04AA51')
+        atc.name.de = 'Amoxicillin, Fuzzy match'
+        atc.save
         assert_equal([], Drugs::Product.instances)
         sub1 = Drugs::Substance.new
         sub1.add_code(Util::Code.new("substance", u("POXM"), 'DE'))
@@ -107,11 +70,12 @@ module ODDB
         tab.save
         input = open(@path)
         @import.import(input)
-        assert_equal(10, Drugs::Product.instances.size)
+        assert_equal(11, Drugs::Product.instances.size)
         expected = [ u("Piroxicam Ratio"), u("Amoxicillin Ratio"),
           u("Buscopan Aca"), u("Aquaphor/Il Aca"), u("Aspirin Aca"),
           u("Sibelium Aca"), u("Capto Merckdura"), 
-          u("Aknefug/Mino Wolff"), u("Ribofluor"), u("Dexa Ct"), ]
+          u("Aknefug/Mino Wolff"), u("Ribofluor"), u("Dexa Ct"), 
+          u("Madopar Emra"), ]
         names = Drugs::Product.instances.collect { |inst|
           inst.name.de
         }
@@ -145,14 +109,27 @@ module ODDB
         assert_instance_of(Util::Code, code)
         assert_equal("649", code.value)
 
+        pr = Drugs::Product.instances.at(1)
+        assert_equal(atc, pr.atc)
+
+        pr = Drugs::Product.instances.last
+        seq = pr.sequences.first
+        comp = seq.compositions.first
+        assert_equal(2, comp.active_agents.size)
+        assert_equal(["Levodopa", "Benserazid"], 
+                     comp.substances.collect { |sub| sub.name.de })
+        assert_equal([Drugs::Dose.new(0,'mg'), Drugs::Dose.new(0,'mg')],
+                     comp.doses)
+
         # do it again, nothing should change
         input = open(@path)
         @import.import(input)
-        assert_equal(10, Drugs::Product.instances.size)
+        assert_equal(11, Drugs::Product.instances.size)
         names = Drugs::Product.instances.collect { |inst|
           inst.name.de
         }
         assert_equal(expected, names)
+        pr = Drugs::Product.instances.first
         assert_equal(1, pr.codes.size)
         code = pr.code(:festbetragsgruppe)
         assert_instance_of(Util::Code, code)
@@ -180,6 +157,18 @@ module ODDB
         code = pack.code(:cid, 'DE')
         assert_instance_of(Util::Code, code)
         assert_equal("649", code.value)
+
+        pr = Drugs::Product.instances.at(1)
+        assert_equal(atc, pr.atc)
+
+        pr = Drugs::Product.instances.last
+        seq = pr.sequences.first
+        comp = seq.compositions.first
+        assert_equal(2, comp.active_agents.size)
+        assert_equal(["Levodopa", "Benserazid"], 
+                     comp.substances.collect { |sub| sub.name.de })
+        assert_equal([Drugs::Dose.new(0,'mg'), Drugs::Dose.new(0,'mg')],
+                     comp.doses)
       end
     end
     class TestDimdiSubstance < Test::Unit::TestCase
@@ -193,9 +182,9 @@ module ODDB
         assert_equal([], Drugs::Substance.instances)
         input = open(@path)
         @import.import(input)
-        assert_equal(5, Drugs::Substance.instances.size)
-        expected = [u("Acebutolol"), u("Aceclofenac"),
-          u("Atenolol+Chlort+Hydralazin"), u("Acemetacin"),
+        assert_equal(7, Drugs::Substance.instances.size)
+        expected = [u("Acebutolol"), u("Aceclofenac"), u("Atenolol"),
+          u("Chlort"), u("Hydralazin"), u("Acemetacin"),
           u("Almotriptan")]
         names = Drugs::Substance.instances.collect { |inst|
           inst.name.de
@@ -204,7 +193,7 @@ module ODDB
         # do it again, nothing should change
         input = open(@path)
         @import.import(input)
-        assert_equal(5, Drugs::Substance.instances.size)
+        assert_equal(7, Drugs::Substance.instances.size)
         names = Drugs::Substance.instances.collect { |inst|
           inst.name.de
         }
@@ -221,8 +210,10 @@ module ODDB
     end
     class TestDimdiZuzahlungsBefreiung < Test::Unit::TestCase
       def setup
+        Drugs::Package.instances.clear
         Drugs::Product.instances.clear
         Drugs::Substance.instances.clear
+        Business::Company.instances.clear
         @data_dir = File.expand_path('data', File.dirname(__FILE__))
         @path = File.expand_path('xls/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls', @data_dir) 
         @import = DimdiZuzahlungsBefreiung.new
@@ -281,6 +272,165 @@ module ODDB
         assert_equal(Drugs::Dose.new(20, 'mg'), agent2.dose)
         assert_instance_of(Util::Code, code)
         assert_equal(true, code.value)
+      end
+      def test_import__ml
+        atc = Drugs::Atc.new('J01CA04')
+        atc.name.de = 'Amoxicillin'
+        atc.save
+        existing = Drugs::Package.new
+        existing.add_code(Util::Code.new(:cid, '3525921', 'DE'))
+        existing.add_part(Drugs::Part.new)
+        existing.save
+        sequence = Drugs::Sequence.new
+        product = Drugs::Product.new
+        existing.sequence = sequence
+        sequence.product = product
+        input = open(@path)
+        assert_nil(existing.code(:zuzahlungsbefreit))
+        @import.import(input)
+        assert_equal(1, Drugs::Product.instances.size)
+        assert_equal([product], Drugs::Product.instances)
+        assert_equal(atc, product.atc)
+        assert_equal([product], atc.products)
+        assert_equal(1, product.sequences.size)
+        sequence = product.sequences.first
+        assert_equal(1, sequence.compositions.size)
+        composition = sequence.compositions.first
+        assert_equal(1, composition.active_agents.size)
+        agent1 = composition.active_agents.at(0)
+        assert_equal('Amoxicillin-3-Wasser', agent1.substance.name.de)
+        assert_equal(Drugs::Dose.new(287, 'mg'), agent1.dose)
+        code = existing.code(:zuzahlungsbefreit)
+        assert_instance_of(Util::Code, code)
+        assert_equal(true, code.value)
+        assert_equal(1, existing.parts.size)
+        part = existing.parts.first
+        assert_equal(2, part.size)
+        assert_equal('100 ml', part.quantity.to_s)
+
+        # do it again, nothing should change
+        input = open(@path)
+        @import.import(input)
+        assert_equal(1, Drugs::Product.instances.size)
+        assert_equal([product], Drugs::Product.instances)
+        assert_equal(atc, product.atc)
+        assert_equal([product], atc.products)
+        assert_equal(1, product.sequences.size)
+        sequence = product.sequences.first
+        assert_equal(1, sequence.compositions.size)
+        composition = sequence.compositions.first
+        assert_equal(1, composition.active_agents.size)
+        agent1 = composition.active_agents.at(0)
+        assert_equal('Amoxicillin-3-Wasser', agent1.substance.name.de)
+        assert_equal(Drugs::Dose.new(287, 'mg'), agent1.dose)
+        code = existing.code(:zuzahlungsbefreit)
+        assert_instance_of(Util::Code, code)
+        assert_equal(true, code.value)
+        assert_equal(1, existing.parts.size)
+        part = existing.parts.first
+        assert_equal(2, part.size)
+        assert_equal('100 ml', part.quantity.to_s)
+      end
+      def test_import__chemical_form
+        atc = Drugs::Atc.new('N04BB01')
+        atc.name.de = 'Amantadin'
+        atc.save
+        existing = Drugs::Package.new
+        existing.add_code(Util::Code.new(:cid, '183762', 'DE'))
+        existing.add_part(Drugs::Part.new)
+        substance1 = Drugs::Substance.new
+        substance1.name.de = 'Amantadin'
+        active_agent = Drugs::ActiveAgent.new(substance1, 200)
+        substance2 = Drugs::Substance.new
+        substance2.name.de = 'Amantadini sulfas'
+        equivalence = Drugs::ActiveAgent.new(substance2, nil)
+        active_agent.chemical_equivalence = equivalence
+        composition = Drugs::Composition.new
+        composition.add_active_agent(active_agent)
+        part = Drugs::Part.new
+        part.composition = composition
+        existing.add_part(part)
+        existing.save
+        sequence = Drugs::Sequence.new
+        sequence.add_composition(composition)
+        product = Drugs::Product.new
+        existing.sequence = sequence
+        sequence.product = product
+        input = open(@path)
+        assert_nil(existing.code(:zuzahlungsbefreit))
+        @import.import(input)
+        assert_equal(1, Drugs::Product.instances.size)
+        assert_equal([product], Drugs::Product.instances)
+        assert_equal(atc, product.atc)
+        assert_equal([product], atc.products)
+        assert_equal(1, product.sequences.size)
+        sequence = product.sequences.first
+        assert_equal(1, sequence.compositions.size)
+        composition = sequence.compositions.first
+        assert_equal(1, composition.active_agents.size)
+        agent1 = composition.active_agents.at(0)
+        assert_equal(active_agent, agent1)
+        assert_equal(Drugs::Dose.new(200, 'mg'), agent1.dose)
+        equ = agent1.chemical_equivalence
+        assert_instance_of(Drugs::ActiveAgent, equ)
+        assert_equal('Amantadin sulfat', equ.substance.name.de)
+        assert_equal(Drugs::Dose.new(100, 'mg'), equ.dose)
+        code = existing.code(:zuzahlungsbefreit)
+        assert_instance_of(Util::Code, code)
+        assert_equal(true, code.value)
+
+        # do it again, nothing should change
+        input = open(@path)
+        @import.import(input)
+        assert_equal(1, Drugs::Product.instances.size)
+        assert_equal([product], Drugs::Product.instances)
+        assert_equal(atc, product.atc)
+        assert_equal([product], atc.products)
+        assert_equal(1, product.sequences.size)
+        sequence = product.sequences.first
+        assert_equal(1, sequence.compositions.size)
+        composition = sequence.compositions.first
+        assert_equal(1, composition.active_agents.size)
+        agent1 = composition.active_agents.at(0)
+        assert_equal(active_agent, agent1)
+        assert_equal(Drugs::Dose.new(200, 'mg'), agent1.dose)
+        equ = agent1.chemical_equivalence
+        assert_instance_of(Drugs::ActiveAgent, equ)
+        assert_equal('Amantadin sulfat', equ.substance.name.de)
+        assert_equal(Drugs::Dose.new(100, 'mg'), equ.dose)
+        code = existing.code(:zuzahlungsbefreit)
+        assert_instance_of(Util::Code, code)
+        assert_equal(true, code.value)
+      end
+      def test_postprocess
+        product = Drugs::Product.new
+        product.name.de = 'Product 100% Company'
+        product.save
+        company = Business::Company.new
+        company.name.de = 'Company AG'
+        company.save
+        @import.postprocess
+        assert_equal(company, product.company)
+      end
+      def test_postprocess__comp
+        product = Drugs::Product.new
+        product.name.de = 'Product 100% Producer Comp'
+        product.save
+        company = Business::Company.new
+        company.name.de = 'Producer AG'
+        company.save
+        @import.postprocess
+        assert_equal(company, product.company)
+      end
+      def test_postprocess__search
+        product = Drugs::Product.new
+        product.name.de = 'Product 100% Manu'
+        product.save
+        company = Business::Company.new
+        company.name.de = 'Manufacturer AG'
+        company.save
+        @import.postprocess
+        assert_equal(company, product.company)
       end
     end
   end

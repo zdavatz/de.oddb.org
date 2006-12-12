@@ -47,7 +47,8 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :no                       => 'Nein',
       :no_active_agents         => 'Keine Wirkstoffe in der DB',
       :oddb_version             => 'Commit-ID',
-      :package                  => 'Packungsgrösse und Wirkstoffe',
+      :package                  => 'Details',
+      :package_and_substances   => 'Packungsgrösse und Wirkstoffe',
       :parts                    => 'Teilpackungen',
       :price_festbetrag         => 'Festbetrag',
       :price_public             => 'Publikumspreis',
@@ -85,6 +86,7 @@ studies was needed. At the same symposium the Drug Utilization Research
 Group (DURG) was established and tasked with the development of
 internationally applicable methods for drug utilization research...
       EOS
+      # rcov needs a comment between two here-documents
       :tt_code_festbetragsstufe => <<-EOS,
 Gruppen "vergleichbarer" Arzneimittel können nach unterschiedlichen
 Kriterien gebildet werden, deshalb werden drei Stufen der Vergleich-
@@ -97,6 +99,7 @@ Festbetragsgruppen der Stufe 3 werden aus Arzneimitteln gebildet,
 die nicht hinsichtlich ihrer Wirkstoffe, aber hinsichtlich ihrer
 therapeutischen Wirkung vergleichbar sind...
       EOS
+      # rcov needs a comment between two here-documents
       :tt_code_zuzahlungsbefreit     => <<-EOS,
 Zuzahlungsbefreite Arzneimittel:
 
@@ -112,8 +115,8 @@ gesetzlichen Zuzahlung nach § 31 Abs. 3 Satz 1 SGB V befreit.
 Quelle: 
       EOS
       :tt_company               => 'Der Hersteller oder Zulassungsinhaber des Produkts',
-      :tt_doses                 => 'Die Stärke bezieht sich auf Darreichungsform-Einheit (Tablette, Zäpfchen, Sirup, etc). Siehe auch: ',
-      :tt_doses_link            => 'Darreichungsformen',
+      :tt_active_agents         => 'Die Stärke bezieht sich auf Darreichungsform-Einheit (Tablette, Zäpfchen, Sirup, etc). Siehe auch: ',
+      :tt_active_agents_link    => 'Darreichungsformen',
       :tt_festbetrag            => <<-EOS,
 Festbetrag: DIMDI hat die Aufgabe, die von den Spitzenverbänden der
 Krankenkassen erstellten und veröffentlichten Übersichten über

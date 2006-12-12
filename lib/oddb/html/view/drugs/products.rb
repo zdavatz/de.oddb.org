@@ -2,18 +2,35 @@
 # Html::View::Drugs::Products -- de.oddb.org -- 07.12.2006 -- hwyss@ywesee.com
 
 require 'oddb/html/view/alpha_header'
+require 'oddb/html/view/list'
 require 'oddb/html/view/offset_header'
 require 'oddb/html/view/search'
-require 'oddb/html/view/drugs/result'
 require 'oddb/html/view/drugs/template'
 
 module ODDB
   module Html
     module View
       module Drugs
-class ProductsList < Packages
+module ProductMethods 
+  def atc(model)
+    if(atc = model.atc)
+      span = HtmlGrid::Span.new(model, @session, self)
+      span.value = atc.code
+      span.css_id = "atc_#@list_index"
+      span.dojo_title = atc.name.send(@session.language)
+      span
+    end
+  end
+  def company(model)
+    if(company = model.company)
+      company.name.send(@session.language)
+    end
+  end
+end
+class ProductsList < View::List
   include View::AlphaHeader
   include View::OffsetHeader
+  include ProductMethods
   COMPONENTS = {
     [0,0] => :product,
     [1,0] => :atc,
@@ -31,6 +48,9 @@ class ProductsList < Packages
     link.value = name
     link.href = @lookandfeel._event_url(:search, :query => name)
     link
+  end
+  def query_key
+    :range
   end
 end
 class ProductsComposite < HtmlGrid::DivComposite

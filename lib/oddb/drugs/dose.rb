@@ -64,7 +64,8 @@ module ODDB
         @val.to_i
       end
       def to_s
-        @not_normalized or begin
+        @not_normalized or 
+        begin
           val = if(@val.is_a? Float)
             sprintf('%.3f', @val).gsub(/0+$/, '')
           else

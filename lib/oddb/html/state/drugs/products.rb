@@ -15,10 +15,11 @@ class Products < Drugs::Global
   VIEW = View::Drugs::Products
   def init
     sort_by(:product)
+    sort
   end
   def _products(query)
     if(@model.query == query)
-      self
+      sort
     else
       super
     end

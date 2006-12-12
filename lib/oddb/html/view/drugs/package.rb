@@ -48,8 +48,11 @@ class Part < HtmlGrid::List
     super(model.active_agents, offset)
   end
   def compose_header(offset=[0,0])
-    @grid.add([@model.size, ' ', @model.unit, ' ', @model.quantity], 
-              *offset)
+    part = [@model.size, ' ', @model.unit]
+    if(quantity = @model.quantity)
+      part.push(' x ', quantity)
+    end
+    @grid.add(part, *offset)
     #resolve_offset(offset, [0,1])
     offset
   end
@@ -76,14 +79,28 @@ class PackageInnerComposite < HtmlGrid::Composite
   DEFAULT_CLASS = HtmlGrid::Value
   def atc(model)
     if(atc = model.atc)
-      [atc.code, '(', atc.name, ')']
+      span = HtmlGrid::Span.new(model, @session, self)
+      span.value = [atc.code]
+      if(name = atc.name)
+        span.value.push('(', name, ')')
+      end
+      ddds = atc.ddds
+      unless(ddds.empty?)
+        span.css_id = "atc"
+        span.dojo_title = ddds.join("\n")
+      end
+      span
     end
   end
   def code_pzn(model)
     model.code(:cid, 'DE')
   end
   def code_zuzahlungsbefreit(model)
-    @lookandfeel.lookup(model.code(:zuzahlungsbefreit) ? :yes : :no)
+    if((code = model.code(:zuzahlungsbefreit)) && code.value)
+      @lookandfeel.lookup(:yes)
+    else
+      @lookandfeel.lookup(:no)
+    end
   end
   def company(model)
     if(company = model.company)
@@ -91,13 +108,17 @@ class PackageInnerComposite < HtmlGrid::Composite
     end
   end
   def equivalence_factor(model)
-    link = HtmlGrid::Link.new(:equivalence_factor, model, @session, self)
-    link.href = "http://www.gesetze-im-internet.de/fgnv/anlage_5.html"
-    link.value = model.parts.collect { |part| 
-      part.composition.equivalence_factor 
+    factors = model.parts.collect { |part| 
+      (comp = part.composition) && comp.equivalence_factor
     }.compact
-    link.label = true
-    link
+    unless(factors.empty?)
+      link = HtmlGrid::Link.new(:equivalence_factor, model, 
+                                @session, self)
+      link.href = "http://www.gesetze-im-internet.de/fgnv/anlage_5.html"
+      link.value = factors
+      link.label = true
+      link
+    end
   end
   def price_festbetrag(model)
     model.price(:festbetrag)
@@ -146,7 +167,7 @@ class PackageComposite < HtmlGrid::DivComposite
     name
   end
   def parts(model)
-    key = model.parts.size > 1 ? :parts : :package
+    key = model.parts.size > 1 ? :parts : :package_and_substances
     @lookandfeel.lookup(key)
   end
   def snapback(model)

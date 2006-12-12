@@ -13,24 +13,18 @@ class Result < Drugs::Global
   include Util::Sort
   VIEW = View::Drugs::Result
   def init
-    if(@session.user_input(:sortvalue))
-      sort
-    else
-      sort_by(:price_public)
-      sort_by(:size)
-      sort_by(:doses)
-      sort_by(:product)
-    end
+    sort_by(:price_public)
+    sort_by(:size)
+    sort_by(:active_agents)
+    sort_by(:product)
+    sort
   end
   def direct_event
     [:search, :query, @model.query]
   end
   def _search(query)
     if(@model.query == query)
-      if(@session.user_input(:sortvalue))
-        sort
-      end
-      self
+      sort
     else
       super
     end
@@ -39,6 +33,9 @@ class Result < Drugs::Global
     case key
     when :atc
       Proc.new { |pac| (atc = pac.atc) && atc.code || '' }
+    when :code_festbetragsstufe, :code_zuzahlungsbefreit
+      Proc.new { |pac| 
+        (code = pac.code(key)) && code.value || '' }
     when :company, :product
       Proc.new { |pac| 
         (multilingual = pac.send(key)) \
@@ -46,9 +43,6 @@ class Result < Drugs::Global
     when :festbetrag, :price_public
       nilval = ODDB::Util::Money.new(0)
       Proc.new { |pac| pac.price(key) || nilval }
-    when :festbetragsstufe, :zuzahlungsbefreit
-      Proc.new { |pac| 
-        (code = pac.code(key)) && code.value || '' }
     when :price_difference
       nilval = ODDB::Util::Money.new(-9999999)
       Proc.new { |pac| 

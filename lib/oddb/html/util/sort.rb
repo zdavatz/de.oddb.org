@@ -6,7 +6,9 @@ module ODDB
     module Util
 module Sort
   def sort
-    sort_by(@session.user_input(:sortvalue).to_sym)
+    if(key = @session.user_input(:sortvalue))
+      sort_by(key.to_sym)
+    end
     self
   end
   def sort_by(key)
