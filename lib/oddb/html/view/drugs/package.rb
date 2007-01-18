@@ -89,6 +89,7 @@ class PackageInnerComposite < HtmlGrid::Composite
         span.css_id = "atc"
         span.dojo_title = ddds.join("\n")
       end
+			span.label = true
       span
     end
   end
