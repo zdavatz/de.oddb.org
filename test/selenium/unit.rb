@@ -10,7 +10,7 @@ if(pid = Kernel.fork)
   }
 else
   path = File.expand_path('selenium-server.jar', File.dirname(__FILE__))
-  command = "java -jar #{path} &> /dev/null"
+  command = "java -jar #{path} "#&> /dev/null"
   exec(command) 
 end
 
@@ -62,6 +62,7 @@ module ODDB
   module Selenium
 module TestCase
   include FlexMock::TestCase
+  include SeleniumHelper
   def setup
     ODDB.logger = Logger.new($stdout)
     ODDB.logger.level = Logger::DEBUG

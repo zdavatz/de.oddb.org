@@ -34,6 +34,7 @@ module ODDB
         assert_equal(false, [code1].include?(code3))
         assert_equal(false, [code1].include?(code4))
         assert_equal(false, [code1].include?(code5))
+        assert_equal(true, code5 == 245)
       end
       def test_format
         code1 = Code.new(:registration, 245, 'ch')
@@ -65,6 +66,8 @@ module ODDB
         code = Code.new(:registration, 245, 'ch')
         assert_equal(true, [code1].include?(code))
         assert_equal(false, [code2].include?(code))
+        assert_equal(true, {code1 => true}.include?(code))
+        assert_equal(false, {code2 => true}.include?(code))
       end
     end
   end

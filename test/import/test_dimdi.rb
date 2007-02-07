@@ -7,6 +7,7 @@ $: << File.expand_path('../../lib', File.dirname(__FILE__))
 require 'test/unit'
 require 'oddb/import/dimdi'
 require 'stub/model'
+require 'flexmock'
 
 module ODDB
   module Import
@@ -69,7 +70,8 @@ module ODDB
         tab.description.de = "Tabletten"
         tab.save
         input = open(@path)
-        @import.import(input)
+        report = @import.import(input)
+        assert_instance_of(Array, report)
         assert_equal(11, Drugs::Product.instances.size)
         expected = [ u("Piroxicam Ratio"), u("Amoxicillin Ratio"),
           u("Buscopan Aca"), u("Aquaphor/Il Aca"), u("Aspirin Aca"),
@@ -123,7 +125,8 @@ module ODDB
 
         # do it again, nothing should change
         input = open(@path)
-        @import.import(input)
+        report = @import.import(input)
+        assert_instance_of(Array, report)
         assert_equal(11, Drugs::Product.instances.size)
         names = Drugs::Product.instances.collect { |inst|
           inst.name.de
@@ -181,7 +184,8 @@ module ODDB
       def test_import
         assert_equal([], Drugs::Substance.instances)
         input = open(@path)
-        @import.import(input)
+        report = @import.import(input)
+        assert_instance_of(Array, report)
         assert_equal(7, Drugs::Substance.instances.size)
         expected = [u("Acebutolol"), u("Aceclofenac"), u("Atenolol"),
           u("Chlort"), u("Hydralazin"), u("Acemetacin"),
@@ -192,7 +196,8 @@ module ODDB
         assert_equal(expected, names)
         # do it again, nothing should change
         input = open(@path)
-        @import.import(input)
+        report = @import.import(input)
+        assert_instance_of(Array, report)
         assert_equal(7, Drugs::Substance.instances.size)
         names = Drugs::Substance.instances.collect { |inst|
           inst.name.de
@@ -209,6 +214,7 @@ module ODDB
       end
     end
     class TestDimdiZuzahlungsBefreiung < Test::Unit::TestCase
+      include FlexMock::TestCase
       def setup
         Drugs::Package.instances.clear
         Drugs::Product.instances.clear
@@ -232,7 +238,8 @@ module ODDB
         sequence.product = product
         input = open(@path)
         assert_nil(existing.code(:zuzahlungsbefreit))
-        @import.import(input)
+        report = @import.import(input)
+        assert_instance_of(Array, report)
         assert_equal(1, Drugs::Product.instances.size)
         assert_equal([product], Drugs::Product.instances)
         assert_equal(atc, product.atc)
@@ -251,10 +258,13 @@ module ODDB
         code = existing.code(:zuzahlungsbefreit)
         assert_instance_of(Util::Code, code)
         assert_equal(true, code.value)
+        confirmed = @import.instance_variable_get('@confirmed_pzns')
+        assert_equal(1, confirmed.size)
 
         # do it again, nothing should change
         input = open(@path)
-        @import.import(input)
+        report = @import.import(input)
+        assert_instance_of(Array, report)
         assert_equal(1, Drugs::Product.instances.size)
         assert_equal([product], Drugs::Product.instances)
         assert_equal(atc, product.atc)
@@ -272,6 +282,8 @@ module ODDB
         assert_equal(Drugs::Dose.new(20, 'mg'), agent2.dose)
         assert_instance_of(Util::Code, code)
         assert_equal(true, code.value)
+        confirmed = @import.instance_variable_get('@confirmed_pzns')
+        assert_equal(1, confirmed.size)
       end
       def test_import__ml
         atc = Drugs::Atc.new('J01CA04')
@@ -287,7 +299,8 @@ module ODDB
         sequence.product = product
         input = open(@path)
         assert_nil(existing.code(:zuzahlungsbefreit))
-        @import.import(input)
+        report = @import.import(input)
+        assert_instance_of(Array, report)
         assert_equal(1, Drugs::Product.instances.size)
         assert_equal([product], Drugs::Product.instances)
         assert_equal(atc, product.atc)
@@ -310,7 +323,8 @@ module ODDB
 
         # do it again, nothing should change
         input = open(@path)
-        @import.import(input)
+        report = @import.import(input)
+        assert_instance_of(Array, report)
         assert_equal(1, Drugs::Product.instances.size)
         assert_equal([product], Drugs::Product.instances)
         assert_equal(atc, product.atc)
@@ -358,7 +372,8 @@ module ODDB
         sequence.product = product
         input = open(@path)
         assert_nil(existing.code(:zuzahlungsbefreit))
-        @import.import(input)
+        report = @import.import(input)
+        assert_instance_of(Array, report)
         assert_equal(1, Drugs::Product.instances.size)
         assert_equal([product], Drugs::Product.instances)
         assert_equal(atc, product.atc)
@@ -381,7 +396,8 @@ module ODDB
 
         # do it again, nothing should change
         input = open(@path)
-        @import.import(input)
+        report = @import.import(input)
+        assert_instance_of(Array, report)
         assert_equal(1, Drugs::Product.instances.size)
         assert_equal([product], Drugs::Product.instances)
         assert_equal(atc, product.atc)
@@ -431,6 +447,25 @@ module ODDB
         company.save
         @import.postprocess
         assert_equal(company, product.company)
+      end
+      def test_postprocess__prune_packages
+        pzn1 = Util::Code.new(:pzn, '12345', 'DE')
+        zzb1 = Util::Code.new(:zuzahlungsbefreit, 'true', 'DE')
+        pac1 = Drugs::Package.new
+        pac1.add_code(pzn1)
+        pac1.add_code(zzb1)
+        pac1.save
+        pzn2 = Util::Code.new(:pzn, '54321', 'DE')
+        zzb2 = Util::Code.new(:zuzahlungsbefreit, 'true', 'DE')
+        pac2 = Drugs::Package.new
+        pac2.add_code(pzn2)
+        pac2.add_code(zzb2)
+        pac2.save
+        @import.instance_variable_set('@confirmed_pzns', 
+                                     pac1.code(:pzn) => true)
+        @import.postprocess
+        assert_equal('true', zzb1.value)
+        assert_equal(false, zzb2.value)
       end
     end
   end

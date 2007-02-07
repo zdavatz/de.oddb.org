@@ -7,8 +7,10 @@ require 'encoding/character/utf-8'
 module ODDB
   module Import
     class Excel
+      attr_reader :report
       def initialize
         @skip_rows = 1
+        @report = []
       end
       def capitalize_all(str)
         ## benchmarked fastest against an append (<<) solution
@@ -30,6 +32,7 @@ module ODDB
         workbook = parse(io)
         import_worksheet(workbook.worksheet(0))
         postprocess()
+        report
       end
       def import_worksheet(worksheet)
         worksheet.each(@skip_rows) { |row|

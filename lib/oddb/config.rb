@@ -11,7 +11,9 @@ module ODDB
     '/etc/oddb/oddb.yml',
   ]
   defaults = {
+    'admins'            => [],
     'config'			      => default_config_files,
+    'data_dir'          => File.expand_path('../data', default_dir),
     'db_name'           => 'oddb',
     'db_user'           => 'oddb',
     'db_auth'           => 'oddb',
@@ -19,11 +21,16 @@ module ODDB
     'http_server'       => 'http://localhost',
     'log_file'          => STDERR,
     'log_level'         => 'INFO',
+    'mail_charset'      => 'utf8',
+    'mail_from'         => 'update@oddb.org',
+    'oddb_dir'          => File.expand_path('..', default_dir),
     'persistence'       => 'odba',
+    'run_updater'       => true,
     'server_url'        => 'druby://localhost:11000',
     'session_timeout'   => 3600,
-    'oddb_dir'          => File.expand_path('..', default_dir),
-    'data_dir'          => File.expand_path('../data', default_dir),
+    'smtp_from'         => 'update@oddb.org',
+    'smtp_server'       => 'localhost',
+    'update_hour'       => 2,
   }
 
   config = RCLConf::RCLConf.new(ARGV, defaults)

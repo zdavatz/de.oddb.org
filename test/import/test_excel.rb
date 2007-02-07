@@ -26,7 +26,8 @@ module ODDB
         assert_equal(:numeric, worksheet.cell(1,5).type)
         assert_equal(20, @import.cell(worksheet.row(1), 5))
         assert_equal(:date, worksheet.cell(1,13).type)
-        assert_equal(Date.new(2006,7), @import.cell(worksheet.row(1), 13))
+        assert_equal(Date.new(2006,7), 
+                     @import.cell(worksheet.row(1), 13))
       end
     end
   end

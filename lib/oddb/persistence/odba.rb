@@ -2,6 +2,7 @@
 # Persistence::ODBA -- de.oddb.org -- 01.09.2006 -- hwyss@ywesee.com
 
 require 'oddb/config'
+require 'odba'
 require 'odba/connection_pool'
 require 'odba/drbwrapper'
 

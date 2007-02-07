@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# ODDB -- bbmb.ch -- 27.10.2006 -- hwyss@ywesee.com
+# ODDB -- de.oddb.org -- 27.10.2006 -- hwyss@ywesee.com
 
 module ODDB
   ODDB_VERSION =

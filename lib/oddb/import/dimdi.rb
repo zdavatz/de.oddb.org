@@ -19,25 +19,58 @@ require 'oddb/drugs/unit'
 
 module ODDB
   module Import
-    class DimdiGalenicForm < Excel
+    class DatedExcel < Excel
+      def initialize(date = Date.today)
+        super()
+        @date = date
+      end
+    end
+    class DimdiGalenicForm < DatedExcel
+      def initialize(date = Date.today)
+        super
+        @count = 0
+        @created = 0
+        @existing = 0
+      end
       def import_row(row)
+        @count += 1
         abbr = cell(row, 0)
         description = capitalize_all(cell(row, 1))
         galenic_form = Drugs::GalenicForm.find_by_code(:value => abbr, 
                                                        :type => "galenic_form",
                                                        :country => 'DE')
         galenic_form ||= Drugs::GalenicForm.find_by_description(description)
-        unless(galenic_form)
+        if(galenic_form)
+          @existing += 1
+        else
+          @created += 1
           galenic_form = Drugs::GalenicForm.new
           galenic_form.description.de = description
         end
         galenic_form.add_code(Util::Code.new("galenic_form", 
-                                             abbr, 'DE'))
+                                             abbr, 'DE', @date))
         galenic_form.save
         galenic_form
       end
+      def report
+        [
+          sprintf("Imported %3i Galenic Forms per %s:", 
+                  @count, @date.strftime("%d.%m.%Y")),
+          sprintf("Visited  %3i existing", @existing),
+          sprintf("Created  %3i new", @created),
+        ]
+      end
     end
-    class DimdiProduct < Excel
+    class DimdiProduct < DatedExcel
+      def initialize(date = Date.today)
+        super
+        @count = 0
+        @created = 0
+        @created_sequences = 0
+        @created_substances = 0
+        @existing = 0
+        @existing_sequences = 0
+      end
       def assign_substance_group(sub, groupname)
         if(sub.group.nil? \
            && (group = import_substance_group(groupname)))
@@ -46,9 +79,13 @@ module ODDB
         end
       end
       def import_row(row)
+        @count += 1
         name = capitalize_all(cell(row, 0))
         product = Drugs::Product.find_by_name(name)
-        unless(product)
+        if(product)
+          @existing += 1
+        else
+          @created += 1
           product = Drugs::Product.new
           product.name.de = name
         end
@@ -57,7 +94,8 @@ module ODDB
         if(code = product.code(:festbetragsgruppe))
           code.value = fpgroup
         else
-          code = Util::Code.new(:festbetragsgruppe, fpgroup, 'DE')
+          code = Util::Code.new(:festbetragsgruppe, fpgroup, 
+                                'DE', @date)
           product.add_code(code)
         end
         atc_name = cell(row, 2)
@@ -102,11 +140,11 @@ module ODDB
           if(code = package.code(:cid))
             code.value = pzn
           else
-            package.add_code(Util::Code.new(:cid, pzn, 'DE'))
+            package.add_code(Util::Code.new(:cid, pzn, 'DE', @date))
           end
         end
         if(level = cell(row, 12))
-          date = cell(row, 13) || Date.today
+          date = cell(row, 13) || @date
           if(code = package.code(:festbetragsstufe))
             code.value = level.to_i, date
           else
@@ -138,7 +176,10 @@ module ODDB
           seq.substances == substances \
             && (doses.empty? || doses.inject { |a, b| a + b } == dose)
         } 
-        if(sequence.nil?)
+        if(sequence)
+          @existing_sequences += 1
+        else
+          @created_sequences += 1
           sequence = Drugs::Sequence.new
           composition = Drugs::Composition.new
           sequence.add_composition(composition)
@@ -192,6 +233,7 @@ module ODDB
             unless(assumed_name.empty?)
               sub = Drugs::Substance.find_by_name(assumed_name)
               if(sub.nil?)
+                @created_substances += 1
                 sub = Drugs::Substance.new
                 sub.name.de = assumed_name
                 sub.save
@@ -217,9 +259,31 @@ module ODDB
           group
         end
       end
+      def report
+        [
+          sprintf("Imported %3i Products per %s:", 
+                  @count, @date.strftime("%d.%m.%Y")),
+          sprintf("Visited  %3i existing Products", @existing),
+          sprintf("Visited  %3i existing Sequences", 
+                  @existing_sequences),
+          sprintf("Created  %3i new Products", @created),
+          sprintf("Created  %3i new Sequences", @created_sequences),
+          sprintf("Created  %3i new Substances from Combinations",
+                  @created_substances),
+        ]
+      end
     end
-    class DimdiSubstance < Excel
+    class DimdiSubstance < DatedExcel
+      def initialize(date = Date.today)
+        super
+        @combi_created = 0
+        @combi_existing = 0
+        @count = 0
+        @created = 0
+        @existing = 0
+      end
       def import_row(row)
+        @count += 1
         abbr = cell(row, 0)
         names = capitalize_all(cell(row, 1)).split('+')
         if(names.size == 1)
@@ -233,23 +297,31 @@ module ODDB
                       :type => "substance", :country => "DE")
         substance ||= Drugs::Substance.find_by_name(name)
         unsaved = false
-        unless(substance)
+        if(substance)
+          @existing += 1
+        else
+          @created += 1
           substance = Drugs::Substance.new
           substance.name.de = name
           unsaved = true
         end
         unless(substance.code('substance', 'DE'))
-          substance.add_code(Util::Code.new("substance", abbr, 'DE'))
+          substance.add_code(Util::Code.new("substance", abbr, 
+                                            'DE', @date))
           unsaved = true
         end
         substance.save if(unsaved)
         substance
       end
       def import_substances(abbr, names)
-        code = Util::Code.new('substance-combination', abbr, 'DE')
+        code = Util::Code.new('substance-combination', abbr, 
+                              'DE', @date)
         names.collect { |name|
           substance = Drugs::Substance.find_by_name(name)
-          unless(substance)
+          if(substance)
+            @combi_existing += 1
+          else
+            @combi_created += 1
             substance = Drugs::Substance.new
             substance.name.de = name
           end
@@ -258,18 +330,50 @@ module ODDB
           substance
         }
       end
+      def report
+        [
+          sprintf("Imported %3i Substances per %s:", 
+                  @count, @date.strftime("%d.%m.%Y")),
+          sprintf("Visited  %3i existing", @existing),
+          sprintf("Visited  %3i existing in Combinations", 
+                  @combi_existing),
+          sprintf("Created  %3i new", @created),
+          sprintf("Created  %3i new from Combinations", @combi_created),
+        ]
+      end
     end
     class DimdiZuzahlungsBefreiung < Excel
+      def initialize
+        super
+        @assigned_companies = 0
+        @confirmed_pzns = {}
+        @count = 0
+        @created = 0
+        @created_companies = 0
+        @created_substances = 0
+        @deleted = 0
+        @existing = 0
+        @existing_companies = 0
+        @existing_substances = 0
+      end
       def import_row(row)
+        @count += 1
         ## for now: ignore packages that can not be linked to an 
         #  existing product by PZN
         pzn = u(cell(row, 1).to_i.to_s)
         if(package = Drugs::Package.find_by_code(:type => 'cid', 
                                                  :value => pzn, 
                                                  :country => 'DE'))
+          @confirmed_pzns.store(package.code(:pzn), true)
           if(code = package.code(:zuzahlungsbefreit))
+            if(code.value)
+              @existing += 1
+            else
+              @created += 1
+            end
             code.value = true
           else
+            @created += 1
             code = Util::Code.new(:zuzahlungsbefreit, true, 'DE')
             package.add_code(code)
           end
@@ -340,25 +444,43 @@ module ODDB
       def import_company(row)
         if(cname = cell(row, 6))
           cname = capitalize_all(cname)
-          Business::Company.find_by_name(cname) or begin
+          company = Business::Company.find_by_name(cname)
+          if(company)
+            @existing_companies += 1
+          else
+            @created_companies += 1
             company = Business::Company.new
             company.name.de = cname
             company.save
-            company
           end
+          company
         end
       end
       def import_substance(substance_name)
         if(substance_name)
-          Drugs::Substance.find_by_name(substance_name) or begin
+          substance = Drugs::Substance.find_by_name(substance_name)
+          if(substance)
+            @existing_substances += 1
+          else
+            @created_substances += 1
             substance = Drugs::Substance.new
             substance.name.de = substance_name
             substance.save
-            substance
           end
+          substance
         end
       end
       def postprocess
+        Drugs::Package.search_by_code(:type => 'zuzahlungsbefreit', 
+                                      :value => 'true', 
+                                      :country => 'DE').each { |package|
+          pzn = package.code(:pzn)
+          unless(@confirmed_pzns.include?(pzn))
+            @deleted += 1
+            package.code(:zuzahlungsbefreit).value = false
+            package.save
+          end
+        }
         Drugs::Product.all { |product|
           unless(product.company)
             keys = product.name.de.split
@@ -374,11 +496,27 @@ module ODDB
               end
             end
             if(company)
+              @assigned_companies += 1
               product.company = company
               product.save
             end
           end
         }
+      end
+      def report
+        [
+          sprintf("Imported %3i FB-Entries on %s:", 
+                  @count, Date.today.strftime("%d.%m.%Y")),
+          sprintf("Visited  %3i existing FB-Entries", @existing),
+          sprintf("Visited  %3i existing Companies", 
+                  @existing_companies),
+          sprintf("Visited  %3i existing Substances", 
+                  @existing_substances),
+          sprintf("Created  %3i new FB-Entries", @created),
+          sprintf("Created  %3i new Companies", @created_companies),
+          sprintf("Created  %3i new Substances", @created_substances),
+          sprintf("Assigned %3i Companies", @assigned_companies),
+        ]
       end
     end
   end

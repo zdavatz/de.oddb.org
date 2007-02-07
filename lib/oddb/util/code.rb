@@ -60,7 +60,7 @@ module ODDB
             && other[:value] == value \
             && other[:country] == @country
         else
-          false
+          value == other || value.to_s == other
         end
       end
       alias :eql? :==
