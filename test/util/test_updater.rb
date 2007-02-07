@@ -13,10 +13,11 @@ module ODDB
       include FlexMock::TestCase
       def setup
         @config = flexstub(ODDB.config)
+        @var = File.expand_path('var', File.dirname(__FILE__))
         @data_dir = File.expand_path('data', File.dirname(__FILE__))
-        @xls_dir = File.join(@data_dir, 'xls')
+        @xls_dir = File.join(@var, 'xls')
         FileUtils.rm_r(@xls_dir) if(File.exist?(@xls_dir))
-        @config.should_receive(:data_dir).and_return(@data_dir)
+        @config.should_receive(:var).and_return(@var)
         @updater = Updater
       end
       def test_run

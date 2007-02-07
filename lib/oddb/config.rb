@@ -31,6 +31,7 @@ module ODDB
     'smtp_from'         => 'update@oddb.org',
     'smtp_server'       => 'localhost',
     'update_hour'       => 2,
+    'var'               => File.expand_path('../var', default_dir),
   }
 
   config = RCLConf::RCLConf.new(ARGV, defaults)

@@ -20,7 +20,7 @@ module ODDB
       end
       def Updater.download_from_dimdi(file, &block)
         url = File.join(DIMDI_PATH, file)
-        xls_dir = File.join(ODDB.config.data_dir, 'xls')
+        xls_dir = File.join(ODDB.config.var, 'xls')
         FileUtils.mkdir_p(xls_dir)
         dest = File.join(xls_dir, file)
         unless(File.exist?(dest))
@@ -33,14 +33,13 @@ module ODDB
           }
         end
       rescue Exception => err
-        #
       end
       def Updater.download_latest(url, today, &block)
         file = File.basename(url)
-        xls_dir = File.join(ODDB.config.data_dir, 'xls')
+        xls_dir = File.join(ODDB.config.var, 'xls')
         FileUtils.mkdir_p(xls_dir)
         dest = File.join(xls_dir, file)
-        archive = File.join(ODDB.config.data_dir, 'xls', 
+        archive = File.join(ODDB.config.var, 'xls', 
                     sprintf("%s-%s", today.strftime("%Y.%m.%d"), file))
         content = open(url).read
         if(!File.exist?(dest) || content.size != File.size(dest))
@@ -53,7 +52,6 @@ module ODDB
           }
         end
       rescue Exception
-        #
       end
       def Updater.import_dimdi_galenic_forms(date)
         file = date.strftime("darform_%d%m%y.xls")
