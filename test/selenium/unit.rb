@@ -10,7 +10,7 @@ if(pid = Kernel.fork)
   }
 else
   path = File.expand_path('selenium-server.jar', File.dirname(__FILE__))
-  command = "java -jar #{path} "#&> /dev/null"
+  command = "java -jar #{path} &> /dev/null"
   exec(command) 
 end
 

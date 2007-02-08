@@ -418,6 +418,26 @@ module ODDB
         assert_instance_of(Util::Code, code)
         assert_equal(true, code.value)
       end
+      def test_import_active_agent
+        sequence = Drugs::Sequence.new
+        composition = Drugs::Composition.new
+        sequence.add_composition(composition)
+        substance = Drugs::Substance.new
+        substance.name.de = u"Fluvoxamin-Hydrogenmaleat"
+        active_agent = Drugs::ActiveAgent.new(substance, 50)
+        composition.add_active_agent(active_agent)
+        row = [ 
+         "Fluvoxamin", "0227488", "FLUVOHEXAL 50MG FILMTABL",
+         "Filmtabletten", 20, "St", "HEXAL AG", "15.21", 
+         "Fluvoxamin hydrogenmaleat", 50, "mg",
+        ].collect { |data|
+          mock = flexmock(data.to_s)
+          mock.should_receive(:to_s).and_return(data.to_s)
+          mock
+        }
+        @import.import_active_agent(sequence, row, 8)
+        assert_equal([active_agent], composition.active_agents)
+      end
       def test_postprocess
         product = Drugs::Product.new
         product.name.de = 'Product 100% Company'

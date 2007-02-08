@@ -406,16 +406,28 @@ module ODDB
       end
       def import_active_agent(sequence, row, offset)
         name = cell(row, offset)
-        if(substance = import_substance(name))
+        sane = sanitize_substance_name(name) 
+        composition = sequence.compositions.first
+        dose = Drugs::Dose.new(cell(row, offset + 1), 
+                               cell(row, offset + 2))
+        ## check for slightly different names
+        if(composition \
+          && (agent = composition.active_agents.find { |act|
+            act.dose == dose \
+              && act.substance.name.all.any? { |sub| 
+              sane = sanitize_substance_name(sub) 
+            }
+          }))
+          substance = agent.substance
+          substance.name.synonyms.push(name)
+          substance.save
+        elsif(substance = import_substance(name))
           ## for now: don't expect multiple compositions
-          composition = sequence.compositions.first
           if(composition.nil?)
             composition = Drugs::Composition.new
             sequence.add_composition(composition)
             sequence.save
           end
-          dose = Drugs::Dose.new(cell(row, offset + 1), 
-                                 cell(row, offset + 2))
           candidate_names = [ name[/^\S+/], name[/^[^-]+/] ].uniq
           agent = nil
           if(agent = composition.active_agent(substance))
@@ -517,6 +529,9 @@ module ODDB
           sprintf("Created  %3i new Substances", @created_substances),
           sprintf("Assigned %3i Companies", @assigned_companies),
         ]
+      end
+      def sanitize_substance_name(str)
+        str.to_s.downcase.gsub(/[^a-z]/, '')
       end
     end
   end
