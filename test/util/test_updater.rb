@@ -63,7 +63,7 @@ module ODDB
         uriparse.should_receive(:parse).with(zuzahlung)\
           .times(1).and_return(zuzahlung_uri)
         wirkkurz_import = flexmock('DimdiSubstance')
-        flexstub(Import::DimdiSubstance)\
+        flexstub(Import::Dimdi::Substance)\
           .should_receive(:new).with(Date.new(2006,10))\
           .and_return(wirkkurz_import)
         wirkkurz_import.should_receive(:import)\
@@ -73,7 +73,7 @@ module ODDB
           []
         }
         darform_import = flexmock('DimdiGalenicForm')
-        flexstub(Import::DimdiGalenicForm)\
+        flexstub(Import::Dimdi::GalenicForm)\
           .should_receive(:new).and_return(darform_import)
         darform_import.should_receive(:import)\
           .times(1).and_return { |io|
@@ -82,7 +82,7 @@ module ODDB
           []
         }
         fbetrag_import = flexmock('DimdiProduct')
-        flexstub(Import::DimdiProduct)\
+        flexstub(Import::Dimdi::Product)\
           .should_receive(:new).and_return(fbetrag_import)
         fbetrag_import.should_receive(:import)\
           .times(1).and_return { |io|
@@ -91,7 +91,7 @@ module ODDB
           []
         }
         zuzahl_import = flexmock('DimdiZuzahlungsBefreiung')
-        flexstub(Import::DimdiZuzahlungsBefreiung)\
+        flexstub(Import::Dimdi::ZuzahlungsBefreiung)\
           .should_receive(:new).and_return(zuzahl_import)
         zuzahl_import.should_receive(:import)\
           .times(1).and_return { |io|
@@ -200,7 +200,7 @@ module ODDB
         uriparse.should_receive(:parse).with(zuzahlung)\
           .times(1).and_return(zuzahlung_uri)
         wirkkurz_import = flexmock('DimdiSubstance')
-        flexstub(Import::DimdiSubstance)\
+        flexstub(Import::Dimdi::Substance)\
           .should_receive(:new).with(Date.new(2006,10))\
           .and_return(wirkkurz_import)
         wirkkurz_import.should_receive(:import)\
@@ -210,7 +210,7 @@ module ODDB
           raise "import error"
         }
         darform_import = flexmock('DimdiGalenicForm')
-        flexstub(Import::DimdiGalenicForm)\
+        flexstub(Import::Dimdi::GalenicForm)\
           .should_receive(:new).and_return(darform_import)
         darform_import.should_receive(:import)\
           .times(1).and_return { |io|
@@ -219,7 +219,7 @@ module ODDB
           raise "import error"
         }
         fbetrag_import = flexmock('DimdiProduct')
-        flexstub(Import::DimdiProduct)\
+        flexstub(Import::Dimdi::Product)\
           .should_receive(:new).and_return(fbetrag_import)
         fbetrag_import.should_receive(:import)\
           .times(1).and_return { |io|
@@ -228,7 +228,7 @@ module ODDB
           raise "import error"
         }
         zuzahl_import = flexmock('DimdiZuzahlungsBefreiung')
-        flexstub(Import::DimdiZuzahlungsBefreiung)\
+        flexstub(Import::Dimdi::ZuzahlungsBefreiung)\
           .should_receive(:new).and_return(zuzahl_import)
         zuzahl_import.should_receive(:import)\
           .times(1).and_return { |io|
@@ -242,33 +242,6 @@ module ODDB
         assert(!File.exist?(File.join(@xls_dir, 'fb011006.xls')))
         assert(!File.exist?(File.join(@xls_dir, 
           "2006.10.06-liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls")))
-      end
-      def test_download_latest__only_once
-        today = Date.new(2006,10)
-        file = "liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls"
-        path = File.join(@xls_dir, file)
-        arch = File.join(@xls_dir, sprintf("2006.10.01-%s", file))
-        zuzahlung = "http://www.die-gesundheitsreform.de/presse/pressethemen/avwg/pdf/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls"
-        zuzahlung_uri = flexmock('Zuzahlungsbefreiung-URI')
-        zuzahlung_uri.should_receive(:open)\
-          .times(2).and_return { 
-          StringIO.new("download_latest-io-read")
-        }
-        uriparse = flexstub(URI)
-        uriparse.should_receive(:parse).with(zuzahlung)\
-          .times(2).and_return(zuzahlung_uri)
-        @updater.download_latest(zuzahlung, today) { |fh|
-          assert_equal('download_latest-io-read', fh.read)
-        }
-        assert(File.exist?(path))
-        assert(File.exist?(arch))
-        @updater.download_latest(zuzahlung, today) { |fh|
-          flunk("should not be called again")
-        }
-      end
-      def test_dimdi_current_date
-        path = File.join(@data_dir, 'html', 'dimdi_index.html')
-        assert_equal(Date.new(2007), @updater.dimdi_current_date(path))
       end
     end
   end
