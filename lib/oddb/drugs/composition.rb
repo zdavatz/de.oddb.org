@@ -8,7 +8,7 @@ module ODDB
   module Drugs
     class Composition < Model
       attr_accessor :galenic_form, :equivalence_factor
-      has_many :active_agents
+      has_many :active_agents, on_delete(:cascade)
       has_many :parts
       def active_agent(substance)
         active_agents.find { |agent| agent.substance == substance }

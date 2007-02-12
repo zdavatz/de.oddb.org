@@ -7,6 +7,10 @@ module ODDB
   class Model
     include ODBA::Persistable
     def delete
+      super
+      self.class.connectors.each { |conn|
+        self.send(conn).odba_delete
+      }
       odba_delete
     end
     def save

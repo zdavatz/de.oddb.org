@@ -6,9 +6,11 @@ require 'oddb/model'
 module ODDB
   module Drugs
     class Sequence < Model
-      has_many :compositions, :active_agents, :doses, :substances
-      has_many :packages
-      belongs_to :product, :atc, :company, :name
+      has_many :compositions, 
+        delegates(:active_agents, :doses, :galenic_form, :substances),
+        on_delete(:cascade)
+      has_many :packages, on_delete(:cascade)
+      belongs_to :product, delegates(:atc, :company, :name)
       def include?(substance, dose=nil, unit=nil)
         compositions.any? { |comp|
           comp.include?(substance, dose, unit)

@@ -6,7 +6,7 @@ require 'oddb/model'
 module ODDB
   module Drugs
     class Atc < Model
-      has_many :ddds
+      has_many :ddds, on_delete(:cascade)
       has_many :products
       attr_reader :code
       multilingual :name

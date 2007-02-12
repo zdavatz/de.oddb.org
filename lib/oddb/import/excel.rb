@@ -45,5 +45,11 @@ module ODDB
       def postprocess
       end
     end
+    class DatedExcel < Excel
+      def initialize(date = Date.today)
+        super()
+        @date = date
+      end
+    end
   end
 end

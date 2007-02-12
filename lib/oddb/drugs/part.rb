@@ -7,7 +7,7 @@ module ODDB
   module Drugs
     class Part < Model
       belongs_to :package
-      belongs_to :composition, :active_agents
+      belongs_to :composition, delegates(:active_agents)
       ## A partial package can be described as e.g. 
       #  5 Ampoules of 20 ml 
       #  ^------------------ :size     - Numeric

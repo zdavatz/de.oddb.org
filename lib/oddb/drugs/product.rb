@@ -8,7 +8,7 @@ module ODDB
     class Product < Model
       belongs_to :atc
       belongs_to :company
-      has_many :sequences
+      has_many :sequences, on_delete(:cascade)
       is_coded
       multilingual :name
       def initialize

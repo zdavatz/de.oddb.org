@@ -6,9 +6,10 @@ require 'oddb/model'
 module ODDB
   module Drugs
     class Package < Model
-      belongs_to :sequence, :active_agents, :atc, :company, :doses,
-        :name, :product, :substances
-      has_many :parts
+      belongs_to :sequence, 
+        delegates(:active_agents, :atc, :company, :doses, :name,
+                  :product, :substances)
+      has_many :parts, on_delete(:cascade)
       has_many :prices
       is_coded
       def size
