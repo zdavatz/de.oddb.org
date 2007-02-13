@@ -93,8 +93,11 @@ class Packages < View::List
   end
   def size(model)
     model.parts.collect { |part|
-      parts = [part.size.to_i, 
-        part.unit.name.send(@session.language)].compact
+      parts = [part.size.to_i] 
+      if(unit = part.unit)
+        parts.push(unit.name.send(@session.language)
+      end
+      parts.compact!
       if(q = part.quantity)
         parts.push('x') unless parts.empty?
         parts.push(q)
