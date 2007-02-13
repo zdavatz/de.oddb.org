@@ -12,13 +12,13 @@ module ODDB
     include FlexMock::TestCase
     class Foo < Model
       multilingual :name
-      has_many :difficulties
+      has_many :difficulties, on_delete(:cascade)
     end
     class Bar < Model
       has_many :not_in_foos
     end
     class Baz < Model
-      belongs_to :foo
+      belongs_to :foo, on_save(:cascade)
     end
     class SelfName < Model
     end
@@ -64,6 +64,20 @@ module ODDB
     end
     def test_singular
       assert_equal('self_name', SelfName.singular)
+    end
+    def test_predicates__on_delete__cascade
+      diff = flexmock('Difficulty')
+      @foo.add_difficulty(diff)
+      diff.should_receive(:delete).times(1).and_return { assert(true) }
+      @foo.delete
+    end
+    def test_predicates__on_save__cascade
+      baz = Baz.new
+      foo = flexmock('foo')
+      foo.should_receive(:add_baz)
+      foo.should_receive(:save).times(2).and_return { assert(true) }
+      baz.foo = foo
+      baz.save
     end
   end
 end

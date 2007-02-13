@@ -10,6 +10,7 @@ module ODDB
     class Predicate
       attr_reader :action, :type, :delegators
       def initialize(action, type, *delegators)
+        raise "unknown predicate type: #{type}" unless respond_to?(type)
         @action, @type, @delegators = action, type, delegators
       end
       def cascade(action, next_level)
@@ -17,8 +18,11 @@ module ODDB
           next_level.each { |element| 
             cascade(action, element)
           }
+        else
+          next_level.send(action) if(next_level.respond_to?(action))
         end
-        next_level.send(action) if(next_level.respond_to?(action))
+      end
+      def delegate(action, next_level)
       end
       def execute(action, object)
         if(action == @action)
@@ -84,7 +88,7 @@ module ODDB
         }
         connectors.push(plural)
         predicates.each { |predicate|
-          if(predicate.action == :method_missing)
+          if(predicate.type == :delegate)
             predicate.delegators.each { |key|
               define_method(key) {
                 self.send(plural).collect { |inst|
@@ -133,6 +137,13 @@ module ODDB
       self.class.predicates.each { |predicate|
         predicate.execute(:delete, self)
       }
+      self
+    end
+    def save
+      self.class.predicates.each { |predicate|
+        predicate.execute(:save, self)
+      }
+      self
     end
   end
 end
