@@ -120,19 +120,20 @@ module Dimdi
     end
     def import_atc(row, product)
       atc_name = cell(row, 2)
-      candidates = Drugs::Atc.search_by_exact_name(atc_name)
-      if(candidates.empty?)
-        candidates = Drugs::Atc.search_by_name(atc_name)
+      substances = product.substances.uniq
+      candidates = []
+      if(substances.size == 1)
+        substance = substances.first
+        candidates = Drugs::Atc.search_by_exact_name(substance.to_s)
+        if(candidates.empty?)
+          candidates = Drugs::Atc.search_by_name(substance.to_s)
+        end
+      end
+      if(candidates.size != 1)
+        candidates = Drugs::Atc.search_by_exact_name(atc_name)
       end
       if(candidates.empty?)
-        substances = product.substances.uniq
-        if(substances.size == 1)
-          substance = substances.first
-          candidates = Drugs::Atc.search_by_exact_name(substance.to_s)
-          if(candidates.empty?)
-            candidates = Drugs::Atc.search_by_name(substance.to_s)
-          end
-        end
+        candidates = Drugs::Atc.search_by_name(atc_name)
       end
       if(candidates.size == 1)
         product.atc = candidates.first
