@@ -95,7 +95,7 @@ class Packages < View::List
     model.parts.collect { |part|
       parts = [part.size.to_i] 
       if(unit = part.unit)
-        parts.push(unit.name.send(@session.language)
+        parts.push(unit.name.send(@session.language))
       end
       parts.compact!
       if(q = part.quantity)
