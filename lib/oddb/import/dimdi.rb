@@ -107,6 +107,7 @@ module Dimdi
       @created = 0
       @created_sequences = 0
       @created_substances = 0
+      @deleted_sequences = 0
       @existing = 0
       @existing_sequences = 0
     end
@@ -115,6 +116,26 @@ module Dimdi
          && (group = import_substance_group(groupname)))
         sub.group = group
         sub.save
+      end
+    end
+    def import_atc(row, product)
+      atc_name = cell(row, 2)
+      candidates = Drugs::Atc.search_by_exact_name(atc_name)
+      if(candidates.empty?)
+        candidates = Drugs::Atc.search_by_name(atc_name)
+      end
+      if(candidates.empty?)
+        substances = product.substances.uniq
+        if(substances.size == 1)
+          substance = substances.first
+          candidates = Drugs::Atc.search_by_exact_name(substance.to_s)
+          if(candidates.empty?)
+            candidates = Drugs::Atc.search_by_name(substance.to_s)
+          end
+        end
+      end
+      if(candidates.size == 1)
+        product.atc = candidates.first
       end
     end
     def import_row(row)
@@ -182,14 +203,7 @@ module Dimdi
                               'DE', @date)
         product.add_code(code)
       end
-      atc_name = cell(row, 2)
-      candidates = Drugs::Atc.search_by_exact_name(atc_name)
-      if(candidates.empty?)
-        candidates = Drugs::Atc.search_by_name(atc_name)
-      end
-      if(candidates.size == 1)
-        product.atc = candidates.first
-      end
+      import_atc(row, product)
       product.save
     end
     def import_price(package, type, amount)
@@ -313,6 +327,7 @@ module Dimdi
         package.sequence = move_to
         update_package(row, package)
         if(move_from.packages.empty?)
+          @deleted_sequences += 1
           move_from.delete
         end
       elsif(move_from.packages.size == 1)
@@ -327,6 +342,7 @@ module Dimdi
       sequence.product = product
       sequence.save
       if(move_from.sequences.empty?)
+        @deleted_sequences += 1
         move_from.delete
       end
     end
@@ -348,6 +364,7 @@ module Dimdi
         sprintf("Created  %5i new Sequences", @created_sequences),
         sprintf("Created  %5i new Substances from Combinations",
                 @created_substances),
+        sprintf("Deleted  %5i Sequences", @deleted_sequences),
       ]
     end
     def update_package(row, package)
@@ -356,7 +373,7 @@ module Dimdi
       if(pzn = cell(row, 10))
         pzn = u(pzn.to_i.to_s)
         if(code = package.code(:cid))
-          unless(code == pzn)
+          if(code.value.to_i < pzn.to_i)
             warn "Reassigning PZN (#{code} -> #{pzn})"
             code.value = pzn
           end
@@ -559,6 +576,11 @@ module Dimdi
     def import_company(row)
       if(cname = cell(row, 6))
         cname = capitalize_all(cname)
+        cname.gsub!(/\./, '. ')
+        cname.gsub!(/[\/&]/) { |match| ' %s ' % match }
+        cname.gsub!(/Gmbh/, 'GmbH')
+        cname.gsub!(/Ag\b/, 'AG')
+        cname.gsub!(/\bKg\b/, 'KG')
         company = Business::Company.find_by_name(cname)
         if(company)
           @existing_companies += 1
