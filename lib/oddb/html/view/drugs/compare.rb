@@ -75,6 +75,9 @@ class CompareComposite < HtmlGrid::DivComposite
 end
 class Compare < Template
   CONTENT = CompareComposite
+  def _title
+    super[0..-2].push(@model.origin.name.send(@session.language))
+  end
 end
       end
     end

@@ -12,6 +12,10 @@ a:hover {
 div.explain {
   padding: 4px;
 }
+div#explain-compare {
+  padding: 2px 4px;
+  float: left;
+}
 div#foot, div#title, th {
   background-color: #2ba476;
   color: white;
@@ -57,7 +61,7 @@ div#result-found {
   font-weight: bold;
   font-size: 14px;
   padding: 2px 4px;
-  float: left;
+  /*float: left;*/
 }
 div#result-search {
   text-align: right;

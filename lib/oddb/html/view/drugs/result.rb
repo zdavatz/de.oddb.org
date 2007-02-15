@@ -54,11 +54,12 @@ end
 class ResultComposite < HtmlGrid::DivComposite
   COMPONENTS = {
     [0,0] => :title_found, 
-    [0,1] => InlineSearch, 
-    [0,2] => Packages, 
+    [0,1] => "explain_compare", 
+    [0,2] => InlineSearch, 
+    [0,3] => Packages, 
   }
-  CSS_ID_MAP = ['result-found', 'result-search']
-  CSS_MAP = { 2 => 'result' }
+  CSS_ID_MAP = ['result-found', 'explain-compare', 'result-search', ]
+  CSS_MAP = { 3 => 'result' }
   def title_found(model)
     @lookandfeel.lookup(:title_found, @model.query, @model.size)
   end

@@ -19,6 +19,7 @@ class Lookandfeel < SBSM::Lookandfeel
       :code_pzn                 => 'Pharmazentralnummer',
       :code_zuzahlungsbefreit   => 'Zuzahlungsbefreit',
       :company                  => 'Zulassungsinhaber',
+      :compare                  => 'Preisvergleich',
       :comparison_for0          => 'Preisvergleich für ',
       :comparison_for1          => '',
       :contact                  => 'Kontakt',
@@ -38,6 +39,7 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte
 einmal.
       EOS
       :equivalence_factor       => 'Wirkstärkenäquivalenzfaktor (waef)',
+      :explain_compare          => 'Für einen Preisvergleich klicken Sie bitte auf den Medikamentennamen.', 
       :explain_search           => <<-EOS,
 Vergleichen Sie einfach und schnell Medikamentenpreise.
 Suchen Sie nach Medikamentname oder Wirkstoff.
