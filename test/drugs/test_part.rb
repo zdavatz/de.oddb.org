@@ -20,6 +20,13 @@ module ODDB
         assert_instance_of(Fixnum, @part.size)
         assert_equal(5, @part.size)
       end
+      def test_comparable_size
+        assert_equal(Dose.new(1), @part.comparable_size)
+        @part.size = "4.5"
+        assert_equal(Dose.new(4.5), @part.comparable_size)
+        @part.quantity = Dose.new(20, 'ml')
+        assert_equal(Dose.new(90, 'ml'), @part.comparable_size)
+      end
     end
   end
 end

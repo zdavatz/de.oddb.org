@@ -39,6 +39,10 @@ module ODDB
       def substances
         active_agents.collect { |agent| agent.substance }
       end
+      def ==(other)
+        @galenic_form == other.galenic_form \
+          && active_agents.sort == other.active_agents.sort
+      end
     end
   end
 end

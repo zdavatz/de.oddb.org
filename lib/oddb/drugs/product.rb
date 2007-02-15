@@ -14,6 +14,9 @@ module ODDB
       def initialize
         @sequences = []
       end
+      def comparables
+        atc.products
+      end
       def packages
         @sequences.inject([]) { |memo, seq|
           memo.concat(seq.packages)

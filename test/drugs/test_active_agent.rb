@@ -20,6 +20,27 @@ module ODDB
         agent = ActiveAgent.new(substance, 100, 'mg')
         assert_equal(dose, agent.dose)
       end
+      def test_equality
+        substance = flexmock('substance')
+        dose = Dose.new(100, 'mg')
+        agent = ActiveAgent.new(substance, dose)
+        equal = ActiveAgent.new(substance, dose)
+        assert_equal(true, agent == equal)
+        assert_equal(true, equal == agent)
+
+        other = ActiveAgent.new(substance, Dose.new(200, 'mg'))
+        assert_equal(false, other == agent)
+        assert_equal(false, agent == other)
+        
+        substance = flexmock('different substance')
+        other = ActiveAgent.new(substance, dose)
+        assert_equal(false, other == agent)
+        assert_equal(false, agent == other)
+
+        other.chemical_equivalence = equal
+        assert_equal(true, other == agent)
+        assert_equal(true, agent == other)
+      end
     end
   end
 end

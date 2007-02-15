@@ -7,6 +7,16 @@ module ODDB
   module Html
     module State
 class Global < SBSM::State
+  def compare
+    if(code = @session.user_input(:pzn))
+      _compare(code)
+    end
+  end
+  def package
+    if(code = @session.user_input(:pzn))
+      _package(code)
+    end
+  end
   def partitioned_keys(keys)
     keys.partition { |key|
       /^[a-z]$/.match(key)

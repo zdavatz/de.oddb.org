@@ -27,6 +27,32 @@ module Sort
   def sort_proc(key)
   end
 end
+module PackageSort
+  include Sort
+  def sort_proc(key)
+    case key
+    when :atc
+      Proc.new { |pac| (atc = pac.atc) && atc.code || '' }
+    when :code_festbetragsstufe, :code_zuzahlungsbefreit
+      Proc.new { |pac| 
+        (code = pac.code(key)) && code.value || '' }
+    when :company, :product
+      Proc.new { |pac| 
+        (multilingual = pac.send(key)) \
+          && multilingual.name.send(@session.language) || '' }
+    when :festbetrag, :price_public
+      nilval = ODDB::Util::Money.new(0)
+      Proc.new { |pac| pac.price(key) || nilval }
+    when :price_difference
+      nilval = ODDB::Util::Money.new(-9999999)
+      Proc.new { |pac| 
+        ((pf = pac.price(:festbetrag)) \
+         && (pp = pac.price(:public)) \
+         && pp - pf) || nilval
+      }
+    end
+  end
+end
     end
   end
 end

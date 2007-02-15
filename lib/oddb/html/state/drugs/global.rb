@@ -4,6 +4,7 @@
 require 'oddb/business/company'
 require 'oddb/drugs/package'
 require 'oddb/html/state/global'
+require 'oddb/html/state/drugs/compare'
 require 'oddb/html/state/drugs/init'
 require 'oddb/html/state/drugs/package'
 require 'oddb/html/state/drugs/products'
@@ -19,15 +20,26 @@ class Global < State::Global
   EVENT_MAP = {
     :home => Drugs::Init,
   }
-  def package
-    if((code = @session.user_input(:pzn)) \
-       && (package = ODDB::Drugs::Package.find_by_code(:type => 'cid',
-                       :value   => code, :country => 'DE')))
-      Package.new(@session, package)
+  def _compare(code)
+    if(package = _package_by_code(code))
+      result = Util::AnnotatedList.new(package.comparables) 
+      result.origin = package
+      result.query = code
+      Compare.new(@session, result)
     end
   end
   def navigation
     [:products].concat(super)
+  end
+  def _package(code)
+    if(package = _package_by_code(code))
+      Package.new(@session, package)
+    end
+  end
+  def _package_by_code(code)
+    ODDB::Drugs::Package.find_by_code(:type => 'cid', 
+                                      :value   => code, 
+                                      :country => 'DE')
   end
   def _products(query)
     result = Util::AnnotatedList.new

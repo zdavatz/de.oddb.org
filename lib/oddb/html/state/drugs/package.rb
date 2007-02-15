@@ -17,6 +17,13 @@ class Package < Global
     end
     direct_event
   end
+  def _package(code)
+    if(code == @model.code(:cid, 'DE'))
+      self
+    else
+      super
+    end
+  end
 end
       end
     end

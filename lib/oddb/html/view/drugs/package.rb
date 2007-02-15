@@ -4,12 +4,37 @@
 require 'htmlgrid/list'
 require 'oddb/html/view/drugs/template'
 require 'oddb/html/view/search'
+require 'oddb/html/view/snapback'
 
 module ODDB
   module Html
     module View
       module Drugs
 module PackageMethods
+  def active_agents(model)
+    link = nil
+    if(code = model.code(:cid, 'DE'))
+      link = HtmlGrid::Link.new(:no_active_agents, model, @session, self)
+      link.href = @lookandfeel._event_url(:package, [:pzn, code.value])
+    else
+      link = HtmlGrid::Value.new(:no_active_agents, model, @session ,self)
+    end
+    agents = model.active_agents.collect { |agent|
+      [
+        agent.substance.name.send(@session.language), ' ',
+        agent.dose, "\n",
+      ]
+    }
+    size = agents.size
+    if(size == 1)
+      link.value = agents.first
+    else
+      link.value = @lookandfeel.lookup(:active_agents, size)
+      link.css_id = "sub_#@list_index"
+      link.dojo_title = agents
+    end
+    link
+  end
   def code_festbetragsgruppe(model)
     model.product.code(:festbetragsgruppe, 'DE')
   end
@@ -35,6 +60,43 @@ module PackageMethods
     else 
       @lookandfeel.lookup(:no)
     end
+  end
+  def price_public(model)
+    model.price(:public)
+  end
+  def product(model)
+    link = nil
+    if(model.atc && (code = model.code(:cid, 'DE')))
+      link = HtmlGrid::Link.new(:compare, model, @session, self)
+      link.href = @lookandfeel._event_url(:compare, [:pzn, code.value])
+    else
+      link = HtmlGrid::Span.new(model, @session, self)
+    end
+    link.value = model.name.send(@session.language)
+    link.css_id = "cid_#@list_index"
+    link.dojo_title = @lookandfeel.lookup(:pzn, model.code(:cid, 'DE'))
+    link
+  end
+  def row_css(model, bg_flag)
+    css = super
+    if((code = model.code(:zuzahlungsbefreit)) && code.value)
+      css = ['zuzahlungsbefreit', css].compact.join(' ')
+    end
+    css
+  end
+  def size(model)
+    model.parts.collect { |part|
+      parts = [part.size.to_i] 
+      if(unit = part.unit)
+        parts.push(unit.name.send(@session.language))
+      end
+      parts.compact!
+      if(q = part.quantity)
+        parts.push('x') unless parts.empty?
+        parts.push(q)
+      end
+      parts.join(' ')
+    }.join(' + ')
   end
 end
 class Part < HtmlGrid::List
@@ -139,6 +201,7 @@ class PackageInnerComposite < HtmlGrid::Composite
   end
 end
 class PackageComposite < HtmlGrid::DivComposite
+  include Snapback
   COMPONENTS = {
     [0,0] => :snapback, 
     [0,1] => InlineSearch, 
@@ -170,17 +233,6 @@ class PackageComposite < HtmlGrid::DivComposite
   def parts(model)
     key = model.parts.size > 1 ? :parts : :package_and_substances
     @lookandfeel.lookup(key)
-  end
-  def snapback(model)
-    if(query = @session.persistent_user_input(:query))
-      link = HtmlGrid::Link.new(:result, model, @session, self)
-      link.href = @lookandfeel._event_url(:search, [ :query, query ])
-      link
-    else
-      link = HtmlGrid::Link.new(:home, model, @session, self)
-      link.href = @lookandfeel._event_url(:home)
-      link
-    end
   end
 end
 class Package < Template

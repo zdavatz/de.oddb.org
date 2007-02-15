@@ -35,30 +35,6 @@ class Packages < View::List
   CSS_MAP = css_map
   CSS_HEAD_MAP = css_map
   EMPTY_LIST_KEY = :empty_packages
-  def active_agents(model)
-    link = nil
-    if(code = model.code(:cid, 'DE'))
-      link = HtmlGrid::Link.new(:no_active_agents, model, @session, self)
-      link.href = @lookandfeel._event_url(:package, [:pzn, code.value])
-    else
-      link = HtmlGrid::Value.new(:no_active_agents, model, @session ,self)
-    end
-    agents = model.active_agents.collect { |agent|
-      [
-        agent.substance.name.send(@session.language), ' ',
-        agent.dose, "\n",
-      ]
-    }
-    size = agents.size
-    if(size == 1)
-      link.value = agents.first
-    else
-      link.value = @lookandfeel.lookup(:active_agents, size)
-      link.css_id = "sub_#@list_index"
-      link.dojo_title = agents
-    end
-    link
-  end
   def compose_empty_list(offset)
     if(key = @model.error)
       fill_row(offset, key, 'warn')
@@ -73,37 +49,6 @@ class Packages < View::List
     if(pf = model.price(:festbetrag))
       model.price(:public) - pf
     end
-  end
-  def price_public(model)
-    model.price(:public)
-  end
-  def product(model)
-    span = HtmlGrid::Span.new(model, @session, self)
-    span.value = model.name.send(@session.language)
-    span.css_id = "cid_#@list_index"
-    span.dojo_title = @lookandfeel.lookup(:pzn, model.code(:cid, 'DE'))
-    span
-  end
-  def row_css(model, bg_flag)
-    css = super
-    if((code = model.code(:zuzahlungsbefreit)) && code.value)
-      css = ['zuzahlungsbefreit', css].compact.join(' ')
-    end
-    css
-  end
-  def size(model)
-    model.parts.collect { |part|
-      parts = [part.size.to_i] 
-      if(unit = part.unit)
-        parts.push(unit.name.send(@session.language))
-      end
-      parts.compact!
-      if(q = part.quantity)
-        parts.push('x') unless parts.empty?
-        parts.push(q)
-      end
-      parts.join(' ')
-    }.join(' + ')
   end
 end
 class ResultComposite < HtmlGrid::DivComposite

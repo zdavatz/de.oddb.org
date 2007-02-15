@@ -12,23 +12,31 @@ class Lookandfeel < SBSM::Lookandfeel
       :active_agents0           => '',
       :active_agents1           => ' Wirkstoffe',
       :atc                      => 'ATC-Code',
+      :breadcrumb_divider       => '&nbsp;&ndash;&nbsp;',
       :choose_range             => 'Bitte wählen Sie den anzuzeigenden Bereich',
       :code_festbetragsgruppe   => 'Festbetragsgruppe',
       :code_festbetragsstufe    => 'Festbetragsstufe',
       :code_pzn                 => 'Pharmazentralnummer',
       :code_zuzahlungsbefreit   => 'Zuzahlungsbefreit',
       :company                  => 'Zulassungsinhaber',
+      :comparison_for0          => 'Preisvergleich für ',
+      :comparison_for1          => '',
       :contact                  => 'Kontakt',
       :drugs                    => 'Medikamente',
       :drugs_atc_codes          => "ATC-Codes, DDD's:",
       :drugs_copay_free         => 'Zuzahlungsbefreite Arzneimittel:',
       :drugs_fixprices          => 'Arzneimittelfestbeträge:',
       :e_query_short            => 'Ihr Such-Stichwort ergibt ein sehr grosses Resultat. Bitte verwenden Sie mindestens 3 Buchstaben.',
+      :empty_comparison         => <<-EOS,
+In unserer Datenbank wurden leider keine Produkte gefunden, 
+die mit diesem Produkt verglichen werden können.
+      EOS
+      #
       :empty_packages           => <<-EOS,
 Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte
 überprüfen Sie die Schreibweise und versuchen Sie es noch
 einmal.
-    EOS
+      EOS
       :equivalence_factor       => 'Wirkstärkenäquivalenzfaktor (waef)',
       :explain_search           => <<-EOS,
 Vergleichen Sie einfach und schnell Medikamentenpreise.
@@ -68,6 +76,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :th_code_festbetragsstufe => 'FB-Stufe',
       :th_code_zuzahlungsbefreit=> 'Zuzahlungsbefreit',
       :th_company               => 'Hersteller',
+      :th_difference            => '%',
       :th_doses                 => 'Stärke',
       :th_festbetrag            => 'FB',
       :th_price_difference      => 'ABS-Differenz',

@@ -2,6 +2,7 @@
 # Drugs::Part -- de.oddb.org -- 14.11.2006 -- hwyss@ywesee.com
 
 require 'oddb/model'
+require 'oddb/drugs/dose'
 
 module ODDB
   module Drugs
@@ -16,6 +17,9 @@ module ODDB
       #  Possibly a multiplication factor (Integer) can be added.
       attr_accessor :unit, :quantity
       attr_reader :size
+      def comparable_size
+        (@quantity || Dose.new(1)) * (@size || 1)
+      end
       def size=(size)
         if(size.to_i == size)
           @size = size.to_i

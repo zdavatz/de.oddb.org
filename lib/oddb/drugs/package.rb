@@ -9,14 +9,33 @@ module ODDB
       belongs_to :sequence, 
         delegates(:active_agents, :atc, :company, :doses, :name,
                   :product, :substances)
-      has_many :parts, on_delete(:cascade)
+      has_many :parts, on_delete(:cascade), delegates(:comparable_size)
       has_many :prices
       is_coded
-      def size
-        parts.inject(0) { |memo, part| memo + part.size }
+      def comparable?(other)
+        return false unless(other.is_a?(Package))
+        csizes = comparable_size.collect { |psize|
+          (psize*0.75)..(psize*1.25)
+        }
+        osizes = other.comparable_size
+        idx = -1
+        osizes.length == csizes.length && csizes.all? { |range|
+          idx += 1
+          range.include?(osizes.at(idx))
+        }
+      end
+      def comparables
+        @sequence.comparables.inject([]) { |memo, sequence|
+          memo.concat sequence.packages.select { |package|
+            (package != self) && comparable?(package)
+          }
+        }
       end
       def price(type, country='DE')
         prices.find { |money| money.is_for?(type, country) }
+      end
+      def size
+        parts.inject(0) { |memo, part| memo + part.size }
       end
     end
   end

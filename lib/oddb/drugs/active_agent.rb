@@ -20,6 +20,12 @@ module ODDB
       def <=>(other)
         [@substance, @dose] <=> [other.substance, other.dose]
       end
+      def ==(other)
+        [@substance, @dose] == [other.substance, other.dose] \
+          || @chemical_equivalence == other \
+          || ((other = other.chemical_equivalence) && self == other) \
+          || false
+      end
     end
   end
 end

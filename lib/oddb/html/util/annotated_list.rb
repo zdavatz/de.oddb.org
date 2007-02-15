@@ -5,7 +5,7 @@ module ODDB
   module Html
     module Util
 class AnnotatedList < Array
-  attr_accessor :error, :query
+  attr_accessor :error, :query, :origin
   def sort_by(*args, &block)
     _delegate(super(*args, &block))
   end

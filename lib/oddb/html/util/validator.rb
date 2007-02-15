@@ -10,11 +10,12 @@ class Validator < SBSM::Validator
   ENUMS = {
     :range     => ("A".."Z").to_a.push('0-9'),
     :sortvalue => [ 'active_agents', 'atc', 'code_festbetragsstufe',
-      'code_zuzahlungsbefreit', 'company', 'doses', 'festbetrag',
-      'price_difference', 'price_public', 'product', 'size', 
+      'code_zuzahlungsbefreit', 'company', 'difference', 'doses',
+      'festbetrag', 'price_difference', 'price_public', 'product',
+      'size', 
     ],
   }
-  EVENTS = [ :home, :package, :products, :search, :sort ]
+  EVENTS = [ :compare, :home, :package, :products, :search, :sort ]
   NUMERIC = [ :offset, :pzn ]
   STRINGS = [ :query ]
 end

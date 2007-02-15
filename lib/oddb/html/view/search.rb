@@ -11,12 +11,8 @@ class SearchBar < HtmlGrid::InputText
   def init
     super
     val = @lookandfeel.lookup(:query_info)
-    if(@value.nil? || @value.is_a?(StandardError))
-      txt_val = if(@session.respond_to?(:persistent_user_input))
-        @session.persistent_user_input(@name) 
-      end || val
-      @attributes.store('value', txt_val)
-    end
+    txt_val = @session.persistent_user_input(@name) || val
+    @attributes.store('value', txt_val)
     @attributes.update({
       'onFocus'  =>  "if (value=='#{val}') { value='' };",
       'onBlur'  =>  "if (value=='') { value='#{val}' };",
