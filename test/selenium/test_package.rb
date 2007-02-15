@@ -13,7 +13,11 @@ module ODDB
   module Selenium
 class TestPackage < Test::Unit::TestCase
   include Selenium::TestCase
-  def setup_package
+  def setup
+    Drugs::Package.instances.clear
+    super
+  end
+  def setup_package(pzn='12345')
     product = Drugs::Product.new
     product.atc = Drugs::Atc.new('N04BB01')
     product.atc.name.de = 'Amantadin'
@@ -39,7 +43,7 @@ class TestPackage < Test::Unit::TestCase
     package.add_code(code)
     code = Util::Code.new(:zuzahlungsbefreit, true, 'DE')
     package.add_code(code)
-    code = Util::Code.new(:cid, '12345', 'DE')
+    code = Util::Code.new(:cid, pzn, 'DE')
     package.add_code(code)
     part = Drugs::Part.new
     part.composition = composition
@@ -59,9 +63,10 @@ class TestPackage < Test::Unit::TestCase
   def test_package
     package = setup_package
     @selenium.open "/de/drugs/package/pzn/12345"
-    assert_equal "ODDB | Medikamente | Details | 12345", @selenium.get_title
+    assert_equal "ODDB | Medikamente | Details | Amantadin by Producer", @selenium.get_title
     assert @selenium.is_text_present('Amantadin by Producer - Producer AG')
     assert @selenium.is_text_present('12345')
+    assert !@selenium.is_text_present('54321')
     assert @selenium.is_text_present('N04BB01 ( Amantadin )')
     assert @selenium.is_text_present('Packungsgrösse und Wirkstoffe')
     assert @selenium.is_text_present('5 Ampullen x 20 ml')
@@ -71,14 +76,24 @@ class TestPackage < Test::Unit::TestCase
     package.code(:zuzahlungsbefreit).value = false
     @selenium.refresh
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Details | 12345", @selenium.get_title
+    assert_equal "ODDB | Medikamente | Details | Amantadin by Producer", @selenium.get_title
     assert !@selenium.is_text_present('Ja')
     assert @selenium.is_text_present('Nein')
+
+    package2 = setup_package('54321')
+    @selenium.open "/de/drugs/package/pzn/54321"
+    assert_equal "ODDB | Medikamente | Details | Amantadin by Producer", 
+                 @selenium.get_title
+    assert @selenium.is_text_present('Amantadin by Producer - Producer AG')
+    assert @selenium.is_text_present('Ja')
+    assert !@selenium.is_text_present('Nein')
+    assert @selenium.is_text_present('54321')
+    assert !@selenium.is_text_present('12345')
   end
   def test_package__search
     setup_package
     @selenium.open "/de/drugs/package/pzn/12345"
-    assert_equal "ODDB | Medikamente | Details | 12345", @selenium.get_title
+    assert_equal "ODDB | Medikamente | Details | Amantadin by Producer", @selenium.get_title
     @selenium.type "query", "Amantadin"
     @selenium.click "//input[@type='submit']"
     @selenium.wait_for_page_to_load "30000"

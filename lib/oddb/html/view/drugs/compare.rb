@@ -32,8 +32,10 @@ class CompareList < View::List
   EMPTY_LIST_KEY = :empty_comparison
   def compose_header(offset=[0,0])
     offset = super
-    _compose(@model.origin, offset)
-    @grid.set_row_attributes({'class' => 'origin'}, offset.at(1))
+    mdl = @model.origin
+    _compose(mdl, offset)
+    css = ['origin', row_css(mdl, nil)].compact.join(' ')
+    @grid.set_row_attributes({'class' => css}, offset.at(1))
     resolve_offset(offset, self::class::OFFSET_STEP)
   end
   def difference(model)

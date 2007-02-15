@@ -158,13 +158,6 @@ class PackageInnerComposite < HtmlGrid::Composite
   def code_pzn(model)
     model.code(:cid, 'DE')
   end
-  def code_zuzahlungsbefreit(model)
-    if((code = model.code(:zuzahlungsbefreit)) && code.value)
-      @lookandfeel.lookup(:yes)
-    else
-      @lookandfeel.lookup(:no)
-    end
-  end
   def company(model)
     if(company = model.company)
       company.name
@@ -237,6 +230,9 @@ class PackageComposite < HtmlGrid::DivComposite
 end
 class Package < Template
   CONTENT = PackageComposite
+  def _title
+    super[0..-2].push(@model.name.send(@session.language))
+  end
 end
       end
     end

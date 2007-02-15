@@ -18,7 +18,7 @@ class Package < Global
     direct_event
   end
   def _package(code)
-    if(code == @model.code(:cid, 'DE'))
+    if(@model.code(:cid, 'DE') == code)
       self
     else
       super

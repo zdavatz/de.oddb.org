@@ -150,7 +150,7 @@ einmal.
     ## click through to Details
     @selenium.click "link=Amantadin 100 mg"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Details | 12345", 
+    assert_equal "ODDB | Medikamente | Details | Amantadin by Producer", 
                  @selenium.get_title
 
     ## click back to Result

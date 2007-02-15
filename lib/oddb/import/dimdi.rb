@@ -108,8 +108,10 @@ module Dimdi
       @created_sequences = 0
       @created_substances = 0
       @deleted_sequences = 0
+      @deleted_products = 0
       @existing = 0
       @existing_sequences = 0
+      @renamed_products = 0
     end
     def assign_substance_group(sub, groupname)
       if(sub.group.nil? \
@@ -117,6 +119,17 @@ module Dimdi
         sub.group = group
         sub.save
       end
+    end
+    def delete_sequence(sequence)
+      if(product = sequence.product)
+        sequence.product = nil
+        if(product.sequences.empty?)
+          @deleted_products += 1
+          product.delete
+        end
+      end
+      @deleted_sequences += 1
+      sequence.delete
     end
     def import_atc(row, product)
       atc_name = cell(row, 2)
@@ -141,8 +154,9 @@ module Dimdi
     end
     def import_row(row)
       @count += 1
+      pzn = u(cell(row, 10).to_i.to_s)
       package = Drugs::Package.find_by_code(:type    => 'cid',
-                                            :value   => cell(row, 10),
+                                            :value   => pzn,
                                             :country => 'DE')
       name = capitalize_all(cell(row, 0))
       product = Drugs::Product.find_by_name(name)
@@ -328,8 +342,7 @@ module Dimdi
         package.sequence = move_to
         update_package(row, package)
         if(move_from.packages.empty?)
-          @deleted_sequences += 1
-          move_from.delete
+          delete_sequence(move_from)
         end
       elsif(move_from.packages.size == 1)
         move_sequence(product, move_from)
@@ -343,13 +356,12 @@ module Dimdi
       sequence.product = product
       sequence.save
       if(move_from.sequences.empty?)
-        @deleted_sequences += 1
+        @deleted_products += 1
         move_from.delete
       end
     end
     def rename_product(row, package, name)
       product = package.product
-      product.name.synonyms.push(product.name.de).uniq!
       product.name.de = name
       product.save
       update_package(row, package)
@@ -365,6 +377,8 @@ module Dimdi
         sprintf("Created  %5i new Sequences", @created_sequences),
         sprintf("Created  %5i new Substances from Combinations",
                 @created_substances),
+        sprintf("Renamed  %5i Products", @renamed_products),
+        sprintf("Deleted  %5i Products", @deleted_products),
         sprintf("Deleted  %5i Sequences", @deleted_sequences),
       ]
     end

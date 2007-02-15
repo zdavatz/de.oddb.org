@@ -111,15 +111,15 @@ class TestProduct < Test::Unit::TestCase
     input = open(@path)
     report = @import.import(input)
     assert_instance_of(Array, report)
-    assert_equal(11, Drugs::Product.instances.size)
-    expected = [ u("Piroxicam Ratio"), u("Amoxicillin Ratio"),
-      u("Buscopan Aca"), u("Aquaphor/Il Aca"), u("Aspirin Aca"),
-      u("Sibelium Aca"), u("Capto Merckdura"), 
-      u("Aknefug/Mino Wolff"), u("Ribofluor"), u("Dexa Ct"), 
-      u("Madopar Emra"), ]
     names = Drugs::Product.instances.collect { |inst|
       inst.name.de
     }
+    assert_equal(11, Drugs::Product.instances.size, names.inspect)
+    expected = [ u("Piroxicam Ratio"), u("Amoxicillin Ratio"),
+      u("Buscopan Aca"), u("Aquaphoril Aca"), u("Aspirin Aca"),
+      u("Sibelium Aca"), u("Capto Merckdura"), 
+      u("Aknefug/Mino Wolff"), u("Ribofluor"), u("Dexa Ct"), 
+      u("Madopar Emra"), ]
     assert_equal(expected, names)
     pr = Drugs::Product.instances.first
     assert_equal(1, pr.codes.size)
@@ -148,7 +148,7 @@ class TestProduct < Test::Unit::TestCase
     assert_equal(u('Tabletten'), part.unit.name.de)
     code = pack.code(:cid, 'DE')
     assert_instance_of(Util::Code, code)
-    assert_equal("649", code.value)
+    assert_equal("114568", code.value)
 
     pr = Drugs::Product.instances.at(1)
     assert_equal(atc, pr.atc)
@@ -198,7 +198,7 @@ class TestProduct < Test::Unit::TestCase
     assert_equal(u('Tabletten'), part.unit.name.de)
     code = pack.code(:cid, 'DE')
     assert_instance_of(Util::Code, code)
-    assert_equal("649", code.value)
+    assert_equal("114568", code.value)
 
     pr = Drugs::Product.instances.at(1)
     assert_equal(atc, pr.atc)
@@ -301,6 +301,7 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_equal(1, confirmed.size)
 
     # do it again, nothing should change
+    existing.code(:zuzahlungsbefreit).value = false
     input = open(@path)
     report = @import.import(input)
     assert_instance_of(Array, report)
@@ -464,6 +465,26 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     substance = Drugs::Substance.new
     substance.name.de = u"Fluvoxamin-Hydrogenmaleat"
     active_agent = Drugs::ActiveAgent.new(substance, 50)
+    composition.add_active_agent(active_agent)
+    row = [ 
+     "Fluvoxamin", "0227488", "FLUVOHEXAL 50MG FILMTABL",
+     "Filmtabletten", 20, "St", "HEXAL AG", "15.21", 
+     "Fluvoxamin hydrogenmaleat", 50, "mg",
+    ].collect { |data|
+      mock = flexmock(data.to_s)
+      mock.should_receive(:to_s).and_return(data.to_s)
+      mock
+    }
+    @import.import_active_agent(sequence, row, 8)
+    assert_equal([active_agent], composition.active_agents)
+  end
+  def test_import_active_agent__correct_dose
+    sequence = Drugs::Sequence.new
+    composition = Drugs::Composition.new
+    sequence.add_composition(composition)
+    substance = Drugs::Substance.new
+    substance.name.de = u"Fluvoxamin hydrogenmaleat"
+    active_agent = Drugs::ActiveAgent.new(substance, nil)
     composition.add_active_agent(active_agent)
     row = [ 
      "Fluvoxamin", "0227488", "FLUVOHEXAL 50MG FILMTABL",
