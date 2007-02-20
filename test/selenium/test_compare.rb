@@ -19,6 +19,7 @@ class TestCompare < Test::Unit::TestCase
     Drugs::Package.instances.clear
     Drugs::Product.instances.clear
     Business::Company.instances.clear
+    @cache = flexstub(ODBA.cache)
     super
   end
   def setup_package(name, pzn='12345', price=6)
@@ -60,6 +61,33 @@ class TestCompare < Test::Unit::TestCase
     package.add_code(Util::Code.new(:cid, pzn, 'DE'))
     package.save
     package
+  end
+  def setup_remote_package(name, uid='55555', price=12)
+    rpackage = flexmock('Remote Package')
+    rpackage.should_receive(:name_base).and_return(name)
+    rpackage.should_receive(:price_public).and_return(price * 100)
+    rpackage.should_receive(:comparable_size)\
+      .and_return(Drugs::Dose.new(5.5))
+    rpackage.should_receive(:__drbref).and_return(uid)
+    rpackage.should_receive(:comform)
+    rcompany = flexmock('Remote Company')
+    rpackage.should_receive(:company).and_return(rcompany)
+    rcompany.should_receive(:name).and_return('Producer (Schweiz) AG')
+    ratc = flexmock('Remote Atc Class')
+    rpackage.should_receive(:atc_class).and_return(ratc)
+    ratc.should_receive(:code).and_return('N04BB01')
+    ratc.should_receive(:de).and_return('Amantadine')
+    ragent = flexmock('Remote ActiveAgent')
+    rpackage.should_receive(:active_agents).and_return([ragent])
+    rsubstance = flexmock('Remote Substance')
+    ragent.should_receive(:dose).and_return(Drugs::Dose.new(100, 'mg'))
+    ragent.should_receive(:substance).and_return(rsubstance)
+    rsubstance.should_receive(:de).and_return('Amantadinum')
+    rgalform = flexmock('Remote Galenic Form')
+    rpackage.should_receive(:galenic_form).and_return(rgalform)
+    rgalform.should_receive(:de).and_return('Tropfen')
+    @cache.should_receive(:fetch).with(uid.to_i).and_return(rpackage)
+    rpackage
   end
   def teardown
     super
@@ -132,27 +160,12 @@ class TestCompare < Test::Unit::TestCase
     ODDB.config.remote_databases = [drb.uri]
 
     remote.should_receive(:get_currency_rate).with('EUR').and_return 0.6
-    rpackage = flexmock('Remote Package')
+    rpackage = setup_remote_package('Remotadin', '55555', 12)
     remote.should_receive(:remote_packages).and_return([rpackage])
-    rpackage.should_receive(:name_base).and_return('Remotadin')
-    rpackage.should_receive(:price_public).and_return(1200)
-    rpackage.should_receive(:comparable_size)\
-      .and_return(Drugs::Dose.new(5.5))
-    rpackage.should_receive(:__drbref).and_return("55555")
-    rpackage.should_receive(:comform)
-    rcompany = flexmock('Remote Company')
-    rpackage.should_receive(:company).and_return(rcompany)
-    rcompany.should_receive(:name).and_return('Producer (Schweiz) AG')
-    ratc = flexmock('Remote Atc Class')
-    rpackage.should_receive(:atc_class).and_return(ratc)
-    ratc.should_receive(:code).and_return('N04BB01')
-    ratc.should_receive(:de).and_return('Amantadine')
-    ragent = flexmock('Remote ActiveAgent')
-    rpackage.should_receive(:active_agents).and_return([ragent])
-    rsubstance = flexmock('Remote Substance')
-    ragent.should_receive(:dose).and_return(Drugs::Dose.new(100, 'mg'))
-    ragent.should_receive(:substance).and_return(rsubstance)
-    rsubstance.should_receive(:de).and_return('Amantadinum')
+
+    rother = setup_remote_package('Remoteric', '55556', 10)
+    rpackage.should_receive(:comparables).and_return([rother])
+
 
     package = setup_package('Amantadin')
     ## switch to mm-flavor
@@ -164,16 +177,31 @@ class TestCompare < Test::Unit::TestCase
     assert_equal "ODDB | Medikamente | Suchen | Amantadin", get_title
   
     atc = Drugs::Atc.new('N04BB01')
-    rgalform = flexmock('Remote Galenic Form')
-    rpackage.should_receive(:galenic_form).and_return(rgalform)
-    rgalform.should_receive(:de).and_return('Tropfen')
-    flexstub(ODBA.cache).should_receive(:fetch)\
-      .with(55555).and_return(rpackage)
 
+    rother.should_receive(:comparables).and_return([rpackage])
     click "link=Remotadin"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Preisvergleich | Remotadin", get_title
+    assert_equal "ODDB | Medikamente | Preisvergleich | Remotadin", 
+                 get_title
+    assert_match(/^Remotadin/, get_text("cid_"))
+    assert is_element_present("//a[@id='cid_0']")
+    assert_match(/^Amantadin/, get_text("cid_0"))
+    assert is_element_present("//a[@id='cid_1']")
+    assert_match(/^Remoteric/, get_text("cid_1"))
     assert is_text_present('-8.3%')
+
+    click "link=Remoteric"
+    wait_for_page_to_load "30000"
+    assert_equal "ODDB | Medikamente | Preisvergleich | Remoteric", 
+                 get_title
+    assert_match(/^Remoteric/, get_text("cid_"))
+    assert is_element_present("//a[@id='cid_0']")
+    assert_match(/^Amantadin/, get_text("cid_0"))
+    assert is_element_present("//a[@id='cid_1']")
+    assert_match(/^Remotadin/, get_text("cid_1"))
+    assert is_text_present('+10.0%')
+    assert is_text_present('+20.0%')
+
   ensure
     drb.stop_service
   end

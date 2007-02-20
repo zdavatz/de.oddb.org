@@ -15,7 +15,11 @@ class ActiveAgent < Remote::Object
     @substance ||= Remote::Drugs::Substance.new(@source, @remote.substance)
   end
   def <=>(other)
-    [substance, dose] <=> [other.substance, other.dose]
+    if(dose.nil?)
+      substance <=> other.substance
+    else
+      [substance, dose] <=> [other.substance, other.dose]
+    end
   end
 end
     end

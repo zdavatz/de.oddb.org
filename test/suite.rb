@@ -6,6 +6,7 @@ require 'find'
 here = File.dirname(__FILE__)
 
 $: << here
+require 'selenium/unit'
 
 Find.find(here) { |file|
 	if /test_.*\.rb$/o.match(file)
