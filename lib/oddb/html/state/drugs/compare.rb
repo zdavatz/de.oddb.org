@@ -16,6 +16,7 @@ class Compare < Global
   class Comparison < SimpleDelegator
     attr_reader :difference
     def initialize(package, original)
+      @package = package
       psize = package.size.to_f
       pprice = package.price(:public).to_f
       osize = original.size.to_f
@@ -24,6 +25,9 @@ class Compare < Global
         @difference = ((osize * pprice) / (psize * oprice) - 1) * 100
       end
       super(package)
+    end
+    def is_a?(mod)
+      super || @package.is_a?(mod)
     end
   end
   def init

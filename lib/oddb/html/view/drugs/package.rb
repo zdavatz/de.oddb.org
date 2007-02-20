@@ -109,13 +109,10 @@ module PackageMethods
   end
   def row_css(model, bg_flag)
     css = super
-    case model
-    when Remote::Drugs::Package
+    if(model.is_a?(Remote::Drugs::Package))
       css = ['remote', css].compact.join(' ')
-    else
-      if((code = model.code(:zuzahlungsbefreit)) && code.value)
-        css = ['zuzahlungsbefreit', css].compact.join(' ')
-      end
+    elsif((code = model.code(:zuzahlungsbefreit)) && code.value)
+      css = ['zuzahlungsbefreit', css].compact.join(' ')
     end
     css
   end

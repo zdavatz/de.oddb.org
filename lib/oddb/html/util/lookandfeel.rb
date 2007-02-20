@@ -159,7 +159,13 @@ aktuellsten Medikamenten-Portal Deutschlands.
       @language, @session.zone].compact.join("/")
   end
 end
-class LookandfeelMeineMedikamente < SBSM::LookandfeelWrapper
+class LookandfeelWrapper < SBSM::LookandfeelWrapper
+  def base_url
+    [@session.http_protocol + ':/', @session.server_name,
+      @language, @session.zone].compact.join("/")
+  end
+end
+class LookandfeelMeineMedikamente < LookandfeelWrapper
   ENABLED = [
     # Features:
     :remote_databases,

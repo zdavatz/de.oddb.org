@@ -31,7 +31,9 @@ class Package < Remote::Object
     @company ||= Remote::Business::Company.new(@source, @remote.company)
   end
   def comparables
-    comparables = []
+    comparables = @remote.comparables.collect { |pac|
+      Package.new(@source, pac, @currency_rate)
+    }
     doses = active_agents.collect { |act| act.dose }
     if(doses.size == 1 \
        && (atc = ODDB::Drugs::Atc.find_by_code(self.atc.code)))

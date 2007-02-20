@@ -87,6 +87,7 @@ module ODDB
         Dose.from_quanty(super)
       end
       def <=>(other)
+        return -1 unless(other.is_a?(Quanty))
         begin
           (@val * 1000).round <=> (adjust(other) * 1000).round
         rescue StandardError

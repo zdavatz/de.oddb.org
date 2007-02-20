@@ -39,8 +39,7 @@ class CompareList < View::List
     resolve_offset(offset, self::class::OFFSET_STEP)
   end
   def difference(model)
-    if(model.respond_to?(:difference))
-      difference = model.difference
+    if(model.respond_to?(:difference) && (difference = model.difference))
       span = HtmlGrid::Span.new(model, @session, self)
       if(difference < 0)
         span.css_class = 'less'
