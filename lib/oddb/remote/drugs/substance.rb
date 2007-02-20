@@ -12,7 +12,7 @@ class Substance < Remote::Object
     @name ||= Util::Multilingual.new(:de => @@iconv.iconv(@remote.de))
   end
   def <=>(other)
-    @name <=> other.name
+    name <=> other.name
   end
 end
     end
