@@ -154,14 +154,17 @@ aktuellsten Medikamenten-Portal Deutschlands.
     :logo => 'logo.gif', 
     :css  => 'oddb.css',
   }
-    def base_url
-      [@session.http_protocol + ':/', @session.server_name,
-        @language, @session.zone].compact.join("/")
-    end
+  def base_url
+    [@session.http_protocol + ':/', @session.server_name,
+      @language, @session.zone].compact.join("/")
+  end
 end
 class LookandfeelMeineMedikamente < SBSM::LookandfeelWrapper
   ENABLED = [
+    # Features:
     :remote_databases,
+    # Navigation-Links:
+    :contact, :home, :products,
   ]
 end
 class LookandfeelFactory < SBSM::LookandfeelFactory

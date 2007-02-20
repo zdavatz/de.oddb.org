@@ -59,15 +59,6 @@ class TestSearch < Test::Unit::TestCase
     super
     ODDB.config.remote_databases = []
   end
-  def test_init
-    @selenium.open "/"
-    assert_equal "ODDB | Medikamente | Home", @selenium.get_title
-    assert @selenium.is_element_present("query")
-    assert @selenium.is_element_present("reset")
-    assert @selenium.is_element_present("//input[@name='search']")
-    assert_match Regexp.new(ODDB.config.http_server), 
-      @selenium.get_attribute("//form[@name='search']@action")
-  end
   def test_search
     package = setup_package
     @selenium.open "/"
