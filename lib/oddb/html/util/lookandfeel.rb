@@ -2,6 +2,8 @@
 # Html::Util::Lookandfeel -- de.oddb.org -- 27.10.2006 -- hwyss@ywesee.com
 
 require 'sbsm/lookandfeel'
+require 'sbsm/lookandfeelfactory'
+require 'sbsm/lookandfeelwrapper'
 
 module ODDB
   module Html
@@ -20,6 +22,7 @@ class Lookandfeel < SBSM::Lookandfeel
       :code_zuzahlungsbefreit   => 'Zuzahlungsbefreit',
       :company                  => 'Zulassungsinhaber',
       :compare                  => 'Preisvergleich',
+      :compare_remote           => 'Preisvergleich',
       :comparison_for0          => 'Preisvergleich für ',
       :comparison_for1          => '',
       :contact                  => 'Kontakt',
@@ -155,6 +158,17 @@ aktuellsten Medikamenten-Portal Deutschlands.
       [@session.http_protocol + ':/', @session.server_name,
         @language, @session.zone].compact.join("/")
     end
+end
+class LookandfeelMeineMedikamente < SBSM::LookandfeelWrapper
+  ENABLED = [
+    :remote_databases,
+  ]
+end
+class LookandfeelFactory < SBSM::LookandfeelFactory
+  BASE = Lookandfeel
+  WRAPPERS = {
+    'mm' => [ LookandfeelMeineMedikamente ],
+  }
 end
     end
   end

@@ -45,13 +45,13 @@ module ODDB
         assert_equal(false, third.comparable?(@sequence))
       end
       def test_comparables
-        prod1 = flexmock('product')
-        prod2 = flexmock('product')
-
         seq1 = Sequence.new
-        prod1.should_receive(:sequences).and_return([seq1])
         seq2 = Sequence.new
-        prod2.should_receive(:sequences).and_return([seq2])
+        atc = flexmock('atc')
+        atc.should_receive(:sequences)\
+          .and_return([seq1, @sequence, seq2])
+        atc.should_ignore_missing
+        @sequence.atc = atc
 
         comp1 = flexmock('composition')
         @sequence.add_composition(comp1)
@@ -59,13 +59,7 @@ module ODDB
         comp2 = flexmock('composition')
         seq2.add_composition(comp2)
 
-        product = flexmock('product')
-        product.should_receive(:comparables).and_return([prod1, prod2])
-        product.should_ignore_missing
-
-        @sequence.product = product
-
-        assert_equal([seq1], @sequence.comparables)
+        assert_equal([seq1, @sequence], @sequence.comparables)
       end
       def test_include
         sub1 = flexmock('substance')

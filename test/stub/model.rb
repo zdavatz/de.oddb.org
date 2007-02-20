@@ -71,6 +71,11 @@ module ODDB
     end
     class Atc < Model
       simulate_database(:name)
+      class << self
+        def find_by_code(code)
+          @instances.find { |inst| inst.code == code }
+        end
+      end
     end
     class Composition < Model
       simulate_database

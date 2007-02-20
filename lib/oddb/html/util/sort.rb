@@ -36,11 +36,11 @@ module PackageSort
     when :code_festbetragsstufe, :code_zuzahlungsbefreit
       Proc.new { |pac| 
         (code = pac.code(key)) && code.value || '' }
-    when :company, :product
+    when :company
       Proc.new { |pac| 
         (multilingual = pac.send(key)) \
           && multilingual.name.send(@session.language) || '' }
-    when :festbetrag, :price_public
+    when :festbetrag
       nilval = ODDB::Util::Money.new(0)
       Proc.new { |pac| pac.price(key) || nilval }
     when :price_difference
@@ -50,6 +50,11 @@ module PackageSort
          && (pp = pac.price(:public)) \
          && pp - pf) || nilval
       }
+    when :price_public
+      nilval = ODDB::Util::Money.new(0)
+      Proc.new { |pac| pac.price(:public) || nilval }
+    when :product
+      Proc.new { |pac| pac.name.send(@session.language) || '' }
     end
   end
 end

@@ -1,0 +1,208 @@
+body, input {
+  font-family: Arial, Helvetica, Verdana, sans-serif;
+  font-size: 12px
+}
+a {
+  text-decoration: none;
+  color: blue;
+}
+a:hover {
+  color: black;
+}
+div.explain {
+  padding: 4px;
+}
+div#explain-compare {
+  padding: 2px 4px;
+  float: left;
+}
+div#foot, div#title, th {
+  background-color: #2ba476;
+  color: white;
+  padding: 4px;
+}
+div#foot a:link,  
+div#foot a:visited,
+th a:link, th a:visited {
+  color: white;
+}
+div#foot a,
+div#foot a:visited:hover,
+div#foot a:link:hover,
+th a, th a:visited:hover, th a:link:hover {
+  color: blue;
+}
+div#head {
+  margin-bottom: 30px;
+}
+div#home-search {
+  margin-top: 100px;
+  margin-bottom: 100px;
+  text-align: center;
+}
+div#home-search input[type=text] {
+  width: 200px;
+}
+div#navigation {
+  float: right;
+}
+div#navigation a {
+  padding: 0px 4px;
+  border-left: 1px solid white;
+}
+div#navigation a:first-child {
+  padding: 0px 4px;
+  border-left: 0px;
+}
+div.result table { 
+  width: 100%;
+}
+div#result-found {
+  font-weight: bold;
+  font-size: 14px;
+  padding: 2px 4px;
+  /*float: left;*/
+}
+div#result-search {
+  text-align: right;
+}
+div#result-search input[type=text] {
+  width: 200px;
+}
+div#snapback {
+  float: left;
+  padding: 3px 4px;
+}
+div#welcome {
+  margin-top: 75px;
+  float: right;
+  text-align: right;
+}
+form {
+  margin: 0px;
+}
+img {
+  border: 0px;
+}
+label {
+  font-weight: bold;
+}
+span#delicious {
+  background-image: url(/resources/images/delicious.gif);
+}
+span#digg {
+  background-image: url(/resources/images/digg.gif);
+}
+span.less {
+  color: #2ba476;
+  font-weight: bold;
+}
+span.more {
+  color: red;
+  font-weight: bold;
+}
+span.same {
+  font-weight: bold;
+}
+span#simpy {
+  background-image: url(/resources/images/simpy.gif);
+}
+span#stumble {
+  background-image: url(/resources/images/stumble.gif);
+}
+span.social {
+  background-repeat: no-repeat;
+  background-attachment: scroll;
+  margin-left: 8px;
+  padding-left: 20px;
+  padding-top: 1px;
+}
+td {
+  padding: 4px;
+}
+td#alphaheader, div.divider {
+  padding: 4px;
+  background-color: #cf9;
+  font-weight: bold;
+}
+td#alphaheader a {
+  padding: 0px 8px;
+  border-left: 1px solid black;
+  color: black;
+}
+td#alphaheader a:first-child {
+  border-left: 0px;
+}
+td#alphaheader a:link,
+td#alphaheader a:visited {
+  color: blue;
+}
+td#alphaheader a:link:hover,
+td#alphaheader a:visited:hover {
+  color: red;
+}
+td.company {
+  font-style: italic;
+}
+td.info {
+  padding: 8px; 
+  font-weight: bold;
+}
+td#offsetheader {
+  padding: 4px 0px;
+  background-color: #cf9;
+  font-weight: bold;
+  border-top: 1px solid #7bcf88;
+}
+td#offsetheader a {
+  background-color: #cf9;
+  padding: 4px 8px;
+  color: black;
+  background-color: #7bcf88;
+}
+td#offsetheader a:link,
+td#offsetheader a:visited {
+  background-color: #cf9;
+  color: blue;
+}
+td#offsetheader a:link:hover,
+td#offsetheader a:visited:hover {
+  color: red;
+}
+td.product {
+  font-size: 14px;
+  font-weight: bold;
+}
+td.warn {
+  padding: 8px; 
+  color: #F70;
+  font-weight: bold;
+}
+th {
+  text-align: left;
+}
+tr.bg {
+  background-color: #dcefd6;
+}
+tr.origin td {
+  padding-bottom: 10px;
+}
+tr.remote {
+  background-color: #fee;
+}
+tr.remote.bg {
+  background-color: #fdd;
+}
+tr.zuzahlungsbefreit {
+  background-color: #fbfd98;
+}
+tr.zuzahlungsbefreit.bg {
+  background-color: #fafc6d;
+}
+.price_public, .festbetrag, .price_difference, .doses, .difference {
+  text-align: right;
+}
+.code_festbetragsstufe, td.code_zuzahlungsbefreit, 
+th.code_zuzahlungsbefreit {
+  text-align: center;
+}

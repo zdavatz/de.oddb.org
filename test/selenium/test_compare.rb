@@ -8,6 +8,8 @@ require 'selenium/unit'
 require 'stub/model'
 require 'oddb/drugs'
 require 'oddb/util'
+require 'odba/drbwrapper'
+require 'odba'
 
 module ODDB
   module Selenium
@@ -21,12 +23,12 @@ class TestCompare < Test::Unit::TestCase
   end
   def setup_package(name, pzn='12345', price=6)
     product = Drugs::Product.new
-    product.atc = Drugs::Atc.new('N04BB01')
     company = Business::Company.new
     company.name.de = 'Producer AG'
     product.company = company
     company.save
     sequence = Drugs::Sequence.new
+    sequence.atc = Drugs::Atc.new('N04BB01')
     sequence.product = product
     composition = Drugs::Composition.new
     sequence.add_composition(composition)
@@ -35,6 +37,9 @@ class TestCompare < Test::Unit::TestCase
     dose = Drugs::Dose.new(100, 'mg')
     active_agent = Drugs::ActiveAgent.new(substance, dose)
     composition.add_active_agent(active_agent)
+    galform = Drugs::GalenicForm.new
+    galform.description.de = 'Tropfen'
+    composition.galenic_form = galform
     package = Drugs::Package.new
     code = Util::Code.new(:festbetragsstufe, 3, 'DE')
     package.add_code(code)
@@ -55,6 +60,10 @@ class TestCompare < Test::Unit::TestCase
     package.add_code(Util::Code.new(:cid, pzn, 'DE'))
     package.save
     package
+  end
+  def teardown
+    super
+    ODDB.config.remote_databases = []
   end
   def test_init
     package = setup_package("Amantadin by Producer")
@@ -115,6 +124,58 @@ class TestCompare < Test::Unit::TestCase
     assert_equal "ODDB | Medikamente | Preisvergleich | Amantadin by Producer", get_title
     assert_match(/^By another name/, @selenium.get_text("cid_0"))
     assert_match(/^Yet another/, @selenium.get_text("cid_1"))
+  end
+  def test_remote
+    remote = flexmock('Remote')
+    DRb.install_id_conv(ODBA::DRbIdConv.new)
+    drb = DRb.start_service('druby://localhost:0', remote)
+    ODDB.config.remote_databases = [drb.uri]
+
+    remote.should_receive(:get_currency_rate).with('EUR').and_return 0.6
+    rpackage = flexmock('Remote Package')
+    remote.should_receive(:remote_packages).and_return([rpackage])
+    rpackage.should_receive(:name_base).and_return('Remotadin')
+    rpackage.should_receive(:price_public).and_return(1200)
+    rpackage.should_receive(:comparable_size)\
+      .and_return(Drugs::Dose.new(5.5))
+    rpackage.should_receive(:__drbref).and_return("55555")
+    rpackage.should_receive(:comform)
+    rcompany = flexmock('Remote Company')
+    rpackage.should_receive(:company).and_return(rcompany)
+    rcompany.should_receive(:name).and_return('Producer (Schweiz) AG')
+    ratc = flexmock('Remote Atc Class')
+    rpackage.should_receive(:atc_class).and_return(ratc)
+    ratc.should_receive(:code).and_return('N04BB01')
+    ratc.should_receive(:de).and_return('Amantadine')
+    ragent = flexmock('Remote ActiveAgent')
+    rpackage.should_receive(:active_agents).and_return([ragent])
+    rsubstance = flexmock('Remote Substance')
+    ragent.should_receive(:dose).and_return(Drugs::Dose.new(100, 'mg'))
+    ragent.should_receive(:substance).and_return(rsubstance)
+    rsubstance.should_receive(:de).and_return('Amantadinum')
+
+    package = setup_package('Amantadin')
+    ## switch to mm-flavor
+    open "/de/drugs/home/flavor/mm"
+    assert_equal "ODDB | Medikamente | Home", get_title
+    type "query", "Amantadin"
+    click "//input[@type='submit']"
+    wait_for_page_to_load "30000"
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin", get_title
+  
+    atc = Drugs::Atc.new('N04BB01')
+    rgalform = flexmock('Remote Galenic Form')
+    rpackage.should_receive(:galenic_form).and_return(rgalform)
+    rgalform.should_receive(:de).and_return('Tropfen')
+    flexstub(ODBA.cache).should_receive(:fetch)\
+      .with(55555).and_return(rpackage)
+
+    click "link=Remotadin"
+    wait_for_page_to_load "30000"
+    assert_equal "ODDB | Medikamente | Preisvergleich | Remotadin", get_title
+    assert is_text_present('-8.3%')
+  ensure
+    drb.stop_service
   end
 end
   end

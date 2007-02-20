@@ -43,7 +43,16 @@ class Compare < Global
   def direct_event
     direct_event = [:compare]
     if(code = @model.query)
-      direct_event.push(code)
+      direct_event.push(:query, code)
+    end
+    direct_event
+  end
+end
+class CompareRemote < Compare
+  def direct_event
+    direct_event = [:compare_remote]
+    if((origin = @model.origin) && (uid = origin.uid))
+      direct_event.push(:uid, uid)
     end
     direct_event
   end

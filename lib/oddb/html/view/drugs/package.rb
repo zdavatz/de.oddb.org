@@ -35,6 +35,15 @@ module PackageMethods
     end
     link
   end
+  def atc(model)
+    if(atc = model.atc)
+      span = HtmlGrid::Span.new(model, @session, self)
+      span.value = atc.code
+      span.css_id = "atc_#@list_index"
+      span.dojo_title = atc.name.send(@session.language)
+      span
+    end
+  end
   def code_festbetragsgruppe(model)
     model.product.code(:festbetragsgruppe, 'DE')
   end
@@ -65,6 +74,13 @@ module PackageMethods
     model.price(:public)
   end
   def product(model)
+    if(model.is_a?(Remote::Drugs::Package))
+      product_remote(model)
+    else
+      product_local(model)
+    end
+  end
+  def product_local(model)
     link = nil
     if(model.atc && (code = model.code(:cid, 'DE')))
       link = HtmlGrid::Link.new(:compare, model, @session, self)
@@ -77,10 +93,29 @@ module PackageMethods
     link.dojo_title = @lookandfeel.lookup(:pzn, model.code(:cid, 'DE'))
     link
   end
+  def product_remote(model)
+    link = nil
+    if(model.atc && (model.active_agents.size == 1))
+      link = HtmlGrid::Link.new(:compare, model, @session, self)
+      link.href = @lookandfeel._event_url(:compare_remote, 
+                                          [:uid, model.uid])
+    else
+      link = HtmlGrid::Span.new(model, @session, self)
+    end
+    link.value = model.name.send(@session.language)
+    link.css_id = "cid_#@list_index"
+    #link.dojo_title = @lookandfeel.lookup(:pzn, model.code(:cid, 'DE'))
+    link
+  end
   def row_css(model, bg_flag)
     css = super
-    if((code = model.code(:zuzahlungsbefreit)) && code.value)
-      css = ['zuzahlungsbefreit', css].compact.join(' ')
+    case model
+    when Remote::Drugs::Package
+      css = ['remote', css].compact.join(' ')
+    else
+      if((code = model.code(:zuzahlungsbefreit)) && code.value)
+        css = ['zuzahlungsbefreit', css].compact.join(' ')
+      end
     end
     css
   end

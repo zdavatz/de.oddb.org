@@ -19,16 +19,16 @@ class TestPackage < Test::Unit::TestCase
   end
   def setup_package(pzn='12345')
     product = Drugs::Product.new
-    product.atc = Drugs::Atc.new('N04BB01')
-    product.atc.name.de = 'Amantadin'
-    ddd = Drugs::Ddd.new('O')
-    ddd.dose = Drugs::Dose.new(5, 'mg')
-    product.atc.add_ddd(ddd)
     company = Business::Company.new
     company.name.de = 'Producer AG'
     product.company = company
     company.save
     sequence = Drugs::Sequence.new
+    sequence.atc = Drugs::Atc.new('N04BB01')
+    sequence.atc.name.de = 'Amantadin'
+    ddd = Drugs::Ddd.new('O')
+    ddd.dose = Drugs::Dose.new(5, 'mg')
+    sequence.atc.add_ddd(ddd)
     sequence.product = product
     composition = Drugs::Composition.new
     composition.equivalence_factor = '44.6'

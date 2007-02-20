@@ -19,7 +19,9 @@ class TestProducts < Test::Unit::TestCase
   end
   def setup_product(name)
     product = Drugs::Product.new
-    product.atc = Drugs::Atc.new('N04BB01')
+    sequence = Drugs::Sequence.new
+    sequence.product = product
+    sequence.atc = Drugs::Atc.new('N04BB01')
     company = Business::Company.new
     company.name.de = 'Producer AG'
     product.company = company

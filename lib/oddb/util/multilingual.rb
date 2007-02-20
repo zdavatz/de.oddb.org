@@ -7,8 +7,8 @@ module ODDB
       include Comparable
       attr_reader :canonical
       attr_reader :synonyms
-      def initialize
-        @canonical = {}
+      def initialize(canonical={})
+        @canonical = canonical
         @synonyms = []
       end
       def all

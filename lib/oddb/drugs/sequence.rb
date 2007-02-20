@@ -6,19 +6,18 @@ require 'oddb/model'
 module ODDB
   module Drugs
     class Sequence < Model
+      belongs_to :atc
+      belongs_to :product, delegates(:company, :name)
       has_many :compositions, 
         delegates(:active_agents, :doses, :galenic_form, :substances),
         on_delete(:cascade)
       has_many :packages, on_delete(:cascade)
-      belongs_to :product, delegates(:atc, :company, :name)
       def comparable?(other)
         other.is_a?(Sequence) && compositions == other.compositions
       end
       def comparables
-        @product.comparables.inject([]) { |memo, product|
-          memo.concat product.sequences.select { |sequence|
-            comparable?(sequence)
-          }
+        atc.sequences.select { |sequence|
+          comparable?(sequence)
         }
       end
       def include?(substance, dose=nil, unit=nil)

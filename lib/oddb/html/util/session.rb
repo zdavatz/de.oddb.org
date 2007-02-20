@@ -19,7 +19,7 @@ class Session < SBSM::Session
   DEFAULT_STATE = State::Drugs::Init
   DEFAULT_ZONE = 'drugs'
   EXPIRES = ODDB.config.session_timeout
-  LOOKANDFEEL = Lookandfeel
+  LF_FACTORY = LookandfeelFactory
   def navigation
     state.navigation
   end

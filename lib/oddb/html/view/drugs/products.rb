@@ -12,15 +12,6 @@ module ODDB
     module View
       module Drugs
 module ProductMethods 
-  def atc(model)
-    if(atc = model.atc)
-      span = HtmlGrid::Span.new(model, @session, self)
-      span.value = atc.code
-      span.css_id = "atc_#@list_index"
-      span.dojo_title = atc.name.send(@session.language)
-      span
-    end
-  end
   def company(model)
     if(company = model.company)
       company.name.send(@session.language)
@@ -42,6 +33,22 @@ class ProductsList < View::List
   }
   CSS_MAP = css_map
   CSS_HEAD_MAP = css_map
+  def atc(model)
+    atcs = model.atcs.sort
+    unless(atcs.empty?)
+      span = HtmlGrid::Span.new(model, @session, self)
+      names = []
+      codes = []
+      atcs.each { |atc|
+        names.push(atc.name.send(@session.language))
+        codes.push(atc.code)
+      }
+      span.value = codes.join(', ')
+      span.css_id = "atc_#@list_index"
+      span.dojo_title = codes.join(', ')
+      span
+    end
+  end
   def product(model)
     link = HtmlGrid::Link.new(:product, model, @session, self)
     name = model.name.send(@session.language)

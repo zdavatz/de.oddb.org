@@ -151,7 +151,8 @@ class TestProduct < Test::Unit::TestCase
     assert_equal("114568", code.value)
 
     pr = Drugs::Product.instances.at(1)
-    assert_equal(atc, pr.atc)
+    seq = pr.sequences.first
+    assert_equal(atc, seq.atc)
 
     pr = Drugs::Product.instances.last
     seq = pr.sequences.first
@@ -201,7 +202,8 @@ class TestProduct < Test::Unit::TestCase
     assert_equal("114568", code.value)
 
     pr = Drugs::Product.instances.at(1)
-    assert_equal(atc, pr.atc)
+    seq = pr.sequences.first
+    assert_equal(atc, seq.atc)
 
     pr = Drugs::Product.instances.last
     seq = pr.sequences.first
@@ -281,10 +283,10 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_instance_of(Array, report)
     assert_equal(1, Drugs::Product.instances.size)
     assert_equal([product], Drugs::Product.instances)
-    assert_equal(atc, product.atc)
-    assert_equal([product], atc.products)
     assert_equal(1, product.sequences.size)
     sequence = product.sequences.first
+    assert_equal(atc, sequence.atc)
+    assert_equal([sequence], atc.sequences)
     assert_equal(1, sequence.compositions.size)
     composition = sequence.compositions.first
     assert_equal(2, composition.active_agents.size)
@@ -307,10 +309,12 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_instance_of(Array, report)
     assert_equal(1, Drugs::Product.instances.size)
     assert_equal([product], Drugs::Product.instances)
-    assert_equal(atc, product.atc)
-    assert_equal([product], atc.products)
+    assert_equal(atc, sequence.atc)
+    assert_equal([sequence], atc.sequences)
     assert_equal(1, product.sequences.size)
     sequence = product.sequences.first
+    assert_equal(atc, sequence.atc)
+    assert_equal([sequence], atc.sequences)
     assert_equal(1, sequence.compositions.size)
     composition = sequence.compositions.first
     assert_equal(2, composition.active_agents.size)
@@ -343,10 +347,10 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_instance_of(Array, report)
     assert_equal(1, Drugs::Product.instances.size)
     assert_equal([product], Drugs::Product.instances)
-    assert_equal(atc, product.atc)
-    assert_equal([product], atc.products)
     assert_equal(1, product.sequences.size)
     sequence = product.sequences.first
+    assert_equal(atc, sequence.atc)
+    assert_equal([sequence], atc.sequences)
     assert_equal(1, sequence.compositions.size)
     composition = sequence.compositions.first
     assert_equal(1, composition.active_agents.size)
@@ -367,10 +371,10 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_instance_of(Array, report)
     assert_equal(1, Drugs::Product.instances.size)
     assert_equal([product], Drugs::Product.instances)
-    assert_equal(atc, product.atc)
-    assert_equal([product], atc.products)
     assert_equal(1, product.sequences.size)
     sequence = product.sequences.first
+    assert_equal(atc, sequence.atc)
+    assert_equal([sequence], atc.sequences)
     assert_equal(1, sequence.compositions.size)
     composition = sequence.compositions.first
     assert_equal(1, composition.active_agents.size)
@@ -416,10 +420,10 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_instance_of(Array, report)
     assert_equal(1, Drugs::Product.instances.size)
     assert_equal([product], Drugs::Product.instances)
-    assert_equal(atc, product.atc)
-    assert_equal([product], atc.products)
     assert_equal(1, product.sequences.size)
     sequence = product.sequences.first
+    assert_equal(atc, sequence.atc)
+    assert_equal([sequence], atc.sequences)
     assert_equal(1, sequence.compositions.size)
     composition = sequence.compositions.first
     assert_equal(1, composition.active_agents.size)
@@ -440,10 +444,10 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_instance_of(Array, report)
     assert_equal(1, Drugs::Product.instances.size)
     assert_equal([product], Drugs::Product.instances)
-    assert_equal(atc, product.atc)
-    assert_equal([product], atc.products)
     assert_equal(1, product.sequences.size)
     sequence = product.sequences.first
+    assert_equal(atc, sequence.atc)
+    assert_equal([sequence], atc.sequences)
     assert_equal(1, sequence.compositions.size)
     composition = sequence.compositions.first
     assert_equal(1, composition.active_agents.size)

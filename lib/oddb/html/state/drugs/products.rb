@@ -33,7 +33,8 @@ class Products < Drugs::Global
   def sort_proc(key)
     case key
     when :atc
-      Proc.new { |prod| (atc = prod.atc) && atc.code || '' }
+      Proc.new { |prod| 
+        prod.atcs.compact.uniq.collect { |atc| atc.code }.sort }
     when :company
       Proc.new { |prod| 
         (multilingual = prod.send(key)) \

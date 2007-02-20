@@ -3,6 +3,7 @@
 
 require 'oddb/business/company'
 require 'oddb/drugs/package'
+require 'oddb/remote/drugs/package'
 require 'oddb/html/state/global'
 require 'oddb/html/state/drugs/compare'
 require 'oddb/html/state/drugs/init'
@@ -20,6 +21,19 @@ class Global < State::Global
   EVENT_MAP = {
     :home => Drugs::Init,
   }
+  def compare_remote
+    id = @session.user_input(:uid)
+    source, ref = id.split('.', 2)
+    uri = ODDB.config.remote_databases.at(source.to_i)
+    if(pac = DRbObject._load(Marshal.dump([uri, ref])))
+      rate = _remote_currency_rate(uri)
+      package = Remote::Drugs::Package.new(source, pac, rate)
+      result = Util::AnnotatedList.new(package.comparables) 
+      result.origin = package
+      result.query = package.atc.code
+      CompareRemote.new(@session, result)
+    end
+  end
   def _compare(code)
     if(package = _package_by_code(code))
       result = Util::AnnotatedList.new(package.comparables) 
@@ -56,6 +70,9 @@ class Global < State::Global
     end
     Products.new(@session, result)
   end
+  def _remote_currency_rate(uri)
+    DRbObject.new(nil, uri).get_currency_rate("EUR")
+  end
   def _search(query)
     result = Util::AnnotatedList.new
     result.query = query
@@ -76,7 +93,25 @@ class Global < State::Global
         result.concat(ODDB::Drugs::Package.search_by_name(query))
       end
     end
+    if(@session.lookandfeel.enabled?(:remote_databases, false))
+      result.concat(_search_remote(query))
+    end
     Result.new(@session, result)
+  end
+  def _search_remote(query)
+    result = []
+    ODDB.config.remote_databases.each_with_index { |uri, source|
+      begin
+        remote = DRbObject.new(nil, uri)
+        rate = _remote_currency_rate(uri)
+        result.concat remote.remote_packages(query).collect { |pac|
+          Remote::Drugs::Package.new(source, pac, rate)
+        }
+      rescue Exception => e
+        warn e.message
+      end
+    }
+    result
   end
 end
       end

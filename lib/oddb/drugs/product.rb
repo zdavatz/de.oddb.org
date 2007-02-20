@@ -6,7 +6,6 @@ require 'oddb/model'
 module ODDB
   module Drugs
     class Product < Model
-      belongs_to :atc
       belongs_to :company
       has_many :sequences, on_delete(:cascade), delegates(:substances)
       is_coded
@@ -14,8 +13,8 @@ module ODDB
       def initialize
         @sequences = []
       end
-      def comparables
-        atc.products
+      def atcs
+        sequences.collect { |sequence| sequence.atc }.compact.uniq
       end
       def packages
         @sequences.inject([]) { |memo, seq|

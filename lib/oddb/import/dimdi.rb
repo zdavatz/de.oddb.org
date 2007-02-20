@@ -131,9 +131,9 @@ module Dimdi
       @deleted_sequences += 1
       sequence.delete
     end
-    def import_atc(row, product)
+    def import_atc(row, sequence)
       atc_name = cell(row, 2)
-      substances = product.substances.uniq
+      substances = sequence.substances.uniq
       candidates = []
       if(substances.size == 1)
         substance = substances.first
@@ -149,7 +149,8 @@ module Dimdi
         candidates = Drugs::Atc.search_by_name(atc_name)
       end
       if(candidates.size == 1)
-        product.atc = candidates.first
+        sequence.atc = candidates.first
+        sequence.save
       end
     end
     def import_row(row)
@@ -218,7 +219,6 @@ module Dimdi
                               'DE', @date)
         product.add_code(code)
       end
-      import_atc(row, product)
       product.save
     end
     def import_price(package, type, amount)
@@ -275,6 +275,7 @@ module Dimdi
         composition.equivalence_factor = factor
       end
       composition.save
+      import_atc(row, sequence)
       if(package)
         package.sequence = sequence
         update_package(row, package)
@@ -514,9 +515,11 @@ module Dimdi
         end
         sequence = package.sequence
         product = sequence.product
-        if(atc = Drugs::Atc.find_by_name(cell(row, 0)))
-          product.atc = atc
-          product.save
+        atc_name = cell(row, 0)
+        candidates = Drugs::Atc.search_by_exact_name(atc_name)
+        if(candidates.size == 1)
+          sequence.atc = candidates.first
+          sequence.save
         end
         part = package.parts.first
         mnum, qnum = cell(row, 4).to_s.split('X')

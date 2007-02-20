@@ -25,6 +25,7 @@ module ODDB
     'mail_from'         => 'update@oddb.org',
     'oddb_dir'          => File.expand_path('..', default_dir),
     'persistence'       => 'odba',
+    'remote_databases'  => [],
     'run_updater'       => true,
     'server_url'        => 'druby://localhost:11000',
     'session_timeout'   => 3600,

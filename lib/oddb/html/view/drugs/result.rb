@@ -47,7 +47,7 @@ class Packages < View::List
   end
   def price_difference(model)
     if(pf = model.price(:festbetrag))
-      model.price(:public) - pf
+      sprintf("%+1.2f", model.price(:public) - pf)
     end
   end
 end

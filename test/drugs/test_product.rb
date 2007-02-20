@@ -14,16 +14,6 @@ module ODDB
       def setup
         @product = Product.new
       end
-      def test_comparables
-        prod1 = flexmock('product')
-        prod2 = flexmock('product')
-        atc = flexmock('atc')
-        atc.should_receive(:products)\
-          .and_return([prod1, @product, prod2])
-        atc.should_ignore_missing
-        @product.atc = atc
-        assert_equal([prod1, @product, prod2], @product.comparables)
-      end
       def test_name
         assert_instance_of(Util::Multilingual, @product.name)
       end
