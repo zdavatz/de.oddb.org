@@ -67,7 +67,7 @@ class TestCompare < Test::Unit::TestCase
     rpackage.should_receive(:name_base).and_return(name)
     rpackage.should_receive(:price_public).and_return(price * 100)
     rpackage.should_receive(:comparable_size)\
-      .and_return(Drugs::Dose.new(5.5))
+      .and_return(Drugs::Dose.new(4))
     rpackage.should_receive(:__drbref).and_return(uid)
     rpackage.should_receive(:comform)
     rcompany = flexmock('Remote Company')
@@ -135,6 +135,8 @@ class TestCompare < Test::Unit::TestCase
     assert_equal 'origin', 
                  get_attribute('//tr[2]@class')
     assert_equal 'zuzahlungsbefreit', get_attribute('//tr[3]@class')
+    assert is_text_present('Gelb = Zuzahlungsbefreit')
+    assert !is_text_present('Rot = CH - Produkte')
   end
   def test_sort
     package1 = setup_package("Amantadin by Producer", '12345', 6)
@@ -188,7 +190,8 @@ class TestCompare < Test::Unit::TestCase
     assert_match(/^Amantadin/, get_text("cid_0"))
     assert is_element_present("//a[@id='cid_1']")
     assert_match(/^Remoteric/, get_text("cid_1"))
-    assert is_text_present('-8.3%')
+    assert is_text_present('-33.3%')
+    assert is_text_present('-16.7%')
 
     click "link=Remoteric"
     wait_for_page_to_load "30000"
@@ -199,9 +202,11 @@ class TestCompare < Test::Unit::TestCase
     assert_match(/^Amantadin/, get_text("cid_0"))
     assert is_element_present("//a[@id='cid_1']")
     assert_match(/^Remotadin/, get_text("cid_1"))
-    assert is_text_present('+10.0%')
+    assert is_text_present('-20.0%')
     assert is_text_present('+20.0%')
 
+    assert is_text_present('Gelb = Zuzahlungsbefreit')
+    assert is_text_present('Rot = CH - Produkte')
   ensure
     drb.stop_service
   end

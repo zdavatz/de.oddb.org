@@ -237,6 +237,8 @@ einmal.
     assert_equal "ODDB | Medikamente | Suchen | Amantadin", get_title
     assert_match(/^Amantadin by Producer/, get_text("cid_0"))
     assert !is_element_present("//a[@id='cid_1']")
+    assert is_text_present('Gelb = Zuzahlungsbefreit')
+    assert !is_text_present('Rot = CH - Produkte')
   ensure
     drb.stop_service
   end
@@ -300,6 +302,9 @@ einmal.
     assert_match(/^Remotadin/, get_text("cid_1"))
     assert_equal 'zuzahlungsbefreit', get_attribute('//tr[2]@class')
     assert_equal 'remote bg', get_attribute('//tr[3]@class')
+
+    assert is_text_present('Gelb = Zuzahlungsbefreit')
+    assert is_text_present('Rot = CH - Produkte')
   ensure
     drb.stop_service
   end

@@ -83,6 +83,9 @@ module ODDB
     class GalenicForm < Model
       simulate_database(:description)
     end
+    class GalenicGroup < Model
+      simulate_database(:name)
+    end
     class Package < Model
       simulate_database(:name, :atc, :substance)
     end

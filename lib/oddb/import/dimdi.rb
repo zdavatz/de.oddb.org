@@ -11,6 +11,7 @@ require 'oddb/drugs/active_agent'
 require 'oddb/drugs/atc'
 require 'oddb/drugs/composition'
 require 'oddb/drugs/galenic_form'
+require 'oddb/drugs/galenic_group'
 require 'oddb/drugs/package'
 require 'oddb/drugs/part'
 require 'oddb/drugs/product'
@@ -43,7 +44,7 @@ module Dimdi
         }
       }
     end
-  rescue Exception
+  rescue StandardError
   end
   def Dimdi.download_latest(url, today, &block)
     file = File.basename(url)
@@ -62,7 +63,7 @@ module Dimdi
         local << content
       }
     end
-  rescue Exception
+  rescue StandardError
   end
   class GalenicForm < DatedExcel
     def initialize(date = Date.today)
@@ -90,6 +91,24 @@ module Dimdi
                                            abbr, 'DE', @date))
       galenic_form.save
       galenic_form
+    end
+    def postprocess
+      {
+        'Tabletten' => [ 'Tabletten', 'Filmtabletten', 'Kapseln',
+                         'Dragees' ],
+        'Retard'    => [ 'Retardtabletten',  'Retardfilmtabletten',
+                         'Retardkapseln', 'Retarddragees' ],
+      }.each { |groupname, formnames|
+        group = Drugs::GalenicGroup.find_by_name(groupname) \
+          || Drugs::GalenicGroup.new(groupname)
+        formnames.each { |name|
+          if((form = Drugs::GalenicForm.find_by_description(name)) \
+             && !form.group)
+            form.group = group
+            form.save
+          end
+        }
+      }
     end
     def report
       [
@@ -465,6 +484,15 @@ module Dimdi
         substance.save
         substance
       }
+    end
+    def postprocess
+      ## a special case that probably fits best here:
+      if((ass = Drugs::Substance.find_by_name('ASS')) \
+         && ass.name.de == 'ASS')
+        ass.name.synonyms.push('ASS').uniq!
+        ass.name.de = 'Acetylsalicylsäure'
+        ass.save
+      end
     end
     def report
       [
