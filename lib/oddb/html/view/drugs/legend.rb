@@ -9,12 +9,19 @@ module ODDB
       module Drugs
 class Legend < HtmlGrid::Composite
   COMPONENTS = {}
+  LEGACY_INTERFACE = false
   def init
-    @css_map = @lookandfeel.legend_components.dup
-    @css_map.each { |pos, key|
-      components.store(pos, "explain_%s" % key)
+    @components = @lookandfeel.legend_components.dup
+    @components.each { |pos, key|
+      css_map.store(pos, key.to_s.gsub(/^explain_/, ""))
     }
     super
+  end
+  def explain_currency_conversion(model)
+    link = HtmlGrid::Link.new(:explain_currency_convert, model, 
+                              @session, self)
+    link.href = "http://www.google.de/search?q=1%20EUR%20in%20CHF"
+    link
   end
 end
       end

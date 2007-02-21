@@ -43,6 +43,7 @@ einmal.
       EOS
       :equivalence_factor       => 'Wirkstärkenäquivalenzfaktor (waef)',
       :explain_compare          => 'Für einen Preisvergleich klicken Sie bitte auf den Medikamentennamen.', 
+      :explain_currency_convert => 'Wechselkurs (1 EUR in CHF)',
       :explain_remote           => 'Rot = CH - Produkte', 
       :explain_zuzahlungsbefreit=> 'Gelb = Zuzahlungsbefreit', 
       :explain_search           => <<-EOS,
@@ -164,7 +165,7 @@ aktuellsten Medikamenten-Portal Deutschlands.
       @language, @session.zone].compact.join("/")
   end
   def legend_components
-    { [0,0] => 'zuzahlungsbefreit' }
+    { [0,0] => 'explain_zuzahlungsbefreit' }
   end
 end
 class LookandfeelWrapper < SBSM::LookandfeelWrapper
@@ -182,8 +183,9 @@ class LookandfeelMeineMedikamente < LookandfeelWrapper
   ]
   def legend_components
     { 
-      [0,0] => 'remote',
-      [0,1] => 'zuzahlungsbefreit', 
+      [0,0] => 'explain_remote',
+      [0,1] => 'explain_zuzahlungsbefreit', 
+      [0,2] => :explain_currency_conversion,
     }
   end
 end
