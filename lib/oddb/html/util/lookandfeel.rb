@@ -43,6 +43,8 @@ einmal.
       EOS
       :equivalence_factor       => 'Wirkstärkenäquivalenzfaktor (waef)',
       :explain_compare          => 'Für einen Preisvergleich klicken Sie bitte auf den Medikamentennamen.', 
+      :explain_remote           => 'Rot = CH - Produkte', 
+      :explain_zuzahlungsbefreit=> 'Gelb = Zuzahlungsbefreit', 
       :explain_search           => <<-EOS,
 Vergleichen Sie einfach und schnell Medikamentenpreise.
 Suchen Sie nach Medikamentname oder Wirkstoff.

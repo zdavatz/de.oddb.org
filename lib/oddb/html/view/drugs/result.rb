@@ -59,7 +59,7 @@ class ResultComposite < HtmlGrid::DivComposite
     [0,3] => Packages, 
   }
   CSS_ID_MAP = ['result-found', 'explain-compare', 'result-search', ]
-  CSS_MAP = { 3 => 'result' }
+  CSS_MAP = { 1 => 'before-searchbar', 3 => 'result' }
   def title_found(model)
     @lookandfeel.lookup(:title_found, @model.query, @model.size)
   end

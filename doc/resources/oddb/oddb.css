@@ -9,12 +9,14 @@ a {
 a:hover {
   color: black;
 }
+div.before-searchbar {
+  float: left;
+}
 div.explain {
   padding: 4px;
 }
 div#explain-compare {
   padding: 2px 4px;
-  float: left;
 }
 div#foot, div#title, th {
   background-color: #2ba476;
@@ -61,7 +63,6 @@ div#result-found {
   font-weight: bold;
   font-size: 14px;
   padding: 2px 4px;
-  /*float: left;*/
 }
 div#result-search {
   text-align: right;
@@ -70,7 +71,6 @@ div#result-search input[type=text] {
   width: 200px;
 }
 div#snapback {
-  float: left;
   padding: 3px 4px;
 }
 div#welcome {

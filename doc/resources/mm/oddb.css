@@ -9,12 +9,14 @@ a {
 a:hover {
   color: black;
 }
+div.before-searchbar {
+  float: left;
+}
 div.explain {
   padding: 4px;
 }
 div#explain-compare {
   padding: 2px 4px;
-  float: left;
 }
 div#foot, div#title, th {
   background-color: #2ba476;
@@ -43,6 +45,12 @@ div#home-search {
 div#home-search input[type=text] {
   width: 200px;
 }
+div#legend {
+  background-color: #cf9;
+}
+div#legend table {
+  margin: 2px;
+}
 div#navigation {
   float: right;
 }
@@ -61,7 +69,6 @@ div#result-found {
   font-weight: bold;
   font-size: 14px;
   padding: 2px 4px;
-  /*float: left;*/
 }
 div#result-search {
   text-align: right;
@@ -70,7 +77,6 @@ div#result-search input[type=text] {
   width: 200px;
 }
 div#snapback {
-  float: left;
   padding: 3px 4px;
 }
 div#welcome {
@@ -173,6 +179,11 @@ td.product {
   font-size: 14px;
   font-weight: bold;
 }
+td.remote, td.zuzahlungsbefreit {
+  border: 2px solid #cf9;
+  padding: 2px;
+  font-weight: bold;
+}
 td.warn {
   padding: 8px; 
   color: #F70;
@@ -190,13 +201,13 @@ tr.origin td {
 tr.remote {
   background-color: #fee;
 }
-tr.remote.bg {
+tr.remote.bg, td.remote {
   background-color: #fdd;
 }
 tr.zuzahlungsbefreit {
   background-color: #fbfd98;
 }
-tr.zuzahlungsbefreit.bg {
+tr.zuzahlungsbefreit.bg, td.zuzahlungsbefreit {
   background-color: #fafc6d;
 }
 .price_public, .festbetrag, .price_difference, .doses, .difference {

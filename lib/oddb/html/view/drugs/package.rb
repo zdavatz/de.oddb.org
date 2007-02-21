@@ -235,7 +235,7 @@ class PackageComposite < HtmlGrid::DivComposite
     [0,4] => :parts,
   }
   CSS_ID_MAP = [ 'snapback', 'result-search', 'title' ]
-  CSS_MAP = { 4 => 'divider' }
+  CSS_MAP = { 0 => 'before-searchbar', 4 => 'divider' }
   def init
     model.parts.each_with_index { |part, idx|
       name = "part_#{idx}".to_sym

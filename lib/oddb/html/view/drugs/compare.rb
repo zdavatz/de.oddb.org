@@ -4,6 +4,7 @@
 require 'oddb/html/view/list'
 require 'oddb/html/view/search'
 require 'oddb/html/view/snapback'
+require 'oddb/html/view/drugs/legend'
 require 'oddb/html/view/drugs/package'
 require 'oddb/html/view/drugs/products'
 require 'oddb/html/view/drugs/template'
@@ -60,11 +61,19 @@ class CompareComposite < HtmlGrid::DivComposite
   include Snapback
   COMPONENTS = {
     [0,0] => :snapback,
-    [0,1] => InlineSearch, 
-    [0,2] => CompareList,
+    [0,1] => "explain_compare", 
+    [0,2] => InlineSearch, 
+    [0,3] => CompareList,
   }
-  CSS_ID_MAP = [ 'snapback', 'result-search' ]
-  CSS_MAP = { 2 => 'result' }
+  CSS_ID_MAP = [ 'snapback', 'explain-compare', 'result-search' ]
+  CSS_MAP = { 1 => 'before-searchbar', 3 => 'result' }
+  def init
+    if(@lookandfeel.enabled?(:remote_databases, false))
+      components.store([0,4], Legend)
+      css_id_map[4] = 'legend'
+    end
+    super
+  end
   def comparison_for(model)
     @lookandfeel.lookup(:comparison_for, 
                         model.origin.name.send(@session.language))
