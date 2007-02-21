@@ -45,6 +45,12 @@ div#home-search {
 div#home-search input[type=text] {
   width: 200px;
 }
+div#legend {
+  background-color: #cf9;
+}
+div#legend table {
+  margin: 2px;
+}
 div#navigation {
   float: right;
 }
@@ -178,6 +184,11 @@ td.warn {
   color: #F70;
   font-weight: bold;
 }
+td.zuzahlungsbefreit {
+  border: 2px solid #cf9;
+  padding: 2px;
+  font-weight: bold;
+}
 th {
   text-align: left;
 }
@@ -190,7 +201,7 @@ tr.origin td {
 tr.zuzahlungsbefreit {
   background-color: #fbfd98;
 }
-tr.zuzahlungsbefreit.bg {
+tr.zuzahlungsbefreit.bg, td.zuzahlungsbefreit {
   background-color: #fafc6d;
 }
 .price_public, .festbetrag, .price_difference, .doses, .difference {

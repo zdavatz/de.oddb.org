@@ -160,6 +160,9 @@ aktuellsten Medikamenten-Portal Deutschlands.
     [@session.http_protocol + ':/', @session.server_name,
       @language, @session.zone].compact.join("/")
   end
+  def legend_components
+    { [0,0] => 'zuzahlungsbefreit' }
+  end
 end
 class LookandfeelWrapper < SBSM::LookandfeelWrapper
   def base_url
@@ -174,6 +177,12 @@ class LookandfeelMeineMedikamente < LookandfeelWrapper
     # Navigation-Links:
     :contact, :home, :products,
   ]
+  def legend_components
+    { 
+      [0,0] => 'remote',
+      [0,1] => 'zuzahlungsbefreit', 
+    }
+  end
 end
 class LookandfeelFactory < SBSM::LookandfeelFactory
   BASE = Lookandfeel

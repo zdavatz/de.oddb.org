@@ -8,14 +8,14 @@ module ODDB
     module View
       module Drugs
 class Legend < HtmlGrid::Composite
-  COMPONENTS = {
-    [0,0] => 'explain_remote',
-    [0,1] => 'explain_zuzahlungsbefreit',
-  }
-  CSS_MAP = {
-    [0,0] => 'remote',
-    [0,1] => 'zuzahlungsbefreit',
-  }
+  COMPONENTS = {}
+  def init
+    @css_map = @lookandfeel.legend_components.dup
+    @css_map.each { |pos, key|
+      components.store(pos, "explain_%s" % key)
+    }
+    super
+  end
 end
       end
     end

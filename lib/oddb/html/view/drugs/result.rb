@@ -5,6 +5,7 @@ require 'htmlgrid/div'
 require 'htmlgrid/span'
 require 'oddb/html/view/list'
 require 'oddb/html/view/search'
+require 'oddb/html/view/drugs/legend'
 require 'oddb/html/view/drugs/package'
 require 'oddb/html/view/drugs/products'
 require 'oddb/html/view/drugs/template'
@@ -57,8 +58,10 @@ class ResultComposite < HtmlGrid::DivComposite
     [0,1] => "explain_compare", 
     [0,2] => InlineSearch, 
     [0,3] => Packages, 
+    [0,4] => Legend,
   }
-  CSS_ID_MAP = ['result-found', 'explain-compare', 'result-search', ]
+  CSS_ID_MAP = ['result-found', 'explain-compare', 'result-search', 
+                'result-list', 'legend' ]
   CSS_MAP = { 1 => 'before-searchbar', 3 => 'result' }
   def title_found(model)
     @lookandfeel.lookup(:title_found, @model.query, @model.size)

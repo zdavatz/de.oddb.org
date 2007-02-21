@@ -64,16 +64,11 @@ class CompareComposite < HtmlGrid::DivComposite
     [0,1] => "explain_compare", 
     [0,2] => InlineSearch, 
     [0,3] => CompareList,
+    [0,4] => Legend,
   }
-  CSS_ID_MAP = [ 'snapback', 'explain-compare', 'result-search' ]
+  CSS_ID_MAP = [ 'snapback', 'explain-compare', 'result-search',
+                 'compare-list', 'legend' ]
   CSS_MAP = { 1 => 'before-searchbar', 3 => 'result' }
-  def init
-    if(@lookandfeel.enabled?(:remote_databases, false))
-      components.store([0,4], Legend)
-      css_id_map[4] = 'legend'
-    end
-    super
-  end
   def comparison_for(model)
     @lookandfeel.lookup(:comparison_for, 
                         model.origin.name.send(@session.language))
