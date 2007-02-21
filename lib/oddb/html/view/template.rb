@@ -29,7 +29,7 @@ class Template < HtmlGrid::DivTemplate
   CSS_ID_MAP = ['head', 'content', 'foot']
   DOJO_DEBUG = false
   DOJO_REQUIRE = [ 'dojo.widget.Tooltip' ]
-  DOJO_PARSE_WIDGETS = false
+  DOJO_PARSE_WIDGETS = true
   def title(context)
     context.title { _title.join(' | ') }
   end
