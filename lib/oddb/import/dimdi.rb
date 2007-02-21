@@ -95,7 +95,7 @@ module Dimdi
     def postprocess
       {
         'Tabletten' => [ 'Tabletten', 'Filmtabletten', 'Kapseln',
-                         'Dragees' ],
+                         'Dragees', 'Lacktabletten' ],
         'Retard'    => [ 'Retardtabletten',  'Retardfilmtabletten',
                          'Retardkapseln', 'Retarddragees' ],
       }.each { |groupname, formnames|
