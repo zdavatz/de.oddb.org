@@ -38,14 +38,19 @@ class Package < Remote::Object
     if(doses.size == 1 \
        && (atc = ODDB::Drugs::Atc.find_by_code(self.atc.code)))
       description = galenic_form.description.de
+      groupname = galenic_form.groupname
       range = (size*0.75)..(size*1.25)
       atc.products.each { |prod|
         prod.sequences.each { |seq|
-          if(seq.doses == doses \
-             && seq.galenic_form.first.description == description)
-            comparables.concat seq.packages.select { |pac|
-              range.include?(pac.size)
-            }
+          if(seq.doses == doses)
+            form = seq.galenic_form.first
+            group = form.group
+            if(form.description == description \
+               || (group && group.name == groupname))
+              comparables.concat seq.packages.select { |pac|
+                range.include?(pac.size)
+              }
+            end
           end
         }
       }

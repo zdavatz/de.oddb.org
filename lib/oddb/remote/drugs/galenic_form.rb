@@ -11,6 +11,9 @@ class GalenicForm < Remote::Object
   def description
     @description ||= Util::Multilingual.new(:de => @remote.de)
   end
+  def groupname
+    @remote.galenic_group.de
+  end
 end
     end
   end
