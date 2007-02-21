@@ -3,6 +3,7 @@
 
 require 'htmlgrid/div'
 require 'htmlgrid/span'
+require 'oddb/html/view/google'
 require 'oddb/html/view/list'
 require 'oddb/html/view/search'
 require 'oddb/html/view/drugs/legend'
@@ -17,6 +18,7 @@ module ODDB
 class Packages < View::List
   include PackageMethods
   include ProductMethods
+  include View::Google
   COMPONENTS = {
     [0,0] => :product,
     [1,0] => :active_agents,
@@ -28,6 +30,7 @@ class Packages < View::List
     [7,0] => :code_zuzahlungsbefreit,
     [8,0] => :atc,
     [9,0] => :company,
+    [10,0]=> :google,
   }
   css_map = {}
   COMPONENTS.each { |key, val|

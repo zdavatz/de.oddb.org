@@ -1,8 +1,9 @@
 #!/usr/bin/env ruby
 # Html::View::Drugs::Package -- de.oddb.org -- 11.12.2006 -- hwyss@ywesee.com
 
-require 'htmlgrid/list'
+require 'oddb/html/view/list'
 require 'oddb/html/view/drugs/template'
+require 'oddb/html/view/google'
 require 'oddb/html/view/search'
 require 'oddb/html/view/snapback'
 
@@ -131,12 +132,11 @@ module PackageMethods
     }.join(' + ')
   end
 end
-class Part < HtmlGrid::List
+class Part < View::List
   COMPONENTS = {
     [1,0] => :substance,
     [2,0] => :dose,
   }
-  LEGACY_INTERFACE = false
   SORT_DEFAULT = nil
   def compose(model=@model, offset=[0,0])
     super(model.active_agents, offset)
@@ -156,8 +156,12 @@ class Part < HtmlGrid::List
 end
 class PackageInnerComposite < HtmlGrid::Composite
   include PackageMethods
+  include View::Google
   COMPONENTS = {
     [0,0] => :name, 
+    ## google's third parameter ensures that its link is written before 
+    #  the name - this allows a float: right in css to work correctly
+    [1,0,0] => :google,  
     [2,0] => :code_pzn, 
     [0,1] => :company, 
     [2,1] => :atc, 
@@ -167,6 +171,9 @@ class PackageInnerComposite < HtmlGrid::Composite
     [2,3] => :code_festbetragsgruppe,
     [0,4] => :code_zuzahlungsbefreit,
     [2,4] => :equivalence_factor,
+  }
+  CSS_MAP = {
+    [1,0] => 'google',
   }
   LABELS = true
   LEGACY_INTERFACE = false

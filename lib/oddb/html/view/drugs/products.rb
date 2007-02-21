@@ -2,6 +2,7 @@
 # Html::View::Drugs::Products -- de.oddb.org -- 07.12.2006 -- hwyss@ywesee.com
 
 require 'oddb/html/view/alpha_header'
+require 'oddb/html/view/google'
 require 'oddb/html/view/list'
 require 'oddb/html/view/offset_header'
 require 'oddb/html/view/search'
@@ -22,10 +23,12 @@ class ProductsList < View::List
   include View::AlphaHeader
   include View::OffsetHeader
   include ProductMethods
+  include View::Google
   COMPONENTS = {
     [0,0] => :product,
     [1,0] => :atc,
     [2,0] => :company,
+    [3,0] => :google,
   }
   css_map = {}
   COMPONENTS.each { |key, val|

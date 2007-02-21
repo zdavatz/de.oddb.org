@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # Html::View::Drugs::Compare -- de.oddb.org -- 14.02.2007 -- hwyss@ywesee.com
 
+require 'oddb/html/view/google'
 require 'oddb/html/view/list'
 require 'oddb/html/view/search'
 require 'oddb/html/view/snapback'
@@ -16,6 +17,7 @@ module ODDB
 class CompareList < View::List
   include PackageMethods
   include ProductMethods
+  include View::Google
   COMPONENTS = {
     [0,0] => :product,
     [1,0] => :company,
@@ -23,6 +25,7 @@ class CompareList < View::List
     [3,0] => :size, 
     [4,0] => :price_public,
     [5,0] => :difference,
+    [6,0] => :google,
   }
   css_map = {}
   COMPONENTS.each { |key, val|
