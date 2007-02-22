@@ -66,6 +66,7 @@ class TestGalenicForm < Test::Unit::TestCase
       inst.description.de
     }
     assert_equal(expected, names)
+
     # do it again, nothing should change
     input = open(@path)
     @import.import(input)

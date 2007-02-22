@@ -94,10 +94,10 @@ module Dimdi
     end
     def postprocess
       {
-        'Tabletten' => [ 'Tabletten', 'Filmtabletten', 'Kapseln',
-                         'Dragees', 'Lacktabletten' ],
-        'Retard'    => [ 'Retardtabletten',  'Retardfilmtabletten',
-                         'Retardkapseln', 'Retarddragees' ],
+        'Tabletten'        => [ 'Tabletten', 'Filmtabletten', 'Kapseln',
+                                'Dragees', 'Lacktabletten' ],
+        'Retard-Tabletten' => [ 'Retardtabletten', 'Retardfilmtabletten',
+                                'Retardkapseln', 'Retarddragees' ],
       }.each { |groupname, formnames|
         group = Drugs::GalenicGroup.find_by_name(groupname) \
           || Drugs::GalenicGroup.new(groupname)
