@@ -26,9 +26,9 @@ class Global < State::Global
     source, ref = id.split('.', 2)
     uri = ODDB.config.remote_databases.at(source.to_i)
     if(pac = DRbObject._load(Marshal.dump([uri, ref])))
-      rate = _remote_currency_rate(uri)
+      rate = _remote(uri) { |remote| remote.get_currency_rate("EUR") }
       package = Remote::Drugs::Package.new(source, pac, rate, 
-                                           _remote_price_factor)
+                                           _reverse_price_factor)
       result = Util::AnnotatedList.new(package.comparables) 
       result.origin = package
       result.query = package.atc.code
@@ -38,6 +38,9 @@ class Global < State::Global
   def _compare(code)
     if(package = _package_by_code(code))
       result = Util::AnnotatedList.new(package.comparables) 
+      if(@session.lookandfeel.enabled?(:remote_databases, false))
+        result.concat(_remote_comparables(package))
+      end
       result.origin = package
       result.query = code
       Compare.new(@session, result)
@@ -56,9 +59,6 @@ class Global < State::Global
                                       :value   => code, 
                                       :country => 'DE')
   end
-  def _remote_price_factor
-    1.0 / @session.lookandfeel.price_factor
-  end
   def _products(query)
     result = Util::AnnotatedList.new
     result.query = query
@@ -74,8 +74,35 @@ class Global < State::Global
     end
     Products.new(@session, result)
   end
-  def _remote_currency_rate(uri)
-    DRbObject.new(nil, uri).get_currency_rate("EUR")
+  def _remote(uri, &block)
+    block.call DRbObject.new(nil, uri)
+  rescue StandardError => e
+    warn e.class
+    warn e.message 
+    warn e.backtrace.first
+  end
+  def _remote_comparables(package)
+    if(atc = package.atc)
+      _remote_packages { |remote| 
+        remote.remote_comparables(ODBA::DRbWrapper.new(package))
+      }
+    end
+  end
+  def _remote_packages(&block)
+    result = []
+    ODDB.config.remote_databases.each_with_index { |uri, source|
+      _remote(uri) { |remote|
+        rate = remote.get_currency_rate("EUR")
+        block.call(remote).each { |pac|
+          result.push Remote::Drugs::Package.new(source, pac, rate, 
+                                                 _reverse_price_factor)
+        }
+      }
+    }
+    result
+  end
+  def _reverse_price_factor
+    1.0 / @session.lookandfeel.price_factor
   end
   def _search(query)
     result = Util::AnnotatedList.new
@@ -103,20 +130,7 @@ class Global < State::Global
     Result.new(@session, result)
   end
   def _search_remote(query)
-    result = []
-    ODDB.config.remote_databases.each_with_index { |uri, source|
-      begin
-        remote = DRbObject.new(nil, uri)
-        rate = _remote_currency_rate(uri)
-        result.concat remote.remote_packages(query).collect { |pac|
-          Remote::Drugs::Package.new(source, pac, rate, 
-                                     _remote_price_factor)
-        }
-      rescue StandardError => e
-        warn e.message
-      end
-    }
-    result
+    _remote_packages { |remote| remote.remote_packages(query) }
   end
 end
       end

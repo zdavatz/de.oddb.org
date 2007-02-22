@@ -9,7 +9,7 @@ module ODDB
       belongs_to :atc
       belongs_to :product, delegates(:company, :name)
       has_many :compositions, 
-        delegates(:active_agents, :doses, :galenic_form, :substances),
+        delegates(:active_agents, :doses, :substances),
         on_delete(:cascade)
       has_many :packages, on_delete(:cascade)
       def comparable?(other)
@@ -19,6 +19,9 @@ module ODDB
         atc.sequences.select { |sequence|
           comparable?(sequence)
         }
+      end
+      def galenic_forms
+        compositions.collect { |comp| comp.galenic_form }.compact.uniq
       end
       def include?(substance, dose=nil, unit=nil)
         compositions.any? { |comp|

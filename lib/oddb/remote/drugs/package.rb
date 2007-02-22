@@ -44,7 +44,7 @@ class Package < Remote::Object
       atc.products.each { |prod|
         prod.sequences.each { |seq|
           if(seq.doses == doses)
-            form = seq.galenic_form.first
+            form = seq.galenic_forms.first
             group = form.group
             if(form.description == description \
                || (group && group.name == groupname))
