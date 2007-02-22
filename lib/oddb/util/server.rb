@@ -28,7 +28,7 @@ module ODDB
             else
               str
             end.to_s
-          rescue Exception => error
+          rescue StandardError => error
             result << error.message
             require 'pp'
             ODDB.logger.error('admin') { error.class }

@@ -56,7 +56,7 @@ module ODDB
       def to_f
         begin
           super
-        rescue RuntimeError
+        rescue StandardError
           @val * @fact.factor
         end
       end

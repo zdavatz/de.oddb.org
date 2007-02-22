@@ -39,7 +39,7 @@ module ODDB
                   Time.now.strftime('%c'), importer.class)
         ]
         lines.concat importer.import(io)
-      rescue Exception => err
+      rescue StandardError => err
         lines.push(err.class, err.message, *err.backtrace)
         raise
       ensure
