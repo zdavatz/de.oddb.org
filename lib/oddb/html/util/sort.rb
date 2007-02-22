@@ -41,7 +41,7 @@ module PackageSort
         (multilingual = pac.send(key)) \
           && multilingual.name.send(@session.language) || '' }
     when :difference
-      nilval = ODDB::Util::Money.new(9999999)
+      nilval = 9999999.0
       Proc.new { |pac| pac.difference || nilval }
     when :festbetrag
       nilval = ODDB::Util::Money.new(0)

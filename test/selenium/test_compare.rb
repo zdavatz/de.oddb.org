@@ -65,7 +65,9 @@ class TestCompare < Test::Unit::TestCase
   def setup_remote_package(name, uid='55555', price=12)
     rpackage = flexmock('Remote Package')
     rpackage.should_receive(:name_base).and_return(name)
-    rpackage.should_receive(:price_public).and_return(price * 100)
+    rpackage.should_receive(:price_public).and_return {
+      price * 100 if(price)
+    }
     rpackage.should_receive(:comparable_size)\
       .and_return(Drugs::Dose.new(4))
     rpackage.should_receive(:__drbref).and_return(uid)
@@ -168,7 +170,7 @@ class TestCompare < Test::Unit::TestCase
     rpackage = setup_remote_package('Remotadin', '55555', 12)
     remote.should_receive(:remote_packages).and_return([rpackage])
 
-    rother = setup_remote_package('Remoteric', '55556', 10)
+    rother = setup_remote_package('Remoteric', '55556', nil)
     rpackage.should_receive(:comparables).and_return([rother])
 
 
@@ -194,7 +196,7 @@ class TestCompare < Test::Unit::TestCase
     assert is_element_present("//a[@id='cid_1']")
     assert_match(/^Remoteric/, get_text("cid_1"))
     assert is_text_present('-39.7%')
-    assert is_text_present('-16.6%')
+    #assert is_text_present('-16.6%')
 
     click "link=Remoteric"
     wait_for_page_to_load "30000"
@@ -205,8 +207,6 @@ class TestCompare < Test::Unit::TestCase
     assert_match(/^Amantadin/, get_text("cid_0"))
     assert is_element_present("//a[@id='cid_1']")
     assert_match(/^Remotadin/, get_text("cid_1"))
-    assert is_text_present('-27.7%')
-    assert is_text_present('+19.9%')
 
     assert is_text_present('Gelb = Zuzahlungsbefreit')
     assert is_text_present('Rot = CH - Produkte')
