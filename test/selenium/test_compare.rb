@@ -86,6 +86,9 @@ class TestCompare < Test::Unit::TestCase
     rgalform = flexmock('Remote Galenic Form')
     rpackage.should_receive(:galenic_form).and_return(rgalform)
     rgalform.should_receive(:de).and_return('Tropfen')
+    rgroup = flexmock('Remote Galenic Group')
+    rgroup.should_receive(:de).and_return('Unbekannt')
+    rgalform.should_receive(:galenic_group).and_return(rgroup)
     @cache.should_receive(:fetch).with(uid.to_i).and_return(rpackage)
     rpackage
   end
@@ -190,8 +193,8 @@ class TestCompare < Test::Unit::TestCase
     assert_match(/^Amantadin/, get_text("cid_0"))
     assert is_element_present("//a[@id='cid_1']")
     assert_match(/^Remoteric/, get_text("cid_1"))
-    assert is_text_present('-33.3%')
-    assert is_text_present('-16.7%')
+    assert is_text_present('-39.7%')
+    assert is_text_present('-16.6%')
 
     click "link=Remoteric"
     wait_for_page_to_load "30000"
@@ -202,8 +205,8 @@ class TestCompare < Test::Unit::TestCase
     assert_match(/^Amantadin/, get_text("cid_0"))
     assert is_element_present("//a[@id='cid_1']")
     assert_match(/^Remotadin/, get_text("cid_1"))
-    assert is_text_present('-20.0%')
-    assert is_text_present('+20.0%')
+    assert is_text_present('-27.7%')
+    assert is_text_present('+19.9%')
 
     assert is_text_present('Gelb = Zuzahlungsbefreit')
     assert is_text_present('Rot = CH - Produkte')

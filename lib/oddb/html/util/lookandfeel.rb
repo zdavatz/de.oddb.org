@@ -89,8 +89,8 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :th_company               => 'Hersteller',
       :th_difference            => '%',
       :th_doses                 => 'Stärke',
-      :th_festbetrag            => 'FB',
       :th_price_difference      => 'ABS-Differenz',
+      :th_price_festbetrag      => 'FB',
       :th_price_public          => 'AVP',
       :th_product               => 'Präparat',
       :th_size                  => 'Packungsgrösse',
@@ -167,6 +167,24 @@ aktuellsten Medikamenten-Portal Deutschlands.
   def legend_components
     { [0,0] => 'explain_zuzahlungsbefreit' }
   end
+  def price_factor
+    1.0
+  end
+  def result_components
+    {
+      [0,0] => :product,
+      [1,0] => :active_agents,
+      [2,0] => :size, 
+      [3,0] => :price_public,
+      [4,0] => :price_festbetrag,
+      [5,0] => :price_difference,
+      [6,0] => :code_festbetragsstufe,
+      [7,0] => :code_zuzahlungsbefreit,
+      [8,0] => :atc,
+      [9,0] => :company,
+      [10,0]=> :google,
+    }
+  end
 end
 class LookandfeelWrapper < SBSM::LookandfeelWrapper
   def base_url
@@ -186,6 +204,20 @@ class LookandfeelMeineMedikamente < LookandfeelWrapper
       [0,0] => 'explain_remote',
       [0,1] => 'explain_zuzahlungsbefreit', 
       [0,2] => :explain_currency_conversion,
+    }
+  end
+  def price_factor
+    107.6 / 119.0
+  end
+  def result_components
+    {
+      [0,0] => :product,
+      [1,0] => :active_agents,
+      [2,0] => :size, 
+      [3,0] => :price_public,
+      [4,0] => :atc,
+      [5,0] => :company,
+      [6,0] => :google,
     }
   end
 end

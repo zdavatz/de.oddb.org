@@ -15,7 +15,8 @@ module ODDB
   module Remote
     module Drugs
 class Package < Remote::Object
-  def initialize(source, remote, currency_rate)
+  def initialize(source, remote, currency_rate, price_factor=1.0)
+    @price_factor = price_factor
     @currency_rate = currency_rate.to_f
     super(source, remote)
   end
@@ -32,7 +33,7 @@ class Package < Remote::Object
   end
   def comparables
     comparables = @remote.comparables.collect { |pac|
-      Package.new(@source, pac, @currency_rate)
+      Package.new(@source, pac, @currency_rate, @price_factor)
     }
     doses = active_agents.collect { |act| act.dose }
     if(doses.size == 1 \
@@ -80,8 +81,8 @@ class Package < Remote::Object
     case type
     when :public
       @price_public or begin
-        price = @remote.price_public.to_f * @currency_rate
-        @price_public = Util::Money.new(price/100.0) if(price > 0)
+        pr = @remote.price_public.to_f * @currency_rate * @price_factor
+        @price_public = Util::Money.new(pr/100.0) if(pr > 0)
       end
     end
   end

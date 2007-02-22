@@ -122,7 +122,7 @@ class TestSearch < Test::Unit::TestCase
     assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
                  @selenium.get_title
 
-    @selenium.click "//a[@name='th_festbetrag']"
+    @selenium.click "//a[@name='th_price_festbetrag']"
     @selenium.wait_for_page_to_load "30000"
     assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
                  @selenium.get_title

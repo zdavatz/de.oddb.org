@@ -216,7 +216,8 @@ tr.zuzahlungsbefreit {
 tr.zuzahlungsbefreit.bg, td.zuzahlungsbefreit {
   background-color: #fafc6d;
 }
-.price_public, .festbetrag, .price_difference, .doses, .difference {
+.difference, .doses, .price_festbetrag, .price_difference,
+.price_public {
   text-align: right;
 }
 .code_festbetragsstufe, td.code_zuzahlungsbefreit, 

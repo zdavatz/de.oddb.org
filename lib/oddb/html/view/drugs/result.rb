@@ -19,26 +19,15 @@ class Packages < View::List
   include PackageMethods
   include ProductMethods
   include View::Google
-  COMPONENTS = {
-    [0,0] => :product,
-    [1,0] => :active_agents,
-    [2,0] => :size, 
-    [3,0] => :price_public,
-    [4,0] => :festbetrag,
-    [5,0] => :price_difference,
-    [6,0] => :code_festbetragsstufe,
-    [7,0] => :code_zuzahlungsbefreit,
-    [8,0] => :atc,
-    [9,0] => :company,
-    [10,0]=> :google,
-  }
-  css_map = {}
-  COMPONENTS.each { |key, val|
-    css_map.store(key, val.to_s)
-  }
-  CSS_MAP = css_map
-  CSS_HEAD_MAP = css_map
   EMPTY_LIST_KEY = :empty_packages
+  def init
+    @components = @lookandfeel.result_components
+    @components.each { |key, val|
+      css_map.store(key, val.to_s)
+    }
+    @css_head_map = @css_map
+    super
+  end
   def compose_empty_list(offset)
     if(key = @model.error)
       fill_row(offset, key, 'warn')
@@ -46,12 +35,9 @@ class Packages < View::List
       super(offset, 'info')
     end
   end
-  def festbetrag(model)
-    model.price(:festbetrag)
-  end
   def price_difference(model)
-    if(pf = model.price(:festbetrag))
-      sprintf("%+1.2f", model.price(:public) - pf)
+    if((pf = model.price(:festbetrag)) && (pp = model.price(:public)))
+      sprintf("%+1.2f", adjust_price(pp - pf))
     end
   end
 end

@@ -36,6 +36,9 @@ module PackageMethods
     end
     link
   end
+  def adjust_price(money)
+    money * @lookandfeel.price_factor if(money)
+  end
   def atc(model)
     if(atc = model.atc)
       span = HtmlGrid::Span.new(model, @session, self)
@@ -71,8 +74,11 @@ module PackageMethods
       @lookandfeel.lookup(:no)
     end
   end
+  def price_festbetrag(model)
+    adjust_price model.price(:festbetrag)
+  end
   def price_public(model)
-    model.price(:public)
+    adjust_price model.price(:public)
   end
   def product(model)
     if(model.is_a?(Remote::Drugs::Package))
@@ -214,12 +220,6 @@ class PackageInnerComposite < HtmlGrid::Composite
       link.label = true
       link
     end
-  end
-  def price_festbetrag(model)
-    model.price(:festbetrag)
-  end
-  def price_public(model)
-    model.price(:public)
   end
   private
   def label(component, key=nil)

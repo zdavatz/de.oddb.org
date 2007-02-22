@@ -27,7 +27,8 @@ class Global < State::Global
     uri = ODDB.config.remote_databases.at(source.to_i)
     if(pac = DRbObject._load(Marshal.dump([uri, ref])))
       rate = _remote_currency_rate(uri)
-      package = Remote::Drugs::Package.new(source, pac, rate)
+      package = Remote::Drugs::Package.new(source, pac, rate, 
+                                           _remote_price_factor)
       result = Util::AnnotatedList.new(package.comparables) 
       result.origin = package
       result.query = package.atc.code
@@ -54,6 +55,9 @@ class Global < State::Global
     ODDB::Drugs::Package.find_by_code(:type => 'cid', 
                                       :value   => code, 
                                       :country => 'DE')
+  end
+  def _remote_price_factor
+    1.0 / @session.lookandfeel.price_factor
   end
   def _products(query)
     result = Util::AnnotatedList.new
@@ -105,9 +109,10 @@ class Global < State::Global
         remote = DRbObject.new(nil, uri)
         rate = _remote_currency_rate(uri)
         result.concat remote.remote_packages(query).collect { |pac|
-          Remote::Drugs::Package.new(source, pac, rate)
+          Remote::Drugs::Package.new(source, pac, rate, 
+                                     _remote_price_factor)
         }
-      rescue Exception => e
+      rescue StandardError => e
         warn e.message
       end
     }
