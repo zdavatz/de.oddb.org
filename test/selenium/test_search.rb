@@ -349,10 +349,7 @@ einmal.
     drb.stop_service
   end
   def test_search__remote__connection_error
-    remote = flexmock('Remote')
-    drb = DRb.start_service('druby://localhost:0', remote)
-    ODDB.config.remote_databases = [drb.uri]
-    drb.stop_service
+    ODDB.config.remote_databases = ['druby://localhost:999999']
 
     package = setup_package
     # switch to mm-flavor

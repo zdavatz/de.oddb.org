@@ -77,9 +77,7 @@ class Global < State::Global
   def _remote(uri, &block)
     block.call DRbObject.new(nil, uri)
   rescue StandardError => e
-    warn e.class
     warn e.message 
-    warn e.backtrace.first
   end
   def _remote_comparables(package)
     if(atc = package.atc)

@@ -260,7 +260,7 @@ module Dimdi
       end
       sequence = product.sequences.find { |seq|
         doses = seq.doses
-        seq.galenic_form == [galform] \
+        seq.galenic_forms == [galform] \
           && seq.substances == substances \
           && (doses.empty? || doses.inject { |a, b| a + b } == dose)
       } 
