@@ -6,7 +6,6 @@ require 'oddb/util/code'
 module ODDB
   module Util
     class Code
-      #include ODBA::Persistable
     end
   end
 end

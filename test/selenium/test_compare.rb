@@ -213,6 +213,45 @@ class TestCompare < Test::Unit::TestCase
   ensure
     drb.stop_service
   end
+  def test_remote__reversed
+    remote = flexmock('Remote')
+    DRb.install_id_conv(ODBA::DRbIdConv.new)
+    drb = DRb.start_service('druby://localhost:0', remote)
+    ODDB.config.remote_databases = [drb.uri]
+
+    remote.should_receive(:get_currency_rate).with('EUR').and_return 0.6
+    rpackage = setup_remote_package('Remotadin', '55555', 12)
+    remote.should_receive(:remote_packages).and_return([rpackage])
+
+    rother = setup_remote_package('Remoteric', '55556', nil)
+    remote.should_receive(:remote_comparables).with(ODBA::DRbWrapper)\
+      .and_return([rpackage, rother])
+
+    package = setup_package('Amantadin')
+    ## switch to mm-flavor
+    open "/de/drugs/home/flavor/mm"
+    assert_equal "ODDB | Medikamente | Home", get_title
+    type "query", "Amantadin"
+    click "//input[@type='submit']"
+    wait_for_page_to_load "30000"
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin", get_title
+  
+    atc = Drugs::Atc.new('N04BB01')
+
+    rother.should_receive(:comparables).and_return([rpackage])
+    click "link=Amantadin"
+    wait_for_page_to_load "30000"
+    assert_equal "ODDB | Medikamente | Preisvergleich | Amantadin", 
+                 get_title
+    assert_match(/^Amantadin/, get_text("cid_"))
+    assert is_element_present("//a[@id='cid_0']")
+    assert_match(/^Remotadin/, get_text("cid_0"))
+    assert is_element_present("//a[@id='cid_1']")
+    assert_match(/^Remoteric/, get_text("cid_1"))
+    assert is_text_present('+65.8%')
+  ensure
+    drb.stop_service
+  end
 end
   end
 end

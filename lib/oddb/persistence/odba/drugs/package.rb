@@ -3,6 +3,7 @@
 
 require 'oddb/drugs/package'
 require 'oddb/persistence/odba/model'
+require 'oddb/persistence/odba/drugs/substance'
 require 'oddb/persistence/odba/util/code'
 
 module ODDB
@@ -13,7 +14,7 @@ module ODDB
       odba_index :atc, 'atc.code'
       odba_index :name, 'name.all'
       odba_index :substance, :substances, 'name.all', Drugs::Substance
-      serialize :prices
+      serialize :codes, :prices
     end
   end
 end

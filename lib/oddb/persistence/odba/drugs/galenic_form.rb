@@ -12,6 +12,7 @@ module ODDB
       odba_index :description, 'description.all'
       odba_index :code, :codes, {:type => 'type.to_s', 
         :country => 'country', :value => 'to_s'}, Util::Code
+      serialize :codes
     end
   end
 end

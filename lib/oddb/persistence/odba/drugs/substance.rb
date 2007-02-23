@@ -15,6 +15,7 @@ module ODDB
         group.add_substance(self)
         @group = group
       end
+      serialize :codes
     end
   end
 end

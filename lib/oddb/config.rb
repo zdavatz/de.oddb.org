@@ -5,7 +5,8 @@ require 'rclconf'
 require 'oddb'
 
 module ODDB
-  default_dir = File.expand_path('../etc', ENV['DOCUMENT_ROOT'])
+  oddb_dir = ENV['DOCUMENT_ROOT'] || '.'
+  default_dir = File.expand_path('etc', oddb_dir)
   default_config_files = [
     File.join(default_dir, 'oddb.yml'),
     '/etc/oddb/oddb.yml',
@@ -13,7 +14,7 @@ module ODDB
   defaults = {
     'admins'            => [],
     'config'			      => default_config_files,
-    'data_dir'          => File.expand_path('../data', default_dir),
+    'data_dir'          => File.expand_path('data', oddb_dir),
     'db_name'           => 'oddb',
     'db_user'           => 'oddb',
     'db_auth'           => 'oddb',
@@ -23,7 +24,7 @@ module ODDB
     'log_level'         => 'INFO',
     'mail_charset'      => 'utf8',
     'mail_from'         => 'update@oddb.org',
-    'oddb_dir'          => File.expand_path('..', default_dir),
+    'oddb_dir'          => oddb_dir,
     'persistence'       => 'odba',
     'remote_databases'  => [],
     'run_updater'       => true,
@@ -32,7 +33,7 @@ module ODDB
     'smtp_from'         => 'update@oddb.org',
     'smtp_server'       => 'localhost',
     'update_hour'       => 2,
-    'var'               => File.expand_path('../var', default_dir),
+    'var'               => File.expand_path('var', oddb_dir),
   }
 
   config = RCLConf::RCLConf.new(ARGV, defaults)

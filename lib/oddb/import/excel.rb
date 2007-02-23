@@ -2,20 +2,12 @@
 # Import::Excel -- de.oddb.org -- 12.09.2006 -- hwyss@ywesee.com
 
 require 'parseexcel/parseexcel'
-require 'encoding/character/utf-8'
+require 'oddb/import/import'
 
 module ODDB
   module Import
-    class Excel
+    class Excel < Import
       attr_reader :report
-      def initialize
-        @skip_rows = 1
-        @report = []
-      end
-      def capitalize_all(str)
-        ## benchmarked fastest against an append (<<) solution
-        str.split(/\b/).collect { |part| part.capitalize }.join
-      end
       def cell(row, idx)
         if(cell = row[idx])
           case cell.type
@@ -41,8 +33,6 @@ module ODDB
       end
       def parse(io)
         Spreadsheet::ParseExcel.parse(io)
-      end
-      def postprocess
       end
     end
     class DatedExcel < Excel

@@ -230,7 +230,10 @@ module Dimdi
         product.name.de = name
       end
       import_sequence(row, product)
-      fpgroup = u(cell(row, 3).to_i.to_s)
+      fpgroup = cell(row, 3)
+      unless(fpgroup.is_a?(String))
+        fpgroup = u(fpgroup.to_i.to_s)
+      end
       if(code = product.code(:festbetragsgruppe))
         code.value = fpgroup
       else
@@ -354,17 +357,20 @@ module Dimdi
       end
     end
     def move_package(row, product, package, name)
+      @existing += 1
       move_from = package.sequence
       move_to = product.sequences.find { |sequence|
         sequence.comparable?(move_from)
       }
       if(move_to)
+        @existing_sequences += 1
         package.sequence = move_to
         update_package(row, package)
         if(move_from.packages.empty?)
           delete_sequence(move_from)
         end
       elsif(move_from.packages.size == 1)
+        @existing_sequences += 1
         move_sequence(product, move_from)
         update_package(row, package)
       else
@@ -381,6 +387,7 @@ module Dimdi
       end
     end
     def rename_product(row, package, name)
+      @renamed_products += 1
       product = package.product
       product.name.de = name
       product.save
@@ -621,13 +628,7 @@ module Dimdi
     end
     def import_company(row)
       if(cname = cell(row, 6))
-        cname = capitalize_all(cname)
-        cname.gsub!(/\./, '. ')
-        cname.gsub!(/[\/&]/) { |match| ' %s ' % match }
-        cname.gsub!(/Gmbh/, 'GmbH')
-        cname.gsub!(/Ag\b/, 'AG')
-        cname.gsub!(/\bKg\b/, 'KG')
-        company = Business::Company.find_by_name(cname)
+        company = Business::Company.find_by_name(company_name(cname))
         if(company)
           @existing_companies += 1
         else

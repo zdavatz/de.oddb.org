@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 # Model -- de.oddb.org -- 17.11.2006 -- hwyss@ywesee.com
 
+require 'oddb/drugs/sequence'
+require 'oddb/drugs/product'
+
 class Object
   def metaclass; class << self; self; end; end
   def meta_eval &blk; metaclass.instance_eval &blk; end
@@ -61,7 +64,7 @@ module ODDB
     end
   end
   module Business
-    class Company
+    class Company < Model
       simulate_database(:name)
     end
   end

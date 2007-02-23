@@ -112,7 +112,7 @@ module ODDB
         @predicates ||= []
       end
       def is_coded
-        has_many :codes, on_delete(:cascade)
+        has_many :codes
         define_method(:code) { |*args|
           type, country = *args
           codes.find { |code| code.is_for?(type, country || 'DE') }
@@ -131,6 +131,8 @@ module ODDB
       end
       def singular
         basename.gsub(/([a-z])([A-Z])/, '\1_\2').downcase
+      end
+      def serialize(key)
       end
     end
     def delete

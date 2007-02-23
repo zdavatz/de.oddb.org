@@ -35,9 +35,11 @@ module ODDB
       def serializables
         @serializables ||= []
       end
-      def serialize(key)
-        connectors.delete(key)
-        serializables.push("@#{key}")
+      def serialize(*keys)
+        keys.each { |key|
+          connectors.delete(key)
+          serializables.push("@#{key}")
+        }
       end
     end
   end

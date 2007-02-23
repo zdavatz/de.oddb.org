@@ -137,7 +137,7 @@ Quelle:
       :tt_company               => 'Der Hersteller oder Zulassungsinhaber des Produkts',
       :tt_active_agents         => 'Die Stärke bezieht sich auf Darreichungsform-Einheit (Tablette, Zäpfchen, Sirup, etc). Siehe auch: ',
       :tt_active_agents_link    => 'Darreichungsformen',
-      :tt_festbetrag            => <<-EOS,
+      :tt_price_festbetrag      => <<-EOS,
 Festbetrag: DIMDI hat die Aufgabe, die von den Spitzenverbänden der
 Krankenkassen erstellten und veröffentlichten Übersichten über
 sämtliche Festbeträge und die betroffenen Arzneimittel im Internet

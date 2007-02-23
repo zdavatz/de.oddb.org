@@ -43,9 +43,6 @@ module PackageSort
     when :difference
       nilval = 9999999.0
       Proc.new { |pac| pac.difference || nilval }
-    when :festbetrag
-      nilval = ODDB::Util::Money.new(0)
-      Proc.new { |pac| pac.price(key) || nilval }
     when :price_difference
       nilval = ODDB::Util::Money.new(-9999999)
       Proc.new { |pac| 
@@ -53,9 +50,10 @@ module PackageSort
          && (pp = pac.price(:public)) \
          && pp - pf) || nilval
       }
-    when :price_public
+    when :price_public, :price_festbetrag
       nilval = ODDB::Util::Money.new(0)
-      Proc.new { |pac| pac.price(:public) || nilval }
+      key = key.to_s.sub(/^price_/, '').to_sym
+      Proc.new { |pac| pac.price(key) || nilval }
     when :product
       Proc.new { |pac| pac.name.send(@session.language) || '' }
     end

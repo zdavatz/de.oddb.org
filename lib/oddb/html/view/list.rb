@@ -44,7 +44,7 @@ class List < HtmlGrid::List
         sortlink.dojo_title = [ title.strip, link ]
       when "tt_company"
         link.href = "http://www.die-gesundheitsreform.de/presse/pressethemen/avwg/pdf/liste_zuzahlungsbefreite_arzneimittel.pdf"
-      when "tt_festbetrag"
+      when "tt_price_festbetrag"
         link.href = "http://www.dimdi.de/static/de/amg/fbag/index.htm"
       when "tt_price_public", "tt_price_difference"
         link.href = "ftp://ftp.dimdi.de/pub/amg/satzbeschr_011006.pdf"

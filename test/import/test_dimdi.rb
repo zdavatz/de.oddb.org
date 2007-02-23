@@ -92,6 +92,7 @@ class TestGalenicForm < Test::Unit::TestCase
 end
 class TestProduct < Test::Unit::TestCase
   def setup
+    Drugs::Product.instances.clear
     @data_dir = File.expand_path('data', File.dirname(__FILE__))
     @path = File.expand_path('xls/fb010706.xls', @data_dir) 
     @import = Product.new
@@ -152,6 +153,7 @@ class TestProduct < Test::Unit::TestCase
     assert_equal("114568", code.value)
 
     pr = Drugs::Product.instances.at(1)
+    assert_equal('2A', pr.code(:festbetragsgruppe).value)
     seq = pr.sequences.first
     assert_equal(atc, seq.atc)
 
@@ -203,6 +205,7 @@ class TestProduct < Test::Unit::TestCase
     assert_equal("114568", code.value)
 
     pr = Drugs::Product.instances.at(1)
+    assert_equal('2A', pr.code(:festbetragsgruppe).value)
     seq = pr.sequences.first
     assert_equal(atc, seq.atc)
 

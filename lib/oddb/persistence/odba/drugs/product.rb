@@ -8,6 +8,7 @@ module ODDB
   module Drugs
     class Product < Model
       odba_index :name, 'name.all'
+      serialize :codes
     end
   end
 end
