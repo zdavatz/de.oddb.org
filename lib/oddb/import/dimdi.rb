@@ -273,35 +273,31 @@ module Dimdi
         @created_sequences += 1
         sequence = Drugs::Sequence.new
         composition = Drugs::Composition.new
+        if(substances.size > 1)
+          dose = nil
+        end
+        substances.each { |substance|
+          active_agent = Drugs::ActiveAgent.new(substance, dose)
+          composition.add_active_agent(active_agent)
+        }
+        composition.galenic_form = galform
+        if(factor = cell(row, 11))
+          composition.equivalence_factor = factor
+        end
+        composition.save
         sequence.add_composition(composition)
         sequence.product = product
         sequence.save
       end
-      composition = sequence.compositions.first
-      if(substances.size > 1)
-        dose = nil
-      end
-      substances.each { |substance|
-        unless(composition.include?(substance))
-          active_agent = Drugs::ActiveAgent.new(substance, dose)
-          composition.add_active_agent(active_agent)
-          composition.save
-        end
-      }
-      unitname = nil
-      if(galform)
-        unitname = galform.description.de
-        composition.galenic_form = galform
-      end
-      if(factor = cell(row, 11))
-        composition.equivalence_factor = factor
-      end
-      composition.save
       import_atc(row, sequence)
       if(package)
         package.sequence = sequence
         update_package(row, package)
       else
+        unitname = nil
+        if(galform)
+          unitname = galform.description.de
+        end
         import_package(row, sequence, unitname)
       end
     end
@@ -410,29 +406,28 @@ module Dimdi
       ]
     end
     def update_package(row, package)
-      import_price(package, :public, cell(row, 7))
-      import_price(package, :festbetrag, cell(row, 8))
-      if(pzn = cell(row, 10))
-        pzn = u(pzn.to_i.to_s)
-        if(code = package.code(:cid))
-          if(code.value.to_i < pzn.to_i)
-            warn "Reassigning PZN (#{code} -> #{pzn})"
-            code.value = pzn
-          end
+      code = package.code(:cid)
+      pzn = u(cell(row, 10).to_i.to_s)
+      if(code.nil? || code.value.to_i < pzn.to_i)
+        import_price(package, :public, cell(row, 7))
+        import_price(package, :festbetrag, cell(row, 8))
+        if(code)
+          warn "Reassigning PZN (#{code} -> #{pzn})"
+          code.value = pzn
         else
           package.add_code(Util::Code.new(:cid, pzn, 'DE', @date))
         end
-      end
-      if(level = cell(row, 12))
-        date = cell(row, 13) || @date
-        if(code = package.code(:festbetragsstufe))
-          code.value = level.to_i, date
-        else
-          package.add_code(Util::Code.new(:festbetragsstufe,
-                                          level.to_i, 'DE', date))
+        if(level = cell(row, 12))
+          date = cell(row, 13) || @date
+          if(code = package.code(:festbetragsstufe))
+            code.value = level.to_i, date
+          else
+            package.add_code(Util::Code.new(:festbetragsstufe,
+                                            level.to_i, 'DE', date))
+          end
         end
+        package.save
       end
-      package.save
     end
   end
   class Substance < DatedExcel
