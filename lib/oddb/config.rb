@@ -5,7 +5,7 @@ require 'rclconf'
 require 'oddb'
 
 module ODDB
-  oddb_dir = ENV['DOCUMENT_ROOT'] || '.'
+  oddb_dir = File.expand_path('..', ENV['DOCUMENT_ROOT'] || './doc')
   default_dir = File.expand_path('etc', oddb_dir)
   default_config_files = [
     File.join(default_dir, 'oddb.yml'),

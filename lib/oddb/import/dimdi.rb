@@ -44,7 +44,8 @@ module Dimdi
         }
       }
     end
-  rescue StandardError
+  rescue StandardError => e
+		warn e.message
   end
   def Dimdi.download_latest(url, today, &block)
     file = File.basename(url)
