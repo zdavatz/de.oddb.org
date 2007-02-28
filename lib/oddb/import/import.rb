@@ -2,10 +2,12 @@
 # Import::Import -- de.oddb.org -- 23.02.2007 -- hwyss@ywesee.com
 
 require 'encoding/character/utf-8'
+require 'iconv'
 
 module ODDB
   module Import
     class Import
+      @@iconv = Iconv.new('utf8//IGNORE//TRANSLIT', 'latin1')
       def initialize
         @report = []
         @skip_rows = 1

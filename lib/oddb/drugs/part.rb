@@ -17,6 +17,10 @@ module ODDB
       #  Possibly a multiplication factor (Integer) can be added.
       attr_accessor :unit, :quantity
       attr_reader :size
+      def initialize
+        super
+        @size = 1
+      end
       def comparable_size
         (@quantity || Dose.new(1)) * (@size || 1)
       end

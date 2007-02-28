@@ -8,7 +8,6 @@ module ODDB
     class Product < Model
       belongs_to :company
       has_many :sequences, on_delete(:cascade), delegates(:substances)
-      is_coded
       multilingual :name
       def initialize
         @sequences = []

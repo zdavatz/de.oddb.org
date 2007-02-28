@@ -49,7 +49,7 @@ module PackageMethods
     end
   end
   def code_festbetragsgruppe(model)
-    model.product.code(:festbetragsgruppe, 'DE')
+    model.code(:festbetragsgruppe, 'DE')
   end
   def code_festbetragsstufe(model)
     if(code = model.code(:festbetragsstufe))
@@ -95,7 +95,8 @@ module PackageMethods
     else
       link = HtmlGrid::Span.new(model, @session, self)
     end
-    link.value = model.name.send(@session.language)
+    link.value = model.name.send(@session.language) \
+      || model.product.name.send(@session.language)
     link.css_id = "cid_#@list_index"
     link.dojo_title = @lookandfeel.lookup(:pzn, model.code(:cid, 'DE'))
     link

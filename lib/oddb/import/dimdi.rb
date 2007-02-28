@@ -131,6 +131,7 @@ module Dimdi
       @deleted_products = 0
       @existing = 0
       @existing_sequences = 0
+      @reassigned_pzns = 0
       @renamed_products = 0
     end
     def assign_substance_group(sub, groupname)
@@ -141,15 +142,15 @@ module Dimdi
       end
     end
     def delete_sequence(sequence)
-      if(product = sequence.product)
-        sequence.product = nil
-        if(product.sequences.empty?)
-          @deleted_products += 1
-          product.delete
-        end
+      product = sequence.product
+      if(product.sequences.size == 1)
+        @deleted_products += 1
+        product.delete
+      else
+        @deleted_sequences += 1
+        sequence.delete
       end
-      @deleted_sequences += 1
-      sequence.delete
+      sequence
     end
     def import_atc(row, sequence)
       atc_name = cell(row, 2)
@@ -169,11 +170,15 @@ module Dimdi
         candidates = Drugs::Atc.search_by_name(atc_name)
       end
       if(candidates.size == 1)
-        sequence.atc = candidates.first
-        sequence.save
+        atc = candidates.first
+        if(sequence.atc != atc)
+          sequence.atc = atc
+          sequence.save
+        end
       end
     end
     def import_row(row)
+      @package_date = cell(row, 13) || @date
       @count += 1
       pzn = u(cell(row, 10).to_i.to_s)
       package = Drugs::Package.find_by_code(:type    => 'cid',
@@ -198,28 +203,25 @@ module Dimdi
     def import_package(row, sequence, unitname)
       ## we don't expect any multipart packages here
       psize = cell(row, 6)
-      package = sequence.packages.find { |pac| 
-        pac.size == psize
-      }
-      if(package.nil?)
-        package = Drugs::Package.new
-        part = Drugs::Part.new
-        part.size = psize
-        if(unitname)
-          unit = Drugs::Unit.find_by_name(unitname)
-          if(unit.nil?)
-            unit = Drugs::Unit.new
-            unit.name.de = unitname
-            unit.save
-          end
-          part.unit = unit
+      package = Drugs::Package.new
+      pzn = u(cell(row, 10).to_i.to_s)
+      package.add_code(Util::Code.new(:cid, pzn, 'DE', @package_date))
+      part = Drugs::Part.new
+      part.size = psize
+      if(unitname)
+        unit = Drugs::Unit.find_by_name(unitname)
+        if(unit.nil?)
+          unit = Drugs::Unit.new
+          unit.name.de = unitname
+          unit.save
         end
-        part.composition = sequence.compositions.first
-        part.save
-        package.add_part(part)
-        package.sequence = sequence
-        package.save
+        part.unit = unit
       end
+      part.composition = sequence.compositions.first
+      part.save
+      package.add_part(part)
+      package.sequence = sequence
+      package.save
       update_package(row, package)
     end
     def import_product(row, product, name)
@@ -229,24 +231,15 @@ module Dimdi
         @created += 1
         product = Drugs::Product.new
         product.name.de = name
+        product.save
       end
       import_sequence(row, product)
-      fpgroup = cell(row, 3)
-      unless(fpgroup.is_a?(String))
-        fpgroup = u(fpgroup.to_i.to_s)
-      end
-      if(code = product.code(:festbetragsgruppe))
-        code.value = fpgroup
-      else
-        code = Util::Code.new(:festbetragsgruppe, fpgroup, 
-                              'DE', @date)
-        product.add_code(code)
-      end
-      product.save
     end
     def import_price(package, type, amount)
       if(price = package.price(type, 'DE'))
-        price.amount = amount
+        if(price != amount)
+          price.amount = amount
+        end
       else
         price = Util::Money.new(amount, type, 'DE')
         package.add_price(price)
@@ -293,6 +286,7 @@ module Dimdi
       import_atc(row, sequence)
       if(package)
         package.sequence = sequence
+        package.save
         update_package(row, package)
       else
         unitname = nil
@@ -362,6 +356,7 @@ module Dimdi
       if(move_to)
         @existing_sequences += 1
         package.sequence = move_to
+        package.save
         update_package(row, package)
         if(move_from.packages.empty?)
           delete_sequence(move_from)
@@ -392,43 +387,52 @@ module Dimdi
     end
     def report
       [
-        sprintf("Imported %5i Products per %s:", 
+        sprintf("Imported   %5i Products per %s:", 
                 @count, @date.strftime("%d.%m.%Y")),
-        sprintf("Visited  %5i existing Products", @existing),
-        sprintf("Visited  %5i existing Sequences", 
+        sprintf("Visited    %5i existing Products", @existing),
+        sprintf("Visited    %5i existing Sequences", 
                 @existing_sequences),
-        sprintf("Created  %5i new Products", @created),
-        sprintf("Created  %5i new Sequences", @created_sequences),
-        sprintf("Created  %5i new Substances from Combinations",
+        sprintf("Created    %5i new Products", @created),
+        sprintf("Created    %5i new Sequences", @created_sequences),
+        sprintf("Created    %5i new Substances from Combinations",
                 @created_substances),
-        sprintf("Renamed  %5i Products", @renamed_products),
-        sprintf("Deleted  %5i Products", @deleted_products),
-        sprintf("Deleted  %5i Sequences", @deleted_sequences),
+        sprintf("Renamed    %5i Products", @renamed_products),
+        sprintf("Reassigned %5i PZNs", @reassigned_pzns),
+        sprintf("Deleted    %5i Products", @deleted_products),
+        sprintf("Deleted    %5i Sequences", @deleted_sequences),
       ]
     end
     def update_package(row, package)
-      code = package.code(:cid)
-      pzn = u(cell(row, 10).to_i.to_s)
-      if(code.nil? || code.value.to_i < pzn.to_i)
-        import_price(package, :public, cell(row, 7))
-        import_price(package, :festbetrag, cell(row, 8))
-        if(code)
-          warn "Reassigning PZN (#{code} -> #{pzn})"
-          code.value = pzn
-        else
-          package.add_code(Util::Code.new(:cid, pzn, 'DE', @date))
-        end
-        if(level = cell(row, 12))
-          date = cell(row, 13) || @date
-          if(code = package.code(:festbetragsstufe))
-            code.value = level.to_i, date
-          else
-            package.add_code(Util::Code.new(:festbetragsstufe,
-                                            level.to_i, 'DE', date))
-          end
-        end
-        package.save
+      modified = false
+      fpgroup = cell(row, 3)
+      unless(fpgroup.is_a?(String))
+        fpgroup = u(fpgroup.to_i.to_s)
       end
+      if(code = package.code(:festbetragsgruppe))
+        if(code.value != fpgroup)
+          modified = true
+          code.value = fpgroup, @package_date
+        end
+      else
+        modified = true
+        package.add_code(Util::Code.new(:festbetragsgruppe, 
+                                        fpgroup, 'DE', @package_date))
+      end
+      import_price(package, :public, cell(row, 7)) && modified = true
+      import_price(package, :festbetrag, cell(row, 8)) && modified = true
+      if(level = cell(row, 12))
+        if(code = package.code(:festbetragsstufe))
+          if(code.value != level.to_i)
+            modified = true
+            code.value = level.to_i, @package_date
+          end
+        else
+          modified = true
+          package.add_code(Util::Code.new(:festbetragsstufe, level.to_i,
+                                          'DE', @package_date))
+        end
+      end
+      package.save if(modified)
     end
   end
   class Substance < DatedExcel
@@ -562,6 +566,7 @@ module Dimdi
           part.quantity = Drugs::Dose.new(qnum, sunit)
           part.size = mnum
           part.unit = nil
+          part.save
         end
         if(company = import_company(row))
           product.company = company

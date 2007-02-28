@@ -54,7 +54,7 @@ class TestCompare < Test::Unit::TestCase
     unit.name.de = 'Ampullen'
     part.unit = unit
     part.quantity = Drugs::Dose.new(20, 'ml')
-    product.name.de = name
+    package.name.de = name
     package.sequence = sequence
     package.add_price(Util::Money.new(price, :public, 'DE'))
     package.add_price(Util::Money.new(10, :festbetrag, 'DE'))

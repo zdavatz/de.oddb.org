@@ -66,12 +66,14 @@ module ODDB
         part1 = flexmock("part")
         part1.should_receive(:comparable_size)\
           .and_return(Dose.new(10, 'mg'))
+        part1.should_ignore_missing
         @package.add_part(part1)
 
         sequence = flexmock('sequence')
         seq1 = flexmock('sequence')
         seq2 = flexmock('sequence')
         sequence.should_receive(:comparables).and_return([seq1, seq2])
+        sequence.should_receive(:compositions).and_return([])
         sequence.should_ignore_missing
         @package.sequence = sequence
 
@@ -101,6 +103,24 @@ module ODDB
         @package.add_part(part2)
         assert_equal([Dose.new(10, 'mg'), Dose.new(20, 'mg')], 
                      @package.comparable_size)
+      end
+      def test_sequence_writer
+        part = flexmock('Part')
+        sequence = flexmock('Sequence')
+        comp = flexmock('Composition')
+        @package.add_part(part)
+        sequence.should_receive(:add_package).times(1)
+        sequence.should_receive(:save).times(2)
+        sequence.should_receive(:compositions).and_return([comp])
+        part.should_receive(:composition=).with(comp)\
+          .times(1).and_return { assert(true) }
+        part.should_receive(:save)
+        @package.sequence = sequence
+
+        sequence.should_receive(:remove_package).with(@package).times(1)
+        part.should_receive(:composition=).with(nil)\
+          .times(1).and_return { assert(true) }
+        @package.sequence = nil
       end
       def test_size
         assert_equal(0, @package.size)

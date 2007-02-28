@@ -16,14 +16,7 @@ module ODDB
       def doses
         active_agents.collect { |agent| agent.dose }
       end
-      def include?(substance, dose=nil, unit=nil)
-        if(dose)
-          include_active_agent?(substance, dose, unit)
-        else
-          include_substance?(substance)
-        end
-      end
-      def include_active_agent?(substance, dose, unit=nil)
+      def include?(substance, dose, unit=nil)
         unless(dose.is_a?(Drugs::Dose))
           dose = Drugs::Dose.new(dose, unit)
         end
@@ -31,16 +24,12 @@ module ODDB
           act.substance == substance && act.dose == dose
         }
       end
-      def include_substance?(substance)
-        active_agents.any? { |act|
-          act.substance == substance
-        }
-      end
       def substances
         active_agents.collect { |agent| agent.substance }
       end
       def ==(other)
-        @galenic_form == other.galenic_form \
+        other.is_a?(Composition) \
+          && @galenic_form == other.galenic_form \
           && active_agents.sort == other.active_agents.sort
       end
     end

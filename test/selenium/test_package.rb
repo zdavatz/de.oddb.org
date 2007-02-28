@@ -53,7 +53,7 @@ class TestPackage < Test::Unit::TestCase
     unit.name.de = 'Ampullen'
     part.unit = unit
     part.quantity = Drugs::Dose.new(20, 'ml')
-    product.name.de = 'Amantadin by Producer'
+    package.name.de = 'Amantadin by Producer'
     package.sequence = sequence
     package.add_price(Util::Money.new(6, :public, 'DE'))
     package.add_price(Util::Money.new(10, :festbetrag, 'DE'))

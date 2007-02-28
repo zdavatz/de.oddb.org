@@ -48,7 +48,7 @@ class TestSearch < Test::Unit::TestCase
     unit.name.de = 'Ampullen'
     part.unit = unit
     part.quantity = Drugs::Dose.new(20, 'ml')
-    product.name.de = name
+    package.name.de = name
     package.sequence = sequence
     package.add_price(Util::Money.new(6, :public, 'DE'))
     package.add_price(Util::Money.new(10, :festbetrag, 'DE'))
@@ -282,7 +282,7 @@ einmal.
     assert is_element_present("//a[@id='cid_1']")
     assert_match(/^Remotadin/, get_text("cid_1"))
     assert is_text_present('Producer (Schweiz) AG')
-    assert is_text_present('7.20')
+    assert is_text_present('7.96')
     assert_equal 'zuzahlungsbefreit', get_attribute('//tr[2]@class')
     assert_equal 'remote bg', get_attribute('//tr[3]@class')
 

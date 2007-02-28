@@ -55,7 +55,9 @@ module PackageSort
       key = key.to_s.sub(/^price_/, '').to_sym
       Proc.new { |pac| pac.price(key) || nilval }
     when :product
-      Proc.new { |pac| pac.name.send(@session.language) || '' }
+      Proc.new { |pac| 
+        pac.name.send(@session.language) \
+          || pac.product.name.send(@session.language) || '' }
     end
   end
 end

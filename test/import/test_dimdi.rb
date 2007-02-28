@@ -52,9 +52,17 @@ module ODDB
     module Dimdi
 class TestGalenicForm < Test::Unit::TestCase
   def setup
+    Drugs::GalenicForm.instances.clear
+    Drugs::GalenicGroup.instances.clear
     @data_dir = File.expand_path('data', File.dirname(__FILE__))
     @path = File.expand_path('xls/darform_010706.xls', @data_dir) 
     @import = GalenicForm.new
+  end
+  def setup_form(name)
+    form = Drugs::GalenicForm.new
+    form.description.de = name
+    form.save
+    form
   end
   def test_import
     input = open(@path)
@@ -89,6 +97,22 @@ class TestGalenicForm < Test::Unit::TestCase
     assert_equal("galenic_form", code.type)
     assert_equal('AMPD1', code.value)
   end
+  def test_postprocess
+    form1 = setup_form('Tabletten')
+    form2 = setup_form('Filmtabletten')
+    form3 = setup_form('Retardtabletten')
+    form4 = setup_form('Retardkapseln')
+    @import.postprocess
+    assert_equal(2, Drugs::GalenicGroup.instances.size)
+    group1 = Drugs::GalenicGroup.find_by_name('Tabletten')
+    assert_equal(Drugs::GalenicGroup.instances.first, group1)
+    assert_equal(group1, form1.group)
+    assert_equal(group1, form2.group)
+    group2 = Drugs::GalenicGroup.find_by_name('Retard-Tabletten')
+    assert_equal(Drugs::GalenicGroup.instances.last, group2)
+    assert_equal(group2, form3.group)
+    assert_equal(group2, form4.group)
+  end
 end
 class TestProduct < Test::Unit::TestCase
   def setup
@@ -98,6 +122,10 @@ class TestProduct < Test::Unit::TestCase
     @import = Product.new
   end
   def test_import_base_data
+    tabl = Drugs::GalenicForm.new
+    tabl.description.de = 'Kapseln'
+    tabl.add_code(Util::Code.new(:galenic_form, 'KAPS', 'DE'))
+    tabl.save
     atc = Drugs::Atc.new('M04AA51')
     atc.name.de = 'Amoxicillin, Fuzzy match'
     atc.save
@@ -124,10 +152,6 @@ class TestProduct < Test::Unit::TestCase
       u("Madopar Emra"), ]
     assert_equal(expected, names)
     pr = Drugs::Product.instances.first
-    assert_equal(1, pr.codes.size)
-    code = pr.code(:festbetragsgruppe, 'DE')
-    assert_instance_of(Util::Code, code)
-    assert_equal(u('9'), code.value)
     assert_equal(1, pr.sequences.size)
     seq = pr.sequences.first
     assert_equal(1, seq.compositions.size)
@@ -136,13 +160,16 @@ class TestProduct < Test::Unit::TestCase
     assert_equal(1, comp.active_agents.size)
     agent = comp.active_agents.first
     assert_equal(sub1, agent.substance)
-    assert_equal(1, seq.packages.size)
+    assert_equal(2, seq.packages.size)
     pack = seq.packages.first
     assert_equal(34.25, pack.price(:public, 'DE'))
     assert_equal(34.28, pack.price(:festbetrag, 'DE'))
     code = pack.code(:festbetragsstufe, 'DE')
     assert_instance_of(Util::Code, code)
     assert_equal(2, code.value)
+    code = pack.code(:festbetragsgruppe, 'DE')
+    assert_instance_of(Util::Code, code)
+    assert_equal(u('9'), code.value)
     assert_equal(1, pack.parts.size)
     assert_equal(100, pack.size)
     part = pack.parts.first
@@ -150,12 +177,21 @@ class TestProduct < Test::Unit::TestCase
     assert_equal(u('Tabletten'), part.unit.name.de)
     code = pack.code(:cid, 'DE')
     assert_instance_of(Util::Code, code)
+    assert_equal("649", code.value)
+
+    pack = seq.packages.last
+    code = pack.code(:cid, 'DE')
+    assert_instance_of(Util::Code, code)
     assert_equal("114568", code.value)
 
     pr = Drugs::Product.instances.at(1)
-    assert_equal('2A', pr.code(:festbetragsgruppe).value)
     seq = pr.sequences.first
     assert_equal(atc, seq.atc)
+
+    pr = Drugs::Product.instances.at(2)
+    seq = pr.sequences.first
+    pack = seq.packages.first
+    assert_equal('2A', pack.code(:festbetragsgruppe).value)
 
     pr = Drugs::Product.instances.last
     seq = pr.sequences.first
@@ -176,10 +212,6 @@ class TestProduct < Test::Unit::TestCase
     }
     assert_equal(expected, names)
     pr = Drugs::Product.instances.first
-    assert_equal(1, pr.codes.size)
-    code = pr.code(:festbetragsgruppe)
-    assert_instance_of(Util::Code, code)
-    assert_equal(u('9'), code.value)
     assert_equal(1, pr.sequences.size)
     seq = pr.sequences.first
     assert_equal(1, seq.compositions.size)
@@ -188,13 +220,16 @@ class TestProduct < Test::Unit::TestCase
     assert_equal(1, comp.active_agents.size)
     agent = comp.active_agents.first
     assert_equal(sub1, agent.substance)
-    assert_equal(1, seq.packages.size)
+    assert_equal(2, seq.packages.size)
     pack = seq.packages.first
     assert_equal(34.25, pack.price(:public, 'DE'))
     assert_equal(34.28, pack.price(:festbetrag, 'DE'))
     code = pack.code(:festbetragsstufe, 'DE')
     assert_instance_of(Util::Code, code)
     assert_equal(2, code.value)
+    code = pack.code(:festbetragsgruppe, 'DE')
+    assert_instance_of(Util::Code, code)
+    assert_equal(u('9'), code.value)
     assert_equal(1, pack.parts.size)
     assert_equal(100, pack.size)
     part = pack.parts.first
@@ -202,12 +237,21 @@ class TestProduct < Test::Unit::TestCase
     assert_equal(u('Tabletten'), part.unit.name.de)
     code = pack.code(:cid, 'DE')
     assert_instance_of(Util::Code, code)
+    assert_equal("649", code.value)
+
+    pack = seq.packages.last
+    code = pack.code(:cid, 'DE')
+    assert_instance_of(Util::Code, code)
     assert_equal("114568", code.value)
 
     pr = Drugs::Product.instances.at(1)
-    assert_equal('2A', pr.code(:festbetragsgruppe).value)
     seq = pr.sequences.first
     assert_equal(atc, seq.atc)
+
+    pr = Drugs::Product.instances.at(2)
+    seq = pr.sequences.first
+    pack = seq.packages.first
+    assert_equal('2A', pack.code(:festbetragsgruppe).value)
 
     pr = Drugs::Product.instances.last
     seq = pr.sequences.first
