@@ -16,7 +16,7 @@ module ODDB
     module Drugs
 class Package < Remote::Object
   def initialize(source, remote, currency_rate, tax_factor=1.0)
-    @tax_factor = 1.0 / tax_factor.to_f
+    @tax_factor = tax_factor.to_f
     @currency_rate = currency_rate.to_f
     super(source, remote)
   end
@@ -81,7 +81,7 @@ class Package < Remote::Object
     case type
     when :public
       @price_public or begin
-        pr = @remote.price_public.to_f * @currency_rate * @tax_factor
+        pr = @remote.price_public.to_f * @currency_rate / @tax_factor
         @price_public = Util::Money.new(pr/100.0) if(pr > 0)
       end
     end

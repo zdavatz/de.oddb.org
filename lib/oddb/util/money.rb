@@ -12,28 +12,29 @@ class Money
     @type, @country = type.to_s.downcase, country.to_s.upcase
   end
   def amount=(amount)
-    @credits = (amount.to_f * 100).round
+    @amount = amount.to_f
+    @credits = (@amount * 100).round
   end
   def is_for?(type, country)
     @type == type.to_s.downcase && @country == country.to_s.upcase
   end
   def to_f
-    @credits.to_f / 100
+    @amount || (@credits.to_f / 100)
   end
   def to_s
     sprintf("%1.2f", to_f)
   end
   def +(other)
-    Money.new(to_f + other.to_f)
+    Money.new((@amount || to_f) + other.to_f)
   end
   def -(other)
-    Money.new(to_f - other.to_f)
+    Money.new((@amount || to_f) - other.to_f)
   end
   def *(other)
-    Money.new(to_f * other.to_f)
+    Money.new((@amount || to_f) * other.to_f)
   end
   def /(other)
-    Money.new(to_f / other.to_f)
+    Money.new((@amount || to_f) / other.to_f)
   end
   def <=>(other)
     case other

@@ -197,6 +197,9 @@ class LookandfeelWrapper < SBSM::LookandfeelWrapper
     [@session.http_protocol + ':/', @session.server_name,
       @language, @session.zone].compact.join("/")
   end
+  def price_factor
+    tax_factor * currency_factor
+  end
 end
 class LookandfeelMeineMedikamente < LookandfeelWrapper
   ENABLED = [
@@ -206,7 +209,7 @@ class LookandfeelMeineMedikamente < LookandfeelWrapper
     :contact, :home, :products,
   ]
   def currency_factor
-    Currency.rate('EUR', 'CHF')
+    @factor ||= Currency.rate('EUR', 'CHF')
   end
   def legend_components
     { 
