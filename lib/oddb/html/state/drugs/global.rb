@@ -121,6 +121,9 @@ class Global < State::Global
       if(result.empty?)
         result.concat(ODDB::Drugs::Package.search_by_name(query))
       end
+      if(result.empty?)
+        result.concat(ODDB::Drugs::Package.search_by_product(query))
+      end
     end
     if(@session.lookandfeel.enabled?(:remote_databases, false))
       result.concat(_search_remote(query))

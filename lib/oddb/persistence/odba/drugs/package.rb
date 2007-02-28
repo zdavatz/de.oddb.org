@@ -14,6 +14,7 @@ module ODDB
       odba_index :atc, 'atc.code'
       odba_index :name, 'name.all'
       odba_index :substance, :substances, 'name.all', Drugs::Substance
+      odba_index :product, :product, 'name.all', Drugs::Product
       serialize :codes, :prices
     end
   end
