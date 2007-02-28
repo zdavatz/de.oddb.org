@@ -189,7 +189,13 @@ aktuellsten Medikamenten-Portal Deutschlands.
     }
   end
   def tax_factor
-    1.0
+    (1 + tax_factor_add) / (1 + tax_factor_sub)
+  end
+  def tax_factor_add
+    0
+  end
+  def tax_factor_sub
+    0
   end
 end
 class LookandfeelWrapper < SBSM::LookandfeelWrapper
@@ -200,11 +206,28 @@ class LookandfeelWrapper < SBSM::LookandfeelWrapper
   def price_factor
     tax_factor * currency_factor
   end
+  def tax_factor
+    (1 + tax_factor_add) / (1 + tax_factor_sub)
+  end
 end
 class LookandfeelMeineMedikamente < LookandfeelWrapper
+  DICTIONARIES = {
+    'de' => { 
+      :explain_price0  => '',
+      :explain_price1  => ' - ',
+      :explain_price2  => ' + ',
+      :explain_price3  => ' = ',
+      :explain_price4  => ' CHF',
+      :price_local     => 'Berechnung',
+      :price_db        => 'Preis Deutschland (CHF)',
+      :tax_add         => 'MwSt. Schweiz (7.6%)',
+      :tax_sub         => 'MwSt. Deutschland (19%)',
+      :tt_price_public => 'Preis: Apothekenverkaufspreis inkl. MwSt. in CHF',
+    },
+  }
   ENABLED = [
     # Features:
-    :remote_databases,
+    :explain_price, :remote_databases,
     # Navigation-Links:
     :contact, :home, :products,
   ]
@@ -215,7 +238,6 @@ class LookandfeelMeineMedikamente < LookandfeelWrapper
     { 
       [0,0] => 'explain_remote',
       [0,1] => 'explain_zuzahlungsbefreit', 
-      [0,2] => :explain_currency_conversion,
     }
   end
   def result_components
@@ -229,8 +251,11 @@ class LookandfeelMeineMedikamente < LookandfeelWrapper
       [6,0] => :google,
     }
   end
-  def tax_factor
-    107.6 / 119.0
+  def tax_factor_add
+    7.6 / 100.0
+  end
+  def tax_factor_sub
+    19.0 / 100.0
   end
 end
 class LookandfeelFactory < SBSM::LookandfeelFactory

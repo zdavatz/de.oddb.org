@@ -11,6 +11,51 @@ module ODDB
   module Html
     module View
       module Drugs
+class ExplainPrice < HtmlGrid::Composite
+  COMPONENTS = {
+    [0,0] => :price_db,
+    [0,1] => :tax_sub,
+    [0,2] => :tax_add,
+    [0,3] => :price_local,
+  }
+  LABELS = true
+  LEGACY_INTERFACE = false
+  def price_local(price)
+    _value :price_local, @lookandfeel.lookup(:explain_price, 
+                                             _price_db(price),
+                                             _tax_sub(price),
+                                             _tax_add(price),
+                                             _price_local(price))
+  end
+  def _price_local(price)
+    price * @lookandfeel.price_factor
+  end
+  def price_db(price)
+    _value :price_db, _price_db(price)
+  end
+  def _price_db(price)
+    price * @lookandfeel.currency_factor
+  end
+  def tax_add(price)
+    _value :tax_add, _tax_add(price)
+  end
+  def _tax_add(price)
+    factor = @lookandfeel.tax_factor_add
+    _price_local(price) / (1.0 + factor) * factor
+  end
+  def tax_sub(price)
+    _value :tax_sub, _tax_sub(price)
+  end
+  def _tax_sub(price)
+    factor = @lookandfeel.tax_factor_sub
+    _price_de(price) / (1.0 + factor) * factor
+  end
+  def _value(key, price)
+    value = HtmlGrid::Value.new(key, price, @session, self)
+    value.value = price
+    value
+  end
+end
 module PackageMethods
   def active_agents(model)
     link = nil
@@ -78,7 +123,20 @@ module PackageMethods
     adjust_price model.price(:festbetrag)
   end
   def price_public(model)
-    adjust_price model.price(:public)
+    pprice = model.price(:public)
+    price = adjust_price pprice
+    if(!@lookandfeel.enabled?(:explain_price, false) \
+       || model.is_a?(Remote::Drugs::Package))
+      price
+    elsif(price && (code = model.code(:cid)))
+      span = HtmlGrid::Span.new(model, @session, self)
+      @adjust_price ||= 0
+      @adjust_price += 1
+      span.value = price
+      span.css_id = "adjust_price#{@adjust_price}"
+      span.dojo_tooltip = ExplainPrice.new(pprice, @session, self)
+      span
+    end
   end
   def product(model)
     if(model.is_a?(Remote::Drugs::Package))

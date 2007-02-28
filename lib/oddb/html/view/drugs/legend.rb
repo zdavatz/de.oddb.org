@@ -17,12 +17,6 @@ class Legend < HtmlGrid::Composite
     }
     super
   end
-  def explain_currency_conversion(model)
-    link = HtmlGrid::Link.new(:explain_currency_convert, model, 
-                              @session, self)
-    link.href = "http://www.google.de/search?q=1%20EUR%20in%20CHF"
-    link
-  end
 end
       end
     end
