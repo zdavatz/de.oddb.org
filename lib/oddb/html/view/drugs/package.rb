@@ -48,7 +48,7 @@ class ExplainPrice < HtmlGrid::Composite
   end
   def _tax_sub(price)
     factor = @lookandfeel.tax_factor_sub
-    _price_de(price) / (1.0 + factor) * factor
+    _price_db(price) / (1.0 + factor) * factor
   end
   def _value(key, price)
     value = HtmlGrid::Value.new(key, price, @session, self)
