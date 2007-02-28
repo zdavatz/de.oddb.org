@@ -17,6 +17,8 @@ class TestSearch < Test::Unit::TestCase
     Drugs::Package.instances.clear
     Drugs::Product.instances.clear
     Business::Company.instances.clear
+    flexstub(Currency).should_receive(:rate)\
+      .with('EUR', 'CHF').and_return(1.5)
     super
   end
   def setup_package(name="Amantadin by Producer")

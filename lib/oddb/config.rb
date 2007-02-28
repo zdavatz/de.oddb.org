@@ -14,6 +14,7 @@ module ODDB
   defaults = {
     'admins'            => [],
     'config'			      => default_config_files,
+    'currency_rates'    => 'druby://localhost:10999',
     'data_dir'          => File.expand_path('data', oddb_dir),
     'db_name'           => 'oddb',
     'db_user'           => 'oddb',

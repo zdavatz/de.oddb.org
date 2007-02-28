@@ -20,6 +20,8 @@ class TestCompare < Test::Unit::TestCase
     Drugs::Product.instances.clear
     Business::Company.instances.clear
     @cache = flexstub(ODBA.cache)
+    flexstub(Currency).should_receive(:rate)\
+      .with('EUR', 'CHF').and_return(1.5)
     super
   end
   def setup_package(name, pzn='12345', price=6)

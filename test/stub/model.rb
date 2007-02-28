@@ -112,4 +112,5 @@ module ODDB
       simulate_database(:name)
     end
   end
+  Currency = Object.new
 end

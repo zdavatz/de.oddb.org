@@ -28,8 +28,8 @@ class Global < State::Global
     if(pac = DRbObject._load(Marshal.dump([uri, ref])))
       rate = _remote(uri) { |remote| remote.get_currency_rate("EUR") }
       package = Remote::Drugs::Package.new(source, pac, rate, 
-                                           _reverse_price_factor)
-      result = Util::AnnotatedList.new(package.comparables) 
+                                           _tax_factor)
+      result = Util::AnnotatedList.new(package.comparables)
       result.origin = package
       result.query = package.atc.code
       CompareRemote.new(@session, result)
@@ -93,14 +93,14 @@ class Global < State::Global
         rate = remote.get_currency_rate("EUR")
         block.call(remote).each { |pac|
           result.push Remote::Drugs::Package.new(source, pac, rate, 
-                                                 _reverse_price_factor)
+                                                 _tax_factor)
         }
       }
     }
     result
   end
-  def _reverse_price_factor
-    1.0 / @session.lookandfeel.price_factor
+  def _tax_factor
+    @session.lookandfeel.tax_factor
   end
   def _search(query)
     result = Util::AnnotatedList.new

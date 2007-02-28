@@ -164,11 +164,14 @@ aktuellsten Medikamenten-Portal Deutschlands.
     [@session.http_protocol + ':/', @session.server_name,
       @language, @session.zone].compact.join("/")
   end
+  def currency_factor
+    1.0
+  end
   def legend_components
     { [0,0] => 'explain_zuzahlungsbefreit' }
   end
   def price_factor
-    1.0
+    tax_factor * currency_factor
   end
   def result_components
     {
@@ -185,6 +188,9 @@ aktuellsten Medikamenten-Portal Deutschlands.
       [10,0]=> :google,
     }
   end
+  def tax_factor
+    1.0
+  end
 end
 class LookandfeelWrapper < SBSM::LookandfeelWrapper
   def base_url
@@ -199,15 +205,15 @@ class LookandfeelMeineMedikamente < LookandfeelWrapper
     # Navigation-Links:
     :contact, :home, :products,
   ]
+  def currency_factor
+    Currency.rate('EUR', 'CHF')
+  end
   def legend_components
     { 
       [0,0] => 'explain_remote',
       [0,1] => 'explain_zuzahlungsbefreit', 
       [0,2] => :explain_currency_conversion,
     }
-  end
-  def price_factor
-    107.6 / 119.0
   end
   def result_components
     {
@@ -219,6 +225,9 @@ class LookandfeelMeineMedikamente < LookandfeelWrapper
       [5,0] => :company,
       [6,0] => :google,
     }
+  end
+  def tax_factor
+    107.6 / 119.0
   end
 end
 class LookandfeelFactory < SBSM::LookandfeelFactory
