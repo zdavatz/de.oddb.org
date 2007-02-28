@@ -19,7 +19,7 @@ module ODDB
     module Csv
 class ProductInfos < Import
   def cell(row, idx)
-    if((str = row.at(idx)) && !str.empty?)
+    if((str = row.at(idx)) && !str.to_s.empty?)
       u(@@iconv.iconv(str))
     end
   end
@@ -91,8 +91,8 @@ class ProductInfos < Import
   end
   def import_size(row, package)
     if(part = package.parts.first)
-      size = row.at(3)
-      dose = row.at(4)
+      size = row.at(3).to_i
+      dose = row.at(4).to_s
       if(dose != 'St')
         part.quantity = Drugs::Dose.new(size, dose)
       else

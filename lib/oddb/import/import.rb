@@ -17,7 +17,7 @@ module ODDB
         str.split(/\b/).collect { |part| part.capitalize }.join
       end
       def company_name(cname)
-        cname = capitalize_all(cname)
+        cname = capitalize_all(cname.to_s)
         cname.gsub!(/\.(?!\s)/, '. ')
         cname.gsub!(/[\/&]/) { |match| ' %s ' % match }
         cname.gsub!(/Gmbh/, 'GmbH')
