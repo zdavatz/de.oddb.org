@@ -213,12 +213,7 @@ end
 class LookandfeelMeineMedikamente < LookandfeelWrapper
   DICTIONARIES = {
     'de' => { 
-      :explain_price0  => '',
-      :explain_price1  => ' - ',
-      :explain_price2  => ' + ',
-      :explain_price3  => ' = ',
-      :explain_price4  => ' CHF',
-      :price_local     => 'Berechnung',
+      :price_local     => 'Preis Schweiz (CHF)',
       :price_db        => 'Preis Deutschland (CHF)',
       :tax_add         => 'MwSt. Schweiz (7.6%)',
       :tax_sub         => 'MwSt. Deutschland (19%)',

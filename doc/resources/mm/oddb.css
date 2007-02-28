@@ -196,6 +196,10 @@ td.remote, td.zuzahlungsbefreit {
   padding: 2px;
   font-weight: bold;
 }
+td.sum {
+  border-top: 1px solid black;
+  font-weight: bold;
+}
 td.warn {
   padding: 8px; 
   color: #F70;
@@ -223,7 +227,7 @@ tr.zuzahlungsbefreit.bg, td.zuzahlungsbefreit {
   background-color: #fafc6d;
 }
 .difference, .doses, .price_festbetrag, .price_difference,
-.price_public {
+.price_public, .price {
   text-align: right;
 }
 .code_festbetragsstufe, td.code_zuzahlungsbefreit, 

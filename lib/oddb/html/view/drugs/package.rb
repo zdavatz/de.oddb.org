@@ -18,14 +18,14 @@ class ExplainPrice < HtmlGrid::Composite
     [0,2] => :tax_add,
     [0,3] => :price_local,
   }
+  CSS_MAP = {
+    [1,0,1,3] => 'price',
+    [0,3,2]   => 'sum',
+  }
   LABELS = true
   LEGACY_INTERFACE = false
   def price_local(price)
-    _value :price_local, @lookandfeel.lookup(:explain_price, 
-                                             _price_db(price),
-                                             _tax_sub(price),
-                                             _tax_add(price),
-                                             _price_local(price))
+    _value :price_local, _price_local(price)
   end
   def _price_local(price)
     price * @lookandfeel.price_factor
@@ -37,14 +37,14 @@ class ExplainPrice < HtmlGrid::Composite
     price * @lookandfeel.currency_factor
   end
   def tax_add(price)
-    _value :tax_add, _tax_add(price)
+    _value :tax_add, ['+', _tax_add(price)]
   end
   def _tax_add(price)
     factor = @lookandfeel.tax_factor_add
     _price_local(price) / (1.0 + factor) * factor
   end
   def tax_sub(price)
-    _value :tax_sub, _tax_sub(price)
+    _value :tax_sub, ['-', _tax_sub(price)]
   end
   def _tax_sub(price)
     factor = @lookandfeel.tax_factor_sub
