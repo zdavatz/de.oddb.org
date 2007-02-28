@@ -20,7 +20,8 @@ class ExplainPrice < HtmlGrid::Composite
   }
   CSS_MAP = {
     [1,0,1,3] => 'price',
-    [0,3,2]   => 'sum',
+    [0,3]     => 'sum',
+    [1,3]     => 'price sum',
   }
   LABELS = true
   LEGACY_INTERFACE = false

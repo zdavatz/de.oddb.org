@@ -199,7 +199,6 @@ td.remote, td.zuzahlungsbefreit {
 td.sum {
   border-top: 1px solid black;
   font-weight: bold;
-  text-align: right;
 }
 td.warn {
   padding: 8px; 
