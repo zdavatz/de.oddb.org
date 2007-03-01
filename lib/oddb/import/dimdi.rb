@@ -628,8 +628,9 @@ module Dimdi
       end
     end
     def import_company(row)
-      if(cname = cell(row, 6))
-        company = Business::Company.find_by_name(company_name(cname))
+      if(name = cell(row, 6))
+        cname = company_name(name)
+        company = Business::Company.find_by_name(cname)
         if(company)
           @existing_companies += 1
         else

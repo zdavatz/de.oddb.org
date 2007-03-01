@@ -349,6 +349,9 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_equal(true, code.value)
     confirmed = @import.instance_variable_get('@confirmed_pzns')
     assert_equal(1, confirmed.size)
+    assert_equal(1, Business::Company.instances.size)
+    comp = Business::Company.instances.first
+    assert_equal('Ratiopharm GmbH', comp.name.de)
 
     # do it again, nothing should change
     existing.code(:zuzahlungsbefreit).value = false
@@ -376,6 +379,9 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_equal(true, code.value)
     confirmed = @import.instance_variable_get('@confirmed_pzns')
     assert_equal(1, confirmed.size)
+    assert_equal(1, Business::Company.instances.size)
+    comp = Business::Company.instances.first
+    assert_equal('Ratiopharm GmbH', comp.name.de)
   end
   def test_import__ml
     atc = Drugs::Atc.new('J01CA04')
