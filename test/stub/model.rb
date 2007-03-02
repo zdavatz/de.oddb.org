@@ -90,7 +90,7 @@ module ODDB
       simulate_database(:name)
     end
     class Package < Model
-      simulate_database(:name, :atc, :substance)
+      simulate_database(:name, :atc, :substance, :company, :product)
     end
     class Part < Model
       simulate_database

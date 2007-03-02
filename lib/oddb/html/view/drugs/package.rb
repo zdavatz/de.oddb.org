@@ -85,15 +85,6 @@ module PackageMethods
   def adjust_price(money)
     money * @lookandfeel.price_factor if(money)
   end
-  def atc(model)
-    if(atc = model.atc)
-      span = HtmlGrid::Span.new(model, @session, self)
-      span.value = atc.code
-      span.css_id = "atc_#@list_index"
-      span.dojo_title = atc.name.send(@session.language)
-      span
-    end
-  end
   def code_festbetragsgruppe(model)
     model.code(:festbetragsgruppe, 'DE')
   end

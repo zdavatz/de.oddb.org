@@ -3,10 +3,19 @@
 
 require 'htmlgrid/divform'
 require 'htmlgrid/reset'
+require 'htmlgrid/select'
 
 module ODDB
   module Html
     module View
+module SearchMethods
+  def dstype(model)
+    select = HtmlGrid::Select.new(:dstype, model, @session, self)
+		select.set_attribute('onChange', 'this.form.onsubmit();')
+		select.selected = @session.persistent_user_input(:dstype)
+    select
+  end
+end
 class SearchBar < HtmlGrid::InputText
   def init
     super
@@ -23,28 +32,30 @@ class SearchBar < HtmlGrid::InputText
     script = "if(#{@name}.value!='#{val}'){"
     script << "var href = '#{submit}'"
     script << "+encodeURIComponent(#{@name}.value.replace(/\\//, '%2F'));"
-    script << "if(this.search_type)"
-    script << "href += '/search_type/' + this.search_type.value;"
+    script << "if(this.dstype)"
+    script << "href += '/dstype/' + this.dstype.value;"
     #script << "href += '#best_result';"
     script << "document.location.href=href; } return false"
     self.onsubmit = script
   end
 end
 class Search < HtmlGrid::DivForm
+  include SearchMethods
   EVENT = :search
   FORM_NAME = 'search'
   COMPONENTS = {
     [0,0] => :query,
-    [0,1] => :submit,
-    [1,1] => :reset,
-    [0,2] => "explain_search",
-    [0,3] => :social_bookmarks,
+    [0,1] => :dstype,
+    [0,2] => :submit,
+    [1,2] => :reset,
+    [0,3] => "explain_search",
+    [0,4] => :social_bookmarks,
   }
   SYMBOL_MAP = {
-    :query => SearchBar,
-    :reset => HtmlGrid::Reset,
+    :query  => SearchBar,
+    :reset  => HtmlGrid::Reset,
   }
-  CSS_MAP = {2 => "explain"}
+  CSS_MAP = {3 => "explain"}
   SOCIAL_BOOKMARKS = [
     [ :sb_delicious, "http://del.icio.us/post?url=%s&title=%s" ],
     [ :sb_stumble, "http://www.stumbleupon.com/submit?url=%s&title=%s" ],
@@ -67,10 +78,11 @@ class Search < HtmlGrid::DivForm
   end
 end
 class InlineSearch < HtmlGrid::DivForm
+  include SearchMethods
   EVENT = :search
   COMPONENTS = {
     [0,0] => :query,
-    [1,0] => :submit,
+    [1,0] => :dstype,
   }
   SYMBOL_MAP = {
     :query => SearchBar,

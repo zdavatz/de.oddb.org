@@ -7,7 +7,7 @@ module ODDB
   module Drugs
     class Atc < Model
       has_many :ddds, on_delete(:cascade)
-      has_many :sequences
+      has_many :sequences, delegates(:packages)
       attr_reader :code
       multilingual :name
       def initialize(code)

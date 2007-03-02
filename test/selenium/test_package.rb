@@ -95,9 +95,9 @@ class TestPackage < Test::Unit::TestCase
     @selenium.open "/de/drugs/package/pzn/12345"
     assert_equal "ODDB | Medikamente | Details | Amantadin by Producer", @selenium.get_title
     @selenium.type "query", "Amantadin"
-    @selenium.click "//input[@type='submit']"
+    @selenium.select "dstype", "Markenname"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Markenname", 
                  @selenium.get_title
   end
 end

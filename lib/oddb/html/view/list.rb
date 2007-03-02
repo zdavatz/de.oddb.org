@@ -11,15 +11,17 @@ class List < HtmlGrid::List
   BACKGROUND_SUFFIX = ''
   LEGACY_INTERFACE = false
   SORT_DEFAULT = nil
+  def query_args
+    []
+  end
   def query_key 
     :query
   end
   def sort_link(thkey, matrix, component)
     sortlink = HtmlGrid::Link.new(thkey, @model, @session, self)
-    args = [
-      query_key, model.query,
-      'sortvalue', component.to_s,
-    ]
+    args = [ query_key, model.query ]
+    args.concat query_args
+    args.push('sortvalue', component.to_s)
     sortlink.href = @lookandfeel._event_url(@session.event, args)
     sortlink.css_class = css_head_map[matrix]
     sortlink.css_id = thkey

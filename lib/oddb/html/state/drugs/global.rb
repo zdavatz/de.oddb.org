@@ -46,6 +46,16 @@ class Global < State::Global
       Compare.new(@session, result)
     end
   end
+  def _complete(result)
+    atcs = {}
+    result.dup.each { |package|
+      if((atc = package.atc) && !atcs[atc])
+        atcs.store(atc, true)
+        result.concat(atc.packages)
+      end
+    }
+    result.uniq!
+  end
   def navigation
     [:products].concat(super)
   end
@@ -102,33 +112,38 @@ class Global < State::Global
   def _tax_factor
     @session.lookandfeel.tax_factor
   end
-  def _search(query)
+  def search
+    _search(@session.persistent_user_input(:query),
+            @session.persistent_user_input(:dstype))
+  end
+  def _search(query, dstype)
     result = Util::AnnotatedList.new
     result.query = query
+    result.dstype = dstype || 'compare'
     if(query.length < 3)
       result.error = :e_query_short
     else
-      result.concat(ODDB::Drugs::Package.search_by_atc(query))
-      if(result.empty?)
-        companies = ODDB::Business::Company.search_by_name(query)
-        companies.each { |comp|
-          result.concat(comp.packages)
-        }
-      end
-      if(result.empty?)
-        result.concat(ODDB::Drugs::Package.search_by_substance(query))
-      end
-      if(result.empty?)
-        result.concat(ODDB::Drugs::Package.search_by_name(query))
-      end
-      if(result.empty?)
-        result.concat(ODDB::Drugs::Package.search_by_product(query))
+      case dstype
+      when 'tradename'
+        _search_by(:name, query, result)
+        _search_by(:product, query, result) if result.empty?
+      when 'substance'
+        _search_by(:substance, query, result)
+      else
+        _search_by(:atc, query, result)
+        _search_by(:company, query, result) if result.empty?
+        _search_by(:substance, query, result) if result.empty?
+        _complete(_search_by(:name, query, result)) if result.empty?
+        _complete(_search_by(:product, query, result)) if result.empty?
       end
     end
     if(@session.lookandfeel.enabled?(:remote_databases, false))
       result.concat(_search_remote(query))
     end
     Result.new(@session, result)
+  end
+  def _search_by(key, query, result)
+    result.concat ODDB::Drugs::Package.send("search_by_#{key}", query)
   end
   def _search_remote(query)
     _remote_packages { |remote| remote.remote_packages(query) }

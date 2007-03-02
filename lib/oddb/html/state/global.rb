@@ -25,9 +25,6 @@ class Global < SBSM::State
   def products
     _products(@session.persistent_user_input(:range))
   end
-  def search
-    _search(@session.persistent_user_input(:query))
-  end
   def navigation
     [:contact, :home]
   end

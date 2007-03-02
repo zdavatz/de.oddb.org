@@ -38,8 +38,6 @@ module PackageSort
   include Sort
   def sort_proc(key)
     case key
-    when :atc
-      Proc.new { |pac| (atc = pac.atc) && atc.code || 'Z' }
     when :code_festbetragsstufe, :code_zuzahlungsbefreit
       Proc.new { |pac| 
         (code = pac.code(key)) && code.value || '' }

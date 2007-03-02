@@ -87,7 +87,7 @@ class TestProducts < Test::Unit::TestCase
 
     @selenium.click "link=4N Pflaster"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | 4N Pflaster", 
+    assert_equal "ODDB | Medikamente | Suchen | 4N Pflaster | Preisvergleich", 
                  @selenium.get_title
   end
   def test_products__sort

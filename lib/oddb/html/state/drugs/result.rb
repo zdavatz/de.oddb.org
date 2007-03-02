@@ -21,10 +21,11 @@ class Result < Drugs::Global
     sort
   end
   def direct_event
-    [:search, :query, @model.query]
+    [:search, :query, @model.query, :dstype, @model.dstype]
   end
   def partition!
     atcs = {}
+    @model.total = @model.size
     while(package = @model.shift)
       code = (atc = package.atc) ? atc.code : 'Z'
       (atcs[code] ||= Util::AnnotatedList.new(:atc => atc)).push(package)
@@ -33,8 +34,8 @@ class Result < Drugs::Global
       @model.push(array)
     }
   end
-  def _search(query)
-    if(@model.query == query)
+  def _search(query, dstype)
+    if(@model.query == query && @model.dstype == dstype)
       sort
     else
       super

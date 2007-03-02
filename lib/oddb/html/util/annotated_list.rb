@@ -25,10 +25,8 @@ class AnnotatedList < Array
     if(args.size == 1 && /=$/.match(mname))
       mname.chop!
       @annotations[mname.to_sym] = args.first
-    elsif(args.empty?)
-      @annotations[key]
     else
-      super
+      @annotations[key]
     end
   end
   private

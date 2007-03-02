@@ -107,7 +107,7 @@ class TestCompare < Test::Unit::TestCase
     type "query", "Amantadin"
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", 
                  get_title
     click 'link=Amantadin by Producer'
     wait_for_page_to_load "30000"
@@ -183,7 +183,7 @@ class TestCompare < Test::Unit::TestCase
     type "query", "Amantadin"
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", get_title
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", get_title
   
     atc = Drugs::Atc.new('N04BB01')
 
@@ -236,7 +236,7 @@ class TestCompare < Test::Unit::TestCase
     type "query", "Amantadin"
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", get_title
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", get_title
   
     atc = Drugs::Atc.new('N04BB01')
 
@@ -250,7 +250,7 @@ class TestCompare < Test::Unit::TestCase
     assert_match(/^Remotadin/, get_text("cid_0"))
     assert is_element_present("//a[@id='cid_1']")
     assert_match(/^Remoteric/, get_text("cid_1"))
-    assert is_text_present('+65.8%')
+    assert is_text_present('+65.9%')
   ensure
     drb.stop_service
   end

@@ -84,6 +84,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :sb_simpy                 => 'Simpy',
       :sb_stumble               => 'Stumble',
       :search                   => 'Suchen',
+      :substance                => 'Inhaltsstoff',
       :th_active_agents         => 'Wirkstoff',
       :th_atc                   => 'ATC-Code',
       :th_code_festbetragsstufe => 'FB-Stufe',
@@ -99,6 +100,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :title_found0             => 'Suchergebnis für "',
       :title_found1             => '", Total ',
       :title_found2             => ' Präparate',
+      :tradename                => 'Markenname',
       :tt_atc                   => <<-EOS,
 The field of drug utilization research has attracted increasing
 interest since its infancy in the 1960s. At a symposium in Oslo 

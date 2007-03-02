@@ -30,6 +30,7 @@ class TestSearch < Test::Unit::TestCase
     sequence = Drugs::Sequence.new
     sequence.product = product
     sequence.atc = Drugs::Atc.new('N04BB01')
+    sequence.atc.name.de = 'Amantadin'
     composition = Drugs::Composition.new
     sequence.add_composition(composition)
     substance = Drugs::Substance.new
@@ -68,8 +69,9 @@ class TestSearch < Test::Unit::TestCase
     @selenium.type "query", "Amantadin"
     @selenium.click "//input[@type='submit']"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", 
                  @selenium.get_title
+    assert @selenium.is_text_present('Amantadin (N04BB01) - 1 Präparate')
     assert @selenium.is_text_present('Amantadin by Producer')
     assert @selenium.is_text_present('100 mg')
     assert @selenium.is_text_present('5 Ampullen x 20 ml')
@@ -88,52 +90,47 @@ class TestSearch < Test::Unit::TestCase
     package2.add_price(Util::Money.new(999999, :public, 'DE'))
     @selenium.open('/de/drugs/search/query/Amantadin')
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", 
                  @selenium.get_title
     assert @selenium.is_text_present('Amantadin by Producer')
     assert !@selenium.is_text_present('999999.00')
 
     ## Sort result
-    @selenium.click "//a[@name='th_atc']"
+    @selenium.click "//a[@name='th_code_zuzahlungsbefreit']"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
-                 @selenium.get_title
-
-    @selenium.click "//a[@name='th_atc']"
-    @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", 
                  @selenium.get_title
 
     @selenium.click "//a[@name='th_code_zuzahlungsbefreit']"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", 
                  @selenium.get_title
 
     @selenium.click "//a[@name='th_code_festbetragsstufe']"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", 
                  @selenium.get_title
 
     @selenium.click "//a[@name='th_price_difference']"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", 
                  @selenium.get_title
 
     @selenium.click "//a[@name='th_company']"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", 
                  @selenium.get_title
 
     @selenium.click "//a[@name='th_price_festbetrag']"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", 
                  @selenium.get_title
 
     ## an empty Result:
     @selenium.type "query", "Gabapentin"
-    @selenium.click "//input[@type='submit']"
+    @selenium.select "dstype", "Inhaltsstoff"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Gabapentin", 
+    assert_equal "ODDB | Medikamente | Suchen | Gabapentin | Inhaltsstoff", 
                  @selenium.get_title
     expected = <<-EOS
 Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte
@@ -150,7 +147,7 @@ einmal.
     @selenium.type "query", "Amantadin"
     @selenium.click "//input[@type='submit']"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", 
                  @selenium.get_title
     assert @selenium.is_text_present('Amantadin by Producer')
 
@@ -163,7 +160,7 @@ einmal.
     ## click back to Result
     @selenium.click "link=Suchresultat"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", 
                  @selenium.get_title
   end
   def test_search__multiple_substances
@@ -178,7 +175,7 @@ einmal.
     @selenium.type "query", "Amantadin"
     @selenium.click "//input[@type='submit']"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", 
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", 
                  @selenium.get_title
     assert @selenium.is_text_present('Amantadin by Producer')
     assert @selenium.is_text_present('2 Wirkstoffe')
@@ -189,7 +186,7 @@ einmal.
     @selenium.type "query", "A"
     @selenium.click "//input[@type='submit']"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | A", 
+    assert_equal "ODDB | Medikamente | Suchen | A | Preisvergleich", 
                  @selenium.get_title
     expected = 'Ihr Such-Stichwort ergibt ein sehr grosses Resultat. Bitte verwenden Sie mindestens 3 Buchstaben.'
     assert @selenium.is_text_present(expected)
@@ -201,7 +198,7 @@ einmal.
     @selenium.type "query", "Producer"
     @selenium.click "//input[@type='submit']"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Producer", 
+    assert_equal "ODDB | Medikamente | Suchen | Producer | Preisvergleich", 
                  @selenium.get_title
     assert @selenium.is_text_present('Amantadin by Producer')
     assert @selenium.is_text_present('100 mg')
@@ -219,7 +216,7 @@ einmal.
     setup_package("Nomamonamon")
     @selenium.open "/de/drugs/search/query/Producer/sortvalue/product"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Producer", 
+    assert_equal "ODDB | Medikamente | Suchen | Producer | Preisvergleich", 
                  @selenium.get_title
 
     assert_match(/^Nomamonamon/, @selenium.get_text("cid_0"))
@@ -236,7 +233,7 @@ einmal.
     type "query", "Amantadin"
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", get_title
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", get_title
     assert_match(/^Amantadin by Producer/, get_text("cid_0"))
     assert !is_element_present("//a[@id='cid_1']")
     assert is_text_present('Gelb = Zuzahlungsbefreit')
@@ -279,31 +276,34 @@ einmal.
     type "query", "Amantadin"
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", get_title
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", get_title
     assert_match(/^Amantadin by Producer/, get_text("cid_0"))
     assert is_element_present("//a[@id='cid_1']")
     assert_match(/^Remotadin/, get_text("cid_1"))
     assert is_text_present('Producer (Schweiz) AG')
-    assert is_text_present('7.96')
-    assert_equal 'zuzahlungsbefreit', get_attribute('//tr[2]@class')
-    assert_equal 'remote bg', get_attribute('//tr[3]@class')
+    assert is_text_present('10.80')
+    assert_equal 'groupheader', get_attribute('//tr[2]@class')
+    assert_equal 'zuzahlungsbefreit', get_attribute('//tr[3]@class')
+    assert_equal 'remote bg', get_attribute('//tr[4]@class')
 
     ## ensure sortable
     click "link=Präparat"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", get_title
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", get_title
     assert_match(/^Remotadin/, get_text("cid_0"))
     assert_match(/^Amantadin by Producer/, get_text("cid_1"))
-    assert_equal 'remote', get_attribute('//tr[2]@class')
-    assert_equal 'zuzahlungsbefreit bg', get_attribute('//tr[3]@class')
+    assert_equal 'groupheader', get_attribute('//tr[2]@class')
+    assert_equal 'remote', get_attribute('//tr[3]@class')
+    assert_equal 'zuzahlungsbefreit bg', get_attribute('//tr[4]@class')
 
     click "link=Wirkstoff"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", get_title
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", get_title
     assert_match(/^Amantadin by Producer/, get_text("cid_0"))
     assert_match(/^Remotadin/, get_text("cid_1"))
-    assert_equal 'zuzahlungsbefreit', get_attribute('//tr[2]@class')
-    assert_equal 'remote bg', get_attribute('//tr[3]@class')
+    assert_equal 'groupheader', get_attribute('//tr[2]@class')
+    assert_equal 'zuzahlungsbefreit', get_attribute('//tr[3]@class')
+    assert_equal 'remote bg', get_attribute('//tr[4]@class')
 
     assert is_text_present('Gelb = Zuzahlungsbefreit')
     assert is_text_present('Rot = CH - Produkte')
@@ -345,7 +345,7 @@ einmal.
     type "query", "Amantadin"
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", get_title
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", get_title
     assert !is_element_present("//a[@id='cid_1']")
   ensure
     drb.stop_service
@@ -360,7 +360,7 @@ einmal.
     type "query", "Amantadin"
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin", get_title
+    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", get_title
     assert_match(/^Amantadin by Producer/, get_text("cid_0"))
     assert !is_element_present("//a[@id='cid_1']")
     assert !is_text_present('Producer (Schweiz) AG')

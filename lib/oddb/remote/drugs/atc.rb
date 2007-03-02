@@ -11,9 +11,6 @@ class Atc < Remote::Object
   def code
     @code ||= @remote.code
   end
-  def name
-    @name ||= Util::Multilingual.new(:de => @remote.de)
-  end
 end
     end
   end

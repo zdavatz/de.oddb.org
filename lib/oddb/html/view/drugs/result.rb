@@ -54,13 +54,17 @@ class Packages < View::List
   def compose_subheader(model, offset)
     @grid.add(atc(model), *offset)
 		@grid.set_colspan(offset.at(0), offset.at(1), full_colspan)
-    @grid.add_style('atc', *offset)
+    @grid.set_row_attributes({'class' => 'groupheader'}, 
+                             offset.at(1), 1)
     resolve_offset(offset, OFFSET_STEP)
   end
   def price_difference(model)
     if((pf = model.price(:festbetrag)) && (pp = model.price(:public)))
       sprintf("%+1.2f", adjust_price(pp - pf))
     end
+  end
+  def query_args
+    [:dstype, @model.dstype]
   end
 end
 class ResultComposite < HtmlGrid::DivComposite
@@ -75,7 +79,7 @@ class ResultComposite < HtmlGrid::DivComposite
                 'result-list', 'legend' ]
   CSS_MAP = { 1 => 'before-searchbar', 3 => 'result' }
   def title_found(model)
-    @lookandfeel.lookup(:title_found, @model.query, @model.size)
+    @lookandfeel.lookup(:title_found, @model.query, @model.total)
   end
 end
 class Result < Template
