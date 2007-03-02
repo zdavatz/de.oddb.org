@@ -28,12 +28,34 @@ class Packages < View::List
     @css_head_map = @css_map
     super
   end
+  def atc(model)
+    description = @lookandfeel.lookup(:atc_unknown)
+    if(atc = model.atc)
+      description = sprintf("%s (%s)", atc.name.send(@session.language),
+                            atc.code)
+
+    end
+    sprintf("%s - %i %s", description, model.size, 
+            @lookandfeel.lookup(:packages))
+  end
   def compose_empty_list(offset)
     if(key = @model.error)
       fill_row(offset, key, 'warn')
     else
       super(offset, 'info')
     end
+  end
+  def compose_list(model=@model, offset=[0,0])
+    @model.each { |part|
+      offset = compose_subheader(part, offset)
+      offset = super(part, offset)
+    }
+  end
+  def compose_subheader(model, offset)
+    @grid.add(atc(model), *offset)
+		@grid.set_colspan(offset.at(0), offset.at(1), full_colspan)
+    @grid.add_style('atc', *offset)
+    resolve_offset(offset, OFFSET_STEP)
   end
   def price_difference(model)
     if((pf = model.price(:festbetrag)) && (pp = model.price(:public)))

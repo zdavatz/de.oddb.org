@@ -6,23 +6,30 @@ module ODDB
     module Util
 module Sort
   def sort
+    _sort
+    self
+  end
+  def _sort
     if(key = @session.user_input(:sortvalue))
       sort_by(key.to_sym)
     end
-    self
   end
   def sort_by(key)
     sorter = sort_proc(key) || Proc.new { |pac| pac.send(key) || '' }
-    @model = @model.sort_by(&sorter)
     if(@sortvalue == key)
       @reverse = !@reverse
-      if(@reverse)
-        @model.reverse!
-      end
     else
       @reverse = false
       @sortvalue = key
     end
+    @model = _sort_by(@model, @reverse, &sorter)
+  end
+  def _sort_by(model, reverse, &sorter)
+    model = model.sort_by(&sorter)
+    if(reverse)
+      model.reverse!
+    end
+    model
   end
   def sort_proc(key)
   end
@@ -32,7 +39,7 @@ module PackageSort
   def sort_proc(key)
     case key
     when :atc
-      Proc.new { |pac| (atc = pac.atc) && atc.code || '' }
+      Proc.new { |pac| (atc = pac.atc) && atc.code || 'Z' }
     when :code_festbetragsstufe, :code_zuzahlungsbefreit
       Proc.new { |pac| 
         (code = pac.code(key)) && code.value || '' }

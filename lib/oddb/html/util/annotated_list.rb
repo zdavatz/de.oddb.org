@@ -5,12 +5,31 @@ module ODDB
   module Html
     module Util
 class AnnotatedList < Array
-  attr_accessor :error, :query, :origin
+  def initialize(annotations = {})
+    if(annotations.is_a?(Hash))
+      super()
+      @annotations = annotations
+    else
+      super
+      @annotations = {}
+    end
+  end
   def sort_by(*args, &block)
     _delegate(super(*args, &block))
   end
   def [](*args, &block)
     _delegate(super(*args, &block))
+  end
+  def method_missing(key, *args)
+    mname = key.id2name
+    if(args.size == 1 && /=$/.match(mname))
+      mname.chop!
+      @annotations[mname.to_sym] = args.first
+    elsif(args.empty?)
+      @annotations[key]
+    else
+      super
+    end
   end
   private
   def _delegate(content)

@@ -14,6 +14,7 @@ class Lookandfeel < SBSM::Lookandfeel
       :active_agents0           => '',
       :active_agents1           => ' Wirkstoffe',
       :atc                      => 'ATC-Code',
+      :atc_unknown              => 'ATC-Code nicht bekannt',
       :breadcrumb_divider       => '&nbsp;&ndash;&nbsp;',
       :choose_range             => 'Bitte wählen Sie den anzuzeigenden Bereich',
       :code_festbetragsgruppe   => 'Festbetragsgruppe',
@@ -42,7 +43,7 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte
 einmal.
       EOS
       :equivalence_factor       => 'Wirkstärkenäquivalenzfaktor (waef)',
-      :explain_compare          => 'Für einen Preisvergleich klicken Sie bitte auf den Medikamentennamen.', 
+      :explain_compare          => 'Für einen Preisvergleich klicken Sie bitte auf den Medikamentennamen; zum Umsortieren auf den Tabellentitel.', 
       :explain_currency_convert => 'Wechselkurs (1 EUR in CHF)',
       :explain_remote           => 'Rot = CH - Produkte', 
       :explain_zuzahlungsbefreit=> 'Gelb = Zuzahlungsbefreit', 
@@ -67,6 +68,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :no_active_agents         => 'Keine Wirkstoffe in der DB',
       :oddb_version             => 'Commit-ID',
       :package                  => 'Details',
+      :packages                 => 'Präparate',
       :package_and_substances   => 'Packungsgrösse und Wirkstoffe',
       :parts                    => 'Teilpackungen',
       :price_festbetrag         => 'Festbetrag',
@@ -183,9 +185,8 @@ aktuellsten Medikamenten-Portal Deutschlands.
       [5,0] => :price_difference,
       [6,0] => :code_festbetragsstufe,
       [7,0] => :code_zuzahlungsbefreit,
-      [8,0] => :atc,
-      [9,0] => :company,
-      [10,0]=> :google,
+      [8,0] => :company,
+      [9,0]=> :google,
     }
   end
   def tax_factor
@@ -241,9 +242,8 @@ class LookandfeelMeineMedikamente < LookandfeelWrapper
       [1,0] => :active_agents,
       [2,0] => :size, 
       [3,0] => :price_public,
-      [4,0] => :atc,
-      [5,0] => :company,
-      [6,0] => :google,
+      [4,0] => :company,
+      [5,0] => :google,
     }
   end
   def tax_factor_add

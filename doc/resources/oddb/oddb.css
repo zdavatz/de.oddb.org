@@ -54,7 +54,7 @@ div#home-search {
 div#home-search input[type=text] {
   width: 200px;
 }
-div#legend {
+div#legend, td.atc {
   background-color: #cf9;
 }
 div#legend table {
