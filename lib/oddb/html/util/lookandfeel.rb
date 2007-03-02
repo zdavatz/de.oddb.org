@@ -31,6 +31,7 @@ class Lookandfeel < SBSM::Lookandfeel
       :drugs_atc_codes          => "ATC-Codes, DDD's:",
       :drugs_copay_free         => 'Zuzahlungsbefreite Arzneimittel:',
       :drugs_fixprices          => 'Arzneimittelfestbeträge:',
+      :dstype                   => 'Art der Suche:',
       :e_query_short            => 'Ihr Such-Stichwort ergibt ein sehr grosses Resultat. Bitte verwenden Sie mindestens 3 Buchstaben.',
       :empty_comparison         => <<-EOS,
 In unserer Datenbank wurden leider keine Produkte gefunden, 

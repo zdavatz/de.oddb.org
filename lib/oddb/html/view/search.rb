@@ -44,18 +44,19 @@ class Search < HtmlGrid::DivForm
   EVENT = :search
   FORM_NAME = 'search'
   COMPONENTS = {
-    [0,0] => :query,
+    [0,0] => 'dstype',
     [0,1] => :dstype,
-    [0,2] => :submit,
-    [1,2] => :reset,
-    [0,3] => "explain_search",
-    [0,4] => :social_bookmarks,
+    [0,2] => :query,
+    [0,3] => :submit,
+    [1,3] => :reset,
+    [0,4] => "explain_search",
+    [0,5] => :social_bookmarks,
   }
   SYMBOL_MAP = {
     :query  => SearchBar,
     :reset  => HtmlGrid::Reset,
   }
-  CSS_MAP = {3 => "explain"}
+  CSS_MAP = {4 => "explain"}
   SOCIAL_BOOKMARKS = [
     [ :sb_delicious, "http://del.icio.us/post?url=%s&title=%s" ],
     [ :sb_stumble, "http://www.stumbleupon.com/submit?url=%s&title=%s" ],
