@@ -19,6 +19,7 @@ class Lookandfeel < SBSM::Lookandfeel
       :choose_range             => 'Bitte wählen Sie den anzuzeigenden Bereich',
       :code_festbetragsgruppe   => 'Festbetragsgruppe',
       :code_festbetragsstufe    => 'Festbetragsstufe',
+      :code_prescription        => 'Rezeptpflichtig',
       :code_pzn                 => 'Pharmazentralnummer',
       :code_zuzahlungsbefreit   => 'Zuzahlungsbefreit',
       :company                  => 'Zulassungsinhaber',
@@ -64,6 +65,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :html_title               => 'ODDB',
       :lgpl_license             => 'LGPL',
       :logo                     => 'de.oddb.org - peer reviewed open drug database',
+      :more                     => '+',
       :name                     => 'Name',
       :no                       => 'Nein',
       :no_active_agents         => 'Keine Wirkstoffe in der DB',
@@ -72,6 +74,9 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :packages                 => 'Präparate',
       :package_and_substances   => 'Packungsgrösse und Wirkstoffe',
       :parts                    => 'Teilpackungen',
+      :prescription_free        => 'O',
+      :prescription_needed      => 'R',
+      :price_difference         => 'Abweichung vom Festbetrag',
       :price_festbetrag         => 'Festbetrag',
       :price_public             => 'Apothekenverkaufspreis',
       :products                 => 'Arzneimittel A-Z',
@@ -93,6 +98,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :th_company               => 'Hersteller',
       :th_difference            => '%',
       :th_doses                 => 'Stärke',
+      :th_package_infos         => 'Zuzahlung / Rezept',
       :th_price_difference      => 'ABS-Differenz',
       :th_price_festbetrag      => 'FB',
       :th_price_public          => 'AVP',
@@ -123,6 +129,8 @@ hinsichtlich ihrer therapeutischen Wirkung vergleichbar sind.
 Festbetragsgruppen der Stufe 3 werden aus Arzneimitteln gebildet, 
 die nicht hinsichtlich ihrer Wirkstoffe, aber hinsichtlich ihrer
 therapeutischen Wirkung vergleichbar sind...
+
+Quelle: 
       EOS
       # rcov needs a comment between two here-documents
       :tt_code_zuzahlungsbefreit     => <<-EOS,
@@ -185,11 +193,9 @@ aktuellsten Medikamenten-Portal Deutschlands.
       [2,0] => :size, 
       [3,0] => :price_public,
       [4,0] => :price_festbetrag,
-      [5,0] => :price_difference,
-      [6,0] => :code_festbetragsstufe,
-      [7,0] => :code_zuzahlungsbefreit,
-      [8,0] => :company,
-      [9,0]=> :google,
+      [5,0] => :package_infos,
+      [6,0] => :company,
+      [7,0]=> :google,
     }
   end
   def tax_factor

@@ -15,6 +15,102 @@ module ODDB
   module Html
     module View
       module Drugs
+class PackageInfos < HtmlGrid::Composite
+  include PackageMethods
+  LABELS = true
+  LEGACY_INTERFACE = false
+  COMPONENTS = {
+    [0,0]   => :price_difference,
+    [0,1]   => :code_festbetragsgruppe,
+    [0,2,0] => :code_festbetragsstufe,
+    [1,2,0] => :opener_festbetragsstufe,
+    [1,2,1] => :info_festbetragsstufe,
+    [0,3,0] => :code_zuzahlungsbefreit,
+    [1,3,0] => :opener_zuzahlungsbefreit,
+    [1,3,1] => :info_zuzahlungsbefreit,
+    [0,4]   => :code_prescription,
+  }
+  CSS_MAP = {
+    [0,2,1,2] => 'top',
+  }
+  def code_festbetragsgruppe(model)
+    if(code = super)
+      link_festbetrag(code)
+    end
+  end
+  def code_festbetragsstufe(model)
+    if(code = super)
+      link_festbetrag(sprintf("%s: %s", code, 
+                      @lookandfeel.lookup("festbetragsstufe_#{code}")))
+    end
+  end
+  def code_prescription(model)
+    value = HtmlGrid::Value.new(:prescription, model, @session, self) 
+    value.value = super
+    value
+  end
+  def code_zuzahlungsbefreit(model)
+    link = link_zuzahlungsbefreit(model)
+    link.value = super
+    link.label = true
+    link
+  end
+  def info_festbetragsstufe(model)
+    source = link_festbetrag('')
+    source.value = source.href
+    txt = @lookandfeel.lookup(:tt_code_festbetragsstufe).strip
+    hidden = HtmlGrid::Div.new(model, @session, self)
+    hidden.value = [ txt, source ]
+    hidden.set_attribute('style', 'display:none')
+    hidden.css_id = "info.festbetragsstufe.#{model.code(:cid)}"
+    hidden.css_class = "hidden"
+    hidden
+  end
+  def info_zuzahlungsbefreit(model)
+    source = link_zuzahlungsbefreit(model)
+    source.value = source.href
+    txt = @lookandfeel.lookup(:tt_code_zuzahlungsbefreit).strip
+    hidden = HtmlGrid::Div.new(model, @session, self)
+    hidden.value = [ txt, source ]
+    hidden.set_attribute('style', 'display:none')
+    hidden.css_id = "info.zuzahlungsbefreit.#{model.code(:cid)}"
+    hidden.css_class = "hidden"
+    hidden
+  end
+  def link_festbetrag(code)
+    link = HtmlGrid::Link.new(:festbetrag, model, @session, self)
+    link.value = code
+    link.href = "http://www.die-gesundheitsreform.de/glossar/festbetraege.html"
+    link.label = true
+    link
+  end
+  def link_zuzahlungsbefreit(model)
+    link = HtmlGrid::Link.new(:zuzahlungsbefreit, model, @session, self)
+    link.href = "http://www.bkk.de/bkk/powerslave,id,1054,nodeid,.html"
+    link
+  end
+  def opener(id)
+    span = HtmlGrid::Span.new(nil, @session, self)
+    span.value = @lookandfeel.lookup(:more)
+    span.onclick = "dojo.lfx.chain(dojo.lfx.toggle.fade.show('%s', 1000), dojo.lfx.toggle.fade.hide(this, 1000)).play()" % id
+    span.css_class = 'opener'
+    span
+  end
+  def opener_festbetragsstufe(model)
+    opener("info.festbetragsstufe.#{@model.code(:cid)}")
+  end
+  def opener_zuzahlungsbefreit(model)
+    opener("info.zuzahlungsbefreit.#{model.code(:cid)}")
+  end
+  def price_difference(model)
+    lnk = HtmlGrid::Link.new(:price_difference, model, @session, self)
+    if(lnk.value = super)
+      lnk.href = "ftp://ftp.dimdi.de/pub/amg/satzbeschr_011006.pdf"
+    end
+    lnk.label = true
+    lnk
+  end
+end
 class Packages < View::List
   include PackageMethods
   include ProductMethods
@@ -38,6 +134,17 @@ class Packages < View::List
     sprintf("%s - %i %s", description, model.size, 
             @lookandfeel.lookup(:packages))
   end
+  def code_prescription(model)
+    span = HtmlGrid::Span.new(model, @session, self)
+    if((code = model.code(:prescription)) && code.value)
+      span.value = @lookandfeel.lookup(:prescription_needed)
+      span.css_class = 'prescription'
+    else
+      span.value = @lookandfeel.lookup(:prescription_free)
+      span.css_class = 'otc'
+    end
+    span
+  end
   def compose_empty_list(offset)
     if(key = @model.error)
       fill_row(offset, key, 'warn')
@@ -58,10 +165,19 @@ class Packages < View::List
                              offset.at(1), 1)
     resolve_offset(offset, OFFSET_STEP)
   end
-  def price_difference(model)
-    if((pf = model.price(:festbetrag)) && (pp = model.price(:public)))
-      sprintf("%+1.2f", adjust_price(pp - pf))
-    end
+  def package_infos(model)
+    @info_id ||= 0
+    @info_id += 1
+    span = HtmlGrid::Span.new(model, @session, self)
+    span.css_id = "package_infos#@info_id"
+    infos = [ price_difference(model),
+      code_festbetragsgruppe(model), code_festbetragsstufe(model),
+      code_zuzahlungsbefreit(model),
+      code_prescription(model) ].compact
+    span.value = infos.zip(Array.new(infos.size - 1, ' / '))
+    span.dojo_tooltip = @lookandfeel._event_url(:package_infos,
+                                                [:pzn, model.code(:cid)])
+    span
   end
   def query_args
     [:dstype, @model.dstype]

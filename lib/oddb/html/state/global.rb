@@ -17,6 +17,11 @@ class Global < SBSM::State
       _package(code)
     end
   end
+  def package_infos
+    if(code = @session.user_input(:pzn))
+      _package_infos(code)
+    end
+  end
   def partitioned_keys(keys)
     keys.partition { |key|
       /^[a-z]$/.match(key)

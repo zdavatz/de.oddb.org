@@ -85,34 +85,32 @@ module PackageMethods
   def adjust_price(money)
     money * @lookandfeel.price_factor if(money)
   end
-  def code_festbetragsgruppe(model)
-    model.code(:festbetragsgruppe, 'DE')
-  end
-  def code_festbetragsstufe(model)
-    if(code = model.code(:festbetragsstufe))
-      span = HtmlGrid::Span.new(model, @session, self)
-      span.value = code
-      link = HtmlGrid::Link.new(:festbetragsstufe, 
-                                model, @session, self)
-      link.href = @lookandfeel.lookup(:festbetragsstufe_url)
-      span.dojo_title = [
-        @lookandfeel.lookup("festbetragsstufe_#{code}"),
-        link, 
-      ]
-      span.css_id = "fb_#@list_index"
-      span.label = true
-      span
-    end
-  end
-  def code_zuzahlungsbefreit(model)
-    if((code = model.code(:zuzahlungsbefreit)) && code.value)
+  def code_boolean(model, key)
+    if((code = model.code(key)) && code.value)
       @lookandfeel.lookup(:yes)
     else 
       @lookandfeel.lookup(:no)
     end
   end
+  def code_festbetragsgruppe(model)
+    model.code(:festbetragsgruppe, 'DE')
+  end
+  def code_festbetragsstufe(model)
+    model.code(:festbetragsstufe)
+  end
+  def code_prescription(model)
+    code_boolean(model, :prescription)
+  end
+  def code_zuzahlungsbefreit(model)
+    code_boolean(model, :zuzahlungsbefreit)
+  end
   def price_festbetrag(model)
     adjust_price model.price(:festbetrag)
+  end
+  def price_difference(model)
+    if((pf = model.price(:festbetrag)) && (pp = model.price(:public)))
+      sprintf("%+1.2f", adjust_price(pp - pf))
+    end
   end
   def price_public(model)
     pprice = model.price(:public)
@@ -221,13 +219,14 @@ class PackageInnerComposite < HtmlGrid::Composite
     [1,0,0] => :google,  
     [2,0] => :code_pzn, 
     [0,1] => :company, 
-    [2,1] => :atc, 
+    [2,1] => :atc,
     [0,2] => :price_public, 
     [2,2] => :price_festbetrag,
     [0,3] => :code_festbetragsstufe,
     [2,3] => :code_festbetragsgruppe,
     [0,4] => :code_zuzahlungsbefreit,
     [2,4] => :equivalence_factor,
+    [0,5] => :code_prescription,
   }
   CSS_MAP = {
     [1,0] => 'google',
@@ -248,6 +247,22 @@ class PackageInnerComposite < HtmlGrid::Composite
         span.dojo_title = ddds.join("\n")
       end
 			span.label = true
+      span
+    end
+  end
+  def code_festbetragsstufe(model)
+    if(code = super)
+      span = HtmlGrid::Span.new(model, @session, self)
+      span.value = code
+      link = HtmlGrid::Link.new(:festbetragsstufe, 
+                                model, @session, self)
+      link.href = @lookandfeel.lookup(:festbetragsstufe_url)
+      span.dojo_title = [
+        @lookandfeel.lookup("festbetragsstufe_#{code}"),
+        link, 
+      ]
+      span.css_id = "fb_#@list_index"
+      span.label = true
       span
     end
   end

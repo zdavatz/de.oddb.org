@@ -46,6 +46,9 @@ th a, th a:visited:hover, th a:link:hover {
 div#head {
   margin-bottom: 30px;
 }
+div.hidden {
+  padding: 4px 0px;
+}
 div#home-search {
   margin-top: 100px;
   margin-bottom: 100px;
@@ -108,13 +111,17 @@ span#delicious {
 span#digg {
   background-image: url(/resources/images/digg.gif);
 }
-span.less {
+span.less, span.otc {
   color: #2ba476;
   font-weight: bold;
 }
-span.more {
+span.more, span.prescription {
   color: red;
   font-weight: bold;
+}
+span.opener {
+  cursor: pointer;
+  margin: 0px 4px;
 }
 span.same {
   font-weight: bold;
@@ -191,14 +198,17 @@ td.product {
   font-size: 14px;
   font-weight: bold;
 }
-td.warn {
-  padding: 8px; 
-  color: #F70;
-  font-weight: bold;
+td.top {
+  vertical-align: top;
 }
 td.zuzahlungsbefreit {
   border: 2px solid #cf9;
   padding: 2px;
+  font-weight: bold;
+}
+td.warn {
+  padding: 8px; 
+  color: #F70;
   font-weight: bold;
 }
 th {
@@ -221,6 +231,6 @@ tr.zuzahlungsbefreit.bg, td.zuzahlungsbefreit {
   text-align: right;
 }
 .code_festbetragsstufe, td.code_zuzahlungsbefreit, 
-th.code_zuzahlungsbefreit {
+th.code_zuzahlungsbefreit, .package_infos {
   text-align: center;
 }

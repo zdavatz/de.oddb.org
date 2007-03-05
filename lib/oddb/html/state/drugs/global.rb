@@ -5,6 +5,7 @@ require 'oddb/business/company'
 require 'oddb/drugs/package'
 require 'oddb/remote/drugs/package'
 require 'oddb/html/state/global'
+require 'oddb/html/state/drugs/ajax/package_infos'
 require 'oddb/html/state/drugs/compare'
 require 'oddb/html/state/drugs/init'
 require 'oddb/html/state/drugs/package'
@@ -68,6 +69,11 @@ class Global < State::Global
     ODDB::Drugs::Package.find_by_code(:type => 'cid', 
                                       :value   => code, 
                                       :country => 'DE')
+  end
+  def _package_infos(code)
+    if(package = _package_by_code(code))
+      Ajax::PackageInfos.new(@session, package)
+    end
   end
   def _products(query)
     result = Util::AnnotatedList.new
