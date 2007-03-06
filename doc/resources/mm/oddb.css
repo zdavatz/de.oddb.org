@@ -241,6 +241,6 @@ tr.zuzahlungsbefreit.bg, td.zuzahlungsbefreit {
   text-align: right;
 }
 .code_festbetragsstufe, td.code_zuzahlungsbefreit, 
-th.code_zuzahlungsbefreit, .package_infos {
+th.code_zuzahlungsbefreit {
   text-align: center;
 }

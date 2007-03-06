@@ -105,7 +105,15 @@ module PackageMethods
     code_boolean(model, :zuzahlungsbefreit)
   end
   def price_festbetrag(model)
-    adjust_price model.price(:festbetrag)
+    @price_id ||= 0
+    @price_id += 1
+    span = HtmlGrid::Span.new(model, @session, self)
+    span.css_id = "price_festbetrag#{@price_id}"
+    span.value = adjust_price model.price(:festbetrag)
+    span.dojo_title = sprintf("%s: %s",
+      @lookandfeel.lookup(:price_difference), price_difference(model))
+    span.label = true
+    span
   end
   def price_difference(model)
     if((pf = model.price(:festbetrag)) && (pp = model.price(:public)))

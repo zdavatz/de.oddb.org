@@ -20,18 +20,17 @@ class PackageInfos < HtmlGrid::Composite
   LABELS = true
   LEGACY_INTERFACE = false
   COMPONENTS = {
-    [0,0]   => :price_difference,
-    [0,1]   => :code_festbetragsgruppe,
-    [0,2,0] => :code_festbetragsstufe,
-    [1,2,0] => :opener_festbetragsstufe,
-    [1,2,1] => :info_festbetragsstufe,
-    [0,3,0] => :code_zuzahlungsbefreit,
-    [1,3,0] => :opener_zuzahlungsbefreit,
-    [1,3,1] => :info_zuzahlungsbefreit,
-    [0,4]   => :code_prescription,
+    [0,0]   => :code_festbetragsgruppe,
+    [0,1,0] => :code_festbetragsstufe,
+    [1,1,0] => :opener_festbetragsstufe,
+    [1,1,1] => :info_festbetragsstufe,
+    [0,2,0] => :code_zuzahlungsbefreit,
+    [1,2,0] => :opener_zuzahlungsbefreit,
+    [1,2,1] => :info_zuzahlungsbefreit,
+    [0,3]   => :code_prescription,
   }
   CSS_MAP = {
-    [0,2,1,2] => 'top',
+    [0,1,1,2] => 'top',
   }
   def code_festbetragsgruppe(model)
     if(code = super)
@@ -102,14 +101,6 @@ class PackageInfos < HtmlGrid::Composite
   def opener_zuzahlungsbefreit(model)
     opener("info.zuzahlungsbefreit.#{model.code(:cid)}")
   end
-  def price_difference(model)
-    lnk = HtmlGrid::Link.new(:price_difference, model, @session, self)
-    if(lnk.value = super)
-      lnk.href = "ftp://ftp.dimdi.de/pub/amg/satzbeschr_011006.pdf"
-    end
-    lnk.label = true
-    lnk
-  end
 end
 class Packages < View::List
   include PackageMethods
@@ -170,9 +161,8 @@ class Packages < View::List
     @info_id += 1
     span = HtmlGrid::Span.new(model, @session, self)
     span.css_id = "package_infos#@info_id"
-    infos = [ price_difference(model),
-      code_festbetragsgruppe(model), code_festbetragsstufe(model),
-      code_zuzahlungsbefreit(model),
+    infos = [ code_festbetragsgruppe(model), 
+      code_festbetragsstufe(model), code_zuzahlungsbefreit(model),
       code_prescription(model) ].compact
     span.value = infos.zip(Array.new(infos.size - 1, ' / '))
     span.dojo_tooltip = @lookandfeel._event_url(:package_infos,

@@ -194,6 +194,9 @@ td#offsetheader a:link:hover,
 td#offsetheader a:visited:hover {
   color: red;
 }
+td.package_infos, th.package_infos {
+  padding-left: 10px
+}
 td.product {
   font-size: 14px;
   font-weight: bold;
@@ -231,6 +234,6 @@ tr.zuzahlungsbefreit.bg, td.zuzahlungsbefreit {
   text-align: right;
 }
 .code_festbetragsstufe, td.code_zuzahlungsbefreit, 
-th.code_zuzahlungsbefreit, .package_infos {
+th.code_zuzahlungsbefreit {
   text-align: center;
 }
