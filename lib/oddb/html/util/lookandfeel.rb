@@ -119,16 +119,7 @@ internationally applicable methods for drug utilization research...
       EOS
       # rcov needs a comment between two here-documents
       :tt_code_festbetragsstufe => <<-EOS,
-Gruppen "vergleichbarer" Arzneimittel können nach unterschiedlichen
-Kriterien gebildet werden, deshalb werden drei Stufen der Vergleich-
-barkeit unterschieden: Festbetragsgruppen der Stufe 1 werden aus
-Arzneimitteln mit denselben Wirkstoffen gebildet. Festbetragsgruppen
-der Stufe 2 werden aus Arzneimitteln gebildet, deren Wirkstoffe
-pharmakologisch, insbesondere chemisch, und dabei gleichzeitig auch
-hinsichtlich ihrer therapeutischen Wirkung vergleichbar sind.
-Festbetragsgruppen der Stufe 3 werden aus Arzneimitteln gebildet, 
-die nicht hinsichtlich ihrer Wirkstoffe, aber hinsichtlich ihrer
-therapeutischen Wirkung vergleichbar sind...
+Gruppen "vergleichbarer" Arzneimittel können nach unterschiedlichen Kriterien gebildet werden, deshalb werden drei Stufen der Vergleichbarkeit unterschieden: Festbetragsgruppen der Stufe 1 werden aus Arzneimitteln mit denselben Wirkstoffen gebildet. Festbetragsgruppen der Stufe 2 werden aus Arzneimitteln gebildet, deren Wirkstoffe pharmakologisch, insbesondere chemisch, und dabei gleichzeitig auch hinsichtlich ihrer therapeutischen Wirkung vergleichbar sind. Festbetragsgruppen der Stufe 3 werden aus Arzneimitteln gebildet, die nicht hinsichtlich ihrer Wirkstoffe, aber hinsichtlich ihrer therapeutischen Wirkung vergleichbar sind...
 
 Quelle: 
       EOS
@@ -136,14 +127,9 @@ Quelle:
       :tt_code_zuzahlungsbefreit     => <<-EOS,
 Zuzahlungsbefreite Arzneimittel:
 
-Die Spitzenverbände der Krankenkassen haben am 11.05.2006 gemeinsam und
-einheitlich für bestimmte zu Lasten ihrer Krankenkassen abgegebene
-Arzneimittel Zuzahlungsbefreiungsgrenzen festgelegt.
+Die Spitzenverbände der Krankenkassen haben am 11.05.2006 gemeinsam und einheitlich für bestimmte zu Lasten ihrer Krankenkassen abgegebene Arzneimittel Zuzahlungsbefreiungsgrenzen festgelegt.
 
-Bei der Verordnung von Arzneimitteln, deren Apothekenverkaufspreise
-inkl. MwSt. den Wert der jeweiligen Zuzahlungsbefreiungrenze nicht
-überschreiten, sind Versicherte ab dem 1. Juli 2006 von der
-gesetzlichen Zuzahlung nach § 31 Abs. 3 Satz 1 SGB V befreit.
+Bei der Verordnung von Arzneimitteln, deren Apothekenverkaufspreise inkl. MwSt. den Wert der jeweiligen Zuzahlungsbefreiungrenze nicht überschreiten, sind Versicherte ab dem 1. Juli 2006 von der gesetzlichen Zuzahlung nach § 31 Abs. 3 Satz 1 SGB V befreit.
 
 Quelle: 
       EOS
