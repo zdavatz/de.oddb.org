@@ -98,7 +98,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :th_company               => 'Hersteller',
       :th_difference            => '%',
       :th_doses                 => 'Stärke',
-      :th_package_infos         => 'Zuzahlung / Rezept',
+      :th_package_infos         => 'Zuzahl. / Rezept',
       :th_price_difference      => 'ABS-Differenz',
       :th_price_festbetrag      => 'FB',
       :th_price_public          => 'AVP',
@@ -170,8 +170,9 @@ aktuellsten Medikamenten-Portal Deutschlands.
     }
   }
   RESOURCES = {
-    :logo => 'logo.gif', 
-    :css  => 'oddb.css',
+    :logo       => 'logo.gif', 
+    :css        => 'oddb.css',
+    :javascript => 'javascript',
   }
   def base_url
     [@session.http_protocol + ':/', @session.server_name,

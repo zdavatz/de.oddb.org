@@ -61,7 +61,7 @@ class PackageInfos < HtmlGrid::Composite
     hidden = HtmlGrid::Div.new(model, @session, self)
     hidden.value = [ txt, source ]
     hidden.set_attribute('style', 'display:none')
-    hidden.css_id = "info.festbetragsstufe.#{model.code(:cid)}"
+    hidden.css_id = "info_festbetragsstufe#{model.code(:cid)}"
     hidden.css_class = "hidden"
     hidden
   end
@@ -72,7 +72,7 @@ class PackageInfos < HtmlGrid::Composite
     hidden = HtmlGrid::Div.new(model, @session, self)
     hidden.value = [ txt, source ]
     hidden.set_attribute('style', 'display:none')
-    hidden.css_id = "info.zuzahlungsbefreit.#{model.code(:cid)}"
+    hidden.css_id = "info_zuzahlungsbefreit#{model.code(:cid)}"
     hidden.css_class = "hidden"
     hidden
   end
@@ -88,18 +88,20 @@ class PackageInfos < HtmlGrid::Composite
     link.href = "http://www.bkk.de/bkk/powerslave,id,1054,nodeid,.html"
     link
   end
-  def opener(id)
+  def opener(code, type)
     span = HtmlGrid::Span.new(nil, @session, self)
     span.value = @lookandfeel.lookup(:more)
-    span.onclick = "dojo.lfx.chain(dojo.lfx.toggle.fade.show('%s', 1000), dojo.lfx.toggle.fade.hide(this, 1000)).play()" % id
+    widget = "package_infos#{code}_widget"
+    hidden = "info_#{type}#{code}"
+    span.onclick = "open_explanation('#{widget}', '#{hidden}', this)"
     span.css_class = 'opener'
     span
   end
   def opener_festbetragsstufe(model)
-    opener("info.festbetragsstufe.#{@model.code(:cid)}")
+    opener(@model.code(:cid), :festbetragsstufe)
   end
   def opener_zuzahlungsbefreit(model)
-    opener("info.zuzahlungsbefreit.#{model.code(:cid)}")
+    opener(@model.code(:cid), :zuzahlungsbefreit)
   end
 end
 class Packages < View::List
@@ -159,14 +161,15 @@ class Packages < View::List
   def package_infos(model)
     @info_id ||= 0
     @info_id += 1
+    code = model.code(:cid)
     span = HtmlGrid::Span.new(model, @session, self)
-    span.css_id = "package_infos#@info_id"
+    span.css_id = "package_infos#{code}"
     infos = [ code_festbetragsgruppe(model), 
       code_festbetragsstufe(model), code_zuzahlungsbefreit(model),
       code_prescription(model) ].compact
     span.value = infos.zip(Array.new(infos.size - 1, ' / '))
     span.dojo_tooltip = @lookandfeel._event_url(:package_infos,
-                                                [:pzn, model.code(:cid)])
+                                                [:pzn, code])
     span
   end
   def query_args
@@ -190,6 +193,7 @@ class ResultComposite < HtmlGrid::DivComposite
 end
 class Result < Template
   CONTENT = ResultComposite
+  JAVASCRIPTS = ['opener']
 end
       end
     end

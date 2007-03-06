@@ -26,6 +26,8 @@ div.explain {
 }
 div#explain-compare {
   padding: 2px 4px;
+  font-weight: bold; 
+  font-style: italic; 
 }
 div#foot, div#title, th {
   background-color: #2ba476;
