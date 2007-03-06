@@ -51,12 +51,13 @@ class Search < HtmlGrid::DivForm
     [1,3] => :reset,
     [0,4] => "explain_search",
     [0,5] => :social_bookmarks,
+    [0,6] => :screencast,
   }
   SYMBOL_MAP = {
     :query  => SearchBar,
     :reset  => HtmlGrid::Reset,
   }
-  CSS_MAP = {4 => "explain"}
+  CSS_MAP = {4 => "explain", 6 => "explain"}
   SOCIAL_BOOKMARKS = [
     [ :sb_delicious, "http://del.icio.us/post?url=%s&title=%s" ],
     [ :sb_stumble, "http://www.stumbleupon.com/submit?url=%s&title=%s" ],
@@ -76,6 +77,11 @@ class Search < HtmlGrid::DivForm
       span.value = link
       span
     }
+  end
+  def screencast(model)
+    link = HtmlGrid::Link.new(:screencast, model, @session, self)
+    link.href = "http://www.youtube.com/watch?v=iZ22GpbTnXE"
+    link
   end
 end
 class InlineSearch < HtmlGrid::DivForm

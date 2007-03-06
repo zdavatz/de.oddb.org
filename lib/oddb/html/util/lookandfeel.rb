@@ -17,6 +17,14 @@ class Lookandfeel < SBSM::Lookandfeel
       :atc_unknown              => 'ATC-Code nicht bekannt',
       :breadcrumb_divider       => '&nbsp;&ndash;&nbsp;',
       :choose_range             => 'Bitte wählen Sie den anzuzeigenden Bereich',
+      :ch_sl                    => 'SL',
+      :ch_sl_entry              => 'Spezialitätenliste',
+      :ch_ikscat                => 'Abgabekategorie',
+      :ch_ikscat_A              => 'Einmalige Abgabe auf ärztliche Verschreibung',
+      :ch_ikscat_B              => 'Abgabe auf ärztliche Verschreibung',
+      :ch_ikscat_C              => 'Abgabe nach Fachberatung durch Medizinalpersonen',
+      :ch_ikscat_D              => 'Abgabe nach Fachberatung',
+      :ch_ikscat_E              => 'Abgabe ohne Fachberatung',
       :code_festbetragsgruppe   => 'Festbetragsgruppe',
       :code_festbetragsstufe    => 'Festbetragsstufe',
       :code_prescription        => 'Rezeptpflichtig',
@@ -33,6 +41,8 @@ class Lookandfeel < SBSM::Lookandfeel
       :drugs_copay_free         => 'Zuzahlungsbefreite Arzneimittel:',
       :drugs_fixprices          => 'Arzneimittelfestbeträge:',
       :dstype                   => 'Art der Suche:',
+      :ean0                     => 'EAN-13: ', 
+      :ean1                     => '', 
       :e_query_short            => 'Ihr Such-Stichwort ergibt ein sehr grosses Resultat. Bitte verwenden Sie mindestens 3 Buchstaben.',
       :empty_comparison         => <<-EOS,
 In unserer Datenbank wurden leider keine Produkte gefunden, 
@@ -89,6 +99,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :sb_delicious             => 'Bookmark',
       :sb_simpy                 => 'Simpy',
       :sb_stumble               => 'Stumble',
+      :screencast               => 'Screencast de.oddb.org',
       :search                   => 'Suchen',
       :substance                => 'Inhaltsstoff',
       :th_active_agents         => 'Wirkstoff',
@@ -180,8 +191,8 @@ aktuellsten Medikamenten-Portal Deutschlands.
       [2,0] => :size, 
       [3,0] => :price_public,
       [4,0] => :price_festbetrag,
-      [5,0] => :package_infos,
-      [6,0] => :company,
+      [5,0] => :company,
+      [6,0] => :package_infos,
       [7,0]=> :google,
     }
   end
@@ -239,7 +250,8 @@ class LookandfeelMeineMedikamente < LookandfeelWrapper
       [2,0] => :size, 
       [3,0] => :price_public,
       [4,0] => :company,
-      [5,0] => :google,
+      [5,0] => :package_infos,
+      [6,0] => :google,
     }
   end
   def tax_factor_add

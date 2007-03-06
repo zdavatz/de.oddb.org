@@ -8,8 +8,9 @@ module ODDB
   module Remote
     module Drugs
 class Atc < Remote::Object
-  def code
-    @code ||= @remote.code
+  delegate :code
+  def name
+    @name ||= Util::Multilingual.new(:de => @remote.name)
   end
 end
     end

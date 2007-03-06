@@ -6,6 +6,7 @@ require 'iconv'
 module ODDB
   module Remote
     class Object
+      attr_reader :source
       @@iconv = Iconv.new('utf8//IGNORE//TRANSLIT', 'latin1')
       def initialize(source, remote)
         @source = source
@@ -21,6 +22,17 @@ module ODDB
 =end
       def uid
         sprintf("%i.%s", @source, @remote.__drbref)
+      end
+      class << self
+        def delegate(*args)
+          args.each { |arg|
+            define_method(arg) { 
+              var = "@#{arg}"
+              instance_variable_get(var) \
+                || instance_variable_set(var, @remote.send(arg))
+            }
+          }
+        end
       end
     end
   end

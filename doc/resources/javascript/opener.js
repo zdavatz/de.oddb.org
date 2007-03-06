@@ -2,9 +2,10 @@ function open_explanation(widget_id, hidden_id, opener) {
   var callback = function() {
     var widget = dojo.widget.byId(widget_id); 
     var node = widget.domNode; 
-    var pos = dojo.html.getAbsolutePosition(node);
+    var pos = dojo.html.getAbsolutePosition(node, true);
     var viewport = dojo.html.getViewport();
     var box = dojo.html.getMarginBox(node);
+    var scroll = dojo.html.getScroll();
     var x = pos.x;
     var y = pos.y;
 
@@ -15,6 +16,9 @@ function open_explanation(widget_id, hidden_id, opener) {
     diff = y + box.height - viewport.height;
     if(diff > 0)
       y -= diff;
+
+    x += scroll.left;
+    y += scroll.top;
 
     dojo.lfx.html.slideTo(node, {left:x, top:y}, 500).play();
   }

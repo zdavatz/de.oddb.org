@@ -104,6 +104,35 @@ class PackageInfos < HtmlGrid::Composite
     opener(@model.code(:cid), :zuzahlungsbefreit)
   end
 end
+class RemoteInfos < HtmlGrid::Composite
+  LABELS = true
+  LEGACY_INTERFACE = false
+  COMPONENTS = {
+    [0,0] => :ch_sl_entry,
+    [0,1] => :ch_ikscat,
+  }
+  CSS_MAP = {
+    [0,1] => 'top',
+  }
+  DEFAULT_CLASS = HtmlGrid::Value
+  def ch_sl_entry(model)
+    value = HtmlGrid::Value.new(:ch_sl_entry, model, @session, self)
+    value.value = @lookandfeel.lookup(model.sl_entry ? :yes : :no)
+    value
+  end
+  def ch_ikscat(model)
+    value = HtmlGrid::Value.new(:ch_ikscat, model, @session, self)
+    span = HtmlGrid::Span.new(model, @session, self)
+    span.value = code = model.ikscat.to_s
+    if(code =~ /[AB]/)
+      span.css_class = 'prescription'
+    else
+      span.css_class = 'otc'
+    end
+    value.value = [span, ":", @lookandfeel.lookup("ch_ikscat_#{code}")]
+    value
+  end
+end
 class Packages < View::List
   include PackageMethods
   include ProductMethods
@@ -158,9 +187,17 @@ class Packages < View::List
                              offset.at(1), 1)
     resolve_offset(offset, OFFSET_STEP)
   end
-  def package_infos(model)
-    @info_id ||= 0
-    @info_id += 1
+  def ikscat(model)
+    span = HtmlGrid::Span.new(model, @session, self)
+    span.value = code = model.ikscat.to_s
+    if(code =~ /[AB]/)
+      span.css_class = 'prescription'
+    else
+      span.css_class = 'otc'
+    end
+    span
+  end
+  def infos_local(model)
     code = model.code(:cid)
     span = HtmlGrid::Span.new(model, @session, self)
     span.css_id = "package_infos#{code}"
@@ -168,9 +205,29 @@ class Packages < View::List
       code_festbetragsstufe(model), code_zuzahlungsbefreit(model),
       code_prescription(model) ].compact
     span.value = infos.zip(Array.new(infos.size - 1, ' / '))
-    span.dojo_tooltip = @lookandfeel._event_url(:package_infos,
+    span.dojo_tooltip = @lookandfeel._event_url(:package_infos, 
                                                 [:pzn, code])
     span
+  end
+  def infos_remote(model)
+    span = HtmlGrid::Span.new(model, @session, self)
+    infos = [ ikscat(model) ]
+    uid = model.uid
+    if(model.sl_entry)
+      infos.unshift(@lookandfeel.lookup(:ch_sl))
+    end
+    span.css_id = "package_infos#{uid}"
+    span.dojo_tooltip = @lookandfeel._event_url(:remote_infos, 
+                                                [:uid, uid])
+    span.value = infos.zip(Array.new(infos.size - 1, ' / '))
+    span
+  end
+  def package_infos(model)
+    if(model.is_a?(Remote::Drugs::Package))
+      infos_remote(model)
+    else
+      infos_local(model)
+    end
   end
   def query_args
     [:dstype, @model.dstype]

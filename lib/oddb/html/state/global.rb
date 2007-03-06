@@ -30,6 +30,11 @@ class Global < SBSM::State
   def products
     _products(@session.persistent_user_input(:range))
   end
+  def remote_infos
+    if(id = @session.user_input(:uid))
+      _remote_infos(id)
+    end
+  end
   def navigation
     [:contact, :home]
   end

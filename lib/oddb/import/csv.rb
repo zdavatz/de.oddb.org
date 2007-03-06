@@ -13,7 +13,6 @@ require 'oddb/drugs/unit'
 require 'oddb/import/import'
 require 'oddb/util/code'
 
-
 module ODDB
   module Import
     module Csv
@@ -35,9 +34,12 @@ class ProductInfos < Import
   end
   def import_row(row)
     pzn = u(row.at(0).to_i.to_s)
+    print '.'
+    $stdout.flush
     if(package = Drugs::Package.find_by_code(:type    => 'cid',
                                              :value   => pzn,
                                              :country => 'DE'))
+      print pzn
       modified = false
       name = cell(row, 1).gsub(/[A-Z .&+-]+/) { |part| 
         capitalize_all(part) }

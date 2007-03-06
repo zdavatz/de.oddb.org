@@ -196,6 +196,9 @@ td#offsetheader a:link:hover,
 td#offsetheader a:visited:hover {
   color: red;
 }
+td.price_public, th.price_public {
+  padding-right: 10px;
+}
 td.product {
   font-size: 14px;
   font-weight: bold;
@@ -239,7 +242,7 @@ tr.zuzahlungsbefreit.bg, td.zuzahlungsbefreit {
   background-color: #fafc6d;
 }
 .difference, .doses, .price_festbetrag, .price_difference,
-.price_public, .price {
+.price_public, .price, .package_infos {
   text-align: right;
 }
 .code_festbetragsstufe, td.code_zuzahlungsbefreit, 

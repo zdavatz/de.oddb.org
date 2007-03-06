@@ -133,6 +133,7 @@ module PackageMethods
       span.value = price
       span.css_id = "adjust_price#{@adjust_price}"
       span.dojo_tooltip = ExplainPrice.new(pprice, @session, self)
+      span.label = true
       span
     end
   end
@@ -168,7 +169,7 @@ module PackageMethods
     end
     link.value = model.name.send(@session.language)
     link.css_id = "cid_#@list_index"
-    #link.dojo_title = @lookandfeel.lookup(:pzn, model.code(:cid, 'DE'))
+    link.dojo_title = @lookandfeel.lookup(:ean, model.code(:ean))
     link
   end
   def row_css(model, bg_flag)

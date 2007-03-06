@@ -28,6 +28,18 @@ class Package < Remote::Object
   def atc
     @atc ||= Remote::Drugs::Atc.new(@source, @remote.atc_class)
   end
+  def code(type, country='CH')
+    case type
+    when :ean
+      @ean ||= Util::Code.new(:ean, @remote.barcode, 'CH')
+    when :prescription
+      @prescription ||= Util::Code.new(:prescription,
+                                       @remote.ikscat =~ /[AB]/, 'CH')
+    when :zuzahlungsbefreit
+      @zuzahlungsbefreit ||= Util::Code.new(:zuzahlungsbefreit,
+                                            !@remote.sl_entry.nil?, 'CH')
+    end
+  end
   def company
     @company ||= Remote::Business::Company.new(@source, @remote.company)
   end
@@ -58,18 +70,15 @@ class Package < Remote::Object
     end
     comparables
   end
-  def code(type, country='DE')
-    #case type
-    #when :cid
-    #  @pzn ||= Util::Code.new(:cid, @remote.ikskey, 'CH')
-    #end
-  end
   def _comparable_size
     @comparable_size ||= @remote.comparable_size
   end
   def galenic_form
     @galenic_form ||= Remote::Drugs::GalenicForm.new(@source, 
                         @remote.galenic_form)
+  end
+  def ikscat
+    @ikscat ||= @remote.ikscat
   end
   def name
     @name ||= Util::Multilingual.new(:de => @@iconv.iconv(@remote.name_base))
@@ -88,6 +97,9 @@ class Package < Remote::Object
   end
   def quantity
     nil
+  end
+  def sl_entry
+    @sl_entry ||= @remote.sl_entry
   end
   def size
     @size ||= _comparable_size.qty

@@ -6,6 +6,7 @@ require 'oddb/drugs/package'
 require 'oddb/remote/drugs/package'
 require 'oddb/html/state/global'
 require 'oddb/html/state/drugs/ajax/package_infos'
+require 'oddb/html/state/drugs/ajax/remote_infos'
 require 'oddb/html/state/drugs/compare'
 require 'oddb/html/state/drugs/init'
 require 'oddb/html/state/drugs/package'
@@ -23,11 +24,9 @@ class Global < State::Global
     :home => Drugs::Init,
   }
   def compare_remote
-    id = @session.user_input(:uid)
-    source, ref = id.split('.', 2)
-    uri = ODDB.config.remote_databases.at(source.to_i)
-    if(pac = DRbObject._load(Marshal.dump([uri, ref])))
-      rate = _remote(uri) { |remote| remote.get_currency_rate("EUR") }
+    if(pac = _remote_package(@session.user_input(:uid)))
+      rate = _remote(pac.source) { |remote| 
+        remote.get_currency_rate("EUR") }
       package = Remote::Drugs::Package.new(source, pac, rate, 
                                            _tax_factor)
       result = Util::AnnotatedList.new(package.comparables)
@@ -102,6 +101,16 @@ class Global < State::Global
       }
     end
   end
+  def _remote_infos(uid)
+    if(pac = _remote_package(uid))
+      Ajax::RemoteInfos.new(@session, pac)
+    end
+  end
+  def _remote_package(id)
+    source, ref = id.split('.', 2)
+    uri = ODDB.config.remote_databases.at(source.to_i)
+    DRbObject._load(Marshal.dump([uri, ref]))
+  end
   def _remote_packages(&block)
     result = []
     ODDB.config.remote_databases.each_with_index { |uri, source|
@@ -130,6 +139,8 @@ class Global < State::Global
       result.error = :e_query_short
     else
       case dstype
+      when 'company'
+        _search_by(:company, query, result)
       when 'tradename'
         _search_by(:name, query, result)
         _search_by(:product, query, result) if result.empty?
