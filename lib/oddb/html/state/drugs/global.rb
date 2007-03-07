@@ -106,7 +106,7 @@ class Global < State::Global
     source, ref = id.split('.', 2)
     uri = ODDB.config.remote_databases.at(source.to_i)
     if(pac = DRbObject._load(Marshal.dump([uri, ref])))
-      rate = _remote(source) { |remote| 
+      rate = _remote(uri) { |remote| 
         remote.get_currency_rate("EUR") }
       Remote::Drugs::Package.new(source, pac, rate, _tax_factor)
     end
