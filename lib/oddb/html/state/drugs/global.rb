@@ -24,11 +24,7 @@ class Global < State::Global
     :home => Drugs::Init,
   }
   def compare_remote
-    if(pac = _remote_package(@session.user_input(:uid)))
-      rate = _remote(pac.source) { |remote| 
-        remote.get_currency_rate("EUR") }
-      package = Remote::Drugs::Package.new(source, pac, rate, 
-                                           _tax_factor)
+    if(package = _remote_package(@session.user_input(:uid)))
       result = Util::AnnotatedList.new(package.comparables)
       result.origin = package
       result.query = package.atc.code
@@ -109,7 +105,11 @@ class Global < State::Global
   def _remote_package(id)
     source, ref = id.split('.', 2)
     uri = ODDB.config.remote_databases.at(source.to_i)
-    DRbObject._load(Marshal.dump([uri, ref]))
+    if(pac = DRbObject._load(Marshal.dump([uri, ref])))
+      rate = _remote(source) { |remote| 
+        remote.get_currency_rate("EUR") }
+      Remote::Drugs::Package.new(source, pac, rate, _tax_factor)
+    end
   end
   def _remote_packages(&block)
     result = []
