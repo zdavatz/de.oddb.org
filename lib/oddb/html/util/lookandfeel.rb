@@ -100,6 +100,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :sb_simpy                 => 'Simpy',
       :sb_stumble               => 'Stumble',
       :screencast               => 'Screencast de.oddb.org',
+      :screencast_url           => 'http://www.youtube.com/watch?v=_1_kqS_wBi0',
       :search                   => 'Suchen',
       :substance                => 'Inhaltsstoff',
       :th_active_agents         => 'Wirkstoff',
@@ -193,7 +194,7 @@ aktuellsten Medikamenten-Portal Deutschlands.
       [4,0] => :price_festbetrag,
       [5,0] => :company,
       [6,0] => :package_infos,
-      [7,0]=> :google,
+      [7,0] => :google,
     }
   end
   def tax_factor
@@ -223,6 +224,8 @@ class LookandfeelMeineMedikamente < LookandfeelWrapper
     'de' => { 
       :price_local     => 'Preis Schweiz (CHF)',
       :price_db        => 'Preis Deutschland (CHF)',
+      :screencast      => 'Screencast mm.de.oddb.org',
+      :screencast_url  => 'http://www.youtube.com/watch?v=VxZTI8qO-VI',
       :tax_add         => 'MwSt. Schweiz (7.6%)',
       :tax_sub         => 'MwSt. Deutschland (19%)',
       :tt_price_public => 'Preis: Apothekenverkaufspreis inkl. MwSt. in CHF',

@@ -67,7 +67,7 @@ class Search < HtmlGrid::DivForm
   ]
   def screencast(model)
     link = HtmlGrid::Link.new(:screencast, model, @session, self)
-    link.href = "http://www.youtube.com/watch?v=_1_kqS_wBi0"
+    link.href = @lookandfeel.lookup(:screencast_url)
     link
   end
   def social_bookmarks(model)
