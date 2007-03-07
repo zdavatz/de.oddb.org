@@ -45,9 +45,20 @@ module PackageSort
       Proc.new { |pac| 
         (multilingual = pac.send(key)) \
           && multilingual.name.send(@session.language) || '' }
+    when :ddd_prices
+      Proc.new { |pac| 
+        pac.ddds.collect { |ddd| pac.ddd_price(ddd) }.compact
+      }
     when :difference
       nilval = 9999999.0
       Proc.new { |pac| pac.difference || nilval }
+    when :package_infos
+      Proc.new { |pac| [ 
+        pac.code(:festbetragsgruppe).to_s,
+        pac.code(:festbetragsstufe).to_s,
+        pac.code(:prescription).to_s, 
+        pac.code(:zuzahlunggsbefreit).to_s,
+      ] }
     when :price_difference
       nilval = ODDB::Util::Money.new(-9999999)
       Proc.new { |pac| 

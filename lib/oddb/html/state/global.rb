@@ -12,6 +12,12 @@ class Global < SBSM::State
       _compare(code)
     end
   end
+  def explain_ddd_price
+    if((code = @session.user_input(:pzn)) \
+       && (idx = @session.user_input(:offset)))
+      _explain_ddd_price(code, idx.to_i)
+    end
+  end
   def explain_price
     if(code = @session.user_input(:pzn))
       _explain_price(code)

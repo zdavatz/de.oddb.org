@@ -11,13 +11,14 @@ class Validator < SBSM::Validator
     :dstype    => ['compare', 'tradename', 'substance', 'company'],
     :range     => ("A".."Z").to_a.push('0-9'),
     :sortvalue => [ 'active_agents', 'atc', 'code_festbetragsstufe',
-      'code_zuzahlungsbefreit', 'company', 'difference', 'doses',
-      'price_festbetrag', 'price_difference', 'price_public',
-      'product', 'size', 
+      'code_zuzahlungsbefreit', 'company', 'ddd_prices', 'difference',
+      'doses', 'package_infos', 'price_festbetrag', 'price_difference',
+      'price_public', 'product', 'size', 
     ],
   }
-  EVENTS = [ :explain_price, :package_infos, :compare, :compare_remote,
-             :home, :package, :products, :remote_infos, :search, :sort ]
+  EVENTS = [ :explain_ddd_price, :explain_price, :package_infos,
+             :compare, :compare_remote, :home, :package, :products,
+             :remote_infos, :search, :sort ]
   NUMERIC = [ :offset, :pzn ]
   STRINGS = [ :query, :uid ]
 end

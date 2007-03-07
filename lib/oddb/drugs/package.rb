@@ -7,7 +7,7 @@ module ODDB
   module Drugs
     class Package < Model
       belongs_to :sequence, 
-        delegates(:active_agents, :atc, :company, :doses,
+        delegates(:active_agents, :atc, :company, :ddds, :doses,
                   :galenic_forms, :product, :substances)
       has_many :parts, on_delete(:cascade), delegates(:comparable_size)
       has_many :prices
@@ -31,6 +31,14 @@ module ODDB
             (package != self) && comparable?(package)
           }
         }
+      end
+      def ddd_price(ddd)
+        if(price = price(:public))
+          ddose = ddd.dose
+          pdose = doses.first.want(ddose.unit)
+          Util::Money.new((ddose / pdose).to_f * (price.to_f / size))
+        end
+      rescue RuntimeError
       end
       def price(type, country='DE')
         prices.find { |money| money.is_for?(type, country) }

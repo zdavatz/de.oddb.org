@@ -13,6 +13,10 @@ class Lookandfeel < SBSM::Lookandfeel
     "de" =>  {
       :active_agents0           => '',
       :active_agents1           => ' Wirkstoffe',
+      :administration           => 'Verabreichungsform',
+      :administration_O         => 'Oral',
+      :administration_P         => 'Parenteral',
+      :administration_R         => 'Rektal',
       :atc                      => 'ATC-Code',
       :atc_unknown              => 'ATC-Code nicht bekannt',
       :breadcrumb_divider       => '&nbsp;&ndash;&nbsp;',
@@ -30,12 +34,22 @@ class Lookandfeel < SBSM::Lookandfeel
       :code_prescription        => 'Rezeptpflichtig',
       :code_pzn                 => 'Pharmazentralnummer',
       :code_zuzahlungsbefreit   => 'Zuzahlungsbefreit',
+      :comment                  => 'Anmerkung',
       :company                  => 'Zulassungsinhaber',
       :compare                  => 'Preisvergleich',
       :compare_remote           => 'Preisvergleich',
       :comparison_for0          => 'Preisvergleich für ',
       :comparison_for1          => '',
       :contact                  => 'Kontakt',
+      :ddd                      => 'Tagesdosis',
+      :ddd_price_calculation    => 'Berechnung',
+      :ddd_price_calculation0   => '( ',
+      :ddd_price_calculation1   => ' / ',
+      :ddd_price_calculation2   => ' ) x ( ',
+      :ddd_price_calculation3   => ' / ',
+      :ddd_price_calculation4   => ' ) = <b>',
+      :ddd_price_calculation5   => ' / Tag </b>',
+      :dose                     => 'Stärke',
       :drugs                    => 'Medikamente',
       :drugs_atc_codes          => "ATC-Codes, DDD's:",
       :drugs_copay_free         => 'Zuzahlungsbefreite Arzneimittel:',
@@ -100,14 +114,16 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :sb_simpy                 => 'Simpy',
       :sb_stumble               => 'Stumble',
       :screencast               => 'Screencast de.oddb.org',
-      :screencast_url           => 'http://www.youtube.com/watch?v=_1_kqS_wBi0',
+      :screencast_url           => 'http://www.youtube.com/watch?v=BQy_HoAYTHs',
       :search                   => 'Suchen',
+      :size                     => 'Packungsgrösse',
       :substance                => 'Inhaltsstoff',
       :th_active_agents         => 'Wirkstoff',
       :th_atc                   => 'ATC-Code',
       :th_code_festbetragsstufe => 'FB-Stufe',
       :th_code_zuzahlungsbefreit=> 'Zuzahlungsbefreit',
       :th_company               => 'Hersteller',
+      :th_ddd_prices            => 'TK',
       :th_difference            => '%',
       :th_doses                 => 'Stärke',
       :th_package_infos         => 'Zuzahl. / Rezept',
@@ -120,6 +136,8 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :title_found1             => '", Total ',
       :title_found2             => ' Präparate',
       :tradename                => 'Markenname',
+      :tt_active_agents         => 'Die Stärke bezieht sich auf Darreichungsform-Einheit (Tablette, Zäpfchen, Sirup, etc). Siehe auch: ',
+      :tt_active_agents_link    => 'Darreichungsformen',
       :tt_atc                   => <<-EOS,
 The field of drug utilization research has attracted increasing
 interest since its infancy in the 1960s. At a symposium in Oslo 
@@ -146,8 +164,7 @@ Bei der Verordnung von Arzneimitteln, deren Apothekenverkaufspreise inkl. MwSt. 
 Quelle: 
       EOS
       :tt_company               => 'Der Hersteller oder Zulassungsinhaber des Produkts',
-      :tt_active_agents         => 'Die Stärke bezieht sich auf Darreichungsform-Einheit (Tablette, Zäpfchen, Sirup, etc). Siehe auch: ',
-      :tt_active_agents_link    => 'Darreichungsformen',
+      :tt_ddd_prices            => 'Tageskosten',
       :tt_price_festbetrag      => <<-EOS,
 Festbetrag: DIMDI hat die Aufgabe, die von den Spitzenverbänden der
 Krankenkassen erstellten und veröffentlichten Übersichten über
@@ -192,9 +209,10 @@ aktuellsten Medikamenten-Portal Deutschlands.
       [2,0] => :size, 
       [3,0] => :price_public,
       [4,0] => :price_festbetrag,
-      [5,0] => :company,
-      [6,0] => :package_infos,
-      [7,0] => :google,
+      [5,0] => :ddd_prices,
+      [6,0] => :company,
+      [7,0] => :package_infos,
+      [8,0] => :google,
     }
   end
   def tax_factor
@@ -252,9 +270,10 @@ class LookandfeelMeineMedikamente < LookandfeelWrapper
       [1,0] => :active_agents,
       [2,0] => :size, 
       [3,0] => :price_public,
-      [4,0] => :company,
-      [5,0] => :package_infos,
-      [6,0] => :google,
+      [4,0] => :ddd_prices,
+      [5,0] => :company,
+      [6,0] => :package_infos,
+      [7,0] => :google,
     }
   end
   def tax_factor_add

@@ -21,6 +21,10 @@ module ODDB
       end
     end
     class WhoccDdd < Xml
+      UNIT_REPLACEMENTS = {
+        'TSD E' => 'TsdI.E.',
+        'MIO E' => 'MioI.E.',
+      }
       def import_document(doc)
         REXML::XPath.each(doc, '//rs:data/rw:row', 
           "rs" => 'urn:schemas-microsoft-com:rowset',
@@ -35,7 +39,9 @@ module ODDB
               && comment == candidate.comment
           } || Drugs::Ddd.new(adm)
           ddd.comment = comment
-          ddd.dose = Drugs::Dose.new(attrs['DDD'], attrs['UnitType'])
+          unit = attrs['UnitType']
+          unit = UNIT_REPLACEMENTS.fetch(unit, unit)
+          ddd.dose = Drugs::Dose.new(attrs['DDD'], unit)
           ddd.atc = atc
           ddd.save
           atc.save

@@ -8,6 +8,7 @@ module ODDB
     class GalenicGroup < Model
       multilingual :name
       has_many :galenic_forms
+      attr_accessor :administration
       def initialize(groupname, language='de')
         name.send("%s=" % language, groupname)
       end

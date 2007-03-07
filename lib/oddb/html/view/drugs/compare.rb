@@ -24,8 +24,9 @@ class CompareList < View::List
     [2,0] => :active_agents,
     [3,0] => :size, 
     [4,0] => :price_public,
-    [5,0] => :difference,
-    [6,0] => :google,
+    [5,0] => :ddd_prices,
+    [6,0] => :difference,
+    [7,0] => :google,
   }
   css_map = {}
   COMPONENTS.each { |key, val|

@@ -73,6 +73,9 @@ class Package < Remote::Object
   def _comparable_size
     @comparable_size ||= @remote.comparable_size
   end
+  def ddds
+    []
+  end
   def galenic_form
     @galenic_form ||= Remote::Drugs::GalenicForm.new(@source, 
                         @remote.galenic_form)

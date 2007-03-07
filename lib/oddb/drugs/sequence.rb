@@ -6,7 +6,7 @@ require 'oddb/model'
 module ODDB
   module Drugs
     class Sequence < Model
-      belongs_to :atc
+      belongs_to :atc, delegates(:ddds)
       belongs_to :product, delegates(:company, :name)
       has_many :compositions, 
         delegates(:active_agents, :doses, :substances),
@@ -19,6 +19,17 @@ module ODDB
         atc.sequences.select { |sequence|
           comparable?(sequence)
         }
+      end
+      def ddds # ddds depend on the sequence's Route of Administration
+        forms = galenic_forms
+        if(forms.size == 1 && (atc_class = atc) \
+           && (group = forms.first.group) \
+           && (roa = group.administration))
+          atc_class.ddds.select { |ddd| 
+            ddd.administration == roa }
+        else
+          []
+        end
       end
       def galenic_forms
         compositions.collect { |comp| comp.galenic_form }.compact.uniq

@@ -95,13 +95,21 @@ module Dimdi
     end
     def postprocess
       {
-        'Tabletten'        => [ 'Tabletten', 'Filmtabletten', 'Kapseln',
-                                'Dragees', 'Lacktabletten' ],
-        'Retard-Tabletten' => [ 'Retardtabletten', 'Retardfilmtabletten',
-                                'Retardkapseln', 'Retarddragees' ],
+        'Injektion/Infusion' \
+                          => [ 'P', 'Fertigspritzen' ],
+        'Tabletten'       => [ 'O', 'Tabletten', 'Filmtabletten', 
+                               'Kapseln', 'Dragees', 'Lacktabletten' ],
+        'Transdermale Systeme' \
+                          => [ 'TD', 'Pflaster, transdermal' ],
+        'Tropfen'         => [ 'P', 'Tropfen' ],
+        'Retard-Tabletten'=> [ 'O', 'Retardtabletten', 
+                               'Retardfilmtabletten', 'Retardkapseln',
+                               'Retarddragees' ],
       }.each { |groupname, formnames|
         group = Drugs::GalenicGroup.find_by_name(groupname) \
           || Drugs::GalenicGroup.new(groupname)
+        group.administration = formnames.shift
+        group.save
         formnames.each { |name|
           if((form = Drugs::GalenicForm.find_by_description(name)) \
              && !form.group)

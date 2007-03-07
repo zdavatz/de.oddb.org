@@ -11,52 +11,6 @@ module ODDB
   module Html
     module View
       module Drugs
-class ExplainPrice < HtmlGrid::Composite
-  COMPONENTS = {
-    [0,0] => :price_db,
-    [0,1] => :tax_sub,
-    [0,2] => :tax_add,
-    [0,3] => :price_local,
-  }
-  CSS_MAP = {
-    [1,0,1,3] => 'price',
-    [0,3]     => 'sum',
-    [1,3]     => 'price sum',
-  }
-  LABELS = true
-  LEGACY_INTERFACE = false
-  def price_local(price)
-    _value :price_local, _price_local(price)
-  end
-  def _price_local(price)
-    price * @lookandfeel.price_factor
-  end
-  def price_db(price)
-    _value :price_db, _price_db(price)
-  end
-  def _price_db(price)
-    price * @lookandfeel.currency_factor
-  end
-  def tax_add(price)
-    _value :tax_add, ['+', _tax_add(price)]
-  end
-  def _tax_add(price)
-    factor = @lookandfeel.tax_factor_add
-    _price_local(price) / (1.0 + factor) * factor
-  end
-  def tax_sub(price)
-    _value :tax_sub, ['-', _tax_sub(price)]
-  end
-  def _tax_sub(price)
-    factor = @lookandfeel.tax_factor_sub
-    _price_db(price) / (1.0 + factor) * factor
-  end
-  def _value(key, price)
-    value = HtmlGrid::Value.new(key, price, @session, self)
-    value.value = price
-    value
-  end
-end
 module PackageMethods
   def active_agents(model)
     link = nil
@@ -104,6 +58,25 @@ module PackageMethods
   def code_zuzahlungsbefreit(model)
     code_boolean(model, :zuzahlungsbefreit)
   end
+  def ddd_prices(model)
+    ddds = []
+    model.ddds.each_with_index { |ddd, idx|
+      if(price = adjust_price model.ddd_price(ddd))
+        span = HtmlGrid::Span.new(model, @session, self)
+        span.value = price
+        code = model.code(:cid)
+        span.css_id = "ddd_price_#{code}.#{idx}"
+        args = [:pzn, code, :offset, idx]
+        span.dojo_tooltip = @lookandfeel._event_url(:explain_ddd_price,
+                                                    args)
+                                                    
+        ddds.push span
+      end
+    }
+    val = HtmlGrid::Value.new(:ddd_prices, model, @session, self)
+    val.value = ddds.zip(Array.new([ddds.size - 1, 0].max, ' / '))
+    val
+  end
   def price_festbetrag(model)
     @price_id ||= 0
     @price_id += 1
@@ -121,8 +94,7 @@ module PackageMethods
     end
   end
   def price_public(model)
-    pprice = model.price(:public)
-    price = adjust_price pprice
+    price = adjust_price model.price(:public)
     if(!@lookandfeel.enabled?(:explain_price, false) \
        || model.is_a?(Remote::Drugs::Package))
       price
