@@ -65,6 +65,11 @@ class Search < HtmlGrid::DivForm
     [ :sb_simpy, 
       "http://www.simpy.com/simpy/LinkAdd.do?href=%s&note=%s"],
   ]
+  def screencast(model)
+    link = HtmlGrid::Link.new(:screencast, model, @session, self)
+    link.href = "http://www.youtube.com/watch?v=_1_kqS_wBi0"
+    link
+  end
   def social_bookmarks(model)
     url = @lookandfeel.base_url
     title = escape(@lookandfeel.lookup(:explain_search))
@@ -77,11 +82,6 @@ class Search < HtmlGrid::DivForm
       span.value = link
       span
     }
-  end
-  def screencast(model)
-    link = HtmlGrid::Link.new(:screencast, model, @session, self)
-    link.href = "http://www.youtube.com/watch?v=iZ22GpbTnXE"
-    link
   end
 end
 class InlineSearch < HtmlGrid::DivForm
