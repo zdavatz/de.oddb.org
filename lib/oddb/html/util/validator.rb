@@ -16,8 +16,8 @@ class Validator < SBSM::Validator
       'product', 'size', 
     ],
   }
-  EVENTS = [ :package_infos, :compare, :compare_remote, :home,
-             :package, :products, :remote_infos, :search, :sort ]
+  EVENTS = [ :explain_price, :package_infos, :compare, :compare_remote,
+             :home, :package, :products, :remote_infos, :search, :sort ]
   NUMERIC = [ :offset, :pzn ]
   STRINGS = [ :query, :uid ]
 end

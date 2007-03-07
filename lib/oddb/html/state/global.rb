@@ -12,6 +12,11 @@ class Global < SBSM::State
       _compare(code)
     end
   end
+  def explain_price
+    if(code = @session.user_input(:pzn))
+      _explain_price(code)
+    end
+  end
   def package
     if(code = @session.user_input(:pzn))
       _package(code)

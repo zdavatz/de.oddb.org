@@ -5,6 +5,7 @@ require 'oddb/business/company'
 require 'oddb/drugs/package'
 require 'oddb/remote/drugs/package'
 require 'oddb/html/state/global'
+require 'oddb/html/state/drugs/ajax/explain_price'
 require 'oddb/html/state/drugs/ajax/package_infos'
 require 'oddb/html/state/drugs/ajax/remote_infos'
 require 'oddb/html/state/drugs/compare'
@@ -51,6 +52,11 @@ class Global < State::Global
       end
     }
     result.uniq!
+  end
+  def _explain_price(code)
+    if(package = _package_by_code(code))
+      Ajax::ExplainPrice.new(@session, package.price(:public))
+    end
   end
   def navigation
     [:products].concat(super)

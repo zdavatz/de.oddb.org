@@ -132,7 +132,8 @@ module PackageMethods
       @adjust_price += 1
       span.value = price
       span.css_id = "adjust_price#{@adjust_price}"
-      span.dojo_tooltip = ExplainPrice.new(pprice, @session, self)
+      span.dojo_tooltip = @lookandfeel._event_url(:explain_price,
+                                                  [:pzn, code])
       span.label = true
       span
     end
