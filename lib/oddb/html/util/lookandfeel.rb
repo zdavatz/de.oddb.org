@@ -47,7 +47,7 @@ class Lookandfeel < SBSM::Lookandfeel
       :ddd_price_calculation1   => ' / ',
       :ddd_price_calculation2   => ' ) x ( ',
       :ddd_price_calculation3   => ' / ',
-      :ddd_price_calculation4   => ' ) = <b>',
+      :ddd_price_calculation4   => ' ) = <b>EUR ',
       :ddd_price_calculation5   => ' / Tag </b>',
       :dose                     => 'Stärke',
       :drugs                    => 'Medikamente',
@@ -114,7 +114,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :sb_simpy                 => 'Simpy',
       :sb_stumble               => 'Stumble',
       :screencast               => 'Screencast de.oddb.org',
-      :screencast_url           => 'http://www.youtube.com/watch?v=BQy_HoAYTHs',
+      :screencast_url           => 'http://www.youtube.com/watch?v=TFqW4hmLzn8',
       :search                   => 'Suchen',
       :size                     => 'Packungsgrösse',
       :substance                => 'Inhaltsstoff',
@@ -240,13 +240,14 @@ end
 class LookandfeelMeineMedikamente < LookandfeelWrapper
   DICTIONARIES = {
     'de' => { 
-      :price_local     => 'Preis Schweiz (CHF)',
-      :price_db        => 'Preis Deutschland (CHF)',
-      :screencast      => 'Screencast mm.de.oddb.org',
-      :screencast_url  => 'http://www.youtube.com/watch?v=VxZTI8qO-VI',
-      :tax_add         => 'MwSt. Schweiz (7.6%)',
-      :tax_sub         => 'MwSt. Deutschland (19%)',
-      :tt_price_public => 'Preis: Apothekenverkaufspreis inkl. MwSt. in CHF',
+      :ddd_price_calculation4 => ' ) = <b>CHF ',
+      :price_local            => 'Preis Schweiz (CHF)',
+      :price_db               => 'Preis Deutschland (CHF)',
+      :screencast             => 'Screencast mm.de.oddb.org',
+      :screencast_url         => 'http://www.youtube.com/watch?v=VxZTI8qO-VI',
+      :tax_add                => 'MwSt. Schweiz (7.6%)',
+      :tax_sub                => 'MwSt. Deutschland (19%)',
+      :tt_price_public        => 'Preis: Apothekenverkaufspreis inkl. MwSt. in CHF',
     },
   }
   ENABLED = [
