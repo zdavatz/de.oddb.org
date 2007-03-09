@@ -90,13 +90,16 @@ class ProductInfos < Import
   end
   def import_size(row, package)
     if(part = package.parts.first)
-      size = row.at(3).to_i
-      dose = row.at(4).to_s
-      if(dose != 'St')
-        part.quantity = Drugs::Dose.new(size, dose)
-      else
-        part.size = size
+      dose, size, multi = row.at(3).to_s.split(/x/i, 3).reverse.compact
+      unit = row.at(4).to_s
+      if(unit != 'St')
+        part.quantity = Drugs::Dose.new(dose, unit)
+      elsif(multi.nil?)
+        multi = size
+        size = dose
       end
+      part.multi = multi.to_i
+      part.size = size.to_i
       if(unitname = cell(row, 5))
         unit = Drugs::Unit.find_by_name(unitname)
         unless(unit)

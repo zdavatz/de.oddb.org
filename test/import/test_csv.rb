@@ -93,12 +93,37 @@ class TestProductInfos < Test::Unit::TestCase
     package6.save
     package6.sequence = sequence5
 
+    package7 = Drugs::Package.new
+    package7.add_code(Util::Code.new(:cid, "2092271", 'DE'))
+    package7.add_code(Util::Code.new(:prescription, false, 'DE'))
+    agent7 = Drugs::ActiveAgent.new(substance4, 25000)
+    composition7 = Drugs::Composition.new
+    composition7.add_active_agent(agent7)
+    sequence7 = Drugs::Sequence.new
+    sequence7.add_composition(composition7)
+    sequence7.product = product4
+    package7.sequence = sequence7
+    part7 = Drugs::Part.new
+    part7.size = 1
+    package7.add_part(part7)
+    package7.save
+
+    package8 = Drugs::Package.new
+    package8.add_code(Util::Code.new(:cid, "2093187", 'DE'))
+    package8.add_code(Util::Code.new(:prescription, false, 'DE'))
+    package8.sequence = sequence7
+    part8 = Drugs::Part.new
+    part8.size = 1
+    package8.add_part(part8)
+    package8.save
+
     input = open(@path)
     @import.import(input)
 
     ## for now, no new packages are created.
     assert_equal([ package1, package2, package3, package4, package5, 
-                   package6], Drugs::Package.instances)
+                   package6, package7, package8], 
+                   Drugs::Package.instances)
     assert_equal(false, package1.code(:prescription).value)
     assert_equal('Aframed GmbH', product1.company.name.de)
     assert_equal(false, package2.code(:prescription).value)
@@ -119,6 +144,13 @@ class TestProductInfos < Test::Unit::TestCase
     assert_equal(2, sequence4.packages.size)
     assert_equal([package4, package5], sequence4.packages)
     assert_equal([Drugs::Dose.new(250, 'mg')], package6.sequence.doses)
+
+    assert_equal(5, part7.multi)
+    assert_equal(10, part7.size)
+
+    assert_equal(40, part8.multi)
+    assert_equal(5, part8.size)
+    assert_equal(Drugs::Dose.new(20, 'ml'), part8.quantity)
   end
 end
     end

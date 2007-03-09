@@ -10,19 +10,19 @@ module ODDB
       belongs_to :package
       belongs_to :composition, delegates(:active_agents)
       ## A partial package can be described as e.g. 
-      #  5 Ampoules of 20 ml 
-      #  ^------------------ :size     - Numeric
-      #    ^---------------- :unit     - Unit (a multilingual)
-      #                ^---- :quantity - Dose 
-      #  Possibly a multiplication factor (Integer) can be added.
-      attr_accessor :unit, :quantity
+      #  10 x 5 Ampoules of 20 ml 
+      #   ^----------------------- :multi    - Numeric
+      #       ^------------------- :size     - Numeric
+      #              ^------------ :unit     - Unit (a multilingual)
+      #                      ^---- :quantity - Dose 
+      attr_accessor :unit, :quantity, :multi
       attr_reader :size
       def initialize
         super
         @size = 1
       end
       def comparable_size
-        (@quantity || Dose.new(1)) * (@size || 1)
+        (@quantity || Dose.new(1)) * (@size || 1) * (@multi || 1)
       end
       def size=(size)
         if(size.to_i == size)
