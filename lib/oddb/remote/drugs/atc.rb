@@ -12,6 +12,10 @@ class Atc < Remote::Object
   def name
     @name ||= Util::Multilingual.new(:de => @remote.name)
   end
+  def ddds(administration)
+    @ddds ||= @remote.ddds.select { |roa, ddd| 
+      ddd.administration_route == administration }
+  end
 end
     end
   end

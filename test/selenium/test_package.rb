@@ -43,6 +43,8 @@ class TestPackage < Test::Unit::TestCase
     package.add_code(code)
     code = Util::Code.new(:zuzahlungsbefreit, true, 'DE')
     package.add_code(code)
+    code = Util::Code.new(:prescription, true, 'DE')
+    package.add_code(code)
     code = Util::Code.new(:cid, pzn, 'DE')
     package.add_code(code)
     part = Drugs::Part.new
@@ -63,7 +65,7 @@ class TestPackage < Test::Unit::TestCase
   def test_package
     package = setup_package
     @selenium.open "/de/drugs/package/pzn/12345"
-    assert_equal "ODDB | Medikamente | Details | Amantadin by Producer", @selenium.get_title
+    assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", @selenium.get_title
     assert @selenium.is_text_present('Amantadin by Producer - Producer AG')
     assert @selenium.is_text_present('12345')
     assert !@selenium.is_text_present('54321')
@@ -76,13 +78,13 @@ class TestPackage < Test::Unit::TestCase
     package.code(:zuzahlungsbefreit).value = false
     @selenium.refresh
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Details | Amantadin by Producer", @selenium.get_title
-    assert !@selenium.is_text_present('Ja')
-    assert @selenium.is_text_present('Nein')
+    assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", @selenium.get_title
+    assert_equal "Nein", @selenium.get_text('//tr[5]/td[2]')
+    assert_equal "Ja", @selenium.get_text('//tr[6]/td[2]')
 
     package2 = setup_package('54321')
     @selenium.open "/de/drugs/package/pzn/54321"
-    assert_equal "ODDB | Medikamente | Details | Amantadin by Producer", 
+    assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", 
                  @selenium.get_title
     assert @selenium.is_text_present('Amantadin by Producer - Producer AG')
     assert @selenium.is_text_present('Ja')
@@ -93,11 +95,11 @@ class TestPackage < Test::Unit::TestCase
   def test_package__search
     setup_package
     @selenium.open "/de/drugs/package/pzn/12345"
-    assert_equal "ODDB | Medikamente | Details | Amantadin by Producer", @selenium.get_title
+    assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", @selenium.get_title
     @selenium.type "query", "Amantadin"
     @selenium.select "dstype", "Markenname"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Markenname", 
+    assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", 
                  @selenium.get_title
   end
 end

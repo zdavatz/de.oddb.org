@@ -243,6 +243,19 @@ module ODDB
         assert(!File.exist?(File.join(@xls_dir, 
           "2006.10.06-liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls")))
       end
+      def test_import_whocc_guidelines
+        flexstub(Util::Mail).should_receive(:notify_admins)\
+          .with(String, Array).times(1)
+        importer = flexmock('Guidelines')
+        flexstub(Import::Whocc::Guidelines).should_receive(:new)\
+          .times(1).and_return(importer)
+        importer.should_receive(:import).with(WWW::Mechanize)\
+          .times(1).and_return {
+          assert(true) 
+          ['report']
+        }
+        Updater.import_whocc_guidelines
+      end
     end
   end
 end

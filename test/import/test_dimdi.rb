@@ -103,13 +103,11 @@ class TestGalenicForm < Test::Unit::TestCase
     form3 = setup_form('Retardtabletten')
     form4 = setup_form('Retardkapseln')
     @import.postprocess
-    assert_equal(2, Drugs::GalenicGroup.instances.size)
+    assert_equal(5, Drugs::GalenicGroup.instances.size)
     group1 = Drugs::GalenicGroup.find_by_name('Tabletten')
-    assert_equal(Drugs::GalenicGroup.instances.first, group1)
     assert_equal(group1, form1.group)
     assert_equal(group1, form2.group)
     group2 = Drugs::GalenicGroup.find_by_name('Retard-Tabletten')
-    assert_equal(Drugs::GalenicGroup.instances.last, group2)
     assert_equal(group2, form3.group)
     assert_equal(group2, form4.group)
   end

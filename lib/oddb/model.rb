@@ -127,7 +127,6 @@ module ODDB
         define_method(:to_s) { 
           self.send(key).to_s
         }
-        self.predicates.push(on_delete(:cascade, key))
       end
       def singular
         basename.gsub(/([a-z])([A-Z])/, '\1_\2').downcase

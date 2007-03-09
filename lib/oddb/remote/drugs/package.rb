@@ -15,6 +15,7 @@ module ODDB
   module Remote
     module Drugs
 class Package < Remote::Object
+  delegate :ikscat, :sl_entry
   def initialize(source, remote, currency_rate, tax_factor=1.0)
     @tax_factor = tax_factor.to_f
     @currency_rate = currency_rate.to_f
@@ -74,14 +75,17 @@ class Package < Remote::Object
     @comparable_size ||= @remote.comparable_size
   end
   def ddds
-    []
+    @ddds or begin
+      if(group = galenic_form.group)
+        @ddds = atc.ddds(group.administration)
+      else
+        @ddds = []
+      end
+    end
   end
   def galenic_form
     @galenic_form ||= Remote::Drugs::GalenicForm.new(@source, 
                         @remote.galenic_form)
-  end
-  def ikscat
-    @ikscat ||= @remote.ikscat
   end
   def name
     @name ||= Util::Multilingual.new(:de => @@iconv.iconv(@remote.name_base))
@@ -100,9 +104,6 @@ class Package < Remote::Object
   end
   def quantity
     nil
-  end
-  def sl_entry
-    @sl_entry ||= @remote.sl_entry
   end
   def size
     @size ||= _comparable_size.qty

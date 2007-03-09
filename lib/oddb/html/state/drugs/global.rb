@@ -9,6 +9,7 @@ require 'oddb/html/state/drugs/ajax/explain_price'
 require 'oddb/html/state/drugs/ajax/explain_ddd_price'
 require 'oddb/html/state/drugs/ajax/package_infos'
 require 'oddb/html/state/drugs/ajax/remote_infos'
+require 'oddb/html/state/drugs/atc_guidelines'
 require 'oddb/html/state/drugs/compare'
 require 'oddb/html/state/drugs/init'
 require 'oddb/html/state/drugs/package'
@@ -53,6 +54,12 @@ class Global < State::Global
       end
     }
     result.uniq!
+  end
+  def ddd
+    if((code = @session.user_input(:code)) \
+       && (atc = ODDB::Drugs::Atc.find_by_code(code)))
+      AtcGuidelines.new(@session, atc)
+    end
   end
   def _explain_ddd_price(code, idx)
     if((package = _package_by_code(code)) \

@@ -14,6 +14,9 @@ module ODDB
       def all
         @canonical.values.concat(@synonyms)
       end
+      def empty?
+        @canonical.empty?
+      end
       def method_missing(meth, *args, &block)
         case meth.to_s
         when /^[a-z]{2}$/

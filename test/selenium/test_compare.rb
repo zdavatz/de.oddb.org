@@ -22,6 +22,12 @@ class TestCompare < Test::Unit::TestCase
     @cache = flexstub(ODBA.cache)
     flexstub(Currency).should_receive(:rate)\
       .with('EUR', 'CHF').and_return(1.5)
+    flexstub(Currency).should_receive(:rate)\
+      .with('EUR', 'CHF').and_return(1.5)
+    currency = flexmock('Currency')
+    @currency = DRb.start_service('druby://localhost:0', currency)
+    ODDB.config.currency_rates = @currency.uri
+    currency.should_receive(:rate).with('EUR', 'CHF').and_return(1.6)
     super
   end
   def setup_package(name, pzn='12345', price=6)
@@ -94,30 +100,32 @@ class TestCompare < Test::Unit::TestCase
     rgroup.should_receive(:de).and_return('Unbekannt')
     rgalform.should_receive(:galenic_group).and_return(rgroup)
     @cache.should_receive(:fetch).with(uid.to_i).and_return(rpackage)
+    rpackage.should_ignore_missing
     rpackage
   end
   def teardown
     super
     ODDB.config.remote_databases = []
+    @currency.stop_service
   end
   def test_init
     package = setup_package("Amantadin by Producer")
     open "/"
-    assert_equal "ODDB | Medikamente | Home", get_title
+    assert_equal "DE - ODDB.org | Medikamente | Home | Open Drug Database", get_title
     type "query", "Amantadin"
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", 
+    assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Preisvergleich | Open Drug Database", 
                  get_title
     click 'link=Amantadin by Producer'
     wait_for_page_to_load "30000"
 
-    assert_equal "ODDB | Medikamente | Preisvergleich | Amantadin by Producer", get_title
+    assert_equal "DE - ODDB.org | Medikamente | Preisvergleich | Amantadin by Producer | Open Drug Database", get_title
     assert is_text_present('Amantadin by Producer')
     assert is_text_present('Amantadin 100 mg')
     assert is_text_present('5 Ampullen x 20 ml')
     assert is_text_present('6.00')
-    assert is_text_present("In unserer Datenbank wurden leider keine Produkte gefunden, \ndie mit diesem Produkt verglichen werden können.")
+    assert is_text_present("In unserer Datenbank wurden leider keine Produkte gefunden, die mit diesem Produkt verglichen werden können.")
   end
   def test_compare
     package1 = setup_package("Amantadin by Producer", '12345', 6)
@@ -128,7 +136,7 @@ class TestCompare < Test::Unit::TestCase
     flexstub(package2).should_receive(:comparables)\
       .and_return([package1])
     open "/de/drugs/compare/pzn/12345"
-    assert_equal "ODDB | Medikamente | Preisvergleich | Amantadin by Producer", get_title
+    assert_equal "DE - ODDB.org | Medikamente | Preisvergleich | Amantadin by Producer | Open Drug Database", get_title
     assert is_text_present('-50.0%')
     assert_equal 'origin zuzahlungsbefreit', 
                  get_attribute('//tr[2]@class')
@@ -137,7 +145,7 @@ class TestCompare < Test::Unit::TestCase
 
     click 'link=By another name'
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Preisvergleich | By another name", get_title
+    assert_equal "DE - ODDB.org | Medikamente | Preisvergleich | By another name | Open Drug Database", get_title
     assert is_text_present('+100.0%')
     assert_equal 'origin', 
                  get_attribute('//tr[2]@class')
@@ -152,13 +160,13 @@ class TestCompare < Test::Unit::TestCase
     flexstub(package1).should_receive(:comparables)\
       .and_return([package2, package3])
     open "/de/drugs/compare/pzn/12345"
-    assert_equal "ODDB | Medikamente | Preisvergleich | Amantadin by Producer", get_title
+    assert_equal "DE - ODDB.org | Medikamente | Preisvergleich | Amantadin by Producer | Open Drug Database", get_title
     assert_match(/^Yet another/, @selenium.get_text("cid_0"))
     assert_match(/^By another name/, @selenium.get_text("cid_1"))
 
     click "//a[@name='th_product']"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Preisvergleich | Amantadin by Producer", get_title
+    assert_equal "DE - ODDB.org | Medikamente | Preisvergleich | Amantadin by Producer | Open Drug Database", get_title
     assert_match(/^By another name/, @selenium.get_text("cid_0"))
     assert_match(/^Yet another/, @selenium.get_text("cid_1"))
   end
@@ -179,18 +187,18 @@ class TestCompare < Test::Unit::TestCase
     package = setup_package('Amantadin')
     ## switch to mm-flavor
     open "/de/drugs/home/flavor/mm"
-    assert_equal "ODDB | Medikamente | Home", get_title
+    assert_equal "CH | DE - ODDB.org | Medikamente | Home | Open Drug Database", get_title
     type "query", "Amantadin"
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", get_title
+    assert_equal "CH | DE - ODDB.org | Medikamente | Suchen | Amantadin | Preisvergleich | Open Drug Database", get_title
   
     atc = Drugs::Atc.new('N04BB01')
 
     rother.should_receive(:comparables).and_return([rpackage])
     click "link=Remotadin"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Preisvergleich | Remotadin", 
+    assert_equal "CH | DE - ODDB.org | Medikamente | Preisvergleich | Remotadin | Open Drug Database", 
                  get_title
     assert_match(/^Remotadin/, get_text("cid_"))
     assert is_element_present("//a[@id='cid_0']")
@@ -202,7 +210,7 @@ class TestCompare < Test::Unit::TestCase
 
     click "link=Remoteric"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Preisvergleich | Remoteric", 
+    assert_equal "CH | DE - ODDB.org | Medikamente | Preisvergleich | Remoteric | Open Drug Database", 
                  get_title
     assert_match(/^Remoteric/, get_text("cid_"))
     assert is_element_present("//a[@id='cid_0']")
@@ -232,18 +240,18 @@ class TestCompare < Test::Unit::TestCase
     package = setup_package('Amantadin')
     ## switch to mm-flavor
     open "/de/drugs/home/flavor/mm"
-    assert_equal "ODDB | Medikamente | Home", get_title
+    assert_equal "CH | DE - ODDB.org | Medikamente | Home | Open Drug Database", get_title
     type "query", "Amantadin"
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | Amantadin | Preisvergleich", get_title
+    assert_equal "CH | DE - ODDB.org | Medikamente | Suchen | Amantadin | Preisvergleich | Open Drug Database", get_title
   
     atc = Drugs::Atc.new('N04BB01')
 
     rother.should_receive(:comparables).and_return([rpackage])
     click "link=Amantadin"
     wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Preisvergleich | Amantadin", 
+    assert_equal "CH | DE - ODDB.org | Medikamente | Preisvergleich | Amantadin | Open Drug Database", 
                  get_title
     assert_match(/^Amantadin/, get_text("cid_"))
     assert is_element_present("//a[@id='cid_0']")

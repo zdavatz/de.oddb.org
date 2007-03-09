@@ -543,7 +543,6 @@ module Dimdi
       if(package = Drugs::Package.find_by_code(:type => 'cid', 
                                                :value => pzn, 
                                                :country => 'DE'))
-        puts sprintf("%7i:%7s", @count, pzn)
         @confirmed_pzns.store(package.code(:pzn), true)
         if(code = package.code(:zuzahlungsbefreit))
           if(code.value)

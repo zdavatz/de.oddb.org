@@ -13,7 +13,7 @@ class TestInit < Test::Unit::TestCase
   include Selenium::TestCase
   def test_init
     @selenium.open "/"
-    assert_equal "ODDB | Medikamente | Home", @selenium.get_title
+    assert_equal "DE - ODDB.org | Medikamente | Home | Open Drug Database", @selenium.get_title
     assert @selenium.is_element_present("query")
     assert @selenium.is_element_present("reset")
     assert @selenium.is_element_present("//input[@name='search']")
@@ -25,7 +25,7 @@ class TestInit < Test::Unit::TestCase
   end
   def test_init__mm
     @selenium.open "/de/drugs/home/flavor/mm"
-    assert_equal "ODDB | Medikamente | Home", @selenium.get_title
+    assert_equal "CH | DE - ODDB.org | Medikamente | Home | Open Drug Database", @selenium.get_title
     assert @selenium.is_element_present("query")
     assert @selenium.is_element_present("reset")
     assert @selenium.is_element_present("//input[@name='search']")

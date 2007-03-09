@@ -6,7 +6,7 @@ $: << File.expand_path('../../lib', File.dirname(__FILE__))
 if(pid = Kernel.fork)
   at_exit {
     Process.kill('HUP', pid)
-    #$selenium.stop if($selenium.respond_to?(:stop))
+    $selenium.stop if($selenium.respond_to?(:stop))
   }
 else
   path = File.expand_path('selenium-server.jar', File.dirname(__FILE__))

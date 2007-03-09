@@ -34,10 +34,10 @@ class TestProducts < Test::Unit::TestCase
     setup_product("Amantadin by someone Else")
     setup_product("4N Pflaster")
     @selenium.open "/"
-    assert_equal "ODDB | Medikamente | Home", @selenium.get_title
+    assert_equal "DE - ODDB.org | Medikamente | Home | Open Drug Database", @selenium.get_title
     @selenium.click "link=Arzneimittel A-Z"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Arzneimittel A-Z", 
+    assert_equal "DE - ODDB.org | Medikamente | Arzneimittel A-Z | Open Drug Database", 
                  @selenium.get_title
     assert @selenium.is_text_present("Bitte wählen Sie den anzuzeigenden Bereich")
     assert @selenium.is_element_present("link=A")
@@ -45,7 +45,7 @@ class TestProducts < Test::Unit::TestCase
 
     @selenium.click "link=A"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Arzneimittel A-Z", 
+    assert_equal "DE - ODDB.org | Medikamente | Arzneimittel A-Z | Open Drug Database", 
                  @selenium.get_title
     assert @selenium.is_text_present('Amantadin by Producer')
     assert @selenium.is_text_present('Amantadin by someone Else')
@@ -57,7 +57,7 @@ class TestProducts < Test::Unit::TestCase
 
     @selenium.refresh
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Arzneimittel A-Z", 
+    assert_equal "DE - ODDB.org | Medikamente | Arzneimittel A-Z | Open Drug Database", 
                  @selenium.get_title
     assert @selenium.is_text_present('Amantadin by Producer')
     assert !@selenium.is_text_present('Amantadin by someone Else')
@@ -68,7 +68,7 @@ class TestProducts < Test::Unit::TestCase
 
     @selenium.click "link=2 - 2"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Arzneimittel A-Z", 
+    assert_equal "DE - ODDB.org | Medikamente | Arzneimittel A-Z | Open Drug Database", 
                  @selenium.get_title
     assert !@selenium.is_text_present('Amantadin by Producer')
     assert @selenium.is_text_present('Amantadin by someone Else')
@@ -79,7 +79,7 @@ class TestProducts < Test::Unit::TestCase
 
     @selenium.click "link=0-9"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Arzneimittel A-Z", 
+    assert_equal "DE - ODDB.org | Medikamente | Arzneimittel A-Z | Open Drug Database", 
                  @selenium.get_title
     assert !@selenium.is_text_present('Amantadin by Producer')
     assert !@selenium.is_text_present('Amantadin by someone Else')
@@ -87,7 +87,7 @@ class TestProducts < Test::Unit::TestCase
 
     @selenium.click "link=4N Pflaster"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Suchen | 4N Pflaster | Preisvergleich", 
+    assert_equal "DE - ODDB.org | Medikamente | Suchen | 4N Pflaster | Preisvergleich | Open Drug Database", 
                  @selenium.get_title
   end
   def test_products__sort
@@ -95,10 +95,10 @@ class TestProducts < Test::Unit::TestCase
     setup_product("Amantadin by someone Else")
     setup_product("4N Pflaster")
     @selenium.open "/"
-    assert_equal "ODDB | Medikamente | Home", @selenium.get_title
+    assert_equal "DE - ODDB.org | Medikamente | Home | Open Drug Database", @selenium.get_title
     @selenium.click "link=Arzneimittel A-Z"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Arzneimittel A-Z", 
+    assert_equal "DE - ODDB.org | Medikamente | Arzneimittel A-Z | Open Drug Database", 
                  @selenium.get_title
     assert @selenium.is_text_present("Bitte wählen Sie den anzuzeigenden Bereich")
     assert @selenium.is_element_present("link=A")
@@ -106,18 +106,18 @@ class TestProducts < Test::Unit::TestCase
 
     @selenium.click "link=A"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Arzneimittel A-Z", 
+    assert_equal "DE - ODDB.org | Medikamente | Arzneimittel A-Z | Open Drug Database", 
                  @selenium.get_title
     assert @selenium.is_text_present('Amantadin by Producer')
     assert @selenium.is_text_present('Amantadin by someone Else')
 
     @selenium.click "link=ATC-Code"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Arzneimittel A-Z", 
+    assert_equal "DE - ODDB.org | Medikamente | Arzneimittel A-Z | Open Drug Database", 
                  @selenium.get_title
     @selenium.click "link=Hersteller"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "ODDB | Medikamente | Arzneimittel A-Z", 
+    assert_equal "DE - ODDB.org | Medikamente | Arzneimittel A-Z | Open Drug Database", 
                  @selenium.get_title
   end
 end

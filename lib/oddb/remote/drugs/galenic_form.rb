@@ -3,6 +3,7 @@
 
 require 'oddb/util/multilingual'
 require 'oddb/remote/object'
+require 'oddb/drugs/galenic_group'
 
 module ODDB
   module Remote
@@ -11,8 +12,11 @@ class GalenicForm < Remote::Object
   def description
     @description ||= Util::Multilingual.new(:de => @remote.de)
   end
+  def group
+    @group ||= ODDB::Drugs::GalenicGroup.find_by_name(groupname)
+  end
   def groupname
-    @remote.galenic_group.de
+    @groupname ||= @remote && @remote.galenic_group.de
   end
 end
     end

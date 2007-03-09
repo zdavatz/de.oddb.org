@@ -13,7 +13,7 @@ class Package < Global
   def direct_event
     direct_event = [:package]
     if(code = @model.code(:cid, 'DE'))
-      direct_event.push(code.value)
+      direct_event.push(:pzn, code.value)
     end
     direct_event
   end

@@ -30,13 +30,17 @@ class Packages < View::List
   end
   def atc(model)
     description = @lookandfeel.lookup(:atc_unknown)
+    link = nil
     if(atc = model.atc)
-      description = sprintf("%s (%s)", atc.name.send(@session.language),
-                            atc.code)
-
+      description = sprintf("%s (%s)", 
+                            atc.name.send(@session.language), atc.code)
+      link = ddd_link(atc)
     end
-    sprintf("%s - %i %s", description, model.size, 
-            @lookandfeel.lookup(:packages))
+    [
+      sprintf("%s - %i %s", description, model.size,
+              @lookandfeel.lookup(:packages)),
+      link,
+    ].compact
   end
   def code_prescription(model)
     span = HtmlGrid::Span.new(model, @session, self)
@@ -68,6 +72,17 @@ class Packages < View::List
     @grid.set_row_attributes({'class' => 'groupheader'}, 
                              offset.at(1), 1)
     resolve_offset(offset, OFFSET_STEP)
+  end
+  def ddd_link(atc)
+    while(atc && !atc.interesting? && (code = atc.parent_code))
+      atc = ODDB::Drugs::Atc.find_by_code(code)
+    end
+    if(atc && atc.interesting?)
+      link = HtmlGrid::Link.new(:who_ddd, atc, @session, self)
+      link.href = @lookandfeel._event_url(:ddd, [:code, atc.code])
+      link.css_class = 'who-ddd square'
+      link
+    end
   end
   def ikscat(model)
     span = HtmlGrid::Span.new(model, @session, self)

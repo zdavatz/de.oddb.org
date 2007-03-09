@@ -31,11 +31,15 @@ class Template < HtmlGrid::DivTemplate
   DOJO_REQUIRE = [ 'dojo.widget.Tooltip' ]
   DOJO_PARSE_WIDGETS = true
   def title(context)
-    context.title { _title.join(' | ') }
+    context.title { 
+      _title.push(@lookandfeel.lookup(:html_owner)).join(' | ') }
   end
   def _title
-    [:html_title, @session.zone,
-      *@session.state.direct_event].collect { |key| 
+    parts = [:html_title, @session.zone]
+    [@session.state.direct_event].flatten.each_with_index { |part, idx|
+      parts << part if((idx%2) == 0)
+    }
+    parts.collect { |key| 
       @lookandfeel.lookup(key) { key if(key.is_a?(String)) } }.compact
   end
 end

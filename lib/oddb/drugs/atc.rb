@@ -10,8 +10,34 @@ module ODDB
       has_many :sequences, delegates(:packages)
       attr_reader :code
       multilingual :name
+      multilingual :guidelines
+      multilingual :ddd_guidelines
       def initialize(code)
         @code = code
+      end
+      def interesting?
+        !(ddds.empty? && guidelines.empty? && ddd_guidelines.empty?)
+      end
+      def level
+        case len = @code.length
+        when 7
+          5
+        when 1
+          len
+        else
+          len - 1
+        end
+      end
+      def parent
+        Atc.find_by_code(parent_code)
+      end
+      def parent_code
+        case level
+        when 2
+          @code[0,1]
+        when 3..5
+          @code[0,level]
+        end
       end
       def products
         sequences.collect { |sequence| sequence.product }.uniq

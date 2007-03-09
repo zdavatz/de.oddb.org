@@ -2,7 +2,9 @@
 # Util::Updater -- de.oddb.org -- 02.02.2007 -- hwyss@ywesee.com
 
 require 'date'
+require 'mechanize'
 require 'oddb/import/dimdi'
+require 'oddb/import/whocc'
 require 'oddb/util/mail'
 
 module ODDB
@@ -32,6 +34,10 @@ module ODDB
         Import::Dimdi.download_latest(url, today) { |io|
           reported_import(Import::Dimdi::ZuzahlungsBefreiung.new, io)
         }
+      end
+      def Updater.import_whocc_guidelines
+        reported_import(Import::Whocc::Guidelines.new, 
+                        WWW::Mechanize.new)
       end
       def Updater.reported_import(importer, io)
         lines = [
