@@ -12,17 +12,26 @@ a:hover {
 a.google {
   color: white;
   background-color: #184FCA;
+  float: right;
 }
 a.square {
   padding: 1px 4px;
   font-weight: bold;
-  float: right;
+  font-size: 11px;
+}
+a.who-ddd {
+  margin-left: 4px;
+  background-color: yellow;
+  color: black;
 }
 div.before-searchbar {
   float: left;
 }
-div.explain {
+div.atc, div.explain {
   padding: 4px;
+}
+div.ddd {
+  background-color: #dcefd6;
 }
 div#explain-compare {
   padding: 2px 4px;
@@ -59,7 +68,7 @@ div#home-search {
 div#home-search input[type=text] {
   width: 200px;
 }
-div#legend, tr.groupheader {
+div#legend, tr.groupheader, div.groupheader {
   background-color: #cf9;
 }
 div#legend table {
