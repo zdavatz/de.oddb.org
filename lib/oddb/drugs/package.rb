@@ -61,7 +61,7 @@ module ODDB
         seq
       end
       def size
-        parts.inject(0) { |memo, part| memo + part.size }
+        parts.inject(0) { |memo, part| memo + part.comparable_size.qty }
       end
     end
   end
