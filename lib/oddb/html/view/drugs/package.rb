@@ -157,7 +157,8 @@ module PackageMethods
   def size(model)
     model.parts.collect { |part|
       parts = [part.size.to_i] 
-      if(multi = part.multi)
+      multi = part.multi.to_i
+      if(multi > 1)
         parts.unshift(multi, 'x')
       end
       if(unit = part.unit)
