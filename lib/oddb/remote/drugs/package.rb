@@ -15,7 +15,7 @@ module ODDB
   module Remote
     module Drugs
 class Package < Remote::Object
-  delegate :ikscat, :sl_entry
+  delegate :ikscat, :sl_entry, :multi
   def initialize(source, remote, currency_rate, tax_factor=1.0)
     @tax_factor = tax_factor.to_f
     @currency_rate = currency_rate.to_f
