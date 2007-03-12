@@ -157,6 +157,9 @@ module PackageMethods
   def size(model)
     model.parts.collect { |part|
       parts = [part.size.to_i] 
+      if(multi = part.multi)
+        parts.unshift(multi, 'x')
+      end
       if(unit = part.unit)
         parts.push(unit.name.send(@session.language))
       end
