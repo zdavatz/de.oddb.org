@@ -178,12 +178,11 @@ abruffähig zu veröffentlichen...
       :tt_price_difference      => 'Absolute Differenz zwischen Preis und Festbetrag',
       :tt_price_public          => 'Preis: Apothekenverkaufspreis inkl. MwSt. in Euro',
       :tt_product               => 'Präparat ist der Handelsname des Medikaments',
+      :welcome_data_declaration => '** Herkunftsdeklaration der Daten **',
       :welcome_drugs            => <<-EOS,
 Willkommen bei de.oddb.org, dem
 aktuellsten Medikamenten-Portal Deutschlands.
-** Herkunftsdeklaration der Daten **
       EOS
-      :welcome_drugs_link       => 'Herkunftsdeklaration',
       :who_ddd                  => 'WHO-DDD',
       :yes                      => 'Ja',
       :ywesee                   => 'ywesee.com',
@@ -250,10 +249,15 @@ class LookandfeelMeineMedikamente < LookandfeelWrapper
       :html_owner             => 'Open Drug Database',
       :price_local            => 'Preis Schweiz (CHF)',
       :price_db               => 'Preis Deutschland (CHF)',
-      :screencast_url         => 'http://www.youtube.com/watch?v=z8a6fCmuCgw',
+      :screencast_url         => 'http://www.youtube.com/watch?v=sWmDAjjm7cU',
       :tax_add                => 'MwSt. Schweiz (7.6%)',
       :tax_sub                => 'MwSt. Deutschland (19%)',
       :tt_price_public        => 'Preis: Apothekenverkaufspreis inkl. MwSt. in CHF',
+      :welcome_drugs            => <<-EOS,
+Willkommen bei chde.oddb.org, dem aktuellsten
+Medikamenten-Portal für den Preisvergleich zwischen
+der Schweiz und Deutschland. Alle Preise sind in CHF.
+      EOS
     },
   }
   ENABLED = [

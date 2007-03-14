@@ -40,11 +40,12 @@ class WelcomeHead < Head
   }
   CSS_ID_MAP = ["welcome"]
   def welcome(model)
-    text = @lookandfeel.lookup(:welcome_drugs).gsub("\n", "<br>")
-    linktext = @lookandfeel.lookup(:welcome_drugs_link)
+    link = HtmlGrid::Link.new(:welcome_drugs, model, @session, self)
+    link.value.gsub!("\n", "<br>")
+    link.href = @lookandfeel.lookup(:screencast_url)
     span = HtmlGrid::Span.new(model, @session, self)
     span.css_id = "data_declaration"
-    span.value = linktext
+    span.value = @lookandfeel.lookup(:welcome_data_declaration)
     span.dojo_title = [
       @lookandfeel.lookup(:drugs_fixprices), "\n",
       url_link("http://www.dimdi.de/static/de/amg/fbag/index.htm"),
@@ -53,8 +54,7 @@ class WelcomeHead < Head
       "\n\n", @lookandfeel.lookup(:drugs_atc_codes), "\n",
       url_link("http://www.whocc.no/atcddd/"),
     ]
-    parts = text.split(linktext)
-    parts.zip(Array.new(parts.size - 1, span)).flatten.compact
+    [ link, span ]
   end
   def url_link(url)
     link = HtmlGrid::Link.new(:none, model, @session, self)
