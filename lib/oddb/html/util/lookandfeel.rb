@@ -180,8 +180,8 @@ abruffähig zu veröffentlichen...
       :tt_product               => 'Präparat ist der Handelsname des Medikaments',
       :welcome_data_declaration => '** Herkunftsdeklaration der Daten **',
       :welcome_drugs            => <<-EOS,
-Willkommen bei de.oddb.org, dem
-aktuellsten Medikamenten-Portal Deutschlands.
+Willkommen bei de.oddb.org, dem aktuellsten 
+Medikamenten-Preisvergleichs-Portal Deutschlands.
       EOS
       :who_ddd                  => 'WHO-DDD',
       :yes                      => 'Ja',
