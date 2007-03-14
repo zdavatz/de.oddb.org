@@ -68,7 +68,7 @@ class ComparisonDeCh
       remote.code(:zuzahlungsbefreit) ? 'SL' : '',
       sprintf("%+4.2f", adjust_price(comparison.absolute)),
       sprintf("%+4.2f%%", comparison.difference),
-      sprintf("%4.2f%", comparison.factor),
+      sprintf("%4.2f", comparison.factor),
     ]
   end
   def write_xls(io, data)
