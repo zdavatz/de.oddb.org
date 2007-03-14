@@ -45,33 +45,11 @@ class Package < Remote::Object
     @company ||= Remote::Business::Company.new(@source, @remote.company)
   end
   def comparables
-    comparables = @remote.comparables.collect { |pac|
+    local_comparables.concat @remote.comparables.collect { |pac|
       Package.new(@source, pac, @currency_rate, @tax_factor)
     }
-    doses = active_agents.collect { |act| act.dose }
-    if(doses.size == 1 \
-       && (atc = ODDB::Drugs::Atc.find_by_code(self.atc.code)))
-      description = galenic_form.description.de
-      groupname = galenic_form.groupname
-      range = (size*0.75)..(size*1.25)
-      atc.products.each { |prod|
-        prod.sequences.each { |seq|
-          if(seq.doses == doses)
-            form = seq.galenic_forms.first
-            group = form.group
-            if(form.description == description \
-               || (group && group.name == groupname))
-              comparables.concat seq.packages.select { |pac|
-                range.include?(pac.size)
-              }
-            end
-          end
-        }
-      }
-    end
-    comparables
   end
-  def _comparable_size
+  def comparable_size
     @comparable_size ||= @remote.comparable_size
   end
   def ddds
@@ -86,6 +64,33 @@ class Package < Remote::Object
   def galenic_form
     @galenic_form ||= Remote::Drugs::GalenicForm.new(@source, 
                         @remote.galenic_form)
+  end
+  def galenic_forms
+    [galenic_form]
+  end
+  def local_comparables
+    comparables = []
+    doses = active_agents.collect { |act| act.dose }
+    if(doses.size == 1 \
+       && (atc = ODDB::Drugs::Atc.find_by_code(self.atc.code)))
+      description = galenic_form.description.de
+      groupname = galenic_form.groupname
+      range = (size*0.75)..(size*1.25)
+      atc.products.each { |prod|
+        prod.sequences.each { |seq|
+          if(seq.doses == doses && (form = seq.galenic_forms.first))
+            group = form.group
+            if(form.description == description \
+               || (group && group.name == groupname))
+              comparables.concat seq.packages.select { |pac|
+                range.include?(pac.size)
+              }
+            end
+          end
+        }
+      }
+    end
+    comparables
   end
   def name
     @name ||= Util::Multilingual.new(:de => @@iconv.iconv(@remote.name_base))
@@ -106,11 +111,11 @@ class Package < Remote::Object
     nil
   end
   def size
-    @size ||= _comparable_size.qty
+    @size ||= comparable_size.qty
   end
   def unit
     @unit ||= Remote::Drugs::Unit.new(@source, 
-                @@iconv.iconv(@remote.comform || _comparable_size.unit))
+                @@iconv.iconv(@remote.comform || comparable_size.unit))
   end
 end
     end

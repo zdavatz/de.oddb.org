@@ -99,10 +99,9 @@ class ProductInfos < Import
         size = dose
       end
       multi = multi.to_i
-      if(multi > 0)
-        part.multi = multi
-      end
-      part.size = size.to_i
+      size = size.to_i
+      part.multi = (multi > 0) ? multi : nil
+      part.size = (size > 0) ? size : nil
       if(unitname = cell(row, 5))
         unit = Drugs::Unit.find_by_name(unitname)
         unless(unit)

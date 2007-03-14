@@ -27,10 +27,11 @@ class Global < State::Global
     :home => Drugs::Init,
   }
   def compare_remote
-    if(package = _remote_package(@session.user_input(:uid)))
+    if((uid = @session.user_input(:uid)) \
+       && (package = _remote_package(uid)))
       result = Util::AnnotatedList.new(package.comparables)
       result.origin = package
-      result.query = package.atc.code
+      result.query = uid
       CompareRemote.new(@session, result)
     end
   end

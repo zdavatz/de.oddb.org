@@ -114,7 +114,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :sb_delicious             => 'Bookmark',
       :sb_simpy                 => 'Simpy',
       :sb_stumble               => 'Stumble',
-      :screencast               => 'Screencast',
+      :screencast               => 'Video-Anleitung (Screencast)',
       :screencast_url           => 'http://www.youtube.com/watch?v=TFqW4hmLzn8',
       :search                   => 'Suchen',
       :size                     => 'Packungsgrösse',

@@ -25,6 +25,7 @@ module ODDB
         (@quantity || Dose.new(1)) * (@size || 1) * (@multi || 1)
       end
       def size=(size)
+        size ||= 1
         if(size.to_i == size)
           @size = size.to_i
         else

@@ -58,7 +58,7 @@ class CompareList < View::List
     end
   end
   def query_key
-    :pzn
+    @model.origin.is_a?(Remote::Drugs::Package) ? :uid : :pzn
   end
 end
 class CompareComposite < HtmlGrid::DivComposite

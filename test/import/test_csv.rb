@@ -152,6 +152,48 @@ class TestProductInfos < Test::Unit::TestCase
     assert_equal(5, part8.size)
     assert_equal(Drugs::Dose.new(20, 'ml'), part8.quantity)
   end
+  def test_import_row__tropfen
+    package = Drugs::Package.new
+    package.add_code(Util::Code.new(:cid, "7448548", 'DE'))
+    part = Drugs::Part.new
+    package.add_part(part)
+    package.save
+    sequence = Drugs::Sequence.new
+    package.sequence = sequence
+    product = Drugs::Product.new
+    sequence.product = product
+
+    src = <<-EOS
+"7448548";"TRAMADOL Tropfen";"Rezeptpflichtig";"10";"ml";"Tropfen";9.3193;9.3193;"1";"WINTHROP ARZNEIM.GMBH";"nein";"nein"
+    EOS
+    row = CSV.parse(src, ';').first
+    @import.import_row(row)
+
+    assert_equal(nil, part.multi)
+    assert_equal(1, part.size)
+    assert_equal(Drugs::Dose.new(10, 'ml'), part.quantity)
+  end
+  def test_import_row__tropfen__size
+    package = Drugs::Package.new
+    package.add_code(Util::Code.new(:cid, "7448554", 'DE'))
+    part = Drugs::Part.new
+    package.add_part(part)
+    package.save
+    sequence = Drugs::Sequence.new
+    package.sequence = sequence
+    product = Drugs::Product.new
+    sequence.product = product
+
+    src = <<-EOS
+"7448554";"TRAMADOL Tropfen";"Rezeptpflichtig";"3X10";"ml";"Tropfen";12.0168;12.0168;"1";"WINTHROP ARZNEIM.GMBH";"nein";"nein"
+    EOS
+    row = CSV.parse(src, ';').first
+    @import.import_row(row)
+
+    assert_equal(nil, part.multi)
+    assert_equal(3, part.size)
+    assert_equal(Drugs::Dose.new(10, 'ml'), part.quantity)
+  end
 end
     end
   end

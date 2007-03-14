@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # Html::State::Drugs::Comparison -- de.oddb.org -- 14.02.2007 -- hwyss@ywesee.com
 
-require 'delegate'
+require 'oddb/util/comparison'
 require 'oddb/html/state/global_predefine'
 require 'oddb/html/util/sort'
 require 'oddb/html/view/drugs/compare'
@@ -13,26 +13,10 @@ module ODDB
 class Compare < Global
   include Util::PackageSort
   VIEW = View::Drugs::Compare
-  class Comparison < SimpleDelegator
-    attr_reader :difference
-    def initialize(package, original)
-      @package = package
-      psize = package.size.to_f
-      pprice = package.price(:public).to_f
-      osize = original.size.to_f
-      oprice = original.price(:public).to_f
-      unless((psize * pprice * osize * oprice) == 0)
-        @difference = ((osize * pprice) / (psize * oprice) - 1) * 100
-      end
-      super(package)
-    end
-    def is_a?(mod)
-      super || @package.is_a?(mod)
-    end
-  end
   def init
     original = @model.origin
-    @model.collect! { |package| Comparison.new(package, original) }
+    @model.collect! { |package| 
+      ODDB::Util::Comparison.new(package, original) }
     sort_by(:product)
     sort_by(:difference)
     sort
