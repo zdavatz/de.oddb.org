@@ -156,18 +156,22 @@ module PackageMethods
   end
   def size(model)
     model.parts.collect { |part|
-      parts = [part.size.to_i] 
+      parts = [] 
+			size = part.size.to_i
+			if(size > 1)
+				parts.push(size)
+			end
       multi = part.multi.to_i
       if(multi > 1)
         parts.unshift(multi, 'x')
-      end
-      if(unit = part.unit)
-        parts.push(unit.name.send(@session.language))
       end
       parts.compact!
       if(q = part.quantity)
         parts.push('x') unless parts.empty?
         parts.push(q)
+      end
+      if(unit = part.unit)
+        parts.push(unit.name.send(@session.language))
       end
       parts.join(' ')
     }.join(' + ')

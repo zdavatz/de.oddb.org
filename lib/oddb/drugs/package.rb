@@ -38,7 +38,7 @@ module ODDB
           pdose = doses.first.want(ddose.unit)
           Util::Money.new((ddose / pdose).to_f * (price.to_f / size))
         end
-      rescue RuntimeError
+      rescue RuntimeError, FloatDomainError
       end
       def price(type, country='DE')
         prices.find { |money| money.is_for?(type, country) }
