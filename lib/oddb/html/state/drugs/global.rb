@@ -163,17 +163,17 @@ class Global < State::Global
       case dstype
       when 'company'
         _search_by(:company, query, result)
-      when 'tradename'
-        _search_by(:name, query, result)
-        _search_by(:product, query, result) if result.empty?
       when 'substance'
         _search_by(:substance, query, result)
-      else
+      when 'compare'
         _search_by(:atc, query, result)
         _search_by(:company, query, result) if result.empty?
         _search_by(:substance, query, result) if result.empty?
         _complete(_search_by(:name, query, result)) if result.empty?
         _complete(_search_by(:product, query, result)) if result.empty?
+      else
+        _search_by(:name, query, result)
+        _search_by(:product, query, result) if result.empty?
       end
     end
     if(@session.lookandfeel.enabled?(:remote_databases, false))

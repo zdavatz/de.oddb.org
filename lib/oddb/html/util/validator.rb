@@ -8,7 +8,7 @@ module ODDB
     module Util
 class Validator < SBSM::Validator
   ENUMS = {
-    :dstype    => ['compare', 'tradename', 'substance', 'company'],
+    :dstype    => ['tradename', 'compare', 'substance', 'company'],
     :range     => ("A".."Z").to_a.push('0-9'),
     :sortvalue => [ 'active_agents', 'atc', 'code_festbetragsstufe',
       'code_zuzahlungsbefreit', 'company', 'ddd_prices', 'difference',
