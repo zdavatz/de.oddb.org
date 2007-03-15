@@ -98,6 +98,9 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :package                  => 'Details',
       :packages                 => 'Präparate',
       :package_and_substances   => 'Packungsgrösse und Wirkstoffe',
+      :pager0                   => 'Seite ',
+      :pager1                   => ' von ',
+      :pager2                   => ':',
       :parts                    => 'Teilpackungen',
       :prescription_free        => 'O',
       :prescription_needed      => 'R',
@@ -202,6 +205,9 @@ Medikamenten-Preisvergleichs-Portal Deutschlands.
   end
   def legend_components
     { [0,0] => 'explain_zuzahlungsbefreit' }
+  end
+  def list_limit
+    100
   end
   def price_factor
     tax_factor * currency_factor

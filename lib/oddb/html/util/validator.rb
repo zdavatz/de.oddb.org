@@ -21,6 +21,12 @@ class Validator < SBSM::Validator
              :remote_infos, :search, :sort ]
   NUMERIC = [ :offset, :pzn ]
   STRINGS = [ :query, :uid, :code ]
+  def page(value) 
+    if(num = validate_numeric(:page, value))
+      # pages are 1-based for the human user
+      [num.to_i - 1, 0].max
+    end
+  end
 end
     end
   end

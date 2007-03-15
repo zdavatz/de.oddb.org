@@ -85,6 +85,19 @@ div#navigation a:first-child {
   padding: 0px 4px;
   border-left: 0px;
 }
+div.pager {
+  float: right;
+}
+div.pager a {
+  font-weight: bold;
+  padding: 4px;
+}
+div.pager a:first-child {
+  padding-left: 16px;
+}
+div.pager a.current_page {
+  color: black;
+}
 div.result table { 
   width: 100%;
 }

@@ -15,6 +15,36 @@ module ODDB
   module Html
     module View
       module Drugs
+class Pager < HtmlGrid::Div
+  CSS_CLASS = 'pager'
+  def init
+    super
+    @value = [@lookandfeel.lookup(:pager, @model.page + 1, 
+                                  @model.page_count)]
+    if(@model.page > 0)
+      @value.push(' ', link('<<', @model.page))
+    end
+    1.upto(@model.page_count) { |page|
+      @value.push(' ', link(page.to_s, page))
+    }
+    if(@model.page < (@model.page_count - 1))
+      @value.push(' ', link('>>', @model.page + 2))
+    end
+  end
+  def link(text, pos)
+    link = HtmlGrid::Link.new(:pager, @model, @session, self)
+    link.value = text
+    if(pos != @model.page.next)
+      args = @session.state.direct_event
+      event = args.shift
+      args.push(:page, pos)
+      link.href = @lookandfeel._event_url(event, args)
+    else
+      link.css_class = 'current_page'
+    end
+    link
+  end
+end
 class Packages < View::List
   include PackageMethods
   include ProductMethods
@@ -37,6 +67,7 @@ class Packages < View::List
       link = ddd_link(atc)
     end
     [
+      (Pager.new(@model, @session, self) if @model.page_count > 1),
       sprintf("%s - %i %s", description, model.size,
               @lookandfeel.lookup(:packages)),
       link,
