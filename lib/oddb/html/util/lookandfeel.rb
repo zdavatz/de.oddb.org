@@ -266,6 +266,9 @@ der Schweiz und Deutschland. Alle Preise sind in CHF.
     # Navigation-Links:
     :contact, :home, :products,
   ]
+  RESOURCES = {
+    :logo => 'logo.png', 
+  }
   def currency_factor
     @factor ||= Currency.rate('EUR', 'CHF')
   end
