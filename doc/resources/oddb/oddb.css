@@ -207,7 +207,6 @@ td#offsetheader {
   border-top: 1px solid #7bcf88;
 }
 td#offsetheader a {
-  background-color: #cf9;
   padding: 4px 8px;
   color: black;
   background-color: #7bcf88;
@@ -249,6 +248,16 @@ tr.bg {
 }
 tr.origin td {
   padding-bottom: 10px;
+}
+tr#display-switcher, tr#selected {
+  background-color: #7bcf88;
+}
+tr#display-switcher a {
+  float: right;
+  font-weight: bold;
+}
+tr#selected td {
+  border-top: 1px solid #2ba476;
 }
 tr.zuzahlungsbefreit {
   background-color: #fbfd98;

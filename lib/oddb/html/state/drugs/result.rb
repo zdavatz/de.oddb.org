@@ -11,7 +11,7 @@ module ODDB
       module Drugs
 class Result < Drugs::Global
   class Paginator
-    attr_accessor :page
+    attr_accessor :page, :display
     attr_reader :pages, :model
     def initialize(model)
       @model = model
@@ -23,13 +23,11 @@ class Result < Drugs::Global
       self
     end
     def each(&block)
-      max = @pages.length - 1
-      range = if(@page >= max) 
-                @pages[max]..-1
-              else
-                @pages[@page]...@pages[@page.next]
-              end
-      @model[range].each(&block)
+      if(paged?)
+        paged_each(&block)
+      else
+        @model.each(&block)
+      end
     end
     def method_missing(key, *args, &block)
       @model.send(key, *args, &block)
@@ -39,8 +37,26 @@ class Result < Drugs::Global
       @pages.push(@model.size)
       @page
     end
+    def overflow?
+      @pages.size > 1
+    end
     def page_count
       @pages.size
+    end
+    def paged?
+      @display == 'paged'
+    end
+    def paged_each(&block)
+      max = @pages.length - 1
+      range = if(@page >= max) 
+                @pages[max]..-1
+              else
+                @pages[@page]...@pages[@page.next]
+              end
+      @model[range].each(&block)
+    end
+    def show_details?
+      !overflow? || paged?
     end
   end
   include Util::PackageSort
@@ -58,6 +74,7 @@ class Result < Drugs::Global
     [:search, :query, @model.query, :dstype, @model.dstype]
   end
   def paginate
+    @model.display = @session.cookie_set_or_get(:display)
     if(page = @session.user_input(:page))
       @model.page = page
     end
@@ -67,7 +84,7 @@ class Result < Drugs::Global
     @model = Paginator.new(@model)
     @model.total = @model.size
     while(package = @model.shift)
-      code = (atc = package.atc) ? atc.code : 'Z'
+      code = (atc = package.atc) ? atc.code : 'X'
       (atcs[code] ||= Util::AnnotatedList.new(:atc => atc)).push(package)
     end
     count = 0

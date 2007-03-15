@@ -49,6 +49,8 @@ class Lookandfeel < SBSM::Lookandfeel
       :ddd_price_calculation3   => ' / ',
       :ddd_price_calculation4   => ' ) = <b>EUR ',
       :ddd_price_calculation5   => ' / Tag </b>',
+      :display_grouped          => 'Zur ATC-Übersicht',
+      :display_paged            => 'Alle Präparate anzeigen',
       :dose                     => 'Stärke',
       :drugs                    => 'Medikamente',
       :drugs_atc_codes          => "ATC-Codes, DDD's:",

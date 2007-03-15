@@ -60,18 +60,41 @@ class Packages < View::List
   end
   def atc(model)
     description = @lookandfeel.lookup(:atc_unknown)
-    link = nil
-    if(atc = model.atc)
+    parts = []
+    atc = model.atc
+    if(atc)
       description = sprintf("%s (%s)", 
                             atc.name.send(@session.language), atc.code)
-      link = ddd_link(atc)
+      parts.push ddd_link(atc)
     end
-    [
-      (Pager.new(@model, @session, self) if @model.page_count > 1),
-      sprintf("%s - %i %s", description, model.size,
-              @lookandfeel.lookup(:packages)),
-      link,
-    ].compact
+    txt = sprintf("%s - %i %s", description, model.size,
+                  @lookandfeel.lookup(:packages))
+    if(@model.overflow?) 
+      parts.push atc_opener(atc, txt)
+    else
+      parts.push txt
+    end
+    if(@model.overflow? && @model.paged?)
+      parts.push Pager.new(@model, @session, self)
+    end
+    parts.reverse
+  end
+  def atc_code(model)
+    model ? model.code : 'X'
+  end
+  def atc_opener(model, txt)
+    code = atc_code(model)
+    if(code == @session.persistent_user_input(:code))
+      link = HtmlGrid::Link.new(code, model, @session, self)
+      unless(code == 'X')
+        link.href = @lookandfeel._event_url(:search, [:query, code, 
+                                            :dstype, :compare])
+      end
+      link.value = txt
+      link
+    else
+      variable_link(:code, code, txt, code)
+    end
   end
   def code_prescription(model)
     span = HtmlGrid::Span.new(model, @session, self)
@@ -92,17 +115,32 @@ class Packages < View::List
     end
   end
   def compose_list(model=@model, offset=[0,0])
+    code = @session.persistent_user_input(:code)
+    if(model.overflow?)
+      offset = compose_row(display_switcher(model), offset, 
+                           {'id' => 'display-switcher'})
+    end
     @model.each { |part|
-      offset = compose_subheader(part, offset)
-      offset = super(part, offset)
+      ccode = atc_code(part.atc)
+      offset = compose_subheader(part, offset, 
+                                 model.overflow? && ccode == code)
+      if(@model.show_details? || (ccode == code))
+        offset = super(part, offset)
+      end
     }
   end
-  def compose_subheader(model, offset)
-    @grid.add(atc(model), *offset)
+  def compose_row(content, offset, attrs={})
+    @grid.add(content, *offset)
 		@grid.set_colspan(offset.at(0), offset.at(1), full_colspan)
-    @grid.set_row_attributes({'class' => 'groupheader'}, 
-                             offset.at(1), 1)
+    @grid.set_row_attributes(attrs, offset.at(1), 1)
     resolve_offset(offset, OFFSET_STEP)
+  end
+  def compose_subheader(model, offset, selected=false)
+    attrs = {'class' => 'groupheader'}
+    if(selected)
+      attrs.store('id', 'selected')
+    end
+    compose_row(atc(model), offset, attrs)
   end
   def ddd_link(atc)
     while(atc && !atc.interesting? && (code = atc.parent_code))
@@ -114,6 +152,13 @@ class Packages < View::List
       link.css_class = 'who-ddd square'
       link
     end
+  end
+  def display_switcher(model)
+    disp = @session.cookie_set_or_get(:display)
+    disp = (disp == 'paged') ? 'grouped' : 'paged'
+    link = variable_link(:display, disp, 
+                         @lookandfeel.lookup("display_#{disp}"))
+    link
   end
   def ikscat(model)
     span = HtmlGrid::Span.new(model, @session, self)
@@ -159,6 +204,15 @@ class Packages < View::List
   end
   def query_args
     [:dstype, @model.dstype]
+  end
+  def variable_link(key, value, text, anchor=nil)
+    link = HtmlGrid::Link.new(key, @model, @session, self)
+    args = @session.state.direct_event
+    event = args.shift
+    args.push(key, value)
+    link.href = @lookandfeel._event_url(event, args, anchor)
+    link.value = text
+    link
   end
 end
 class ResultComposite < HtmlGrid::DivComposite
