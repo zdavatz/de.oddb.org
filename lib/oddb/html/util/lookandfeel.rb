@@ -194,7 +194,7 @@ Medikamenten-Preisvergleichs-Portal Deutschlands.
     }
   }
   RESOURCES = {
-    :logo       => 'logo.gif', 
+    :logo       => 'logo.png', 
     :css        => 'oddb.css',
     :javascript => 'javascript',
   }
