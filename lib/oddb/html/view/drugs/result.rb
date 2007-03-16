@@ -21,20 +21,16 @@ class Pager < HtmlGrid::Div
     super
     @value = [@lookandfeel.lookup(:pager, @model.page + 1, 
                                   @model.page_count)]
-    if(@model.page > 0)
-      @value.push(' ', link('<<', @model.page))
-    end
+    @value.push(' ', link('<<', @model.page))
     1.upto(@model.page_count) { |page|
       @value.push(' ', link(page.to_s, page))
     }
-    if(@model.page < (@model.page_count - 1))
-      @value.push(' ', link('>>', @model.page + 2))
-    end
+    @value.push(' ', link('>>', @model.page + 2))
   end
   def link(text, pos)
     link = HtmlGrid::Link.new(:pager, @model, @session, self)
     link.value = text
-    if(pos != @model.page.next)
+    unless([0, @model.page.next, @model.page_count.next].include?(pos))
       args = @session.state.direct_event
       event = args.shift
       args.push(:page, pos)

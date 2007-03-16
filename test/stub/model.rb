@@ -1,8 +1,9 @@
 #!/usr/bin/env ruby
 # Model -- de.oddb.org -- 17.11.2006 -- hwyss@ywesee.com
 
-require 'oddb/drugs/sequence'
-require 'oddb/drugs/product'
+require 'oddb/drugs'
+require 'oddb/business/company'
+require 'oddb/util/code'
 
 class Object
   def metaclass; class << self; self; end; end

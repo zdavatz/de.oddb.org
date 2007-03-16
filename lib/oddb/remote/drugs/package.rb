@@ -33,12 +33,6 @@ class Package < Remote::Object
     case type
     when :ean
       @ean ||= Util::Code.new(:ean, @remote.barcode, 'CH')
-    when :prescription
-      @prescription ||= Util::Code.new(:prescription,
-                                       @remote.ikscat =~ /[AB]/, 'CH')
-    when :zuzahlungsbefreit
-      @zuzahlungsbefreit ||= Util::Code.new(:zuzahlungsbefreit,
-                                            !@remote.sl_entry.nil?, 'CH')
     end
   end
   def company

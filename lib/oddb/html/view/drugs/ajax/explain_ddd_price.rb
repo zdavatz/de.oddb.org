@@ -50,7 +50,7 @@ class ExplainDddPrice < HtmlGrid::Composite
     model[:ddd].dose
   end
   def _ddd_price(model)
-    adjust_price model[:package].ddd_price(model[:ddd])
+    adjust_price model[:package].dose_price(model[:ddd].dose)
   end
   def ddd_price_calculation(model)
     comp = HtmlGrid::Value.new(:ddd_price_calculation, 

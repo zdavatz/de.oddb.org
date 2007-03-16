@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 # Selenium::TestCompare -- de.oddb.org -- 15.02.2007 -- hwyss@ywesee.com
 
-
 $: << File.expand_path('..', File.dirname(__FILE__))
 
 require 'selenium/unit'
@@ -37,7 +36,10 @@ class TestCompare < Test::Unit::TestCase
     product.company = company
     company.save
     sequence = Drugs::Sequence.new
-    sequence.atc = Drugs::Atc.new('N04BB01')
+    atc = Drugs::Atc.new('N04BB01') 
+    atc.name.de = 'Amantadin'
+    sequence.atc = atc
+    atc.save
     sequence.product = product
     composition = Drugs::Composition.new
     sequence.add_composition(composition)
@@ -48,6 +50,7 @@ class TestCompare < Test::Unit::TestCase
     composition.add_active_agent(active_agent)
     galform = Drugs::GalenicForm.new
     galform.description.de = 'Tropfen'
+    galform.group = Drugs::GalenicGroup.new('Tropfen')
     composition.galenic_form = galform
     package = Drugs::Package.new
     code = Util::Code.new(:festbetragsstufe, 3, 'DE')
@@ -61,7 +64,6 @@ class TestCompare < Test::Unit::TestCase
     unit = Drugs::Unit.new
     unit.name.de = 'Ampullen'
     part.unit = unit
-    part.quantity = Drugs::Dose.new(20, 'ml')
     package.name.de = name
     package.sequence = sequence
     package.add_price(Util::Money.new(price, :public, 'DE'))
@@ -95,9 +97,9 @@ class TestCompare < Test::Unit::TestCase
     rsubstance.should_receive(:de).and_return('Amantadinum')
     rgalform = flexmock('Remote Galenic Form')
     rpackage.should_receive(:galenic_form).and_return(rgalform)
-    rgalform.should_receive(:de).and_return('Tropfen')
+    rgalform.should_receive(:de).and_return('Tropfen-Ampullen')
     rgroup = flexmock('Remote Galenic Group')
-    rgroup.should_receive(:de).and_return('Unbekannt')
+    rgroup.should_receive(:de).and_return('Tropfen')
     rgalform.should_receive(:galenic_group).and_return(rgroup)
     @cache.should_receive(:fetch).with(uid.to_i).and_return(rpackage)
     rpackage.should_ignore_missing
@@ -115,7 +117,7 @@ class TestCompare < Test::Unit::TestCase
     type "query", "Amantadin"
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
-    assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Preisvergleich | Open Drug Database", 
+    assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", 
                  get_title
     click 'link=Amantadin by Producer'
     wait_for_page_to_load "30000"
@@ -123,7 +125,7 @@ class TestCompare < Test::Unit::TestCase
     assert_equal "DE - ODDB.org | Medikamente | Preisvergleich | Amantadin by Producer | Open Drug Database", get_title
     assert is_text_present('Amantadin by Producer')
     assert is_text_present('Amantadin 100 mg')
-    assert is_text_present('5 Ampullen x 20 ml')
+    assert is_text_present('5 Ampullen')
     assert is_text_present('6.00')
     assert is_text_present("In unserer Datenbank wurden leider keine Produkte gefunden, die mit diesem Produkt verglichen werden können.")
   end
@@ -183,18 +185,16 @@ class TestCompare < Test::Unit::TestCase
     rother = setup_remote_package('Remoteric', '55556', nil)
     rpackage.should_receive(:comparables).and_return([rother])
 
-
     package = setup_package('Amantadin')
+
     ## switch to mm-flavor
     open "/de/drugs/home/flavor/mm"
     assert_equal "CH | DE - ODDB.org | Medikamente | Home | Open Drug Database", get_title
     type "query", "Amantadin"
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
-    assert_equal "CH | DE - ODDB.org | Medikamente | Suchen | Amantadin | Preisvergleich | Open Drug Database", get_title
+    assert_equal "CH | DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", get_title
   
-    atc = Drugs::Atc.new('N04BB01')
-
     rother.should_receive(:comparables).and_return([rpackage])
     click "link=Remotadin"
     wait_for_page_to_load "30000"
@@ -244,7 +244,7 @@ class TestCompare < Test::Unit::TestCase
     type "query", "Amantadin"
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
-    assert_equal "CH | DE - ODDB.org | Medikamente | Suchen | Amantadin | Preisvergleich | Open Drug Database", get_title
+    assert_equal "CH | DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", get_title
   
     atc = Drugs::Atc.new('N04BB01')
 

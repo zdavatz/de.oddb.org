@@ -38,16 +38,13 @@ module PackageSort
   include Sort
   def sort_proc(key)
     case key
-    when :code_festbetragsstufe, :code_zuzahlungsbefreit
-      Proc.new { |pac| 
-        (code = pac.code(key)) && code.value || '' }
     when :company
       Proc.new { |pac| 
         (multilingual = pac.send(key)) \
           && multilingual.name.send(@session.language) || '' }
     when :ddd_prices
       Proc.new { |pac| 
-        pac.ddds.collect { |ddd| pac.ddd_price(ddd) }.compact
+        pac.ddds.collect { |ddd| pac.dose_price(ddd.dose) }.compact
       }
     when :difference
       nilval = 9999999.0
@@ -59,13 +56,6 @@ module PackageSort
         pac.code(:prescription).to_s, 
         pac.code(:zuzahlunggsbefreit).to_s,
       ] }
-    when :price_difference
-      nilval = ODDB::Util::Money.new(-9999999)
-      Proc.new { |pac| 
-        ((pf = pac.price(:festbetrag)) \
-         && (pp = pac.price(:public)) \
-         && pp - pf) || nilval
-      }
     when :price_public, :price_festbetrag
       nilval = ODDB::Util::Money.new(0)
       key = key.to_s.sub(/^price_/, '').to_sym

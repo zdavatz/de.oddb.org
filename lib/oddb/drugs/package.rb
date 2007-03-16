@@ -32,13 +32,12 @@ module ODDB
           }
         }
       end
-      def ddd_price(ddd)
+      def dose_price(dose)
         if(price = price(:public))
-          ddose = ddd.dose
-          pdose = doses.first.want(ddose.unit)
-          Util::Money.new((ddose / pdose).to_f * (price.to_f / size))
+          pdose = doses.first.want(dose.unit)
+          Util::Money.new((dose / pdose).to_f * (price.to_f / size))
         end
-      rescue RuntimeError, FloatDomainError
+      rescue StandardError
       end
       def price(type, country='DE')
         prices.find { |money| money.is_for?(type, country) }

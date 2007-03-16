@@ -39,11 +39,6 @@ class List < HtmlGrid::List
         sortlink.dojo_title = [ title, link ]
       when "tt_atc"
         link.href = "http://www.whocc.no/atcddd/atcsystem.html"
-      when "tt_code_festbetragsstufe"
-        link.href = "http://www.die-gesundheitsreform.de/glossar/festbetraege.html"
-      when "tt_code_zuzahlungsbefreit"
-        link.value = link.href = "http://www.bkk.de/bkk/powerslave,id,1054,nodeid,.html"
-        sortlink.dojo_title = [ title.strip, link ]
       when "tt_company"
         link.href = "http://www.die-gesundheitsreform.de/presse/pressethemen/avwg/pdf/liste_zuzahlungsbefreite_arzneimittel.pdf"
       when "tt_price_festbetrag"

@@ -5,6 +5,7 @@ $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
 require 'flexmock'
 require 'test/unit'
+require 'oddb/drugs/ddd'
 require 'oddb/drugs/sequence'
 
 module ODDB
@@ -60,6 +61,32 @@ module ODDB
         seq2.add_composition(comp2)
 
         assert_equal([seq1, @sequence], @sequence.comparables)
+      end
+      def test_ddds
+        ddd1 = Drugs::Ddd.new('O')
+        ddd2 = Drugs::Ddd.new('P')
+        atc = flexmock('atc')
+        atc.should_ignore_missing
+        atc.should_receive(:ddds).and_return([ddd1, ddd2])
+        @sequence.atc = atc
+
+        comp1 = flexmock('composition')
+        comp1.should_ignore_missing
+        @sequence.add_composition(comp1)
+        assert_equal([], @sequence.ddds)
+
+        form1 = flexmock('galenic_form')
+        form1.should_ignore_missing
+        comp1.should_receive(:galenic_form).and_return(form1)
+        assert_equal([], @sequence.ddds)
+
+        group1 = flexmock('galenic_group')
+        group1.should_ignore_missing
+        form1.should_receive(:group).and_return(group1)
+        assert_equal([], @sequence.ddds)
+
+        group1.should_receive(:administration).and_return('O')
+        assert_equal([ddd1], @sequence.ddds)
       end
       def test_include
         sub1 = flexmock('substance')

@@ -7,6 +7,7 @@ require 'flexmock'
 require 'test/unit'
 require 'oddb/drugs/package'
 require 'oddb/drugs/dose'
+require 'oddb/util/money'
 
 module ODDB
   module Drugs
@@ -104,6 +105,39 @@ module ODDB
         assert_equal([Dose.new(10, 'mg'), Dose.new(20, 'mg')], 
                      @package.comparable_size)
       end
+      def test_dose_price
+        doses = []
+
+        sequence = flexmock('sequence')
+        sequence.should_receive(:add_package).with(@package)
+        sequence.should_receive(:save)
+        sequence.should_receive(:compositions).and_return([])
+        sequence.should_receive(:doses).and_return(doses)
+        @package.sequence = sequence
+
+        dose = Drugs::Dose.new(1, 'g')
+        assert_nil(@package.dose_price(nil))
+        assert_nil(@package.dose_price(dose))
+
+        price = Util::Money.new(10, :public, 'DE')
+        assert(price.is_for?(:public, 'DE'))
+        @package.add_price(price)
+        assert_nil(@package.dose_price(nil))
+        assert_nil(@package.dose_price(dose))
+
+        doses.push(Drugs::Dose.new(10, 'mg'))
+        assert_nil(@package.dose_price(nil))
+        assert_nil(@package.dose_price(dose))
+
+        part1 = flexmock("part")
+        part1.should_receive(:comparable_size)\
+          .and_return(Dose.new(2))
+        part1.should_ignore_missing
+        @package.add_part(part1)
+        expected = Util::Money.new(500, :public)
+        assert_nil(@package.dose_price(nil))
+        assert_equal(expected, @package.dose_price(dose))
+      end
       def test_sequence_writer
         part = flexmock('Part')
         sequence = flexmock('Sequence')
@@ -125,11 +159,11 @@ module ODDB
       def test_size
         assert_equal(0, @package.size)
         part1 = flexmock("part")
-        part1.should_receive(:size).and_return(1)
+        part1.should_receive(:comparable_size).and_return(Dose.new(1))
         @package.add_part(part1)
         assert_equal(1, @package.size)
         part2 = flexmock("part")
-        part2.should_receive(:size).and_return(2)
+        part2.should_receive(:comparable_size).and_return(Dose.new(2))
         @package.add_part(part2)
         assert_equal(3, @package.size)
       end

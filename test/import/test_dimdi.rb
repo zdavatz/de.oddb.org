@@ -303,8 +303,10 @@ end
 class TestZuzahlungsBefreiung < Test::Unit::TestCase
   include FlexMock::TestCase
   def setup
+    Drugs::Atc.instances.clear
     Drugs::Package.instances.clear
     Drugs::Product.instances.clear
+    Drugs::Sequence.instances.clear
     Drugs::Substance.instances.clear
     Business::Company.instances.clear
     @data_dir = File.expand_path('data', File.dirname(__FILE__))

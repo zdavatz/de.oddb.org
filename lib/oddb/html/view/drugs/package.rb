@@ -61,7 +61,7 @@ module PackageMethods
   def ddd_prices(model)
     ddds = []
     model.ddds.each_with_index { |ddd, idx|
-      if(price = adjust_price model.ddd_price(ddd))
+      if(price = adjust_price model.dose_price(ddd.dose))
         span = HtmlGrid::Span.new(model, @session, self)
         span.value = price
         code = model.code(:cid)
@@ -100,10 +100,8 @@ module PackageMethods
       price
     elsif(price && (code = model.code(:cid)))
       span = HtmlGrid::Span.new(model, @session, self)
-      @adjust_price ||= 0
-      @adjust_price += 1
       span.value = price
-      span.css_id = "adjust_price#{@adjust_price}"
+      span.css_id = "explain_price#{code}"
       span.dojo_tooltip = @lookandfeel._event_url(:explain_price,
                                                   [:pzn, code])
       span.label = true

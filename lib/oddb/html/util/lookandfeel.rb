@@ -208,9 +208,6 @@ Medikamenten-Preisvergleichs-Portal Deutschlands.
   def legend_components
     { [0,0] => 'explain_zuzahlungsbefreit' }
   end
-  def list_limit
-    100
-  end
   def price_factor
     tax_factor * currency_factor
   end
@@ -257,7 +254,7 @@ class LookandfeelMeineMedikamente < LookandfeelWrapper
       :html_owner             => 'Open Drug Database',
       :price_local            => 'Preis Schweiz (CHF)',
       :price_db               => 'Preis Deutschland (CHF)',
-      :screencast_url         => 'http://www.youtube.com/watch?v=sWmDAjjm7cU',
+      :screencast_url         => 'http://www.youtube.com/watch?v=8lWYIzjlOe0',
       :tax_add                => 'MwSt. Schweiz (7.6%)',
       :tax_sub                => 'MwSt. Deutschland (19%)',
       :tt_price_public        => 'Preis: Apothekenverkaufspreis inkl. MwSt. in CHF',

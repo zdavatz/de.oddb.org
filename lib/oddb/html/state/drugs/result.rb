@@ -74,6 +74,9 @@ class Result < Drugs::Global
     [:search, :query, @model.query, :dstype, @model.dstype]
   end
   def paginate
+    if(@session.user_input(:page))
+      @session.set_cookie_input(:display, 'paged')
+    end
     @model.display = @session.cookie_set_or_get(:display)
     if(page = @session.user_input(:page))
       @model.page = page
@@ -87,12 +90,12 @@ class Result < Drugs::Global
       code = (atc = package.atc) ? atc.code : 'X'
       (atcs[code] ||= Util::AnnotatedList.new(:atc => atc)).push(package)
     end
-    count = 0
-    limit = @session.lookandfeel.list_limit
+    count = 1
+    limit = @session.pagelength
     atcs.sort.each { |code, array|
       if(count > limit)
         @model.next_page!
-        count = 0
+        count = 1
       end
       @model.push(array)
       count += array.size

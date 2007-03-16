@@ -156,6 +156,16 @@ class TestGuidelines < Test::Unit::TestCase
       @import.login(agent)
     }
   end
+  def test_import
+    stub = flexstub(@import)
+    stub.should_receive(:login).with('agent')
+    %w{A B C D G H J L M N P R S V}.each { |level|
+      stub.should_receive(:import_code).with('agent', level)\
+        .times(1).and_return { assert true }
+    }
+    res = @import.import('agent')
+    assert_equal(@import.report, res)
+  end
   def test_import_code__A
     url = "http://www.whocc.no/atcddd/database/index.php?query=A&showdescription=yes"
     html = File.read(File.join(@html_path, 'A.html'))
@@ -267,6 +277,9 @@ The DDDs for diuretics are based on monotherapy. Most diuretics are used both fo
 The DDDs for combinations correspond to the DDD for the diuretic component, except for ATC group C03E, see comments under this level.
     EOS
     assert_equal(expected.chop, atc.ddd_guidelines.en)
+  end
+  def test_report
+    assert_instance_of(Array, @import.report)
   end
 end
 class TestCodeHandler < Test::Unit::TestCase

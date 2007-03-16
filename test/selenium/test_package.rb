@@ -97,9 +97,9 @@ class TestPackage < Test::Unit::TestCase
     @selenium.open "/de/drugs/package/pzn/12345"
     assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", @selenium.get_title
     @selenium.type "query", "Amantadin"
-    @selenium.select "dstype", "Markenname"
+    @selenium.select "dstype", "Preisvergleich"
     @selenium.wait_for_page_to_load "30000"
-    assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", 
+    assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Preisvergleich | Open Drug Database", 
                  @selenium.get_title
   end
 end
