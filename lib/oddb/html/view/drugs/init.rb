@@ -10,7 +10,7 @@ module ODDB
       module Drugs
 class Init < Template
   CONTENT = Search
-  CSS_ID_MAP = ['head', 'home-search', 'foot']
+  CSS_ID_MAP = ['head', 'home-search', 'navigation', 'foot']
   HEAD = WelcomeHead
 end
       end

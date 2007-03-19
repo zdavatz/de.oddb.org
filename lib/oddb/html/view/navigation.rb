@@ -6,21 +6,52 @@ require 'htmlgrid/div'
 module ODDB
   module Html
     module View
-class Navigation < HtmlGrid::Div
+class Links < HtmlGrid::Component
   def init
     super
-    @value = @lookandfeel.navigation.collect { |event|
+    @value = links(link_keys)
+  end
+  def links(keys)
+    current = @session.direct_event
+    keys.collect { |event|
       link = HtmlGrid::Link.new(event, @model, @session, self) 
       if(self.respond_to?(event))
         self.send(event, link)
-      elsif(@session.direct_event != event)
+      elsif(current != event)
         link.href = @lookandfeel._event_url(event)
       end
       link
     }
   end
+end
+class CountryLinks < Links
+  def link_keys
+    country, = @session.server_name.split('.')
+    ptrn = /_#{country}$/
+    [:oddb_ch, :oddb_de, :oddb_chde].reject { |key| 
+      ptrn.match(key.to_s) }
+  end
+  def oddb_ch(link)
+    link.href = "http://ch.oddb.org/de/"
+  end
+  def oddb_chde(link)
+    link.href = "http://chde.oddb.org/"
+  end
+  def oddb_de(link)
+    link.href = "http://de.oddb.org/"
+  end
+end
+class HelpLinks < Links
   def contact(link)
     link.href = "http://wiki.oddb.org/wiki.php/ODDB/Kontakt"
+  end
+  def link_keys
+    [:contact, :home]
+  end
+end
+class Navigation < Links
+  def link_keys
+    @lookandfeel.navigation
   end
 end
     end

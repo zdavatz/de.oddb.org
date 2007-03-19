@@ -38,21 +38,27 @@ div#explain-compare {
   font-weight: bold; 
   font-style: italic; 
 }
-div#foot, div#title, th {
-  background-color: #2ba476;
-  color: white;
-  padding: 4px;
+div#foot {
+  background-color: #cf9;
+  padding: 4px 0px 4px 4px;
 }
 div#foot a:link,  
 div#foot a:visited,
 th a:link, th a:visited {
-  color: white;
+  color: blue;
 }
 div#foot a,
 div#foot a:visited:hover,
 div#foot a:link:hover,
 th a, th a:visited:hover, th a:link:hover {
-  color: blue;
+  color: black;
+}
+div#foot div.navigation a {
+  padding: 0px 4px;
+  border-left: 1px solid black;
+}
+div#foot div.navigation a:first-child {
+  border-left: 0px;
 }
 div#head {
   margin-bottom: 30px;
@@ -74,16 +80,34 @@ div#legend, tr.groupheader, div.groupheader {
 div#legend table {
   margin: 2px;
 }
-div#navigation {
+div.navigation {
   float: right;
 }
-div#navigation a {
+div.navigation a {
+  padding: 0px 4px;
+}
+div#navigation {
+  background-color: #2ba476;
+  color: white;
+  padding: 4px 0px;
+}
+div#navigation div.links a {
   padding: 0px 4px;
   border-left: 1px solid white;
 }
-div#navigation a:first-child {
-  padding: 0px 4px;
+div#navigation div.links a:first-child {
   border-left: 0px;
+}
+div#navigation a:link,  
+div#navigation a:visited,
+th a:link, th a:visited {
+  color: white;
+}
+div#navigation a,
+div#navigation a:visited:hover,
+div#navigation a:link:hover,
+th a, th a:visited:hover, th a:link:hover {
+  color: blue;
 }
 div.pager {
   float: right;
@@ -114,6 +138,11 @@ div#result-search input[type=text] {
 }
 div#snapback {
   padding: 3px 4px;
+}
+div#title, th {
+  background-color: #2ba476;
+  color: white;
+  padding: 4px;
 }
 div#welcome {
   margin-top: 75px;

@@ -203,7 +203,7 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     assert is_text_present('Amantadin by Producer')
     mouse_over 'package_infos12345'
     assert !60.times { 
-      break if (is_element_present("//body/div[4]/table") rescue false)
+      break if (is_element_present("//body/div[5]/table") rescue false)
       sleep 1 
     }
     assert is_text_present('Festbetragsgruppe')
@@ -215,7 +215,7 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     assert is_text_present('Nein')
     mouse_over 'ddd_price_12345.0'
     assert !60.times { 
-      break if (is_element_present("//body/div[5]/table") rescue false)
+      break if (is_element_present("//body/div[6]/table") rescue false)
       sleep 1 
     }
     assert is_text_present('Verabreichungsform')
@@ -509,14 +509,14 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     assert_match(/^Remotadin/, get_text("cid_1"))
     mouse_over 'package_infos0.55555'
     assert !60.times { 
-      break if (is_element_present("//body/div[4]/table") rescue false)
+      break if (is_element_present("//body/div[5]/table") rescue false)
       sleep 1 
     }
     assert is_text_present('B : Abgabe auf ärztliche Verschreibung')
 
     mouse_over 'explain_price12345'
     assert !60.times { 
-      break if (is_element_present("//body/div[5]/table") rescue false)
+      break if (is_element_present("//body/div[6]/table") rescue false)
       sleep 1 
     }
     assert is_text_present('Preis Deutschland (CHF)')
@@ -531,7 +531,7 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     assert_match(/^Remotadin/, get_text("cid_2"))
     mouse_over 'package_infos0.55556'
     assert !60.times { 
-      break if (is_element_present("//body/div[6]/table") rescue false)
+      break if (is_element_present("//body/div[7]/table") rescue false)
       sleep 1 
     }
     assert is_text_present('D : Abgabe nach Fachberatung')

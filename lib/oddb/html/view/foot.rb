@@ -9,10 +9,10 @@ module ODDB
     module View
 class Foot < HtmlGrid::DivComposite
   COMPONENTS = { 
-    [0,0] => Navigation, 
+    [0,0] => HelpLinks, 
     [0,1] => :copyright, 
   }
-  CSS_ID_MAP = ['navigation']
+  CSS_MAP = ['navigation', 'links']
   def copyright(model)
     [ lgpl_license(model), ' ', Time.now.year, ', ',
       ywesee_link(model), ', ', oddb_version(model) ]
@@ -33,6 +33,13 @@ class Foot < HtmlGrid::DivComposite
     link.href = 'http://www.ywesee.com'
     link
   end
+end
+class NavigationFoot < HtmlGrid::DivComposite
+  COMPONENTS = { 
+    [0,0] => Navigation, 
+    [0,1] => CountryLinks, 
+  }
+  CSS_MAP = ['navigation', 'links']
 end
     end
   end

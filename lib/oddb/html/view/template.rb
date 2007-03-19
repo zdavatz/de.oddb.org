@@ -24,9 +24,10 @@ class Template < HtmlGrid::DivTemplate
   COMPONENTS = {
     [0,0] => :head,
     [0,1] => :content,  
-    [0,2] => :foot,
+    [0,2] => NavigationFoot,  
+    [0,3] => :foot,
   }
-  CSS_ID_MAP = ['head', 'content', 'foot']
+  CSS_ID_MAP = ['head', 'content', 'navigation', 'foot']
   DOJO_DEBUG = false
   DOJO_REQUIRE = [ 'dojo.widget.Tooltip' ]
   DOJO_PARSE_WIDGETS = true

@@ -47,7 +47,7 @@ class Global < SBSM::State
     end
   end
   def navigation
-    [:contact, :home]
+    []
   end
 end
     end
