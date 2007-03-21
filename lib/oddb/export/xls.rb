@@ -65,7 +65,7 @@ class ComparisonDeCh
         x.active_agents.first.substance.name.de },
       remote.atc.code,
       remote.ikscat,
-      remote.code(:zuzahlungsbefreit) ? 'SL' : '',
+      remote.sl_entry ? 'SL' : '',
       sprintf("%+4.2f", adjust_price(comparison.absolute)),
       sprintf("%+4.2f%%", comparison.difference),
       sprintf("%4.2f", comparison.factor),
