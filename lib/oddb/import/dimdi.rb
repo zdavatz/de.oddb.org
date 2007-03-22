@@ -535,6 +535,8 @@ module Dimdi
       @count = 0
       @created = 0
       @created_companies = 0
+      @created_products = 0
+      @created_sequences = 0
       @created_substances = 0
       @deleted = 0
       @existing = 0
@@ -693,6 +695,7 @@ module Dimdi
         search.sub!(/(\s|^)\S*$/, '')
       end
       if(product.nil?)
+        @created_products += 1
         product = Drugs::Product.new
         product.name.de = name
         product.save
@@ -717,6 +720,7 @@ module Dimdi
           && (doses.empty? || doses.inject { |a, b| a + b } == dose)
       } 
       if(sequence.nil?)
+        @created_sequences += 1
         sequence = Drugs::Sequence.new
         composition = Drugs::Composition.new
         substances.each_with_index { |sub, idx|
@@ -789,6 +793,8 @@ module Dimdi
         sprintf("Visited  %3i existing Substances", 
                 @existing_substances),
         sprintf("Created  %3i new FB-Entries", @created),
+        sprintf("Created  %3i new Products", @created_products),
+        sprintf("Created  %3i new Sequences", @created_sequences),
         sprintf("Created  %3i new Companies", @created_companies),
         sprintf("Created  %3i new Substances", @created_substances),
         sprintf("Assigned %3i Companies", @assigned_companies),
