@@ -125,8 +125,8 @@ class TestComparisonDeCh < Test::Unit::TestCase
     expected = [ "Amantadin by Producer (Remotadin)", "100 ml", "8.68",
                  "Producer AG (Producer (Schweiz) AG)", "12345",
                  "7680555550012", "Tropfen", "100 mg", 
-                 "Amantadin (Amantadinum)", "N04BB01", "B", "", "-3.32",
-                 "-27.66%", "1.00" ]
+                 "Amantadin (Amantadinum)", "N04BB01", "B", "SL", 
+                 "-3.32", "-27.66%", "1.00" ]
     sheet.should_receive(:write).with(1,0, Array).times(1)\
       .and_return { |row, col, cells|
       assert_equal(expected, cells)

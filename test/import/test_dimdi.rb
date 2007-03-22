@@ -103,7 +103,6 @@ class TestGalenicForm < Test::Unit::TestCase
     form3 = setup_form('Retardtabletten')
     form4 = setup_form('Retardkapseln')
     @import.postprocess
-    assert_equal(5, Drugs::GalenicGroup.instances.size)
     group1 = Drugs::GalenicGroup.find_by_name('Tabletten')
     assert_equal(group1, form1.group)
     assert_equal(group1, form2.group)
@@ -329,8 +328,8 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_nil(existing.code(:zuzahlungsbefreit))
     report = @import.import(input)
     assert_instance_of(Array, report)
-    assert_equal(1, Drugs::Product.instances.size)
-    assert_equal([product], Drugs::Product.instances)
+    assert_equal(3, Drugs::Product.instances.size)
+    assert_equal(true, Drugs::Product.instances.include?(product))
     assert_equal(1, product.sequences.size)
     sequence = product.sequences.first
     assert_equal(atc, sequence.atc)
@@ -349,7 +348,7 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_equal(true, code.value)
     confirmed = @import.instance_variable_get('@confirmed_pzns')
     assert_equal(1, confirmed.size)
-    assert_equal(1, Business::Company.instances.size)
+    assert_equal(2, Business::Company.instances.size)
     comp = Business::Company.instances.first
     assert_equal('Ratiopharm GmbH', comp.name.de)
 
@@ -358,8 +357,8 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     input = open(@path)
     report = @import.import(input)
     assert_instance_of(Array, report)
-    assert_equal(1, Drugs::Product.instances.size)
-    assert_equal([product], Drugs::Product.instances)
+    assert_equal(3, Drugs::Product.instances.size)
+    assert_equal(true, Drugs::Product.instances.include?(product))
     assert_equal(atc, sequence.atc)
     assert_equal([sequence], atc.sequences)
     assert_equal(1, product.sequences.size)
@@ -379,7 +378,7 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_equal(true, code.value)
     confirmed = @import.instance_variable_get('@confirmed_pzns')
     assert_equal(1, confirmed.size)
-    assert_equal(1, Business::Company.instances.size)
+    assert_equal(2, Business::Company.instances.size)
     comp = Business::Company.instances.first
     assert_equal('Ratiopharm GmbH', comp.name.de)
   end
@@ -399,8 +398,8 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_nil(existing.code(:zuzahlungsbefreit))
     report = @import.import(input)
     assert_instance_of(Array, report)
-    assert_equal(1, Drugs::Product.instances.size)
-    assert_equal([product], Drugs::Product.instances)
+    assert_equal(3, Drugs::Product.instances.size)
+    assert_equal(true, Drugs::Product.instances.include?(product))
     assert_equal(1, product.sequences.size)
     sequence = product.sequences.first
     assert_equal(atc, sequence.atc)
@@ -423,8 +422,8 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     input = open(@path)
     report = @import.import(input)
     assert_instance_of(Array, report)
-    assert_equal(1, Drugs::Product.instances.size)
-    assert_equal([product], Drugs::Product.instances)
+    assert_equal(3, Drugs::Product.instances.size)
+    assert_equal(true, Drugs::Product.instances.include?(product))
     assert_equal(1, product.sequences.size)
     sequence = product.sequences.first
     assert_equal(atc, sequence.atc)
@@ -472,8 +471,8 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_nil(existing.code(:zuzahlungsbefreit))
     report = @import.import(input)
     assert_instance_of(Array, report)
-    assert_equal(1, Drugs::Product.instances.size)
-    assert_equal([product], Drugs::Product.instances)
+    assert_equal(3, Drugs::Product.instances.size)
+    assert_equal(true, Drugs::Product.instances.include?(product))
     assert_equal(1, product.sequences.size)
     sequence = product.sequences.first
     assert_equal(atc, sequence.atc)
@@ -496,8 +495,8 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     input = open(@path)
     report = @import.import(input)
     assert_instance_of(Array, report)
-    assert_equal(1, Drugs::Product.instances.size)
-    assert_equal([product], Drugs::Product.instances)
+    assert_equal(3, Drugs::Product.instances.size)
+    assert_equal(true, Drugs::Product.instances.include?(product))
     assert_equal(1, product.sequences.size)
     sequence = product.sequences.first
     assert_equal(atc, sequence.atc)
@@ -525,9 +524,9 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     active_agent = Drugs::ActiveAgent.new(substance, 50)
     composition.add_active_agent(active_agent)
     row = [ 
-     "Fluvoxamin", "0227488", "FLUVOHEXAL 50MG FILMTABL",
-     "Filmtabletten", 20, "St", "HEXAL AG", "15.21", 
-     "Fluvoxamin hydrogenmaleat", 50, "mg",
+      "Fluvoxamin", "0227488", "FLUVOHEXAL 50MG FILMTABL",
+      "Filmtabletten", 20, "St", "HEXAL AG", "15.21", 
+      "Fluvoxamin hydrogenmaleat", 50, "mg",
     ].collect { |data|
       mock = flexmock(data.to_s)
       mock.should_receive(:to_s).and_return(data.to_s)
@@ -535,6 +534,7 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     }
     @import.import_active_agent(sequence, row, 8)
     assert_equal([active_agent], composition.active_agents)
+    assert_equal(Drugs::Dose.new(50, 'mg'), active_agent.dose)
   end
   def test_import_active_agent__correct_dose
     sequence = Drugs::Sequence.new
@@ -545,9 +545,9 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     active_agent = Drugs::ActiveAgent.new(substance, nil)
     composition.add_active_agent(active_agent)
     row = [ 
-     "Fluvoxamin", "0227488", "FLUVOHEXAL 50MG FILMTABL",
-     "Filmtabletten", 20, "St", "HEXAL AG", "15.21", 
-     "Fluvoxamin hydrogenmaleat", 50, "mg",
+      "Fluvoxamin", "0227488", "FLUVOHEXAL 50MG FILMTABL",
+      "Filmtabletten", 20, "St", "HEXAL AG", "15.21", 
+      "Fluvoxamin hydrogenmaleat", 50, "mg",
     ].collect { |data|
       mock = flexmock(data.to_s)
       mock.should_receive(:to_s).and_return(data.to_s)
@@ -555,6 +555,34 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     }
     @import.import_active_agent(sequence, row, 8)
     assert_equal([active_agent], composition.active_agents)
+    assert_equal(Drugs::Dose.new(50, 'mg'), active_agent.dose)
+  end
+  def test_import_active_agent__two_agents
+    sequence = Drugs::Sequence.new
+    substance1 = Drugs::Substance.new
+    substance1.name.de = u"Levodopa"
+    substance1.save
+    substance2 = Drugs::Substance.new
+    substance2.name.de = u"Carbidopa"
+    substance2.save
+    row = [ 
+      "Levodopa und Decarboxylasehemmer", "0126008", 
+      "LEVODOPA COMP C STADA 100", "Tabletten", 30, "St", 
+      "STADAPHARM GMBH", 13.8, "Carbidopa-1-Wasser", 27, "mg", 
+      "Levodopa", 100, "mg",
+    ].collect { |data|
+      mock = flexmock(data.to_s)
+      mock.should_receive(:to_s).and_return(data.to_s)
+      mock
+    }
+    @import.import_active_agent(sequence, row, 8)
+    @import.import_active_agent(sequence, row, 11)
+    acts = sequence.active_agents
+    assert_equal(2, acts.size)
+    assert_equal("Carbidopa-1-Wasser", acts.first.substance.name.de)
+    assert_equal(Drugs::Dose.new(27, 'mg'), acts.first.dose)
+    assert_equal("Levodopa", acts.last.substance.name.de)
+    assert_equal(Drugs::Dose.new(100, 'mg'), acts.last.dose)
   end
   def test_postprocess
     product = Drugs::Product.new

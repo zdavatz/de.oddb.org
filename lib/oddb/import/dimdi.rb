@@ -105,6 +105,11 @@ module Dimdi
         'Retard-Tabletten'=> [ 'O', 'Retardtabletten', 
                                'Retardfilmtabletten', 'Retardkapseln',
                                'Retarddragees' ],
+        'Salben'          => [ 'T', 'Creme', 'Gel', 'Lotion', 'Salbe' ],
+        'Suppositorien'   => [ 'R', 'Suppositorien' ], 
+        'Vaginal-Produkte'=> [ 'V', 'Vaginalcreme', 'Vaginalovula', 
+                               'Vaginaltabletten', 
+                               'Vaginalsuppositorien']
       }.each { |groupname, formnames|
         group = Drugs::GalenicGroup.find_by_name(groupname) \
           || Drugs::GalenicGroup.new(groupname)
@@ -179,7 +184,8 @@ module Dimdi
       end
       if(candidates.size == 1)
         atc = candidates.first
-        if(sequence.atc != atc)
+        if(sequence.atc.nil? \
+           || (sequence.atc != atc && atc.level >= sequence.atc.level))
           sequence.atc = atc
           sequence.save
         end
@@ -539,53 +545,53 @@ module Dimdi
       @count += 1
       ## for now: ignore packages that can not be linked to an 
       #  existing product by PZN
-      pzn = u(cell(row, 1).to_i.to_s)
-      if(package = Drugs::Package.find_by_code(:type => 'cid', 
-                                               :value => pzn, 
-                                               :country => 'DE'))
-        @confirmed_pzns.store(package.code(:pzn), true)
-        if(code = package.code(:zuzahlungsbefreit))
-          if(code.value)
-            @existing += 1
-          else
-            @created += 1
-          end
-          code.value = true
+      package = import_package(row)
+      @confirmed_pzns.store(package.code(:pzn), true)
+      if(code = package.code(:zuzahlungsbefreit))
+        if(code.value)
+          @existing += 1
         else
           @created += 1
-          code = Util::Code.new(:zuzahlungsbefreit, true, 'DE')
-          package.add_code(code)
         end
-        sequence = package.sequence
-        product = sequence.product
-        atc_name = cell(row, 0)
-        candidates = Drugs::Atc.search_by_exact_name(atc_name)
-        if(candidates.size == 1)
-          sequence.atc = candidates.first
+        code.value = true
+      else
+        @created += 1
+        code = Util::Code.new(:zuzahlungsbefreit, true, 'DE')
+        package.add_code(code)
+      end
+      sequence = package.sequence
+      product = sequence.product
+      atc_name = cell(row, 0)
+      candidates = Drugs::Atc.search_by_exact_name(atc_name)
+      if(candidates.size == 1)
+        atc = candidates.first
+        if(sequence.atc.nil? || \
+           (sequence.atc != atc && atc.level >= sequence.atc.level))
+          sequence.atc = atc
           sequence.save
         end
-        part = package.parts.first
-        mnum, qnum = cell(row, 4).to_s.split('X')
-        if(qnum.nil?)
-          mnum, qnum = qnum, mnum
-        end
-        sunit = cell(row, 5)
-        if(sunit == "ml")
-          part.quantity = Drugs::Dose.new(qnum, sunit)
-          part.size = mnum
-          part.unit = nil
-          part.save
-        end
-        if(company = import_company(row))
-          product.company = company
-          product.save
-        end
-        import_active_agent(sequence, row, 8)
-        import_active_agent(sequence, row, 11)
-        import_active_agent(sequence, row, 14)
-        package.save
       end
-    end
+      part = package.parts.first
+      mnum, qnum = cell(row, 4).to_s.split('X')
+      if(qnum.nil?)
+        mnum, qnum = qnum, mnum
+      end
+      sunit = cell(row, 5)
+      if(sunit == "ml")
+        part.quantity = Drugs::Dose.new(qnum, sunit)
+        part.size = mnum
+        part.unit = nil
+        part.save
+      end
+      if(company = import_company(row))
+        product.company = company
+        product.save
+      end
+      import_active_agent(sequence, row, 8)
+      import_active_agent(sequence, row, 11)
+      import_active_agent(sequence, row, 14)
+      package.save
+    end 
     def import_active_agent(sequence, row, offset)
       name = cell(row, offset)
       sane = sanitize_substance_name(name) 
@@ -595,11 +601,12 @@ module Dimdi
       ## check for slightly different names
       if(composition \
         && (agent = composition.active_agents.find { |act|
-          act.dose == dose \
-            && act.substance.name.all.any? { |sub| 
-            sane = sanitize_substance_name(sub) 
+          act.substance.name.all.any? { |sub| 
+            sane == sanitize_substance_name(sub) 
           }
         }))
+        agent.dose = dose
+        agent.save
         substance = agent.substance
         substance.name.synonyms.push(name)
         substance.save
@@ -649,6 +656,81 @@ module Dimdi
         end
         company
       end
+    end
+    def import_galenic_form(row)
+      Drugs::GalenicForm.find_by_code(:value   => cell(row, 3),
+                                      :type    => "galenic_form",
+                                      :country => 'DE')
+    end
+    def import_package(row)
+      pzn = u(cell(row, 1).to_i.to_s)
+      package = Drugs::Package.find_by_code(:type => 'cid', 
+                                            :value => pzn, 
+                                            :country => 'DE')
+      if(package.nil?)
+        package = Drugs::Package.new
+        package.add_code(Util::Code.new(:cid, pzn, 'DE'))
+        part = Drugs::Part.new
+        part.package = package
+        part.save
+        product = import_product(package, row)
+        package.sequence = import_sequence(product, package, row)
+        package.save
+      end
+      package
+    end
+    def import_product(package, row)
+      name = capitalize_all(cell(row, 2))
+      search = name.dup
+      product = nil
+      candidates = []
+      until(product || search.empty? || candidates.size > 1)
+        candidates = Drugs::Product.search_by_name(search)
+        if(candidates.size == 1)
+          product = candidates.first
+          product.name.synonyms.push(name)
+        end
+        search.sub!(/(\s|^)\S*$/, '')
+      end
+      if(product.nil?)
+        product = Drugs::Product.new
+        product.name.de = name
+        product.save
+      end
+      product
+    end
+    def import_sequence(product, package, row)
+      substances = []
+      doses = []
+      [8, 11, 14].each { |idx| 
+        if(name = cell(row, idx)) 
+          substances.push(import_substance(name))
+          doses.push(Drugs::Dose.new(cell(row, idx + 1), 
+                                     cell(row, idx + 2)))
+        end
+      }.compact
+      galform = import_galenic_form(row)
+      sequence = product.sequences.find { |seq|
+        doses = seq.doses
+        seq.galenic_forms == [galform] \
+          && seq.substances == substances \
+          && (doses.empty? || doses.inject { |a, b| a + b } == dose)
+      } 
+      if(sequence.nil?)
+        sequence = Drugs::Sequence.new
+        composition = Drugs::Composition.new
+        substances.each_with_index { |sub, idx|
+          act = Drugs::ActiveAgent.new(sub, doses.at(idx))
+          composition.add_active_agent(act)
+          act.save
+        }
+        composition.galenic_form = galform
+        composition.save
+        sequence.add_composition(composition)
+        sequence.product = product
+        sequence.save
+      end
+      sequence
     end
     def import_substance(substance_name)
       if(substance_name)
