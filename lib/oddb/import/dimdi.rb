@@ -545,8 +545,6 @@ module Dimdi
     end
     def import_row(row)
       @count += 1
-      ## for now: ignore packages that can not be linked to an 
-      #  existing product by PZN
       package = import_package(row)
       @confirmed_pzns.store(package.code(:cid), true)
       if(code = package.code(:zuzahlungsbefreit))
@@ -583,8 +581,11 @@ module Dimdi
         part.quantity = Drugs::Dose.new(qnum, sunit)
         part.size = mnum
         part.unit = nil
-        part.save
+      else
+        part.size = qnum || part.size
+        part.unit = Drugs::Unit.find_by_name(cell(row, 3)) || part.unit
       end
+      part.save
       if(company = import_company(row))
         product.company = company
         product.save

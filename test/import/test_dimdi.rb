@@ -347,7 +347,7 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_instance_of(Util::Code, code)
     assert_equal(true, code.value)
     confirmed = @import.instance_variable_get('@confirmed_pzns')
-    assert_equal(1, confirmed.size)
+    assert_equal(3, confirmed.size)
     assert_equal(2, Business::Company.instances.size)
     comp = Business::Company.instances.first
     assert_equal('Ratiopharm GmbH', comp.name.de)
@@ -377,7 +377,7 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_instance_of(Util::Code, code)
     assert_equal(true, code.value)
     confirmed = @import.instance_variable_get('@confirmed_pzns')
-    assert_equal(1, confirmed.size)
+    assert_equal(3, confirmed.size)
     assert_equal(2, Business::Company.instances.size)
     comp = Business::Company.instances.first
     assert_equal('Ratiopharm GmbH', comp.name.de)
@@ -615,20 +615,20 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     assert_equal(company, product.company)
   end
   def test_postprocess__prune_packages
-    pzn1 = Util::Code.new(:pzn, '12345', 'DE')
+    pzn1 = Util::Code.new(:cid, '12345', 'DE')
     zzb1 = Util::Code.new(:zuzahlungsbefreit, 'true', 'DE')
     pac1 = Drugs::Package.new
     pac1.add_code(pzn1)
     pac1.add_code(zzb1)
     pac1.save
-    pzn2 = Util::Code.new(:pzn, '54321', 'DE')
+    pzn2 = Util::Code.new(:cid, '54321', 'DE')
     zzb2 = Util::Code.new(:zuzahlungsbefreit, 'true', 'DE')
     pac2 = Drugs::Package.new
     pac2.add_code(pzn2)
     pac2.add_code(zzb2)
     pac2.save
     @import.instance_variable_set('@confirmed_pzns', 
-                                 pac1.code(:pzn) => true)
+                                 pac1.code(:cid) => true)
     @import.postprocess
     assert_equal('true', zzb1.value)
     assert_equal(false, zzb2.value)
