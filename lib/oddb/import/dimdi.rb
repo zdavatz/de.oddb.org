@@ -548,7 +548,7 @@ module Dimdi
       ## for now: ignore packages that can not be linked to an 
       #  existing product by PZN
       package = import_package(row)
-      @confirmed_pzns.store(package.code(:pzn), true)
+      @confirmed_pzns.store(package.code(:cid), true)
       if(code = package.code(:zuzahlungsbefreit))
         if(code.value)
           @existing += 1
@@ -754,7 +754,7 @@ module Dimdi
       Drugs::Package.search_by_code(:type => 'zuzahlungsbefreit', 
                                     :value => 'true', 
                                     :country => 'DE').each { |package|
-        pzn = package.code(:pzn)
+        pzn = package.code(:cid)
         unless(@confirmed_pzns.include?(pzn))
           @deleted += 1
           package.code(:zuzahlungsbefreit).value = false
