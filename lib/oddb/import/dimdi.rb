@@ -678,7 +678,17 @@ module Dimdi
         part.save
         product = import_product(package, row)
         package.sequence = import_sequence(product, package, row)
-        package.save
+        # package.save is called at the end of import_row
+      end
+      if(amount = cell(row, 7))
+        if(price = package.price(:public, 'DE'))
+          if(price != amount)
+            price.amount = amount
+          end
+        else
+          price = Util::Money.new(amount, :public, 'DE')
+          package.add_price(price)
+        end
       end
       package
     end
