@@ -531,6 +531,7 @@ module Dimdi
     def initialize
       super
       @assigned_companies = 0
+      @assigned_equivalences = 0
       @confirmed_pzns = {}
       @count = 0
       @created = 0
@@ -822,6 +823,7 @@ module Dimdi
             if(agent.chemical_equivalence)
               raise "multiple chemical equivalences" 
             end
+            @assigned_equivalences += 1
             composition.remove_active_agent(other)
             agent.chemical_equivalence = other
             agent.save
@@ -845,6 +847,8 @@ module Dimdi
         sprintf("Created  %3i new Sequences", @created_sequences),
         sprintf("Created  %3i new Companies", @created_companies),
         sprintf("Created  %3i new Substances", @created_substances),
+        sprintf("Assigned %3i Chemical Equivalences", 
+                @assigned_equivalences),
         sprintf("Assigned %3i Companies", @assigned_companies),
       ]
     end
