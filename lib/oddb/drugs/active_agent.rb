@@ -8,7 +8,8 @@ module ODDB
   module Drugs
     class ActiveAgent < Model
       include Comparable
-      attr_accessor :dose, :substance, :chemical_equivalence
+      belongs_to :substance
+      attr_accessor :dose, :chemical_equivalence
       def initialize(substance, dose, unit="mg")
         @substance = substance
         if(dose.is_a?(Dose))
