@@ -232,8 +232,8 @@ module Dimdi
         part.unit = unit
       end
       part.composition = sequence.compositions.first
+      part.package = package
       part.save
-      package.add_part(part)
       package.sequence = sequence
       package.save
       update_package(row, package)
@@ -787,7 +787,7 @@ module Dimdi
           package.code(:zuzahlungsbefreit).value = false
           package.save
         end
-      }
+      } unless(@confirmed_pzns.empty?)
       Drugs::Product.all { |product|
         unless(product.company)
           keys = product.name.de.split
@@ -821,7 +821,7 @@ module Dimdi
               agent, other = other, agent
             end
             if(agent.chemical_equivalence)
-              raise "multiple chemical equivalences" 
+              raise "multiple chemical equivalences in #{composition.parts.first.package.code(:cid)}" 
             end
             @assigned_equivalences += 1
             composition.remove_active_agent(other)
