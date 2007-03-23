@@ -41,6 +41,13 @@ module ODDB
         assert_equal(true, other == agent)
         assert_equal(true, agent == other)
       end
+      def test_equality__nil
+        substance = flexmock('substance')
+        dose = Dose.new(100, 'mg')
+        agent = ActiveAgent.new(substance, dose)
+
+        assert_equal(false, agent == nil)
+      end
     end
   end
 end
