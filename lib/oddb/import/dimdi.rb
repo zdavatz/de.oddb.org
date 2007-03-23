@@ -546,7 +546,7 @@ module Dimdi
     def import_row(row)
       @count += 1
       package = import_package(row)
-      @confirmed_pzns.store(package.code(:cid), true)
+      @confirmed_pzns.store(package.code(:cid).value, true)
       if(code = package.code(:zuzahlungsbefreit))
         if(code.value)
           @existing += 1
@@ -578,15 +578,27 @@ module Dimdi
       end
       sunit = cell(row, 5)
       if(sunit == "ml")
-        part.quantity = Drugs::Dose.new(qnum, sunit)
-        part.size = mnum
-        part.unit = nil
+        dose = Drugs::Dose.new(qnum, sunit)
+        if(part.quantity != dose || part.size != mnum)
+          part.quantity = dose
+          part.size = mnum
+          part.unit = nil
+          part.save
+        end
       else
-        part.size = qnum || part.size
-        part.unit = Drugs::Unit.find_by_name(cell(row, 3)) || part.unit
+        unit = Drugs::Unit.find_by_name(cell(row, 3))
+        changed = false
+        if(qnum && part.size != qnum)
+          part.size = qnum
+          changed = true
+        end
+        if(unit && part.unit != unit)
+          part.unit = unit
+          changed = true
+        end
+        part.save if changed
       end
-      part.save
-      if(company = import_company(row))
+      if((company = import_company(row)) && product.company != company)
         product.company = company
         product.save
       end
@@ -768,7 +780,7 @@ module Dimdi
       Drugs::Package.search_by_code(:type => 'zuzahlungsbefreit', 
                                     :value => 'true', 
                                     :country => 'DE').each { |package|
-        pzn = package.code(:cid)
+        pzn = package.code(:cid).value
         unless(@confirmed_pzns.include?(pzn))
           @deleted += 1
           package.code(:zuzahlungsbefreit).value = false
