@@ -811,10 +811,11 @@ module Dimdi
       }
       Drugs::Composition.all { |composition|
         next if(composition.active_agents.size < 2)
-        composition.active_agents.each { |agent|
+        composition.active_agents.dup.each { |agent|
+          next unless composition.active_agents.include?(agent)
           name = agent.substance.name.de
           if(other = composition.active_agents.find { |candidate|
-            candidate != other \
+            candidate != agent \
               && candidate.substance.name.de[0,name.length] == name })
             qty = other.dose.qty
             if(qty == qty.to_i && !other.chemical_equivalence)
