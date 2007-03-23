@@ -611,8 +611,10 @@ module Dimdi
         agent.dose = dose
         agent.save
         substance = agent.substance
-        substance.name.synonyms.push(name)
-        substance.save
+        if(substance.name != name)
+          substance.name.synonyms.push(name)
+          substance.save
+        end
       elsif(substance = import_substance(name))
         ## for now: don't expect multiple compositions
         if(composition.nil?)
@@ -702,6 +704,7 @@ module Dimdi
         if(candidates.size == 1)
           product = candidates.first
           product.name.synonyms.push(name)
+          product.save
         end
         search.sub!(/(\s|^)\S*$/, '')
       end
@@ -792,6 +795,26 @@ module Dimdi
             product.save
           end
         end
+      }
+      Drugs::Composition.all { |composition|
+        composition.active_agents.each { |agent|
+          name = agent.substance.name.de
+          if(other = composition.active_agents.find { |candidate|
+            candidate.substance.name.de[0,name.length] == name })
+            qty = other.dose.qty
+            if(qty == qty.to_i && !other.chemical_equivalence)
+              agent, other = other, agent
+            end
+            if(agent.chemical_equivalence)
+              raise "multiple chemical equivalences" 
+            end
+            composition.remove_active_agent(other)
+            agent.chemical_equivalence = other
+            agent.save
+            other.save
+            composition.save
+          end
+        }
       }
     end
     def report
