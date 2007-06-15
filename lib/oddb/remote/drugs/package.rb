@@ -97,7 +97,7 @@ class Package < Remote::Object
     when :public
       @price_public or begin
         pr = @remote.price_public.to_f * @currency_rate / @tax_factor
-        @price_public = Util::Money.new(pr/100.0) if(pr > 0)
+        @price_public = Util::Money.new(pr.to_f) if(pr > 0)
       end
     end
   end

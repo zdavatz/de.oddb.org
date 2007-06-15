@@ -76,7 +76,7 @@ class TestComparisonDeCh < Test::Unit::TestCase
     rpackage.should_receive(:barcode).and_return("7680#{uid}0012")
     rpackage.should_receive(:name_base).and_return(name)
     rpackage.should_receive(:price_public).and_return {
-      price * 100 if(price)
+      price
     }
     rpackage.should_receive(:ikscat).and_return(ikscat)
     rpackage.should_receive(:sl_entry).and_return(true)

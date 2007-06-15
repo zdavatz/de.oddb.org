@@ -628,7 +628,7 @@ class TestZuzahlungsBefreiung < Test::Unit::TestCase
     pac2.add_code(zzb2)
     pac2.save
     @import.instance_variable_set('@confirmed_pzns', 
-                                 pac1.code(:cid) => true)
+                                 pac1.code(:cid).value => true)
     @import.postprocess
     assert_equal('true', zzb1.value)
     assert_equal(false, zzb2.value)
