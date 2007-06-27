@@ -136,6 +136,7 @@ class TestProductInfos < Test::Unit::TestCase
 
     assert_equal(Drugs::Dose.new(50, 'ml'), part1.quantity)
 
+    assert_equal(String, package2.name.de.class)
     assert_equal("Biotin Hermes 2,5 mg Tabletten", package2.name.de)
 
 
