@@ -8,13 +8,17 @@ module ODDB
   module Remote
     module Drugs
 class Atc < Remote::Object
-  delegate :code
+  delegate :code, :parent_code
   def name
     @name ||= Util::Multilingual.new(:de => @remote.name)
   end
   def ddds(administration)
-    @ddds ||= @remote.ddds.select { |roa, ddd| 
-      ddd.administration_route == administration }
+    []
+    #@ddds ||= @remote.ddds.select { |roa, ddd| 
+    #  ddd.administration_route == administration }
+  end
+  def interesting?
+    false
   end
 end
     end

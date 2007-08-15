@@ -18,6 +18,7 @@ module ODDB
         @xls_dir = File.join(@var, 'xls')
         FileUtils.rm_r(@xls_dir) if(File.exist?(@xls_dir))
         @config.should_receive(:var).and_return(@var)
+        @config.should_receive(:data_dir).and_return(@data_dir)
         @updater = Updater
       end
       def test_run
@@ -255,6 +256,24 @@ module ODDB
           ['report']
         }
         Updater.import_whocc_guidelines
+      end
+      def test_import_product_infos
+        flexstub(Util::Mail).should_receive(:notify_admins)\
+          .with(String, Array).times(1)
+        importer = flexmock('ProductInfos')
+        flexstub(Import::Csv::ProductInfos).should_receive(:new)\
+          .times(1).and_return(importer)
+        path = File.join(@data_dir, 'csv', 'products.csv')
+        flexstub(File).should_receive(:open).and_return { |file, block|
+          assert_equal(path, file)
+          block.call('file-handle')
+        }
+        importer.should_receive(:import).with('file-handle')\
+          .times(1).and_return {
+          assert(true) 
+          ['report']
+        }
+        Updater.import_product_infos
       end
     end
   end

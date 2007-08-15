@@ -3,6 +3,7 @@
 
 require 'date'
 require 'mechanize'
+require 'oddb/import/csv'
 require 'oddb/import/dimdi'
 require 'oddb/import/whocc'
 require 'oddb/util/mail'
@@ -33,6 +34,12 @@ module ODDB
         url = "http://www.die-gesundheitsreform.de/presse/pressethemen/avwg/pdf/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls"
         Import::Dimdi.download_latest(url, today) { |io|
           reported_import(Import::Dimdi::ZuzahlungsBefreiung.new, io)
+        }
+      end
+      def Updater.import_product_infos(path=nil)
+        path ||= File.join(ODDB.config.data_dir, 'csv', 'products.csv')
+        File.open(path) { |io|
+          reported_import(Import::Csv::ProductInfos.new, io)
         }
       end
       def Updater.import_whocc_guidelines

@@ -90,15 +90,15 @@ class Result < Drugs::Global
       code = (atc = package.atc) ? atc.code : 'X'
       (atcs[code] ||= Util::AnnotatedList.new(:atc => atc)).push(package)
     end
-    count = 1
+    count = 0
     limit = @session.pagelength
     atcs.sort.each { |code, array|
+      count += array.size
       if(count > limit)
         @model.next_page!
-        count = 1
+        count = array.size
       end
       @model.push(array)
-      count += array.size
     }
     @model.page = 0
   end

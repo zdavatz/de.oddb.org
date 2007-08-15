@@ -17,9 +17,16 @@ module ODDB
   module Import
     module Csv
 class ProductInfos < Import
+  def initialize
+    super
+    @count = 0
+    @created = 0
+    @created_companies = 0
+    @found = 0
+  end
   def cell(row, idx)
     if((str = row.at(idx)) && !str.to_s.empty?)
-      u(@@iconv.iconv(str))
+      u(@@iconv.iconv(str.to_s))
     end
   end
   def import(io)
@@ -31,12 +38,15 @@ class ProductInfos < Import
         import_row(row)
       end
     }
+    report
   end
   def import_row(row)
     pzn = u(row.at(0).to_i.to_s)
+    @count += 1
     if(package = Drugs::Package.find_by_code(:type    => 'cid',
                                              :value   => pzn,
                                              :country => 'DE'))
+      @found += 1
       modified = false
       name = cell(row, 1).gsub(/[A-Z .&+-]+/) { |part| 
         capitalize_all(part) }
@@ -68,6 +78,7 @@ class ProductInfos < Import
     name = company_name(row.at(9))
     company = Business::Company.find_by_name(name) 
     if(company.nil?)
+      @created_companies += 1
       company = Business::Company.new
       company.name.de = name
     end
@@ -130,6 +141,7 @@ class ProductInfos < Import
       agent.dose = dose
       agent.save
     else
+      @created += 1
       substance = sequence.active_agents.first.substance
       seq = Drugs::Sequence.new
       comp = Drugs::Composition.new
@@ -141,6 +153,14 @@ class ProductInfos < Import
       package.sequence = seq
       package.save
     end
+  end
+  def report
+    [
+      sprintf("Checked %5i Lines", @count),
+      sprintf("Updated %5i Packages", @found),
+      sprintf("Created %5i Sequences", @created),
+      sprintf("Created %5i Companies", @created_companies),
+    ]
   end
 end
     end
