@@ -2,6 +2,7 @@
 # Import::Csv::ProductInfos -- de.oddb.org -- 13.02.2007 -- hwyss@ywesee.com
 
 require 'csv'
+require 'net/pop'
 require 'oddb/business/company'
 require 'oddb/drugs/active_agent'
 require 'oddb/drugs/composition'
@@ -12,11 +13,54 @@ require 'oddb/drugs/substance'
 require 'oddb/drugs/unit'
 require 'oddb/import/import'
 require 'oddb/util/code'
+require 'oddb/config'
+require 'fileutils'
+require 'rmail'
+require 'zip/zip'
 
 module ODDB
   module Import
     module Csv
 class ProductInfos < Import
+  def ProductInfos.download_latest(&block)
+    c = ODDB.config.credentials["product_infos"]
+    sources = []
+    Net::POP3.start(c["pop_server"], c["pop_port"] || 110, 
+                    c["pop_user"], c["pop_pass"]) { |pop|
+      pop.each_mail { |mail|
+        source = mail.pop
+        ## work around a bug in RMail::Parser that cannot deal with
+        ## RFC-2822-compliant CRLF..
+        time = Time.now
+        name = sprintf("%s.%s.%s", c["pop_user"], 
+                       time.strftime("%Y%m%d%H%M%S"), time.usec)
+        dir = File.join(ODDB.config.var, 'mail')
+        FileUtils.mkdir_p(dir)
+        path = File.join(dir, name)
+        File.open(path, 'w') { |fh| fh.puts(source) }
+        mail.delete
+        source.gsub!(/\r\n/, "\n")
+        sources.push source
+      }
+    }
+    sources.each { |source|
+      extract_message(RMail::Parser.read(source), &block)
+    }
+    sources.size
+  end
+  def ProductInfos.extract_message(message, &block)
+    if(message.multipart?)
+      message.each_part { |part|
+        extract_message(part, &block)
+      }
+    elsif(/application.zip/.match message.header.content_type('text/plain'))
+      path = File.join(ODDB.config.var, 'product_infos.zip')
+      File.open(path, 'w') { |fh| fh << message.decode }
+      Zip::ZipFile.foreach(path) { |zh|
+        block.call(zh.get_input_stream) 
+      }       
+    end
+  end
   def initialize
     super
     @count = 0

@@ -7,15 +7,27 @@ $: << File.expand_path('../../lib', File.dirname(__FILE__))
 require 'test/unit'
 require 'oddb/import/csv'
 require 'stub/model'
+require 'flexmock'
 
 module ODDB
   module Import
     module Csv
 class TestProductInfos < Test::Unit::TestCase
+  include FlexMock::TestCase
   def setup
     @data_dir = File.expand_path('data', File.dirname(__FILE__))
+    @var = File.expand_path('var', File.dirname(__FILE__))
     @path = File.expand_path('csv/products.csv', @data_dir) 
     @import = ProductInfos.new
+    c = ODDB.config
+    c.data_dir = @data_dir
+    c.var = @var
+    c.credentials.store("product_infos", {
+      "pop_server" => 'pop.server.com',
+      "pop_user" => 'myuser',
+      "pop_pass" => 'mypass',
+      "pop_port" => 110,
+    })
     Drugs::Package.instances.clear
   end
   def test_import
@@ -194,6 +206,36 @@ class TestProductInfos < Test::Unit::TestCase
     assert_equal(nil, part.multi)
     assert_equal(3, part.size)
     assert_equal(Drugs::Dose.new(10, 'ml'), part.quantity)
+  end
+  def test_poll_message
+    source = File.read(File.join(@data_dir, 'mail', 'csv.mail'))
+    message = RMail::Parser.read(source)
+    ProductInfos.extract_message(message) { |io|
+      assert_instance_of(Zip::ZipInputStream, io)
+    }
+  end
+  def test_download_latest
+    backup = File.join(@var, 'mail')
+    FileUtils.rm_r(backup) if(File.exist? backup)
+    source = File.read(File.join(@data_dir, 'mail', 'csv.mail'))
+    mail = flexmock('mail')
+    mail.should_receive(:pop).times(1).and_return source
+    mail.should_receive(:delete).times(1)
+    session = flexmock('pop-session')
+    session.should_receive(:each_mail).and_return { |block| block.call(mail) }
+    flexstub(Net::POP3).should_receive(:start)\
+      .and_return { |host, port, user, pass, block| 
+      assert_equal('pop.server.com', host)
+      assert_equal(110, port)
+      assert_equal('myuser', user)
+      assert_equal('mypass', pass)
+      block.call(session) 
+    }
+    ProductInfos.download_latest { |io|
+      assert_instance_of(Zip::ZipInputStream, io)
+    }
+    assert(File.exist?(backup))
+    assert_equal(3, Dir.entries(backup).size)
   end
 end
     end

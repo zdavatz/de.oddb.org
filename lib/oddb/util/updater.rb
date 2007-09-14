@@ -36,9 +36,8 @@ module ODDB
           reported_import(Import::Dimdi::ZuzahlungsBefreiung.new, io)
         }
       end
-      def Updater.import_product_infos(path=nil)
-        path ||= File.join(ODDB.config.data_dir, 'csv', 'products.csv')
-        File.open(path) { |io|
+      def Updater.import_product_infos
+        Import::Csv::ProductInfos.download_latest { |io|
           reported_import(Import::Csv::ProductInfos.new, io)
         }
       end
@@ -67,6 +66,7 @@ module ODDB
           import_dimdi_products(date)
         end
         import_dimdi_zuzahlungsbefreiung(today)
+        import_product_infos
       end
     end
   end
