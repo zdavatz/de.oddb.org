@@ -75,13 +75,19 @@ class ProductInfos < Import
   end
   def import(io)
     skip = @skip_rows
-    CSV::IOReader.new(io, ';').each { |row|
-      if(skip > 0)
-        skip -= 1
-      else
-        import_row(row)
-      end
-    }
+    begin
+      CSV::IOReader.new(io, ';').each { |row|
+        if(skip > 0)
+          skip -= 1
+        else
+          import_row(row)
+        end
+      }
+    rescue CSV::IllegalFormatError
+      # Zip::ZipInputStream returns a superfluous empty String at EOF, which
+      # upsets CSV::IOReader. Ignore this error and send a report of newly
+      # created products anyway.
+    end
     report
   end
   def import_row(row)
