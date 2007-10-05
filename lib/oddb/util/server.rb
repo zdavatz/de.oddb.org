@@ -58,7 +58,7 @@ module ODDB
         }
       end
       def run_exporter
-        @exporter = run_at(ODDB.config.exporter_hour) { Exporter.run }
+        @exporter = run_at(ODDB.config.export_hour) { Exporter.run }
       end
       def run_updater
         @updater = run_at(ODDB.config.update_hour) { Updater.run }
