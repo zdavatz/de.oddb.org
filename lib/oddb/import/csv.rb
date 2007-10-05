@@ -47,6 +47,8 @@ class ProductInfos < Import
       extract_message(RMail::Parser.read(source), &block)
     }
     sources.size
+  rescue StandardError => e
+		warn e.message
   end
   def ProductInfos.extract_message(message, &block)
     if(message.multipart?)

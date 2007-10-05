@@ -12,7 +12,8 @@ module ODDB
     class TestUpdater < Test::Unit::TestCase
       include FlexMock::TestCase
       def setup
-        @config = flexstub(ODDB.config)
+        ODDB.config.reset!
+        @config = flexmock(ODDB.config)
         @var = File.expand_path('var', File.dirname(__FILE__))
         @data_dir = File.expand_path('data', File.dirname(__FILE__))
         @xls_dir = File.join(@var, 'xls')
@@ -22,8 +23,8 @@ module ODDB
         @updater = Updater
       end
       def test_run
-        flexstub(Util::Mail).should_receive(:notify_admins)\
-          .with(String, Array).times(4)
+        flexmock(Util::Mail).should_receive(:notify_admins)\
+          .with(String, Array).times(5)
         arch = File.join(@xls_dir, 
           "liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls")
         today = Date.new(2006,10)
@@ -52,7 +53,7 @@ module ODDB
         zuzahlung_uri = flexmock('Zuzahlungsbefreiung-URI')
         zuzahlung_uri.should_receive(:open)\
           .times(1).and_return(StringIO.new("zuzahlung-xls-io"))
-        uriparse = flexstub(URI)
+        uriparse = flexmock(URI)
         uriparse.should_receive(:parse).with(Updater::DIMDI_INDEX)\
           .times(1).and_return(index_uri)
         uriparse.should_receive(:parse).with(wirkkurz)\
@@ -64,7 +65,7 @@ module ODDB
         uriparse.should_receive(:parse).with(zuzahlung)\
           .times(1).and_return(zuzahlung_uri)
         wirkkurz_import = flexmock('DimdiSubstance')
-        flexstub(Import::Dimdi::Substance)\
+        flexmock(Import::Dimdi::Substance)\
           .should_receive(:new).with(Date.new(2006,10))\
           .and_return(wirkkurz_import)
         wirkkurz_import.should_receive(:import)\
@@ -74,7 +75,7 @@ module ODDB
           []
         }
         darform_import = flexmock('DimdiGalenicForm')
-        flexstub(Import::Dimdi::GalenicForm)\
+        flexmock(Import::Dimdi::GalenicForm)\
           .should_receive(:new).and_return(darform_import)
         darform_import.should_receive(:import)\
           .times(1).and_return { |io|
@@ -83,7 +84,7 @@ module ODDB
           []
         }
         fbetrag_import = flexmock('DimdiProduct')
-        flexstub(Import::Dimdi::Product)\
+        flexmock(Import::Dimdi::Product)\
           .should_receive(:new).and_return(fbetrag_import)
         fbetrag_import.should_receive(:import)\
           .times(1).and_return { |io|
@@ -92,13 +93,25 @@ module ODDB
           []
         }
         zuzahl_import = flexmock('DimdiZuzahlungsBefreiung')
-        flexstub(Import::Dimdi::ZuzahlungsBefreiung)\
+        flexmock(Import::Dimdi::ZuzahlungsBefreiung)\
           .should_receive(:new).and_return(zuzahl_import)
         zuzahl_import.should_receive(:import)\
           .times(1).and_return { |io|
           assert_instance_of(File, io)
           assert_equal('zuzahlung-xls-io', io.read)
           []
+        }
+        importer = flexmock('ProductInfos')
+        stub = flexmock(Import::Csv::ProductInfos)
+        stub.should_receive(:download_latest).and_return { |block|
+          block.call('file-handle') }
+        stub.should_receive(:new)\
+          .times(1).and_return(importer)
+        path = File.join(@data_dir, 'csv', 'products.csv')
+        importer.should_receive(:import).with('file-handle')\
+          .times(1).and_return {
+          assert(true) 
+          ['report']
         }
         @updater.run(today)
         assert(File.exist?(File.join(@xls_dir, 'wirkkurz_011006.xls')))
@@ -139,7 +152,11 @@ module ODDB
           .times(1).and_return {
           raise "connection error 4"
         }
-        uriparse = flexstub(URI)
+        stub = flexmock(Net::POP3)
+        stub.should_receive(:start).and_return { 
+          raise "connection error 5"
+        }
+        uriparse = flexmock(URI)
         uriparse.should_receive(:parse).with(Updater::DIMDI_INDEX)\
           .times(1).and_return(index_uri)
         uriparse.should_receive(:parse).with(wirkkurz)\
@@ -159,8 +176,8 @@ module ODDB
         assert(!File.exist?(arch))
       end
       def test_run__later_errors
-        flexstub(Util::Mail).should_receive(:notify_admins)\
-          .with(String, Array).times(4)
+        flexmock(Util::Mail).should_receive(:notify_admins)\
+          .with(String, Array).times(5)
         arch = File.join(@xls_dir, 
           "liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls")
         today = Date.new(2006,10)
@@ -189,7 +206,7 @@ module ODDB
         zuzahlung_uri = flexmock('Zuzahlungsbefreiung-URI')
         zuzahlung_uri.should_receive(:open)\
           .times(1).and_return(StringIO.new("zuzahlung-xls-io"))
-        uriparse = flexstub(URI)
+        uriparse = flexmock(URI)
         uriparse.should_receive(:parse).with(Updater::DIMDI_INDEX)\
           .times(1).and_return(index_uri)
         uriparse.should_receive(:parse).with(wirkkurz)\
@@ -201,7 +218,7 @@ module ODDB
         uriparse.should_receive(:parse).with(zuzahlung)\
           .times(1).and_return(zuzahlung_uri)
         wirkkurz_import = flexmock('DimdiSubstance')
-        flexstub(Import::Dimdi::Substance)\
+        flexmock(Import::Dimdi::Substance)\
           .should_receive(:new).with(Date.new(2006,10))\
           .and_return(wirkkurz_import)
         wirkkurz_import.should_receive(:import)\
@@ -211,7 +228,7 @@ module ODDB
           raise "import error"
         }
         darform_import = flexmock('DimdiGalenicForm')
-        flexstub(Import::Dimdi::GalenicForm)\
+        flexmock(Import::Dimdi::GalenicForm)\
           .should_receive(:new).and_return(darform_import)
         darform_import.should_receive(:import)\
           .times(1).and_return { |io|
@@ -220,7 +237,7 @@ module ODDB
           raise "import error"
         }
         fbetrag_import = flexmock('DimdiProduct')
-        flexstub(Import::Dimdi::Product)\
+        flexmock(Import::Dimdi::Product)\
           .should_receive(:new).and_return(fbetrag_import)
         fbetrag_import.should_receive(:import)\
           .times(1).and_return { |io|
@@ -229,7 +246,7 @@ module ODDB
           raise "import error"
         }
         zuzahl_import = flexmock('DimdiZuzahlungsBefreiung')
-        flexstub(Import::Dimdi::ZuzahlungsBefreiung)\
+        flexmock(Import::Dimdi::ZuzahlungsBefreiung)\
           .should_receive(:new).and_return(zuzahl_import)
         zuzahl_import.should_receive(:import)\
           .times(1).and_return { |io|
@@ -237,7 +254,21 @@ module ODDB
           assert_equal('zuzahlung-xls-io', io.read)
           raise "import error"
         }
-        @updater.run(today)
+        importer = flexmock('ProductInfos')
+        stub = flexmock(Import::Csv::ProductInfos)
+        stub.should_receive(:download_latest).and_return { |block|
+          block.call('file-handle') rescue StandardError }
+        stub.should_receive(:new)\
+          .times(1).and_return(importer)
+        path = File.join(@data_dir, 'csv', 'products.csv')
+        importer.should_receive(:import).with('file-handle')\
+          .times(1).and_return { |io|
+          assert_equal('file-handle', io)
+          raise "import error"
+        }
+        assert_nothing_raised {
+          @updater.run(today)
+        }
         assert(!File.exist?(File.join(@xls_dir, 'wirkkurz_011006.xls')))
         assert(!File.exist?(File.join(@xls_dir, 'darform_011006.xls')))
         assert(!File.exist?(File.join(@xls_dir, 'fb011006.xls')))
@@ -245,10 +276,10 @@ module ODDB
           "2006.10.06-liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls")))
       end
       def test_import_whocc_guidelines
-        flexstub(Util::Mail).should_receive(:notify_admins)\
+        flexmock(Util::Mail).should_receive(:notify_admins)\
           .with(String, Array).times(1)
         importer = flexmock('Guidelines')
-        flexstub(Import::Whocc::Guidelines).should_receive(:new)\
+        flexmock(Import::Whocc::Guidelines).should_receive(:new)\
           .times(1).and_return(importer)
         importer.should_receive(:import).with(WWW::Mechanize)\
           .times(1).and_return {
@@ -258,16 +289,15 @@ module ODDB
         Updater.import_whocc_guidelines
       end
       def test_import_product_infos
-        flexstub(Util::Mail).should_receive(:notify_admins)\
+        flexmock(Util::Mail).should_receive(:notify_admins)\
           .with(String, Array).times(1)
         importer = flexmock('ProductInfos')
-        flexstub(Import::Csv::ProductInfos).should_receive(:new)\
+        stub = flexmock(Import::Csv::ProductInfos)
+        stub.should_receive(:download_latest).and_return { |block|
+          block.call('file-handle') }
+        stub.should_receive(:new)\
           .times(1).and_return(importer)
         path = File.join(@data_dir, 'csv', 'products.csv')
-        flexstub(File).should_receive(:open).and_return { |file, block|
-          assert_equal(path, file)
-          block.call('file-handle')
-        }
         importer.should_receive(:import).with('file-handle')\
           .times(1).and_return {
           assert(true) 

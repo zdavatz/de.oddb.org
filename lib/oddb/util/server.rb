@@ -3,6 +3,7 @@
 
 require 'oddb/html/util/session'
 require 'oddb/html/util/validator'
+require 'oddb/util/exporter'
 require 'oddb/util/updater'
 require 'sbsm/drbserver'
 
@@ -14,6 +15,7 @@ module ODDB
       VALIDATOR = Html::Util::Validator
       def initialize(*args)
         super
+        run_exporter if(ODDB.config.run_exporter)
         run_updater if(ODDB.config.run_updater)
       end
       def _admin(src, result, priority=0)
@@ -42,19 +44,24 @@ module ODDB
         @admin_threads.add(t)
         t
       end
-      def run_updater
-        @updater = Thread.new {
+      def run_at(hour, &block)
+        Thread.new {
           loop {
-            hour = ODDB.config.update_hour
             now = Time.now 
             run_at = Time.local(now.year, now.month, now.day, hour)
             while(now > run_at)
               run_at += 24*60*60
             end
             sleep(run_at - now)
-            Updater.run
+            block.call
           }
         }
+      end
+      def run_exporter
+        @exporter = run_at(ODDB.config.exporter_hour) { Exporter.run }
+      end
+      def run_updater
+        @updater = run_at(ODDB.config.update_hour) { Updater.run }
       end
     end
   end
