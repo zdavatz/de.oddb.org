@@ -14,8 +14,8 @@ module ODDB
         if(uri = ODDB.config.remote_databases.first)
           remote = DRb::DRbObject.new(nil, uri)
           safe_export(Export::Xls::ComparisonDeCh) { |exporter|
-            remote.remote_export("chde.xls") { |io|
-              exporter.export(uri, io)
+            remote.remote_export("chde.xls") { |path|
+              File.open(path, 'w') { |io| exporter.export(uri, io) }
             }
           }
         end
