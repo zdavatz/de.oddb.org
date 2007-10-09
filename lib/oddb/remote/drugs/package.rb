@@ -19,6 +19,7 @@ class Package < Remote::Object
   def initialize(source, remote, currency_rate, tax_factor=1.0)
     @tax_factor = tax_factor.to_f
     @currency_rate = currency_rate.to_f
+    @cache = {}
     super(source, remote)
   end
   def active_agents
@@ -94,15 +95,16 @@ class Package < Remote::Object
   end
   def price(type)
     case type
-    when :public
-      @price_public or begin
-        pr = @remote.price_public.to_f * @currency_rate / @tax_factor
-        @price_public = Util::Money.new(pr.to_f) if(pr > 0)
-      end
+    when :public, :exfactory
+      @cache.fetch(type) { @cache.store(type, remote_price(type)) }
     end
   end
   def quantity
     nil
+  end
+  def remote_price(key)
+    pr = @remote.send("price_#{key}").to_f * @currency_rate / @tax_factor
+    Util::Money.new(pr.to_f) if(pr > 0)
   end
   def size
     @size ||= comparable_size.qty

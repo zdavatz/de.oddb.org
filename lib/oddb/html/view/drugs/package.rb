@@ -93,6 +93,9 @@ module PackageMethods
       sprintf("%+1.2f", adjust_price(pp - pf))
     end
   end
+  def price_exfactory(model)
+    adjust_price model.price(:exfactory)
+  end
   def price_public(model)
     price = adjust_price model.price(:public)
     if(!@lookandfeel.enabled?(:explain_price, false) \

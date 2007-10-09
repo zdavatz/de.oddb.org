@@ -140,6 +140,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :th_doses                 => 'Stärke',
       :th_package_infos         => 'Zuzahl. / Rezept',
       :th_price_difference      => 'ABS-Differenz',
+      :th_price_exfactory       => 'FAP',
       :th_price_festbetrag      => 'FB',
       :th_price_public          => 'AVP',
       :th_product               => 'Präparat',
@@ -184,6 +185,7 @@ sämtliche Festbeträge und die betroffenen Arzneimittel im Internet
 abruffähig zu veröffentlichen...
       EOS
       :tt_price_difference      => 'Absolute Differenz zwischen Preis und Festbetrag',
+      :tt_price_exfactory       => 'Preis: Fabrikabgabepreis exkl. MwSt. in Euro',
       :tt_price_public          => 'Preis: Apothekenverkaufspreis inkl. MwSt. in Euro',
       :tt_product               => 'Präparat ist der Handelsname des Medikaments',
       :welcome_data_declaration => '** Herkunftsdeklaration der Daten **',
@@ -219,12 +221,13 @@ Medikamenten-Preisvergleichs-Portal Deutschlands.
       [0,0] => :product,
       [1,0] => :active_agents,
       [2,0] => :size, 
-      [3,0] => :price_public,
-      [4,0] => :price_festbetrag,
-      [5,0] => :ddd_prices,
-      [6,0] => :company,
-      [7,0] => :package_infos,
-      [8,0] => :google,
+      [3,0] => :price_exfactory,
+      [4,0] => :price_public,
+      [5,0] => :price_festbetrag,
+      [6,0] => :ddd_prices,
+      [7,0] => :company,
+      [8,0] => :package_infos,
+      [9,0] => :google,
     }
   end
   def tax_factor
@@ -291,11 +294,12 @@ der Schweiz und Deutschland. Alle Preise sind in CHF.
       [0,0] => :product,
       [1,0] => :active_agents,
       [2,0] => :size, 
-      [3,0] => :price_public,
-      [4,0] => :ddd_prices,
-      [5,0] => :company,
-      [6,0] => :package_infos,
-      [7,0] => :google,
+      [3,0] => :price_exfactory,
+      [4,0] => :price_public,
+      [5,0] => :ddd_prices,
+      [6,0] => :company,
+      [7,0] => :package_infos,
+      [8,0] => :google,
     }
   end
   def tax_factor_add

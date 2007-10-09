@@ -40,7 +40,20 @@ module ODDB
       rescue StandardError
       end
       def price(type, country='DE')
-        prices.find { |money| money.is_for?(type, country) }
+        case type
+        when :exfactory
+          price_exfactory(country)
+        else
+          prices.find { |money| money.is_for?(type, country) }
+        end
+      end
+      def price_exfactory(country='DE')
+        if((price = price(:public, country)) \
+           && (code = code(:prescription)) && code.value)
+          c = ODDB.config
+          (price - c.pharmacy_premium) * 100 / 
+            (100.0 + c.vat + c.pharmacy_percentage) 
+        end
       end
       unless(instance_methods.include?("__sequence_writer__"))
         alias :__sequence_writer__ :sequence=

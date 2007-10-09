@@ -12,6 +12,9 @@ module ODDB
   module Util
     class TestExporter < Test::Unit::TestCase
       include FlexMock::TestCase
+      def setup
+        @data_dir = File.expand_path('var/xls', File.dirname(__FILE__))
+      end
       def test_run
         flexmock(Util::Mail).should_receive(:notify_admins)\
           .and_return { |subj, body| flunk(body.join("\n")) }
@@ -21,15 +24,19 @@ module ODDB
           Exporter.run(Date.new(2007))
         }
         exp = flexmock('exp')
-        io = flexmock('io')
+        path = File.join(@data_dir, 'chde.xls')
         remote = flexmock('remote')
         drb = DRb.start_service('druby://localhost:0', remote)
         klass.should_receive(:new).and_return(exp)
-        exp.should_receive(:export).with(drb.uri, io).and_return { assert true }
+        exp.should_receive(:export).and_return { |uri, file|
+          assert_equal(drb.uri, uri)
+          assert_instance_of(File, file)
+          assert_equal(path, file.path)
+        }
         ODDB.config.remote_databases = [drb.uri]
         remote.should_receive(:remote_export).and_return { |file, block| 
           assert_equal("chde.xls", file)
-          block.call(io) }
+          block.call(path) }
         Exporter.run(Date.new(2007))
       end
       def test_remote_export_chde
@@ -41,15 +48,19 @@ module ODDB
           Exporter.remote_export_chde
         }
         exp = flexmock('exp')
-        io = flexmock('io')
+        path = File.join(@data_dir, 'chde.xls')
         remote = flexmock('remote')
         drb = DRb.start_service('druby://localhost:0', remote)
         klass.should_receive(:new).and_return(exp)
-        exp.should_receive(:export).with(drb.uri, io).and_return { assert true }
+        exp.should_receive(:export).and_return { |uri, file|
+          assert_equal(drb.uri, uri)
+          assert_instance_of(File, file)
+          assert_equal(path, file.path)
+        }
         ODDB.config.remote_databases = [drb.uri]
         remote.should_receive(:remote_export).and_return { |file, block| 
           assert_equal("chde.xls", file)
-          block.call(io) }
+          block.call(path) }
         Exporter.remote_export_chde
       end
       def test_on_monthday
