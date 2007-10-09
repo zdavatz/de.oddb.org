@@ -48,8 +48,9 @@ class ComparisonDeCh
   end
   def write_row(worksheet, idx, local, remote)
     comparison = Util::Comparison.new(local, remote)
-    rprice = remote.price(:public)
-    worksheet.write idx, 0, [
+    lexf = local.price(:exfactory)
+    rexf = remote.price(:exfactory)
+    data = [
       collect_cell(local, remote) { |x| 
         x.name.de || x.product.name.de },
       collect_cell(local, remote) { |x| x.comparable_size.to_s },
@@ -69,7 +70,14 @@ class ComparisonDeCh
       sprintf("%+4.2f", adjust_price(comparison.absolute)),
       sprintf("%+4.2f%%", comparison.difference),
       sprintf("%4.2f", comparison.factor),
+      (adjust_price(lexf) if lexf).to_s,
+      (adjust_price(rexf) if rexf).to_s,
     ]
+    if(lexf && rexf)
+      data.push sprintf("%+4.2f", adjust_price(comparison.absolute_exfactory)),
+        sprintf("%+4.2f%%", comparison.difference_exfactory)
+    end
+    worksheet.write idx, 0, data
   end
   def write_xls(io, data)
     workbook = Spreadsheet::Excel.new(io)
@@ -86,9 +94,13 @@ class ComparisonDeCh
       "Stärke (Schreibweise CH)",
       "Wirkstoff (Schreibweise CH)",
       "ATC-Code", "Abgabekategorie CH", "SL Schweiz",
-      "Preisunterschied pro Tablette inkl. Mwst. in CHF",
-      "Preisunterschied in %",
+      "Preisunterschied inkl. Mwst. in CHF",
+      "Preisunterschied in % (normalisiert)",
       "Packungsäquivalenzfaktor",
+      "FAP DE exkl. MwSt (errechnet)",
+      "FAP CH exkl. MwSt",
+      "Preisunterschied FAP in CHF ",
+      "Preisunterschied FAP in % (normalisiert)",
     ].collect { |str| @@iconv.iconv str }, fmt_title
     data.sort_by { |local, remote| 
       local.name.de || local.product.name.de
