@@ -10,7 +10,7 @@ module ODDB
 class Atc < Remote::Object
   delegate :code, :parent_code
   def name
-    @name ||= Util::Multilingual.new(:de => @remote.name)
+    @name ||= Util::Multilingual.new(:de => @@iconv.iconv(@remote.name))
   end
   def ddds(administration)
     []
