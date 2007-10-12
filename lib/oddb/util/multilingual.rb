@@ -11,6 +11,9 @@ module ODDB
         @canonical = canonical
         @synonyms = []
       end
+      def add_synonym(synonym)
+        @synonyms.push(synonym).uniq! && synonym
+      end
       def all
         @canonical.values.concat(@synonyms)
       end

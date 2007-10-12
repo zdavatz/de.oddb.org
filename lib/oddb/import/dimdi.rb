@@ -510,7 +510,7 @@ module Dimdi
       ## a special case that probably fits best here:
       if((ass = Drugs::Substance.find_by_name('ASS')) \
          && ass.name.de == 'ASS')
-        ass.name.synonyms.push('ASS').uniq!
+        ass.name.add_synonym('ASS')
         ass.name.de = 'Acetylsalicylsäure'
         ass.save
       end
@@ -625,8 +625,7 @@ module Dimdi
         agent.save
         substance = agent.substance
         if(substance.name != name)
-          substance.name.synonyms.push(name)
-          substance.save
+          substance.name.add_synonym(name) && substance.save
         end
       elsif(substance = import_substance(name))
         ## for now: don't expect multiple compositions
@@ -716,8 +715,7 @@ module Dimdi
         candidates = Drugs::Product.search_by_name(search)
         if(candidates.size == 1)
           product = candidates.first
-          product.name.synonyms.push(name)
-          product.save
+          product.name.add_synonym(name) && product.save
         end
         search.sub!(/(\s|^)\S*$/, '')
       end
