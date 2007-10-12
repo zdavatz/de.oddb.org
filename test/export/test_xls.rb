@@ -7,6 +7,7 @@ $: << File.expand_path('..', File.dirname(__FILE__))
 require 'drb'
 require 'flexmock'
 require 'test/unit'
+require 'oddb/config'
 require 'oddb/export/xls'
 require 'stub/model'
 
@@ -56,6 +57,8 @@ class TestComparisonDeCh < Test::Unit::TestCase
     package.add_code(code)
     code = Util::Code.new(:zuzahlungsbefreit, true, 'DE')
     package.add_code(code)
+    code = Util::Code.new(:prescription, true, 'DE')
+    package.add_code(code)
     part = Drugs::Part.new
     part.package = package
     part.size = 5
@@ -66,17 +69,20 @@ class TestComparisonDeCh < Test::Unit::TestCase
     part.quantity = Drugs::Dose.new(20, 'ml')
     package.name.de = name
     package.sequence = sequence
-    package.add_price(Util::Money.new(6, :public, 'DE'))
-    package.add_price(Util::Money.new(10, :festbetrag, 'DE'))
+    package.add_price(Util::Money.new(16, :public, 'DE'))
+    package.add_price(Util::Money.new(20, :festbetrag, 'DE'))
     package.save
     package
   end
-  def setup_remote_package(name, uid='55555', price=12, ikscat='B')
+  def setup_remote_package(name, uid='55555', price=30, ikscat='B')
     rpackage = flexmock('Remote Package')
     rpackage.should_receive(:barcode).and_return("7680#{uid}0012")
     rpackage.should_receive(:name_base).and_return(name)
     rpackage.should_receive(:price_public).and_return {
       price
+    }
+    rpackage.should_receive(:price_exfactory).times(1).and_return {
+      price / 2
     }
     rpackage.should_receive(:ikscat).and_return(ikscat)
     rpackage.should_receive(:sl_entry).and_return(true)
@@ -122,11 +128,11 @@ class TestComparisonDeCh < Test::Unit::TestCase
       .times(1).and_return(sheet)
     sheet.should_receive(:write).with(0,0, Array, Format).times(1)
 
-    expected = [ "Amantadin by Producer (Remotadin)", "100 ml", "8.68",
+    expected = [ "Amantadin by Producer (Remotadin)", "100 ml", "23.15",
                  "Producer AG (Producer (Schweiz) AG)", "12345",
                  "7680555550012", "Tropfen", "100 mg", 
                  "Amantadin (Amantadinum)", "N04BB01", "B", "SL", 
-                 "-3.32", "-27.66%", "1.00" ]
+                 "-6.85", "-22.84%", "1.00", "9.37", "15.00", "-5.63", "-37.55%" ]
     sheet.should_receive(:write).with(1,0, Array).times(1)\
       .and_return { |row, col, cells|
       assert_equal(expected, cells)
