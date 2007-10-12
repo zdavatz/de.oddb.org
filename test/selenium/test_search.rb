@@ -581,6 +581,54 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
   ensure
     drb.stop_service
   end
+  def test_search__remote__only_remote
+    remote = flexmock('Remote')
+    drb = DRb.start_service('druby://localhost:0', remote)
+    ODDB.config.remote_databases = [drb.uri]
+
+    remote.should_receive(:get_currency_rate).with('EUR').and_return 0.6
+    rpackage = flexmock('Remote Package')
+    remote.should_receive(:remote_packages).and_return([rpackage])
+    rpackage.should_receive(:barcode).and_return('Barcode')
+    rpackage.should_receive(:name_base).and_return('Remotadin')
+    rpackage.should_receive(:price_public).and_return(12)
+    rpackage.should_receive(:comparable_size)\
+      .and_return(Drugs::Dose.new(100, 'ml'))
+    rpackage.should_receive(:__drbref).and_return("55555")
+    rpackage.should_receive(:comform)
+    rcompany = flexmock('Remote Company')
+    rpackage.should_receive(:company).and_return(rcompany)
+    rcompany.should_receive(:name).and_return('Producer (Schweiz) AG')
+    ratc = flexmock('Remote Atc Class')
+    rpackage.should_receive(:atc_class).and_return(ratc)
+    ratc.should_receive(:code).and_return('N04BB01')
+    ratc.should_receive(:parent_code).and_return('N04BB')
+    flexmock(Drugs::Atc).should_receive(:find_by_code)
+    ratc.should_receive(:name).and_return("Rem\366tadine")
+    ragent = flexmock('Remote ActiveAgent')
+    rpackage.should_receive(:active_agents).and_return([ragent])
+    rsubstance = flexmock('Remote Substance')
+    ragent.should_receive(:dose).and_return(Drugs::Dose.new(100, 'mg'))
+    ragent.should_receive(:substance).and_return(rsubstance)
+    rsubstance.should_receive(:de).and_return('Amantadinum')
+    rpackage.should_ignore_missing
+
+    # switch to mm-flavor
+    open "/de/drugs/home/flavor/mm"
+    assert_equal "CH | DE - ODDB.org | Medikamente | Home | Open Drug Database", get_title
+    type "query", "Amantadin"
+    click "//input[@type='submit']"
+    wait_for_page_to_load "30000"
+    assert_equal "CH | DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", get_title
+    assert is_element_present("//a[@id='cid_0']")
+    assert_match(/^Remotadin/, get_text("cid_0"))
+    assert is_text_present('Remötadin')
+    assert is_text_present('Producer (Schweiz) AG')
+    assert is_text_present('10.80')
+
+  ensure
+    drb.stop_service
+  end
   def test_search__remote__connection_error
     ODDB.config.remote_databases = ['druby://localhost:999999']
 

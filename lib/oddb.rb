@@ -6,6 +6,6 @@ module ODDB
     File.read(File.expand_path('../.git/refs/heads/master',
                                File.dirname(__FILE__)))
   class << self
-    attr_accessor :auth, :config, :logger, :persistence, :server
+    attr_accessor :auth, :config, :logger, :persistence, :server, :exporter
   end
 end

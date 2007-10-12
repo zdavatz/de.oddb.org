@@ -11,8 +11,10 @@ module ODDB
     end
     def delete
       __odba_delete__
-      self.class.connectors.each { |conn|
-        self.send(conn).odba_delete
+      self.class.connectors.each { |name|
+        if(conn = instance_variable_get(name))
+          conn.odba_delete
+        end
       }
       odba_delete
     end
@@ -25,8 +27,10 @@ module ODDB
     def save
       __odba_save__
       odba_isolated_store
-      self.class.connectors.each { |conn|
-        self.send(conn).odba_store
+      self.class.connectors.each { |name|
+        if(conn = instance_variable_get(name))
+          conn.odba_store
+        end
       }
       self
     end
@@ -37,8 +41,9 @@ module ODDB
       end
       def serialize(*keys)
         keys.each { |key|
-          connectors.delete(key)
-          serializables.push("@#{key}")
+          name = "@#{key}"
+          connectors.delete(name)
+          serializables.push(name)
         }
       end
     end

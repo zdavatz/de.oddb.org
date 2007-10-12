@@ -30,7 +30,7 @@ module ODDB
       assert_instance_of(Util::Multilingual, @foo.name)
     end
     def test_has_many
-      assert_equal([:difficulties], Foo.connectors)
+      assert_equal(['@difficulties'], Foo.connectors)
       assert_respond_to(@foo, :difficulties)
       assert_equal([], @foo.difficulties)
       assert_respond_to(@foo, :add_difficulty)

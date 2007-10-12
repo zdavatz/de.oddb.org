@@ -35,9 +35,11 @@ module ODDB
     class << self
       def belongs_to(groupname, *predicates)
         attr_reader groupname
+        varname = "@#{groupname}"
+        connections.push(varname)
         selfname = singular
         define_method("#{groupname}=") { |group|
-          old = instance_variable_get("@#{groupname}")
+          old = instance_variable_get(varname)
           if(old != group)
             if(old)
               old.send("remove_#{selfname}", self)
@@ -48,13 +50,13 @@ module ODDB
               group.save
             end
           end
-          instance_variable_set("@#{groupname}", group)
+          instance_variable_set(varname, group)
         }
         predicates.each { |predicate|
           if(predicate.action == :method_missing)
             predicate.delegators.each { |key|
               define_method(key) { 
-                if(group = instance_variable_get("@#{groupname}"))
+                if(group = instance_variable_get(varname))
                   group.send(key)
                 end
               }
@@ -65,6 +67,9 @@ module ODDB
           end
         }
       end
+      def connections
+        @connections ||= []
+      end
       def connectors
         @connectors ||= []
       end
@@ -72,9 +77,10 @@ module ODDB
         Predicate.new(:method_missing, :delegate, *delegators)
       end
       def has_many(plural, *predicates)
+        varname = "@#{plural}"
         define_method(plural) {
-          instance_variable_get("@#{plural}") or begin
-            instance_variable_set("@#{plural}", Array.new)
+          instance_variable_get(varname) or begin
+            instance_variable_set(varname, Array.new)
           end
         }
         define_method("add_#{plural.to_s.singular}") { |inst|
@@ -86,7 +92,7 @@ module ODDB
         define_method("remove_#{plural.to_s.singular}") { |inst|
           self.send(plural).delete(inst)
         }
-        connectors.push(plural)
+        connectors.push(varname)
         predicates.each { |predicate|
           if(predicate.type == :delegate)
             predicate.delegators.each { |key|
