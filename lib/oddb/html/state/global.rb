@@ -23,6 +23,15 @@ class Global < SBSM::State
       _explain_price(code)
     end
   end
+  def fachinfo
+    if(code = @session.user_input(:pzn))
+      _fachinfo(code)
+    end
+  end
+  def logout
+    @session.logout
+    trigger :home
+  end
   def package
     if(code = @session.user_input(:pzn))
       _package(code)

@@ -163,14 +163,14 @@ class TestCompare < Test::Unit::TestCase
       .and_return([package2, package3])
     open "/de/drugs/compare/pzn/12345"
     assert_equal "DE - ODDB.org | Medikamente | Preisvergleich | Amantadin by Producer | Open Drug Database", get_title
-    assert_match(/^Yet another/, @selenium.get_text("cid_0"))
-    assert_match(/^By another name/, @selenium.get_text("cid_1"))
+    assert_match(/^Yet another/, @selenium.get_text("cid_N04BB01_0"))
+    assert_match(/^By another name/, @selenium.get_text("cid_N04BB01_1"))
 
     click "//a[@name='th_product']"
     wait_for_page_to_load "30000"
     assert_equal "DE - ODDB.org | Medikamente | Preisvergleich | Amantadin by Producer | Open Drug Database", get_title
-    assert_match(/^By another name/, @selenium.get_text("cid_0"))
-    assert_match(/^Yet another/, @selenium.get_text("cid_1"))
+    assert_match(/^By another name/, @selenium.get_text("cid_N04BB01_0"))
+    assert_match(/^Yet another/, @selenium.get_text("cid_N04BB01_1"))
   end
   def test_remote
     remote = flexmock('Remote')
@@ -200,11 +200,11 @@ class TestCompare < Test::Unit::TestCase
     wait_for_page_to_load "30000"
     assert_equal "CH | DE - ODDB.org | Medikamente | Preisvergleich | Remotadin | Open Drug Database", 
                  get_title
-    assert_match(/^Remotadin/, get_text("cid_"))
-    assert is_element_present("//a[@id='cid_0']")
-    assert_match(/^Amantadin/, get_text("cid_0"))
-    assert is_element_present("//a[@id='cid_1']")
-    assert_match(/^Remoteric/, get_text("cid_1"))
+    assert_match(/^Remotadin/, get_text("cid_N04BB01_"))
+    assert is_element_present("//a[@id='cid_N04BB01_0']")
+    assert_match(/^Amantadin/, get_text("cid_N04BB01_0"))
+    assert is_element_present("//a[@id='cid_N04BB01_1']")
+    assert_match(/^Remoteric/, get_text("cid_N04BB01_1"))
     assert is_text_present('-39.7%')
     #assert is_text_present('-16.6%')
 
@@ -212,11 +212,11 @@ class TestCompare < Test::Unit::TestCase
     wait_for_page_to_load "30000"
     assert_equal "CH | DE - ODDB.org | Medikamente | Preisvergleich | Remoteric | Open Drug Database", 
                  get_title
-    assert_match(/^Remoteric/, get_text("cid_"))
-    assert is_element_present("//a[@id='cid_0']")
-    assert_match(/^Amantadin/, get_text("cid_0"))
-    assert is_element_present("//a[@id='cid_1']")
-    assert_match(/^Remotadin/, get_text("cid_1"))
+    assert_match(/^Remoteric/, get_text("cid_N04BB01_"))
+    assert is_element_present("//a[@id='cid_N04BB01_0']")
+    assert_match(/^Amantadin/, get_text("cid_N04BB01_0"))
+    assert is_element_present("//a[@id='cid_N04BB01_1']")
+    assert_match(/^Remotadin/, get_text("cid_N04BB01_1"))
 
     assert is_text_present('Gelb = Zuzahlungsbefreit')
     assert is_text_present('Rot = CH - Produkte')
@@ -253,11 +253,11 @@ class TestCompare < Test::Unit::TestCase
     wait_for_page_to_load "30000"
     assert_equal "CH | DE - ODDB.org | Medikamente | Preisvergleich | Amantadin | Open Drug Database", 
                  get_title
-    assert_match(/^Amantadin/, get_text("cid_"))
-    assert is_element_present("//a[@id='cid_0']")
-    assert_match(/^Remotadin/, get_text("cid_0"))
-    assert is_element_present("//a[@id='cid_1']")
-    assert_match(/^Remoteric/, get_text("cid_1"))
+    assert_match(/^Amantadin/, get_text("cid_N04BB01_"))
+    assert is_element_present("//a[@id='cid_N04BB01_0']")
+    assert_match(/^Remotadin/, get_text("cid_N04BB01_0"))
+    assert is_element_present("//a[@id='cid_N04BB01_1']")
+    assert_match(/^Remoteric/, get_text("cid_N04BB01_1"))
     assert is_text_present('+65.9%')
   ensure
     drb.stop_service

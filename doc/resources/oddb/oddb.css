@@ -9,6 +9,10 @@ a {
 a:hover {
   color: black;
 }
+a.fachinfo {
+  color: black;
+	background-color: #FFF455;
+}
 a.google {
   color: white;
   background-color: #184FCA;
@@ -29,6 +33,15 @@ div.before-searchbar {
 }
 div.atc, div.explain {
   padding: 4px;
+}
+div.chapter {
+  padding-left: 4px;
+}
+div.chapter table {
+  border-collapse: collapse;
+}
+div.chapter td {
+  border: 1px solid #666;
 }
 div.ddd {
   background-color: #dcefd6;
@@ -91,11 +104,11 @@ div#navigation {
   color: white;
   padding: 4px 0px;
 }
-div#navigation div.links a {
-  padding: 0px 4px;
+div#navigation a {
+  padding: 0px 4px 0px 6px;
   border-left: 1px solid white;
 }
-div#navigation div.links a:first-child {
+div#navigation a:first-child {
   border-left: 0px;
 }
 div#navigation a:link,  

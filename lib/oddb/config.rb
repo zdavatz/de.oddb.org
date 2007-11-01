@@ -13,6 +13,8 @@ module ODDB
   ]
   defaults = {
     'admins'              => [],
+    'auth_domain'         => 'org.oddb.de',
+    'auth_server'         => 'drbssl://localhost:9997',
     'config'			        => default_config_files,
     'credentials'         => {},
     'currency_rates'      => 'druby://localhost:10999',

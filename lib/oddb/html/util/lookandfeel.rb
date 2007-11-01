@@ -60,6 +60,7 @@ class Lookandfeel < SBSM::Lookandfeel
       :ean0                     => 'EAN-13: ', 
       :ean1                     => '', 
       :e_query_short            => 'Ihr Such-Stichwort ergibt ein sehr grosses Resultat. Bitte verwenden Sie mindestens 3 Buchstaben.',
+      :email                    => 'E-Mail',
       :empty_comparison         => <<-EOS,
 In unserer Datenbank wurden leider keine Produkte gefunden, 
 die mit diesem Produkt verglichen werden können.
@@ -79,11 +80,13 @@ einmal.
 Vergleichen Sie einfach und schnell Medikamentenpreise.
 Suchen Sie nach Medikamentname oder Wirkstoff.
       EOS
+      :fachinfo                 => 'Fachinformation',
       :festbetragsstufe         => ' (Gesetzestext)',
       :festbetragsstufe_url     => 'http://www.sozialgesetzbuch-bundessozialhilfegesetz.de/buch/sgbv/35.html',
       :festbetragsstufe_1       => 'Arzneimittel mit denselben Wirkstoffen',
       :festbetragsstufe_2       => 'Arzneimittel mit pharmakologisch-therapeutisch vergleichbaren Wirkstoffen, insbesondere mit chemisch verwandten Stoffen',
       :festbetragsstufe_3       => 'Arzneimittel mit therapeutisch vergleichbarer Wirkung, insbesondere Arzneimittelkombinationen',
+      :fi_url                   => 'URL zur Fachinfo',
       :google                   => 'G',
       :google0                  => 'Google-Suche nach ',
       :google1                  => '',
@@ -91,6 +94,8 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :html_title               => 'DE - ODDB.org',
       :html_owner               => 'Open Drug Database',
       :lgpl_license             => 'LGPL',
+      :login                    => 'Anmelden',
+      :logout                   => 'Abmelden',
       :logo                     => 'de.oddb.org - peer reviewed open drug database',
       :more                     => '+',
       :name                     => 'Name',
@@ -107,6 +112,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :pager1                   => ' von ',
       :pager2                   => ':',
       :parts                    => 'Teilpackungen',
+      :pass                     => 'Passwort',
       :prescription_free        => 'O',
       :prescription_needed      => 'R',
       :price_difference         => 'Abweichung vom Festbetrag',
@@ -125,6 +131,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :screencast               => 'Video-Anleitung (Screencast)',
       :screencast_url           => 'http://www.youtube.com/watch?v=TFqW4hmLzn8',
       :search                   => 'Suchen',
+      :square_fachinfo          => 'FI',
       :size                     => 'Packungsgrösse',
       :substance                => 'Inhaltsstoff',
       :th_active_agents         => 'Wirkstoff',
@@ -188,6 +195,7 @@ abruffähig zu veröffentlichen...
       :tt_price_exfactory       => 'Preis: Fabrikabgabepreis exkl. MwSt. in Euro',
       :tt_price_public          => 'Preis: Apothekenverkaufspreis inkl. MwSt. in Euro',
       :tt_product               => 'Präparat ist der Handelsname des Medikaments',
+      :update                   => 'Speichern',
       :welcome_data_declaration => '** Herkunftsdeklaration der Daten **',
       :welcome_drugs            => <<-EOS,
 Willkommen bei de.oddb.org, dem aktuellsten 
@@ -218,16 +226,17 @@ Medikamenten-Preisvergleichs-Portal Deutschlands.
   end
   def result_components
     {
-      [0,0] => :product,
-      [1,0] => :active_agents,
-      [2,0] => :size, 
-      [3,0] => :price_exfactory,
-      [4,0] => :price_public,
-      [5,0] => :price_festbetrag,
-      [6,0] => :ddd_prices,
-      [7,0] => :company,
-      [8,0] => :package_infos,
-      [9,0] => :google,
+      [0,0] => :fachinfo,
+      [1,0] => :product,
+      [2,0] => :active_agents,
+      [3,0] => :size, 
+      [4,0] => :price_exfactory,
+      [5,0] => :price_public,
+      [6,0] => :price_festbetrag,
+      [7,0] => :ddd_prices,
+      [8,0] => :company,
+      [9,0] => :package_infos,
+      [10,0] => :google,
     }
   end
   def tax_factor

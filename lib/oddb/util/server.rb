@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # Util::Server -- de.oddb.org -- 01.09.2006 -- hwyss@ywesee.com
 
+require 'oddb/html/util/known_user'
 require 'oddb/html/util/session'
 require 'oddb/html/util/validator'
 require 'oddb/util/exporter'
@@ -43,6 +44,14 @@ module ODDB
         t.priority = priority
         @admin_threads.add(t)
         t
+      end
+      def login(email, pass)
+        session = ODDB.auth.login(email, pass, ODDB.config.auth_domain)
+        Html::Util::KnownUser.new(session)
+      end
+      def logout(session)
+        ODDB.auth.logout(session)
+      rescue DRb::DRbError, RangeError, NameError
       end
       def run_at(hour, &block)
         Thread.new {

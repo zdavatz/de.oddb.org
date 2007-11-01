@@ -77,6 +77,14 @@ module PackageMethods
     val.value = ddds.zip(Array.new([ddds.size - 1, 0].max, ' / '))
     val
   end
+  def fachinfo(model)
+    if(model.fachinfo.send(@session.language) && (code = model.code(:cid)))
+      link = HtmlGrid::Link.new(:square_fachinfo, model, @session, self)
+      link.css_class = 'square fachinfo'
+      link.href = @lookandfeel._event_url(:fachinfo, [:pzn, code.value])
+      link
+    end
+  end
   def price_festbetrag(model)
     @price_id ||= 0
     @price_id += 1
@@ -128,13 +136,14 @@ module PackageMethods
     end
     link.value = model.name.send(@session.language) \
       || model.product.name.send(@session.language)
-    link.css_id = "cid_#@list_index"
+    link.css_id = "cid_#{model.atc}_#@list_index"
     link.dojo_title = @lookandfeel.lookup(:pzn, model.code(:cid, 'DE'))
     link
   end
   def product_remote(model)
     link = nil
-    if(model.atc && (model.active_agents.size == 1))
+    atc = model.atc
+    if(atc && (model.active_agents.size == 1))
       link = HtmlGrid::Link.new(:compare, model, @session, self)
       link.href = @lookandfeel._event_url(:compare_remote, 
                                           [:uid, model.uid])
@@ -142,7 +151,8 @@ module PackageMethods
       link = HtmlGrid::Span.new(model, @session, self)
     end
     link.value = model.name.send(@session.language)
-    link.css_id = "cid_#@list_index"
+    code = atc && atc.code
+    link.css_id = "cid_#{code}_#@list_index"#"cid_#@list_index"
     link.dojo_title = @lookandfeel.lookup(:ean, model.code(:ean))
     link
   end
@@ -218,6 +228,7 @@ class PackageInnerComposite < HtmlGrid::Composite
     [0,4] => :code_zuzahlungsbefreit,
     [2,4] => :equivalence_factor,
     [0,5] => :code_prescription,
+    [1,6] => :fachinfo,
   }
   CSS_MAP = {
     [1,0] => 'google',

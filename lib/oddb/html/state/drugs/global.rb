@@ -12,6 +12,8 @@ require 'oddb/html/state/drugs/ajax/remote_infos'
 require 'oddb/html/state/drugs/atc_guidelines'
 require 'oddb/html/state/drugs/compare'
 require 'oddb/html/state/drugs/init'
+require 'oddb/html/state/drugs/login'
+require 'oddb/html/state/drugs/fachinfo'
 require 'oddb/html/state/drugs/package'
 require 'oddb/html/state/drugs/products'
 require 'oddb/html/state/drugs/result'
@@ -24,7 +26,8 @@ module ODDB
       module Drugs
 class Global < State::Global
   EVENT_MAP = {
-    :home => Drugs::Init,
+    :home  => Drugs::Init,
+    :login => Drugs::Login,
   }
   def compare_remote
     if((uid = @session.user_input(:uid)) \
@@ -72,6 +75,11 @@ class Global < State::Global
   def _explain_price(code)
     if(package = _package_by_code(code))
       Ajax::ExplainPrice.new(@session, package.price(:public))
+    end
+  end
+  def _fachinfo(code)
+    if((package = _package_by_code(code)) && package.fachinfo)
+      Fachinfo.new(@session, package)
     end
   end
   def navigation

@@ -40,6 +40,8 @@ module ODDB
   logger.level = Logger.const_get(@config.log_level)
   @logger = logger
 
+  @auth = DRbObject.new(nil, @config.auth_server)
+
   Currency = DRbObject.new(nil, @config.currency_rates)
 
   begin

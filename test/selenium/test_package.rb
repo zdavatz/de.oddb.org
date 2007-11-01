@@ -64,43 +64,59 @@ class TestPackage < Test::Unit::TestCase
   end
   def test_package
     package = setup_package
-    @selenium.open "/de/drugs/package/pzn/12345"
-    assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", @selenium.get_title
-    assert @selenium.is_text_present('Amantadin by Producer - Producer AG')
-    assert @selenium.is_text_present('12345')
-    assert !@selenium.is_text_present('54321')
-    assert @selenium.is_text_present('N04BB01 ( Amantadin )')
-    assert @selenium.is_text_present('Packungsgrösse und Wirkstoffe')
-    assert @selenium.is_text_present('5 Ampullen x 20 ml')
-    assert @selenium.is_text_present('100 mg')
-    assert @selenium.is_text_present('Ja')
-    assert !@selenium.is_text_present('Nein')
+    open "/de/drugs/package/pzn/12345"
+    assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", get_title
+    assert is_text_present('Amantadin by Producer - Producer AG')
+    assert is_text_present('12345')
+    assert !is_text_present('54321')
+    assert is_text_present('N04BB01 ( Amantadin )')
+    assert is_text_present('Packungsgrösse und Wirkstoffe')
+    assert is_text_present('5 Ampullen x 20 ml')
+    assert is_text_present('100 mg')
+    assert is_text_present('Ja')
+    assert !is_text_present('Nein')
     package.code(:zuzahlungsbefreit).value = false
-    @selenium.refresh
-    @selenium.wait_for_page_to_load "30000"
-    assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", @selenium.get_title
-    assert_equal "Nein", @selenium.get_text('//tr[5]/td[2]')
-    assert_equal "Ja", @selenium.get_text('//tr[6]/td[2]')
+    refresh
+    wait_for_page_to_load "30000"
+    assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", get_title
+    assert_equal "Nein", get_text('//tr[5]/td[2]')
+    assert_equal "Ja", get_text('//tr[6]/td[2]')
 
     package2 = setup_package('54321')
-    @selenium.open "/de/drugs/package/pzn/54321"
+    open "/de/drugs/package/pzn/54321"
     assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", 
-                 @selenium.get_title
-    assert @selenium.is_text_present('Amantadin by Producer - Producer AG')
-    assert @selenium.is_text_present('Ja')
-    assert !@selenium.is_text_present('Nein')
-    assert @selenium.is_text_present('54321')
-    assert !@selenium.is_text_present('12345')
+                 get_title
+    assert is_text_present('Amantadin by Producer - Producer AG')
+    assert is_text_present('Ja')
+    assert !is_text_present('Nein')
+    assert is_text_present('54321')
+    assert !is_text_present('12345')
   end
   def test_package__search
     setup_package
-    @selenium.open "/de/drugs/package/pzn/12345"
-    assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", @selenium.get_title
-    @selenium.type "query", "Amantadin"
-    @selenium.select "dstype", "Preisvergleich"
-    @selenium.wait_for_page_to_load "30000"
+    open "/de/drugs/package/pzn/12345"
+    assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", get_title
+    type "query", "Amantadin"
+    select "dstype", "Preisvergleich"
+    wait_for_page_to_load "30000"
     assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Preisvergleich | Open Drug Database", 
-                 @selenium.get_title
+                 get_title
+  end
+  def test_admin_package
+    package = setup_package
+    user = login_admin
+    open "/de/drugs/package/pzn/12345"
+    assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", get_title
+    assert is_element_present "fi_url"
+    fachinfo = "A Fachinfo-Document"
+    type "fi_url", "http://host.domain/path.rtf"
+    flexmock(Import::PharmNet::FachInfo).new_instances\
+      .should_receive(:import_rtf).and_return { fachinfo }
+    click "//input[@name='update']"
+    wait_for_page_to_load "30000"
+    assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", get_title
+    assert is_text_present "FI"
+    assert_equal(fachinfo, package.sequence.fachinfo.de)
   end
 end
   end

@@ -42,6 +42,9 @@ module ODDB
       def products
         sequences.collect { |sequence| sequence.product }.uniq
       end
+      def to_s
+        @code.to_s
+      end
       def <=>(other)
         @code <=> other.code
       end

@@ -308,8 +308,30 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     assert_equal "DE - ODDB.org | Medikamente | Suchen | Producer | Preisvergleich | Open Drug Database", 
                  get_title
 
-    assert_match(/^Nomamonamon/, get_text("cid_0"))
-    assert_match(/^Amonamon/, get_text("cid_1"))
+    assert_match(/^Nomamonamon/, get_text("cid_N04BB01_0"))
+    assert_match(/^Amonamon/, get_text("cid_N04BB01_1"))
+  end
+  def test_search__with_fachinfo
+    package = setup_package
+    package.fachinfo.de = "Fachinfo-Document"
+    open "/"
+    assert_equal "DE - ODDB.org | Medikamente | Home | Open Drug Database", get_title
+    type "query", "Amantadin"
+    click "//input[@type='submit']"
+    wait_for_page_to_load "30000"
+    assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", 
+                 get_title
+    assert is_text_present('FI')
+    assert is_text_present('Amantadin by Producer')
+    assert is_text_present('100 mg')
+    assert is_text_present('5 x 20 ml Ampullen')
+    assert is_text_present('6.00')
+    assert is_text_present('10.00')
+    assert is_text_present('-4.00')
+    assert is_text_present('3')
+    assert is_text_present('Ja')
+    assert is_text_present('N04BB01')
+    assert is_text_present('Producer AG')
   end
   def test_search__multiple_substances
     package = setup_package
@@ -409,8 +431,8 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
     assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", get_title
-    assert_match(/^Amantadin by Producer/, get_text("cid_0"))
-    assert !is_element_present("//a[@id='cid_1']")
+    assert_match(/^Amantadin by Producer/, get_text("cid_N04BB01_0"))
+    assert !is_element_present("//a[@id='cid_N04BB01_1']")
     assert is_text_present('Gelb = Zuzahlungsbefreit')
     assert !is_text_present('Rot = CH - Produkte')
   ensure
@@ -454,9 +476,9 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
     assert_equal "CH | DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", get_title
-    assert_match(/^Amantadin by Producer/, get_text("cid_0"))
-    assert is_element_present("//a[@id='cid_1']")
-    assert_match(/^Remotadin/, get_text("cid_1"))
+    assert_match(/^Amantadin by Producer/, get_text("cid_N04BB01_0"))
+    assert is_element_present("//a[@id='cid_N04BB01_1']")
+    assert_match(/^Remotadin/, get_text("cid_N04BB01_1"))
     assert is_text_present('Producer (Schweiz) AG')
     assert is_text_present('10.80')
     assert_equal 'groupheader', get_attribute('//tr[2]@class')
@@ -467,8 +489,8 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     click "link=Präparat"
     wait_for_page_to_load "30000"
     assert_equal "CH | DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", get_title
-    assert_match(/^Remotadin/, get_text("cid_0"))
-    assert_match(/^Amantadin by Producer/, get_text("cid_1"))
+    assert_match(/^Remotadin/, get_text("cid_N04BB01_0"))
+    assert_match(/^Amantadin by Producer/, get_text("cid_N04BB01_1"))
     assert_equal 'groupheader', get_attribute('//tr[2]@class')
     assert_equal 'remote', get_attribute('//tr[3]@class')
     assert_equal 'zuzahlungsbefreit bg', get_attribute('//tr[4]@class')
@@ -476,8 +498,8 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     click "link=Wirkstoff"
     wait_for_page_to_load "30000"
     assert_equal "CH | DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", get_title
-    assert_match(/^Amantadin by Producer/, get_text("cid_0"))
-    assert_match(/^Remotadin/, get_text("cid_1"))
+    assert_match(/^Amantadin by Producer/, get_text("cid_N04BB01_0"))
+    assert_match(/^Remotadin/, get_text("cid_N04BB01_1"))
     assert_equal 'groupheader', get_attribute('//tr[2]@class')
     assert_equal 'zuzahlungsbefreit', get_attribute('//tr[3]@class')
     assert_equal 'remote bg', get_attribute('//tr[4]@class')
@@ -506,7 +528,7 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
     assert_equal "CH | DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", get_title
-    assert_match(/^Remotadin/, get_text("cid_1"))
+    assert_match(/^Remotadin/, get_text("cid_N04BB01_1"))
     mouse_over 'package_infos0.55555'
     assert !60.times { 
       break if (is_element_present("//body/div[5]/table") rescue false)
@@ -528,7 +550,7 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     assert is_text_present('Preis Schweiz (CHF)')
     assert is_text_present('8.14')
 
-    assert_match(/^Remotadin/, get_text("cid_2"))
+    assert_match(/^Remotadin/, get_text("cid_N04BB01_2"))
     mouse_over 'package_infos0.55556'
     assert !60.times { 
       break if (is_element_present("//body/div[7]/table") rescue false)
@@ -577,7 +599,7 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
     assert_equal "CH | DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", get_title
-    assert !is_element_present("//a[@id='cid_1']")
+    assert !is_element_present("//a[@id='cid_N04BB01_1']")
   ensure
     drb.stop_service
   end
@@ -620,8 +642,8 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
     assert_equal "CH | DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", get_title
-    assert is_element_present("//a[@id='cid_0']")
-    assert_match(/^Remotadin/, get_text("cid_0"))
+    assert is_element_present("//a[@id='cid_N04BB01_0']")
+    assert_match(/^Remotadin/, get_text("cid_N04BB01_0"))
     assert is_text_present('Remötadin')
     assert is_text_present('Producer (Schweiz) AG')
     assert is_text_present('10.80')
@@ -640,8 +662,8 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
     assert_equal "CH | DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", get_title
-    assert_match(/^Amantadin by Producer/, get_text("cid_0"))
-    assert !is_element_present("//a[@id='cid_1']")
+    assert_match(/^Amantadin by Producer/, get_text("cid_N04BB01_0"))
+    assert !is_element_present("//a[@id='cid_N04BB01_1']")
     assert !is_text_present('Producer (Schweiz) AG')
     assert !is_text_present('7.20')
   end

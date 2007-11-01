@@ -46,7 +46,15 @@ class HelpLinks < Links
     link.href = "http://wiki.oddb.org/wiki.php/ODDB/Kontakt"
   end
   def link_keys
-    [:contact, :home]
+    user_navigation.concat [:contact, :home]
+  end
+  def user_navigation
+    nav = @session.user.navigation 
+    if(nav.empty?)
+      [:login]
+    else
+      nav
+    end
   end
 end
 class Navigation < Links

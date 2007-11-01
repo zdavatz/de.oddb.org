@@ -17,11 +17,11 @@ class Validator < SBSM::Validator
       'price_public', 'product', 'size', 
     ],
   }
-  EVENTS = [ :ddd, :explain_ddd_price, :explain_price, :package_infos,
-             :compare, :compare_remote, :home, :package, :products,
-             :remote_infos, :search, :sort ]
+  EVENTS = [ :ddd, :explain_ddd_price, :explain_price, :fachinfo, :package_infos,
+             :compare, :compare_remote, :home, :login, :logout, :package,
+             :products, :remote_infos, :search, :sort, :update ]
   NUMERIC = [ :offset, :pzn ]
-  STRINGS = [ :query, :uid, :code ]
+  STRINGS = [ :code, :fi_url, :query, :uid ]
   def page(value) 
     if(num = validate_numeric(:page, value))
       # pages are 1-based for the human user

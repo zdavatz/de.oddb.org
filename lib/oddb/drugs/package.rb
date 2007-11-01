@@ -8,7 +8,7 @@ module ODDB
     class Package < Model
       belongs_to :sequence, 
         delegates(:active_agents, :atc, :company, :ddds, :doses,
-                  :galenic_forms, :product, :substances)
+                  :fachinfo, :galenic_forms, :product, :substances)
       has_many :parts, on_delete(:cascade), delegates(:comparable_size)
       has_many :prices
       is_coded

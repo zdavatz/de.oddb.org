@@ -1,18 +1,10 @@
 #!/usr/bin/env ruby
 # Export::Yaml -- de.oddb.org -- 09.10.2007 -- hwyss@ywesee.com
 
-require 'yaml'
+require 'fixes/yaml'
 require 'oddb/business/company'
 require 'oddb/drugs'
 
-## FIXME: the following works around Character::Encoding::UTF8 hanging when 
-#         yaml's String#is_binary_data? calls self.count("\x00")
-class String
-  def is_binary_data?
-    ( self.count( "^ -~", "^\r\n" ) / self.size > 0.3 \
-     || self.include?( "\x00" ) ) unless empty?
-  end
-end
 module ODDB
   module OddbUri
     YAML_URI = '!de.oddb.org,2007'

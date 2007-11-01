@@ -96,6 +96,33 @@ module TestCase
     assert_equal [], @verification_errors
     super
   end
+  def login(email, *permissions)
+    user = mock_user email, *permissions
+    @auth.should_receive(:login).and_return(user)
+    open "/de/drugs/login"
+    type "email", email
+    type "pass", "test"
+    click "//input[@name='login']"
+    wait_for_page_to_load "30000"
+    user
+  end
+  def login_admin
+    login "test.admin@oddb.org", ['login', 'org.oddb.de.Admin']
+  end
+  def mock_user(email, *permissions)
+    user = flexmock(email)
+    user.should_receive(:allowed?).and_return { |*pair|
+      permissions.include?(pair)
+    }
+    user.should_receive(:name).and_return(email)
+    user.should_receive(:get_preference)
+    user.should_receive(:find_entity).and_return { |email|
+      (@yus_entities ||= {})[email]
+    }
+    user.should_receive(:last_login)
+    user.should_ignore_missing
+    user
+  end
 end
   end
 end

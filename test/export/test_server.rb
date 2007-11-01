@@ -65,6 +65,29 @@ module ODDB
           block.call(path) }
         Server.remote_export_chde
       end
+      def test_remote_export_yaml
+        flexmock(Util::Mail).should_receive(:notify_admins)\
+          .and_return { |subj, body| flunk(body.join("\n")) }
+        klass = flexmock(Export::Yaml::Drugs)
+        ODDB.config.remote_databases = []
+        assert_nothing_raised {
+          Server.remote_export_yaml
+        }
+        exp = flexmock('exp')
+        path = File.join(@data_dir, 'de.oddb.yaml')
+        remote = flexmock('remote')
+        drb = DRb.start_service('druby://localhost:0', remote)
+        klass.should_receive(:new).and_return(exp)
+        exp.should_receive(:export).and_return { |file|
+          assert_instance_of(File, file)
+          assert_equal(path, file.path)
+        }
+        ODDB.config.remote_databases = [drb.uri]
+        remote.should_receive(:remote_export).and_return { |file, block| 
+          assert_equal("de.oddb.yaml", file)
+          block.call(path) }
+        Server.remote_export_yaml
+      end
       def test_on_monthday
         called = false
         Server.on_monthday(3, Date.new(2007,10)) {

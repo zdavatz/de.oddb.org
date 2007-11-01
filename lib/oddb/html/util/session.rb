@@ -20,6 +20,15 @@ class Session < SBSM::Session
   DEFAULT_ZONE = 'drugs'
   EXPIRES = ODDB.config.session_timeout
   LF_FACTORY = LookandfeelFactory
+  def login
+    @user = @app.login(user_input(:email), user_input(:pass))
+    @user.session = self if(@user.respond_to?(:session=))
+    @user
+  end
+  def logout
+    @app.logout(@user.auth_session) if(@user.respond_to?(:auth_session))
+    super
+  end
   def navigation
     state.navigation
   end
