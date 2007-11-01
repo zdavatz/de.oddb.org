@@ -226,7 +226,7 @@ Medikamenten-Preisvergleichs-Portal Deutschlands.
   end
   def result_components
     {
-      [0,0] => :fachinfo,
+      [0,0] => :fachinfo_link,
       [1,0] => :product,
       [2,0] => :active_agents,
       [3,0] => :size, 

@@ -77,7 +77,7 @@ module PackageMethods
     val.value = ddds.zip(Array.new([ddds.size - 1, 0].max, ' / '))
     val
   end
-  def fachinfo(model)
+  def fachinfo_link(model)
     if(model.fachinfo.send(@session.language) && (code = model.code(:cid)))
       link = HtmlGrid::Link.new(:square_fachinfo, model, @session, self)
       link.css_class = 'square fachinfo'
@@ -228,7 +228,7 @@ class PackageInnerComposite < HtmlGrid::Composite
     [0,4] => :code_zuzahlungsbefreit,
     [2,4] => :equivalence_factor,
     [0,5] => :code_prescription,
-    [1,6] => :fachinfo,
+    [1,6] => :fachinfo_link,
   }
   CSS_MAP = {
     [1,0] => 'google',
