@@ -14,7 +14,7 @@ module ODDB
         [@data].pack('H*')
       end
       def filename
-        @filename ||= "%s.png" % Digest::MD5.hexdigest(to_png)
+        @filename ||= "%s.png" % Digest::MD5.hexdigest(@data)
       end
       def image
         Magick::Image.from_blob(blob).first
@@ -27,8 +27,8 @@ module ODDB
       end
       def to_png
         img = image
-        geom = sprintf("%ix%i", (@width || img.columns) / PNG_SCALE, 
-                                (@height || img.rows) / PNG_SCALE)
+        geom = sprintf("%ix%i!", (@width || img.columns) / PNG_SCALE, 
+                                 (@height || img.rows) / PNG_SCALE)
         img.change_geometry(geom) { |cols, rows, tmp|
           img.resize!(cols, rows)
         }

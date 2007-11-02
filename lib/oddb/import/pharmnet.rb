@@ -36,7 +36,7 @@ class FiParser < Rtf
            when /^6\.5\.?\s*(Art|Behältnis)/i then 'packaging'
            when /^6\.6\.?\s*(Hinweis|Entsorgung)/i then 'disposal'
            when /^6\.?\sPharmazeutisch/i then 'pharmaceutic'
-           when /^7\.?\s*(Pharmazeutischer|Inhaber)/i  then 'company'
+           when /^7\.?\s*(Name|Pharmazeutischer|Inhaber)/i  then 'company'
            when /^8\.?\s*Zulassung/i then 'registration'
            when /^9\.?\s*Datum/i then 'registration_date'
            when /^zusätzliche Angaben/i

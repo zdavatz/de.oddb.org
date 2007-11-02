@@ -48,6 +48,26 @@ Angabe als geom. Mittelwerte Standardabweichung (* Angabe als Median und Streubr
     EOS
     assert_equal(expected.strip, chapters.last.to_s)
   end
+  def test_import__omeprazol
+    path = File.expand_path('data/rtf/pharmnet/omeprazol.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = %w{default name composition galenic_form clinical indications
+                  dosage counterindications precautions interactions pregnancy
+                  driving_ability unwanted_effects overdose pharmacology
+                  pharmacodynamics pharmacokinetics preclinicals pharmaceutic
+                  excipients incompatibilities shelf_life storage packaging 
+                  disposal company registration registration_date date
+                  sale_limitation }
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+    expected = "11.\tVerschreibungsstatus/Apothekenpflicht\nVerschreibungspflichtig"
+    assert_equal(expected, chapters.last.to_s)
+  end
   def test_import__selegilin
     path = File.expand_path('data/rtf/pharmnet/selegilin.rtf', 
                             File.dirname(__FILE__))
