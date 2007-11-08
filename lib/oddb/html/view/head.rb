@@ -11,12 +11,10 @@ module ODDB
     module View
 class Head < HtmlGrid::DivComposite
   COMPONENTS = {
-    [0,0]    =>  :logo,
-    #[1,0,0]  =>  :sponsor,
-    #[1,0,1]  =>  :welcome,
-    #[0,1]    =>  :language_chooser,
-    #[1,1]    =>  View::TabNavigation,
+    [0,0] => :user,
+    [0,1] => :logo,
   }
+  CSS_ID_MAP = ["user"]
   def logo(model)
     target = :home
     logo = HtmlGrid::Image.new(:logo, model, @session, self)
@@ -29,16 +27,20 @@ class Head < HtmlGrid::DivComposite
       link
     end
   end
+  def user(model)
+    user = @session.user
+    if(user.is_a? Util::KnownUser)
+      @lookandfeel.lookup(:welcome_user, user.name)
+    end
+  end
 end
 class WelcomeHead < Head
   COMPONENTS = {
-    [0,0] =>  :welcome,
-    [0,1] =>  :logo,
-    #[1,0,0]  =>  :sponsor,
-    #[0,1]    =>  :language_chooser,
-    #[1,1]    =>  View::TabNavigation,
+    [0,0] => :user,
+    [0,1] => :welcome,
+    [0,2] => :logo,
   }
-  CSS_ID_MAP = ["welcome"]
+  CSS_ID_MAP = ["user", "welcome"]
   def welcome(model)
     link = HtmlGrid::Link.new(:welcome_drugs, model, @session, self)
     link.value.gsub!("\n", "<br>")

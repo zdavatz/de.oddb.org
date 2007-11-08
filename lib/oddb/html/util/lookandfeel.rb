@@ -196,6 +196,8 @@ abruffähig zu veröffentlichen...
       :tt_price_public          => 'Preis: Apothekenverkaufspreis inkl. MwSt. in Euro',
       :tt_product               => 'Präparat ist der Handelsname des Medikaments',
       :update                   => 'Speichern',
+      :welcome_user0            => 'Willkommen bei de.oddb.org! Sie sind angemeldet als ',
+      :welcome_user1            => '',
       :welcome_data_declaration => '** Herkunftsdeklaration der Daten **',
       :welcome_drugs            => <<-EOS,
 Willkommen bei de.oddb.org, dem aktuellsten 

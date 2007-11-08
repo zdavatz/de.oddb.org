@@ -144,10 +144,16 @@ div#title, th {
   color: white;
   padding: 4px;
 }
+div#user {
+  float: right;
+  text-align: right;
+  font-weight: bold;
+}
 div#welcome {
   margin-top: 75px;
   float: right;
   text-align: right;
+  clear: right;
 }
 form {
   margin: 0px;
