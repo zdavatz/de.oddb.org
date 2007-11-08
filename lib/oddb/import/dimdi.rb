@@ -392,6 +392,23 @@ module Dimdi
         move_from.delete
       end
     end
+    def postprocess
+      Drugs::Product.all { |product|
+        sequences = product.sequences.dup
+        sequences.each { |sequence|
+          sequences.dup.each { |other|
+            if(sequence != other && other.identical?(sequence))
+              other.packages.each { |package|
+                package.sequence = sequence
+                package.save
+              }
+              sequences.delete other # should be safe because Array is ordered
+              other.delete
+            end
+          }
+        }
+      }
+    end
     def rename_product(row, package, name)
       @renamed_products += 1
       product = package.product

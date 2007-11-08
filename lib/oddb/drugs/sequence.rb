@@ -35,6 +35,14 @@ module ODDB
       def galenic_forms
         compositions.collect { |comp| comp.galenic_form }.compact.uniq
       end
+      def identical?(other)
+        comparable?(other) && other.product == product \
+          && compositions.each_with_index { |comp, idx| 
+          unless(comp.galenic_form.eql?(other.compositions.at(idx).galenic_form))
+            return false
+          end
+        }
+      end
       def include?(substance, dose=nil, unit=nil)
         compositions.any? { |comp|
           comp.include?(substance, dose, unit)
