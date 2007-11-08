@@ -18,7 +18,7 @@ class FiParser < Rtf
            when /^4\.1\.?\s*Anwendung/i then 'indications'
            when /^4\.2\.?\s*Dosierung/i then 'dosage'
            when /^4\.3\.?\s*Gegenanzeigen/i then 'counterindications'
-           when /^4\.4\.?\s*Warnhinweise/i then 'precautions'
+           when /^4\.4\.?\s*(Besondere\s+)?Warnhinweise/i then 'precautions'
            when /^4\.5\.?\s*Wechselwirkungen/i then 'interactions'
            when /^4\.6\.?\s*(Anwendung|Schwangerschaft)/i then 'pregnancy'
            when /^4\.7\.?\s*Auswirkung/i then 'driving_ability'
@@ -29,12 +29,12 @@ class FiParser < Rtf
            when /^5\.2\.?\s*Pharmakokinetisch/i then 'pharmacokinetics'
            when /^5\.3\.?\s*Präklinisch/i then 'preclinicals'
            when /^5\.?\s*Pharmakologisch/i then 'pharmacology'
-           when /^6\.1\.?\s*Hilfsstoffe?/i then 'excipients'
+           when /^6\.1\.?\s*(Liste|Hilfsstoffe?)/i then 'excipients'
            when /^6\.2\.?\s*Inkompatibilitäten/i then 'incompatibilities'
            when /^6\.3\.?\s*(Dauer|Haltbarkeit)/i then 'shelf_life'
            when /^6\.4\.?\s*(Besondere|Lagerung|Aufbewahrung)/i then 'storage'
            when /^6\.5\.?\s*(Art|Behältnis)/i then 'packaging'
-           when /^6\.6\.?\s*(Hinweis|Entsorgung)/i then 'disposal'
+           when /^6\.6\.?\s*(Besondere|Hinweis|Entsorgung)/i then 'disposal'
            when /^6\.?\sPharmazeutisch/i then 'pharmaceutic'
            when /^7\.?\s*(Name|Pharmazeutischer|Inhaber)/i  then 'company'
            when /^8\.?\s*Zulassung/i then 'registration'
@@ -47,12 +47,24 @@ class FiParser < Rtf
     end
     super
   end
+  def _sanitize_text(value)
+    if @buffer.empty? && @buffer.is_a?(Text::Paragraph)
+      value.gsub! /^([BF][A-Z0-9]{1,2})?\s*/, ''
+    end
+  end
 end
 class FachInfo < Import
   def import_rtf(agent, url)
     file = agent.get url
     doc = FiParser.new.import StringIO.new(file.body)
     doc.chapters.shift
+    ## ensure that chapter-headings are bold
+    doc.chapters.each { |chapter|
+      if((paragraph = chapter.paragraphs.first) \
+         && (format = paragraph.formats.first))
+        format.augment "b"
+      end
+    }
     doc
   end
 end

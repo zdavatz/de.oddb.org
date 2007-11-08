@@ -7,9 +7,16 @@ module ODDB
       attr_accessor :start, :end, :values
       VALID_FORMATS = %w{b i sub}
       def initialize(*args)
-        @values = (args & VALID_FORMATS).sort
+        @values = []
+        augment *args
         @start = 0
         @end = -1
+      end
+      def augment(*args)
+        @values.concat (args & VALID_FORMATS)
+        @values.sort!
+        @values.uniq!
+        @values
       end
       def range
         @start..@end

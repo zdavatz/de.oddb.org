@@ -325,9 +325,7 @@ class Rtf
   end
   def _import_text(value)
     @buffer.set_format(*current_group)
-    if @buffer.empty? && @buffer.is_a?(Text::Paragraph)
-      value.gsub! /^(B[A-Z0-9]{1,2})?\s*/, ''
-    end
+    _sanitize_text(value)
     @buffer << value.gsub(/\\[\-~]/, '').gsub(/\\-/, '')
   end
   def import_token(reader)
@@ -363,6 +361,8 @@ class Rtf
     @groups[-2] || []
   end
   def set_font_size(size)
+  end
+  def _sanitize_text(value)
   end
 end
   end

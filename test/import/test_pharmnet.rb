@@ -17,6 +17,32 @@ class TestFiParser < Test::Unit::TestCase
     @importer = FiParser.new
     ODDB.config.var = File.expand_path('var', File.dirname(__FILE__))
   end
+  def test_import__amlodipin
+    path = File.expand_path('data/rtf/pharmnet/amlodipin.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = %w{default name composition galenic_form clinical indications
+                  dosage counterindications precautions interactions pregnancy
+                  driving_ability unwanted_effects overdose pharmacology
+                  pharmacodynamics pharmacokinetics preclinicals pharmaceutic
+                  excipients incompatibilities shelf_life storage packaging 
+                  disposal company registration registration_date date
+                  sale_limitation }
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+    expected = "Wortlaut der f\303\274r die Fachinformation vorgesehenen Angaben\nFachinformation"
+    assert_equal(expected, chapters.at(0).to_s)
+    expected = "1.\tBezeichnung der Arzneimittel\nAmlodipin [besilat] - 1 A Pharma 5 mg Tabletten\nAmlodipin [besilat] - 1 A Pharma 7,5 mg Tabletten\nAmlodipin [besilat] - 1 A Pharma 10 mg Tabletten"
+    assert_equal(expected, chapters.at(1).to_s)
+    expected = "4.6\tSchwangerschaft und Stillzeit\nSchwangerschaft\nEs liegen keine hinreichenden Daten f\303\274r die Anwendung von Amlodipin bei Schwangeren vor. \nTierexperimentelle Studien haben Reproduktionstoxizit\303\244t bei hohen Dosen gezeigt (siehe Abschnitt 5.3). Das potentielle Risiko f\303\274r den Menschen ist unbekannt. Amlodipin darf w\303\244hrend der Schwangerschaft nicht angewendet werden, es sei denn, der therapeutische Nutzen \303\274berwiegt deutlich das potentielle Risiko einer Behandlung.\nStillzeit\nEs ist nicht bekannt, ob Amlodipin in die Muttermilch \303\274bergeht. Es wird geraten, w\303\244hrend der Behandlung mit Amlodipin abzustillen."
+    assert_equal(expected, document.chapter("pregnancy").to_s)
+    expected = "11.\tVerkaufsabgrenzung\nVerschreibungspflichtig"
+    assert_equal(expected, chapters.last.to_s)
+  end
   def test_import__aspirin
     path = File.expand_path('data/rtf/pharmnet/aspirin.rtf', 
                             File.dirname(__FILE__))
