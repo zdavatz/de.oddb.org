@@ -8,24 +8,46 @@ module ODDB
     module View
       module Drugs
         module Admin
-class PackageForm < HtmlGrid::Form
-  EVENT = :update
-  COMPONENTS = {
-    [0,0] => :fi_url, 
-    [1,1] => :submit, 
+class PackageForm < Drugs::PackageInnerComposite
+  include HtmlGrid::FormMethods
+  COLSPAN_MAP = {
+    [1,7] => 3,
   }
-  LABELS = true
+  COMPONENTS = {
+    [0,0] => :name, 
+    ## google's third parameter ensures that its link is written before 
+    #  the name - this allows a float: right in css to work correctly
+    [1,0,0] => :google,  
+    [2,0] => :code_pzn, 
+    [0,1] => :company, 
+    [2,1] => :atc,
+    [0,2] => :price_public, 
+    [2,2] => :price_festbetrag,
+    [0,3] => :code_festbetragsstufe,
+    [2,3] => :code_festbetragsgruppe,
+    [0,4] => :code_zuzahlungsbefreit,
+    [2,4] => :equivalence_factor,
+    [0,5] => :code_prescription,
+    [1,6] => :fachinfo_link,
+    [0,7] => :fi_url,
+    [1,8] => :submit, 
+  }
+  COMPONENT_CSS_MAP = {
+    [1,7] => 'url',
+  }
+  EVENT = :update
+  SYMBOL_MAP = {
+    :fi_url => HtmlGrid::InputText,
+  }
 end
 class PackageComposite < Drugs::PackageComposite
   COMPONENTS = {
     [0,0] => :snapback, 
     [0,1] => InlineSearch, 
     [0,2] => :name,
-    [0,3] => PackageInnerComposite,
-    [0,4] => PackageForm,
-    [0,5] => :parts,
+    [0,3] => PackageForm,
+    [0,4] => :parts,
   }
-  CSS_MAP = { 0 => 'before-searchbar', 5 => 'divider' }
 end
 class Package < Drugs::Package
   CONTENT = PackageComposite

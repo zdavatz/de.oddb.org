@@ -174,6 +174,9 @@ form {
 img {
   border: 0px;
 }
+input.url {
+  width: 600px;
+}
 label {
   font-weight: bold;
 }
