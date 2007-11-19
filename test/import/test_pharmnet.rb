@@ -5,9 +5,14 @@ $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
 require 'test/unit'
 require 'flexmock'
+require 'oddb/business/company'
 require 'oddb/config'
+require 'oddb/drugs/active_agent'
+require 'oddb/drugs/galenic_form'
+require 'oddb/drugs/sequence'
+require 'oddb/drugs/substance'
 require 'oddb/import/pharmnet'
-#require 'hpricot'
+require 'mechanize'
 
 module ODDB
   module Import
@@ -16,6 +21,25 @@ class TestFiParser < Test::Unit::TestCase
   def setup
     @importer = FiParser.new
     ODDB.config.var = File.expand_path('var', File.dirname(__FILE__))
+  end
+  def test_import__ace_hemmer
+    path = File.expand_path('data/rtf/pharmnet/ace_hemmer_ratio.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "name", "sale_limitation", "composition",
+                 "substance_group", "active_agents", "excipients",
+                 "indications", "counterindications", "unwanted_effects",
+                 "interactions", "precautions", "incompatibilities", "dosage",
+                 "application", "overdose", "pharmacology", "toxicology",
+                 "pharmacokinetics", "bioavailability", "other_advice",
+                 "shelf_life", "storage", "packaging", "date", "company",
+                 "producer"]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
   end
   def test_import__amlodipin
     path = File.expand_path('data/rtf/pharmnet/amlodipin.rtf', 
@@ -134,6 +158,60 @@ class TestPharmNet < Test::Unit::TestCase
     @importer = FachInfo.new
     ODDB.config.var = File.expand_path('var', File.dirname(__FILE__))
   end
+  def setup_search(resultfile='empty_result.html')
+    agent = flexmock(WWW::Mechanize.new)
+    setup_agent(agent, resultfile, :get)
+    setup_agent(agent, resultfile, :submit) { |form, button| 
+      form.action 
+    }
+    setup_agent(agent, resultfile, :click) { |link| link.href }
+    agent
+  end
+  def setup_agent(agent, resultfile, symbol, &block)
+    dir = File.expand_path('data/html/pharmnet', File.dirname(__FILE__))
+    agent.should_receive(symbol).and_return { |argument, *data|
+      if(block)
+        argument = block.call(argument, *data)
+      end
+      name = case argument
+             when "http://www.pharmnet-bund.de/dynamic/de/am-info-system/index.html"
+               'index.html'
+             when "http://gripsdb.dimdi.de/websearch/servlet/Gate#__DEFANCHOR__"
+               'gate.html'
+             when "/websearch/servlet/FlowController/AcceptFZK?uid=000002"
+               'search.html'
+             when "/websearch/servlet/FlowController/DisplaySearchForm?uid=000002"
+               'search_filtered.html'
+             when "/websearch/servlet/FlowController/Search?uid=000002"
+               (@resultfiles ||= []).shift || resultfile
+             when "http://gripsdb.dimdi.de/websearch/servlet/FlowController/DisplayTitles?index=1&uid=000002"
+               'paged_result_2.html'
+             when "/websearch/servlet/FlowController/Documents-display"
+               (@displayfiles ||= []).shift || 'display.html'
+             when %r{/amispb/doc}
+               '../../rtf/pharmnet/aspirin.rtf'
+             else
+               flunk "encountered unknown path: #{argument}"
+             end
+      path = File.join(dir, name)
+      uri = URI.parse argument
+      agent.pluggable_parser.parser("text/html").new(
+        URI.parse("http://www.pharmnet-bund.de" + uri.path),
+        {'content-type'=>'text/html'}, File.read(path), 200
+      ) { |parser| parser.mech = agent }
+    }
+  end
+  def test_get_search_form
+    agent = setup_search
+    form = @importer.get_search_form(agent)
+    assert_instance_of(WWW::Mechanize::Form, form)
+    assert_equal("/websearch/servlet/FlowController/Search?uid=000002", 
+                 form.action)
+    radio = form.radiobuttons.find { |b| b.name == "WFTYP" && b.value == "YES" }
+    assert_equal(true, radio.checked)
+    field = form.field('term')
+    assert_instance_of(WWW::Mechanize::Field, field)
+  end
   def test_import_rtf
     url = "http://gripsdb.dimdi.de/amispb/doc/2136914-20050504/OBFM654A78B701C54FC6.rtf"
     path = File.expand_path('data/rtf/pharmnet/selegilin.rtf', 
@@ -143,6 +221,231 @@ class TestPharmNet < Test::Unit::TestCase
     agent.should_receive(:get).with(url).and_return(file)
     file.should_receive(:body).and_return { File.read path }
     document = @importer.import_rtf(agent, url)
+    assert_instance_of Text::Document, document
+  end
+  def test_result_page__empty_result
+    agent = setup_search
+    form = @importer.get_search_form(agent)
+    page = @importer.result_page(form, 'Aar O S')
+    assert_instance_of WWW::Mechanize::Page, page
+    result = @importer.extract_result agent, page
+    assert result.empty?
+  end
+  def test_result_page
+    agent = setup_search "result.html"
+    form = @importer.get_search_form(agent)
+    page = @importer.result_page(form, 'Aarane')
+    assert_instance_of WWW::Mechanize::Page, page
+    result = @importer.extract_result agent, page
+    assert_equal(1, result.size)
+    expected = [{
+      :data => [ "AARANE N", 
+                 "Suspension mit Treibmittel", 
+                 "Sanofi-Aventis Deutschland GmbH" ], 
+      :href => "/websearch/servlet/FlowController/Documents-display?uid=000002&docId=1"
+    }]
+    assert_equal expected, result
+  end
+  def test_result_page__paged
+    agent = setup_search "paged_result_1.html"
+    form = @importer.get_search_form(agent)
+    page = @importer.result_page(form, 'Aspirin')
+    assert_instance_of WWW::Mechanize::Page, page
+    result = @importer.extract_result agent, page
+    assert_equal(18, result.size)
+    expected = {
+      :data=> [ "Aspirin", "Tablette", "Bayer Vital GmbH" ],
+      :href=> "/websearch/servlet/FlowController/Documents-display?uid=000002&docId=1"
+    }
+    assert_equal expected, result.first
+    expected = {
+      :data=> [ "Aspirin-Colfarit 100mg", 
+                "magensaftresistente Tablette", 
+                "Bayer Vital GmbH"],
+      :href=> "/websearch/servlet/FlowController/Documents-display?uid=000002&docId=18"
+    }
+    assert_equal expected, result.last
+  end
+  def test_get_details
+    agent = setup_search "result.html"
+    form = @importer.get_search_form(agent)
+    page = @importer.result_page(form, 'Aarane')
+    result = @importer.extract_result agent, page
+    page = @importer.get_details agent, page, result.first
+    assert_instance_of WWW::Mechanize::Page, page
+    details = @importer.extract_details page
+    expected = {
+      :fachinfo=>"/amispb/doc/2007/08/15/2103159/OBFM2F47BD1E01C7DE6A.rtf",
+      :composition=> [
+        { :dose => Drugs::Dose.new(0.5, "mg"), :ask_nr => "", 
+          :substance => "Reproterolhydrochlorid" },
+        { :dose => Drugs::Dose.new(1, "mg"), :ask_nr => "", 
+          :substance => "Natriumcromoglicat (Ph.Eur.)" }
+      ],
+      :date => Date.new(2007,06,29),
+    }
+    assert_equal expected, details
+  end
+  def test_search__paged
+    agent = setup_search "paged_result_1.html"
+    result = @importer.search agent, 'Aspirin'
+    assert_equal 18, result.size
+    expected = {
+      :fachinfo=>"/amispb/doc/2007/08/15/2103159/OBFM2F47BD1E01C7DE6A.rtf",
+      :composition=> [
+        { :dose => Drugs::Dose.new(0.5, "mg"), :ask_nr => "", 
+          :substance=>"Reproterolhydrochlorid" },
+        { :dose => Drugs::Dose.new(1, "mg"), :ask_nr => "", 
+          :substance=>"Natriumcromoglicat (Ph.Eur.)" }
+      ],
+      :data => ["Aspirin", "Tablette", "Bayer Vital GmbH"],
+      :date => Date.new(2007,06,29),
+    }
+    assert_equal expected, result.first
+    expected = {
+      :fachinfo=>"/amispb/doc/2007/08/15/2103159/OBFM2F47BD1E01C7DE6A.rtf",
+      :composition=> [
+        { :dose => Drugs::Dose.new(0.5, "mg"), :ask_nr => "", 
+          :substance=>"Reproterolhydrochlorid" },
+        { :dose => Drugs::Dose.new(1, "mg"), :ask_nr => "", 
+          :substance=>"Natriumcromoglicat (Ph.Eur.)" }
+      ],
+      :data=> [ "Aspirin-Colfarit 100mg", 
+                "magensaftresistente Tablette", 
+                "Bayer Vital GmbH"],
+      :date => Date.new(2007,06,29),
+    }
+    assert_equal expected, result.last
+  end
+  def test_search__cached
+    agent = setup_search "paged_result_1.html"
+    result = @importer.search agent, 'Aspirin'
+    agent2= flexmock(WWW::Mechanize.new)
+    agent2.should_receive(:get).and_return { 
+      raise "the search for aspirin should be cached" }
+    agent2.should_receive(:submit).and_return { 
+      raise "the search for aspirin should be cached" }
+    agent2.should_receive(:click).and_return { 
+      raise "the search for aspirin should be cached" }
+    result2 = @importer.search agent2, 'aspirin'
+    assert_equal result, result2
+  end
+  def test_assign_fachinfo__no_suitable_fachinfo_found__no_active_agents
+    @resultfiles = %w{empty_result.html result.html}
+    agent = setup_search
+    sequence = flexmock(Drugs::Sequence.new)
+    sequence.should_receive(:name)\
+      .and_return(Util::Multilingual.new(:de => 'Aar O S'))
+    company = Business::Company.new
+    company.name.de = 'Company'
+    sequence.should_receive(:company).and_return flexmock(company)
+    @importer.assign_fachinfo agent, sequence
+    assert sequence.fachinfo.empty?
+  end
+  def test_assign_fachinfo__no_suitable_fachinfo_found
+    @resultfiles = %w{empty_result.html result.html}
+    agent = setup_search
+    sequence = flexmock(Drugs::Sequence.new)
+    sequence.should_receive(:name)\
+      .and_return(Util::Multilingual.new(:de => 'Aar O S'))
+    company = Business::Company.new
+    company.name.de = 'Company'
+    sequence.should_receive(:company).and_return flexmock(company)
+    substance = Drugs::Substance.new
+    substance.name.de = 'Acetylsalicylsäure'
+    act = Drugs::ActiveAgent.new substance, 300
+    sequence.should_receive(:active_agents).and_return [flexmock(act)]
+    @importer.assign_fachinfo agent, sequence
+    assert sequence.fachinfo.empty?
+  end
+  def test_assign_fachinfo
+    agent = setup_search "result.html"
+    sequence = flexmock(Drugs::Sequence.new)
+    sequence.should_receive(:name)\
+      .and_return(Util::Multilingual.new(:de => 'Aarane'))
+    company = Business::Company.new
+    company.name.de = 'Sanofi-Aventis Dt. GmbH'
+    sequence.should_receive(:company).and_return flexmock(company)
+    galform = Drugs::GalenicForm.new
+    galform.description.de = 'Dosieraerosol'
+    sequence.should_receive(:galenic_forms).and_return [flexmock(galform)]
+    substance1 = Drugs::Substance.new
+    substance1.name.de = 'Reproterol'
+    agent1 = Drugs::ActiveAgent.new substance1, 0
+    substance2 = Drugs::Substance.new
+    substance2.name.de = 'Cromoglicin'
+    agent2 = Drugs::ActiveAgent.new substance2, 0
+    sequence.should_receive(:active_agents)\
+      .and_return [flexmock(agent1), flexmock(agent2)]
+    @importer.assign_fachinfo agent, sequence
+    assert !sequence.fachinfo.empty?
+  end
+  def test_assign_fachinfo__many
+    @displayfiles = %w{display2.html display3.html display1.html} * 6
+    agent = setup_search "paged_result_1.html"
+    sequence = flexmock(Drugs::Sequence.new)
+    sequence.should_receive(:name)\
+      .and_return(Util::Multilingual.new(:de => 'Aspirin Protect'))
+    company = Business::Company.new
+    company.name.de = 'Bayer Vital GmbH'
+    sequence.should_receive(:company).and_return flexmock(company)
+    galform = Drugs::GalenicForm.new
+    galform.description.de = 'Tabletten, Magensaftresistent'
+    sequence.should_receive(:galenic_forms).and_return [flexmock(galform)]
+    substance = Drugs::Substance.new
+    substance.name.de = 'Acetylsalicylsäure'
+    act = Drugs::ActiveAgent.new substance, 300
+    sequence.should_receive(:active_agents).and_return [flexmock(act)]
+    @importer.assign_fachinfo agent, sequence
+    assert !sequence.fachinfo.empty?
+  end
+  def test_exclusive_permutation
+    assert_equal([[[0,0]]], @importer.exclusive_permutation(1))
+    assert_equal([[[0,0], [1,1]], [[1,0], [0,1]]], 
+                 @importer.exclusive_permutation(2))
+    assert_equal([ [[0,0], [1,1], [2,2]], 
+                   [[0,0], [2,1], [1,2]],
+                   [[1,0], [0,1], [2,2]],
+                   [[1,0], [2,1], [0,2]],
+                   [[2,0], [0,1], [1,2]],
+                   [[2,0], [1,1], [0,2]], ], 
+                 @importer.exclusive_permutation(3))
+  end
+  def test_ngram_similarity
+    assert_in_delta(1.0, @importer.ngram_similarity('Tablette', 'tablette'),
+                    0.00001)
+    assert_in_delta(0.8, @importer.ngram_similarity('Tablette', 'Tabletten'),
+                    0.00001)
+    assert_in_delta(0.75, 
+                    @importer.ngram_similarity('Tablette, magensaftresistent', 
+                                               'magensaftresistente Tabletten'),
+                    0.0001)
+    assert_in_delta(0.18, 
+                    @importer.ngram_similarity('Tablette, magensaftresistent', 
+                                               'Brausetabletten'), 
+                    0.01)
+    assert_in_delta(0.666, 
+                    @importer.ngram_similarity('Aspirin Protect', 
+                                               'Aspirin protect 300mg'),
+                    0.001)
+    assert_in_delta(0.333,
+                    @importer.ngram_similarity('Reproterol', 
+                                               'Reproterolhydrochlorid'),
+                    0.001)
+    assert_in_delta(0.238,
+                    @importer.ngram_similarity('Cromoglicin', 
+                                               'Natriumcromoglicat (Ph.Eur.)'),
+                    0.001)
+
+  end
+  def test_suitable_data
+    data = {
+      :data => ['ACE-Hemmer-ratiopharm 100', 'Tabletten', 'Ratiopharm GmbH'],
+      :composition => []
+    }
+    comparison = ['Ace Hemmer Ratio', 'Tabletten', 'Ratiopharm']
+
+    assert_not_nil @importer._suitable_data(data, comparison, 0)
   end
 end
     end

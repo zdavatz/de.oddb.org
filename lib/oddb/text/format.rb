@@ -13,7 +13,7 @@ module ODDB
         @end = -1
       end
       def augment(*args)
-        @values.concat (args & VALID_FORMATS)
+        @values.concat(args & VALID_FORMATS)
         @values.sort!
         @values.uniq!
         @values

@@ -128,7 +128,7 @@ class TestGuidelines < Test::Unit::TestCase
   end
   def setup_page(url, html)
     response = {'content-type' => 'text/html'}
-    WWW::Mechanize::Page.new(url, response, html, 200)
+    WWW::Mechanize::Page.new(URI.parse(url), response, html, 200)
   end
   def teardown
     ODDB.config.credentials = {}

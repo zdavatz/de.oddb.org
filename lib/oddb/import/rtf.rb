@@ -279,6 +279,7 @@ class Rtf
         end
       end
     when '\\pict'
+      current_group.push :picture
       @buffer = Text::Picture.new
     when '\\pich'
       @buffer.height = extra.to_i
@@ -302,6 +303,9 @@ class Rtf
     when '{'
       @groups.push current_group.dup
     when '}'
+      if(@buffer.is_a?(Text::Picture) && !current_group.include?(:picture))
+        @buffer = Text::Paragraph.new
+      end
       @groups.pop
     end
   end

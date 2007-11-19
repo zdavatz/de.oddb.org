@@ -24,7 +24,7 @@ module ODDB
         assert_instance_of(Text::Chapter, document.chapter('default'))
       end
       def test_import__html__raises_error
-        path = File.expand_path('data/html/pharmnet/Gate.html', 
+        path = File.expand_path('data/html/pharmnet/gate.html', 
                                 File.dirname(__FILE__))
         assert_raises(ArgumentError) do
           File.open(path) do |fh|

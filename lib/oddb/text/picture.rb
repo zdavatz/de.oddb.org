@@ -13,6 +13,11 @@ module ODDB
       def blob
         [@data].pack('H*')
       end
+      def empty?
+        false if(image)
+      rescue
+        true
+      end
       def filename
         @filename ||= "%s.png" % Digest::MD5.hexdigest(@data)
       end
