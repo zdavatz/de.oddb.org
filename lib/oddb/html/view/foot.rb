@@ -40,6 +40,12 @@ class NavigationFoot < HtmlGrid::DivComposite
     [0,1] => CountryLinks, 
   }
   CSS_MAP = ['navigation', 'links']
+  def init
+    if(@lookandfeel.disabled? :country_links)
+      components.update([0,1] => "&nbsp;")
+    end
+    super
+  end
 end
     end
   end

@@ -16,6 +16,7 @@ class Head < HtmlGrid::DivComposite
   }
   CSS_ID_MAP = ["user"]
   def logo(model)
+    return if @lookandfeel.disabled? :logo
     target = :home
     logo = HtmlGrid::Image.new(:logo, model, @session, self)
     if(@session.direct_event == target)

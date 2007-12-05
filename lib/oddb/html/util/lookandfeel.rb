@@ -263,6 +263,18 @@ class LookandfeelWrapper < SBSM::LookandfeelWrapper
     (1 + tax_factor_add) / (1 + tax_factor_sub)
   end
 end
+class LookandfeelJustMedical < LookandfeelWrapper
+  DISABLED = [ :country_links, :logo ]
+  ENABLED = [
+    # Features:
+    :external_css, :explain_price, 
+    # Navigation-Links:
+    :home, :products,
+  ]
+  RESOURCES = {
+    :external_css  =>  'http://www.just-medical.com/css/de.oddb.css',
+  }
+end
 class LookandfeelMeineMedikamente < LookandfeelWrapper
   DICTIONARIES = {
     'de' => { 
@@ -323,7 +335,8 @@ end
 class LookandfeelFactory < SBSM::LookandfeelFactory
   BASE = Lookandfeel
   WRAPPERS = {
-    'mm' => [ LookandfeelMeineMedikamente ],
+    'mm'           => [ LookandfeelMeineMedikamente ],
+    'just-medical' => [ LookandfeelJustMedical ],
   }
 end
     end
