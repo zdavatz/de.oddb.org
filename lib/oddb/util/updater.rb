@@ -31,7 +31,7 @@ module ODDB
         }
       end
       def Updater.import_dimdi_zuzahlungsbefreiung(today)
-        url = "http://www.die-gesundheitsreform.de/presse/pressethemen/avwg/pdf/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls"
+        url = "http://www.die-gesundheitsreform.de/gesetze_meilensteine/gesetze/pdf/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls"
         Import::Dimdi.download_latest(url, today) { |io|
           reported_import(Import::Dimdi::ZuzahlungsBefreiung.new, io)
         }
