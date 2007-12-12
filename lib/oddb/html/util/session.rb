@@ -35,6 +35,12 @@ class Session < SBSM::Session
   def pagelength
     100
   end
+  def passed_turing_test?
+    state.respond_to?(:passed_turing_test) && state.passed_turing_test
+  end
+  def server_name
+    super || @server_name = ODDB.config.server_name
+  end
 end
     end
   end

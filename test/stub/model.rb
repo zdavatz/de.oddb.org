@@ -113,5 +113,10 @@ module ODDB
       simulate_database(:name)
     end
   end
+  module Util
+    class Feedback < Model
+      simulate_database 
+    end
+  end
   Currency = Object.new
 end

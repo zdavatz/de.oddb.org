@@ -7,6 +7,7 @@ module ODDB
   module Html
     module State
 class Global < SBSM::State
+  attr_reader :passed_turing_test
   def compare
     if(code = @session.user_input(:pzn))
       _compare(code)
@@ -26,6 +27,11 @@ class Global < SBSM::State
   def fachinfo
     if(code = @session.user_input(:pzn))
       _fachinfo(code)
+    end
+  end
+  def feedback
+    if(code = @session.user_input(:pzn))
+      _feedback(code)
     end
   end
   def logout

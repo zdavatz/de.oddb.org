@@ -7,6 +7,8 @@ module ODDB
   module Html
     module Util
 class Validator < SBSM::Validator
+  BOOLEAN = [ :email_public, :item_good_experience, :item_good_impression, 
+              :item_recommended, :item_helps, ]
   ENUMS = {
     :display   => ['paged', 'grouped'],
     :dstype    => ['tradename', 'compare', 'substance', 'company'],
@@ -17,11 +19,11 @@ class Validator < SBSM::Validator
       'price_public', 'product', 'size', 
     ],
   }
-  EVENTS = [ :ddd, :explain_ddd_price, :explain_price, :fachinfo, :package_infos,
-             :compare, :compare_remote, :home, :login, :logout, :package,
-             :products, :remote_infos, :search, :sort, :update ]
+  EVENTS = [ :ddd, :explain_ddd_price, :explain_price, :fachinfo, :feedback,
+             :package_infos, :compare, :compare_remote, :home, :login, :logout,
+             :package, :products, :remote_infos, :search, :sort, :update ]
   NUMERIC = [ :offset, :pzn ]
-  STRINGS = [ :code, :fi_url, :query, :uid ]
+  STRINGS = [ :captcha, :code, :fi_url, :message, :name, :query, :uid ]
   def page(value) 
     if(num = validate_numeric(:page, value))
       # pages are 1-based for the human user

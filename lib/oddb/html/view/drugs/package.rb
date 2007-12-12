@@ -85,6 +85,14 @@ module PackageMethods
       link
     end
   end
+  def feedback(model)
+    if(@lookandfeel.enabled?(:feedback, false) && (code = model.code(:cid, 'DE')))
+      link = HtmlGrid::Link.new(:feedback_short, model, @session, self)
+      link.href = @lookandfeel._event_url(:feedback, [:pzn, code.value])
+      link.css_class = 'feedback square'
+      link
+    end
+  end
   def price_festbetrag(model)
     @price_id ||= 0
     @price_id += 1

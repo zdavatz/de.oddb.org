@@ -14,6 +14,7 @@ require 'oddb/html/state/drugs/compare'
 require 'oddb/html/state/drugs/init'
 require 'oddb/html/state/drugs/login'
 require 'oddb/html/state/drugs/fachinfo'
+require 'oddb/html/state/drugs/feedback'
 require 'oddb/html/state/drugs/package'
 require 'oddb/html/state/drugs/products'
 require 'oddb/html/state/drugs/result'
@@ -80,6 +81,11 @@ class Global < State::Global
   def _fachinfo(code)
     if((package = _package_by_code(code)) && package.fachinfo)
       Fachinfo.new(@session, package)
+    end
+  end
+  def _feedback(code)
+    if(package = _package_by_code(code))
+      Feedback.new(@session, package)
     end
   end
   def navigation

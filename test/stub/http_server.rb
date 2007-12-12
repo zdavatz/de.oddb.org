@@ -67,8 +67,10 @@ module ODDB
       server.mount_proc('/', &application)
       server.mount_proc('/de', &application)
       server.mount_proc('/de/.*', &application)
-      res = File.join(doc, 'resources')
-      server.mount('/resources', WEBrick::HTTPServlet::FileHandler, res, {})
+      server.mount('/resources', WEBrick::HTTPServlet::FileHandler, 
+                   File.join(doc, 'resources'), {})
+      server.mount('/captcha', WEBrick::HTTPServlet::FileHandler, 
+                   File.join(ODDB.config.var, 'captcha'), {})
       server
     end
   end

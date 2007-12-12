@@ -31,7 +31,7 @@ module ODDB
         wirkkurz = "ftp://ftp.dimdi.de/pub/amg/wirkkurz_011006.xls"
         darform = "ftp://ftp.dimdi.de/pub/amg/darform_011006.xls"
         fbetrag = "ftp://ftp.dimdi.de/pub/amg/fb011006.xls"
-        zuzahlung = "http://www.die-gesundheitsreform.de/presse/pressethemen/avwg/pdf/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls"
+        zuzahlung = "http://www.die-gesundheitsreform.de/gesetze_meilensteine/gesetze/pdf/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls"
         index_uri = flexmock('Index-URI')
         index_uri.should_receive(:open)\
           .times(1).and_return(StringIO.new("xyzfb011006.xlsABC"))
@@ -128,7 +128,7 @@ module ODDB
         wirkkurz = "ftp://ftp.dimdi.de/pub/amg/wirkkurz_011006.xls"
         darform = "ftp://ftp.dimdi.de/pub/amg/darform_011006.xls"
         fbetrag = "ftp://ftp.dimdi.de/pub/amg/fb011006.xls"
-        zuzahlung = "http://www.die-gesundheitsreform.de/presse/pressethemen/avwg/pdf/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls"
+        zuzahlung = "http://www.die-gesundheitsreform.de/gesetze_meilensteine/gesetze/pdf/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls"
         index_uri = flexmock('Index-URI')
         index_uri.should_receive(:open)\
           .times(1).and_return(StringIO.new("xyzfb011006.xlsABC"))
@@ -184,7 +184,7 @@ module ODDB
         wirkkurz = "ftp://ftp.dimdi.de/pub/amg/wirkkurz_011006.xls"
         darform = "ftp://ftp.dimdi.de/pub/amg/darform_011006.xls"
         fbetrag = "ftp://ftp.dimdi.de/pub/amg/fb011006.xls"
-        zuzahlung = "http://www.die-gesundheitsreform.de/presse/pressethemen/avwg/pdf/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls"
+        zuzahlung = "http://www.die-gesundheitsreform.de/gesetze_meilensteine/gesetze/pdf/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls"
         index_uri = flexmock('Index-URI')
         index_uri.should_receive(:open)\
           .times(1).and_return(StringIO.new("xyzfb011006.xlsABC"))

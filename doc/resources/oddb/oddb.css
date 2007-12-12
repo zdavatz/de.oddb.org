@@ -1,4 +1,4 @@
-body, input, div.dojoTooltip, select {
+body, input, div.dojoTooltip, select, textarea {
   font-family: Arial, Helvetica, Verdana, sans-serif;
   font-size: 12px
 }
@@ -11,7 +11,12 @@ a:hover {
 }
 a.fachinfo {
   color: black;
-	background-color: #FFF455;
+  background-color: #FFF455;
+}
+a.feedback {
+  color: black;
+  background-color : #ffbc6f;
+  float: right;
 }
 a.google {
   color: white;
@@ -28,8 +33,9 @@ a.who-ddd {
   background-color: yellow;
   color: black;
 }
-div.before-searchbar {
+div.before-searchbar, div.lefthand {
   float: left;
+  clear: left;
 }
 div.atc, div.explain {
   padding: 4px;
@@ -43,6 +49,10 @@ div.chapter table {
 div.chapter td {
   border: 1px solid #666;
 }
+div#content {
+  overflow: auto;
+  width: 100%;
+}
 div.ddd {
   background-color: #dcefd6;
 }
@@ -50,6 +60,10 @@ div#explain-compare {
   padding: 2px 4px;
   font-weight: bold; 
   font-style: italic; 
+}
+div#feedbacks {
+  max-width: 400px;
+  border-left: 1px solid #2ba476;
 }
 div#foot {
   background-color: #cf9;
@@ -93,8 +107,15 @@ div#legend, tr.groupheader, div.groupheader {
 div#legend table {
   margin: 2px;
 }
-div.navigation {
+div.mezzo {
+  width: 50%;
+}
+div.minus {
+  background-color: #ffbc6f;
+}
+div.navigation, div.righthand {
   float: right;
+  clear: right;
 }
 div.navigation a {
   padding: 0px 4px;
@@ -135,6 +156,9 @@ div.pager a:first-child {
 div.pager a.current_page {
   color: black;
 }
+div.plus {
+  background-color: #cf9;
+}
 div.result table { 
   width: 100%;
 }
@@ -151,6 +175,13 @@ div#result-search input[type=text] {
 }
 div#snapback {
   padding: 3px 4px;
+}
+div.square {
+  max-width: 20px;
+  height: 20px;
+  text-align: center;
+  vertical-align: middle;
+  font-size : 16px;
 }
 div#title, th {
   background-color: #2ba476;
@@ -274,22 +305,32 @@ td#offsetheader a:visited:hover {
 td.company, th.company {
   padding-left: 15px;
 }
+td.processingerror {
+  color: red;
+}
 td.product {
   font-size: 14px;
   font-weight: bold;
 }
+td.radio {
+  max-width: 20px;
+}
 td.top {
   vertical-align: top;
+}
+td.warn {
+  padding: 8px; 
+  color: #F70;
+  font-weight: bold;
 }
 td.zuzahlungsbefreit {
   border: 2px solid #cf9;
   padding: 2px;
   font-weight: bold;
 }
-td.warn {
-  padding: 8px; 
-  color: #F70;
-  font-weight: bold;
+textarea {
+  width: 350px;
+  height: 200px;
 }
 th {
   text-align: left;

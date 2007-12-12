@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
-# Selenium::TestInit -- de.oddb.org -- 21.11.2006 -- hwyss@ywesee.com
-
+# Selenium::TestPackage -- de.oddb.org -- 21.11.2006 -- hwyss@ywesee.com
 
 $: << File.expand_path('..', File.dirname(__FILE__))
 

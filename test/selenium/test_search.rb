@@ -139,6 +139,7 @@ class TestSearch < Test::Unit::TestCase
     assert is_text_present('Ja')
     assert is_text_present('N04BB01')
     assert is_text_present('Producer AG')
+    assert is_text_present('FB')
 
     ## State::Drugs::Result does not re-search if the query is the same
     package2 = Drugs::Package.new
@@ -310,6 +311,31 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
 
     assert_match(/^Nomamonamon/, get_text("cid_N04BB01_0"))
     assert_match(/^Amonamon/, get_text("cid_N04BB01_1"))
+  end
+  def test_search__feedback
+    package = setup_package
+    package.add_code(Util::Code.new(:cid, '12345', 'DE'))
+    open "/"
+    assert_equal "DE - ODDB.org | Medikamente | Home | Open Drug Database", get_title
+    type "query", "Amantadin"
+    click "//input[@type='submit']"
+    wait_for_page_to_load "30000"
+    assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", 
+                 get_title
+    assert is_text_present('Amantadin by Producer')
+
+    ## click through to Feedback
+    assert is_element_present "link=FB"
+    click "//a[@name='feedback_short']"
+    wait_for_page_to_load "30000"
+    assert_equal "DE - ODDB.org | Medikamente | Feedback | Amantadin by Producer | Open Drug Database", 
+                 get_title
+
+    ## click back to Result
+    click "link=Suchresultat"
+    wait_for_page_to_load "30000"
+    assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", 
+                 get_title
   end
   def test_search__with_fachinfo
     package = setup_package

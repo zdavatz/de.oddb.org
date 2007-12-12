@@ -38,6 +38,7 @@ module ODDB
     'remote_databases'    => [],
     'run_exporter'        => true,
     'run_updater'         => true,
+    'server_name'         => 'de.oddb.org',
     'server_url'          => 'druby://localhost:11000',
     'server_url_export'   => 'druby://localhost:11001',
     'session_timeout'     => 3600,

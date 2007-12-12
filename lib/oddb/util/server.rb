@@ -6,6 +6,7 @@ require 'oddb/html/util/session'
 require 'oddb/html/util/validator'
 require 'oddb/util/exporter'
 require 'oddb/util/updater'
+require 'oddb/export/rss'
 require 'sbsm/drbserver'
 
 module ODDB
@@ -16,6 +17,7 @@ module ODDB
       VALIDATOR = Html::Util::Validator
       def initialize(*args)
         super
+        @rss_mutex = Mutex.new
         run_exporter if(ODDB.config.run_exporter)
         run_updater if(ODDB.config.run_updater)
       end
@@ -71,6 +73,19 @@ module ODDB
       end
       def run_updater
         @updater = run_at(ODDB.config.update_hour) { Updater.run }
+      end
+      def update_feedback_rss_feed
+        async {
+          begin
+            @rss_mutex.synchronize {
+              Export::Rss::Feedback.new.export
+            }
+          rescue StandardError => error
+            ODDB.logger.error('rss_feed') { error.class }
+            ODDB.logger.error('rss_feed') { error.message }
+            ODDB.logger.error('rss_feed') { error.backtrace.pretty_inspect }
+          end
+        }
       end
     end
   end
