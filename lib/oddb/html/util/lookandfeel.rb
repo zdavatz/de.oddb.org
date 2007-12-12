@@ -91,6 +91,8 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       EOS
       :fachinfo                   => 'Fachinformation',
       :feedback                   => 'Feedback',
+      :feedback_alt0              =>  'Feedback zu ',
+      :feedback_alt1              =>  '',
       :feedback_changed           =>  'Vielen Dank! Ihr Feedback wurde geändert. Sie können noch weitere Änderungen vornehmen.',
       :feedback_for0              => 'Feedback zu ',
       :feedback_for1              => ' in der Handelsform: ',
@@ -290,8 +292,8 @@ Medikamenten-Preisvergleichs-Portal Deutschlands.
       [7,0] => :ddd_prices,
       [8,0] => :company,
       [9,0] => :package_infos,
-      [11,0] => :feedback,
-      [10,0] => :google,
+      [10,0] => :feedback,
+      [11,0] => :google,
     }
   end
   def tax_factor

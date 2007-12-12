@@ -90,6 +90,8 @@ module PackageMethods
       link = HtmlGrid::Link.new(:feedback_short, model, @session, self)
       link.href = @lookandfeel._event_url(:feedback, [:pzn, code.value])
       link.css_class = 'feedback square'
+      link.set_attribute('title', @lookandfeel.lookup(:feedback_alt, 
+        model.name))
       link
     end
   end
