@@ -73,7 +73,7 @@ class FeedbackList < List
   end
   def name(model)
     @lookandfeel.lookup(:feedback_by, model.name, 
-                        model.time.strftime("%A, %d. %B %Y"))
+                        model.time.strftime("%A, %d. %B %Y - %H:%M"))
   end
 end
 class FeedbackForm < HtmlGrid::Form

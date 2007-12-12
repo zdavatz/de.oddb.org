@@ -13,11 +13,14 @@ module ODDB
 class TestFeedback < Test::Unit::TestCase
   include Selenium::TestCase
   def setup
-    Drugs::Package.instances.clear
     ODDB.config.data_dir = File.expand_path('../../data', File.dirname(__FILE__))
     ODDB.config.var = File.expand_path('var', File.dirname(__FILE__))
     @path = File.join(ODDB.config.var, 'rss', 'de', 'feedback.rss')
     File.delete(@path) if(File.exist? @path)
+    super
+  end
+  def teardown
+    Drugs::Package.instances.clear
     super
   end
   def setup_package(pzn='12345')
@@ -153,7 +156,7 @@ class TestFeedback < Test::Unit::TestCase
     assert is_element_present('item_helps')
     assert !is_element_present("//input[starts-with(@name, 'captcha')]")
     assert !is_text_present("Was steht im Bild unten?")
-    assert is_text_present("Feedback von My Name, erstellt am:")
+    assert is_text_present("Feedback von My Name\nerstellt am:")
     assert is_text_present("My personal experience")
     assert !is_text_present("My personal experience with this Product was ok.")
     type "message", "My personal experience with this Product was ok."

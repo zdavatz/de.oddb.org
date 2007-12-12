@@ -96,7 +96,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :feedback_for1              => ' in der Handelsform: ',
       :feedback_for2              => '',
       :feedback_by0               => 'Feedback von ', 
-      :feedback_by1               => ', erstellt am: ', 
+      :feedback_by1               => '<br/>erstellt am: ', 
       :feedback_by2               => '', 
       :feedback_feed_description  => 'Patienten- und Ärztefeedback zu Medikamenten im Schweizer Gesundheitsmarkt',
       :feedback_feed_title        => 'Patienten- und Ärztefeedback zu Medikamenten',
@@ -242,11 +242,12 @@ Medikamenten-Preisvergleichs-Portal Deutschlands.
       :ywesee                     => 'ywesee.com',
     }
   }
-  ENABLED = [:feedback]
   RESOURCES = {
     :logo       => 'logo.png', 
     :css        => 'oddb.css',
     :javascript => 'javascript',
+    :rss        => 'rss',
+    :rss_img    => 'livemarks16.png',
   }
   def base_url
     [@session.http_protocol + ':/', @session.server_name,

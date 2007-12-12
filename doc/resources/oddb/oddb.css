@@ -90,6 +90,12 @@ div#foot div.navigation a:first-child {
 div#head {
   margin-bottom: 30px;
 }
+div.heading {
+  font-weight: bold;
+}
+div.heading img {
+  float: right;
+}
 div.hidden {
   padding: 4px 0px;
 }
@@ -172,6 +178,14 @@ div#result-search {
 }
 div#result-search input[type=text] {
   width: 200px;
+}
+div.sidebar {
+  width: 200px;
+  min-height: 300px;
+}
+div.sidebar div {
+  padding: 2px;
+  background-color: #dfd;
 }
 div#snapback {
   padding: 3px 4px;

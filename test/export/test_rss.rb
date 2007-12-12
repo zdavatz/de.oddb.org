@@ -17,7 +17,6 @@ class TestFeedback < Test::Unit::TestCase
   include FlexMock::TestCase
   def setup
     ARGV.push ''
-    Util::Feedback.instances.clear
     @exporter = Feedback.new
     @f1 = Util::Feedback.new
     @f1.time = Time.now
@@ -34,6 +33,10 @@ class TestFeedback < Test::Unit::TestCase
     @f2 = Util::Feedback.new
     @f2.time = Time.now
     @f2.save
+    super
+  end
+  def teardown
+    Util::Feedback.instances.clear
     super
   end
   def test_sorted_feedbacks
@@ -54,7 +57,7 @@ class TestFeedback < Test::Unit::TestCase
     <item>
       <title>Feedback zu  in der Handelsform: </title>
       <link>http://de.oddb.org/de/feedback/pzn/12345/index/1</link>
-      <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01//EN&quot; &quot;http://www.w3.org/TR/html4/strict.dtd&quot;&gt;&lt;HTML&gt;&lt;HEAD&gt;&lt;TITLE&gt;DE - ODDB.org&lt;/TITLE&gt;&lt;LINK href=&quot;http://de.oddb.org/resources/oddb/oddb.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt;&lt;/HEAD&gt;&lt;BODY&gt;&lt;DIV&gt;&lt;TABLE cellspacing=&quot;0&quot;&gt;&lt;TR&gt;&lt;TD colspan=&quot;2&quot;&gt;Feedback von Test User, erstellt am: #{@f1.time.strftime("%A, %d. %B %Y")}&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD&gt;&lt;LABEL for=&quot;email&quot;&gt;E-Mail&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;E-Mail wird nicht angezeigt.&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD class=&quot;top&quot;&gt;&lt;LABEL for=&quot;message&quot;&gt;Feedback&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;Test Message&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD&gt;&lt;LABEL&gt;Pers\303\266nliche Erfahrung&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;&lt;DIV class=&quot;square minus&quot;&gt;-&lt;/DIV&gt;&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD&gt;&lt;LABEL&gt;Empfehlung&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;&lt;DIV class=&quot;square minus&quot;&gt;-&lt;/DIV&gt;&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD&gt;&lt;LABEL&gt;Pers\303\266nlicher Eindruck&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;&lt;DIV class=&quot;square plus&quot;&gt;+&lt;/DIV&gt;&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD&gt;&lt;LABEL&gt;Wirkung&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;&lt;DIV class=&quot;square minus&quot;&gt;-&lt;/DIV&gt;&lt;/TD&gt;&lt;/TR&gt;&lt;/TABLE&gt;&lt;/DIV&gt;&lt;DIV&gt;&lt;A href=&quot;http://de.oddb.org/de/feedbacks/pzn/12345&quot; name=&quot;feedback_feed_link&quot;&gt;&lt;/A&gt;&lt;/DIV&gt;&lt;/BODY&gt;&lt;/HTML&gt;</description>
+      <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01//EN&quot; &quot;http://www.w3.org/TR/html4/strict.dtd&quot;&gt;&lt;HTML&gt;&lt;HEAD&gt;&lt;TITLE&gt;DE - ODDB.org&lt;/TITLE&gt;&lt;LINK href=&quot;http://de.oddb.org/resources/oddb/oddb.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt;&lt;/HEAD&gt;&lt;BODY&gt;&lt;DIV&gt;&lt;TABLE cellspacing=&quot;0&quot;&gt;&lt;TR&gt;&lt;TD colspan=&quot;2&quot;&gt;Feedback von Test User&lt;br/&gt;erstellt am: #{@f1.time.strftime("%A, %d. %B %Y - %H:%M")}&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD&gt;&lt;LABEL for=&quot;email&quot;&gt;E-Mail&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;E-Mail wird nicht angezeigt.&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD class=&quot;top&quot;&gt;&lt;LABEL for=&quot;message&quot;&gt;Feedback&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;Test Message&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD&gt;&lt;LABEL&gt;Pers\303\266nliche Erfahrung&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;&lt;DIV class=&quot;square minus&quot;&gt;-&lt;/DIV&gt;&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD&gt;&lt;LABEL&gt;Empfehlung&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;&lt;DIV class=&quot;square minus&quot;&gt;-&lt;/DIV&gt;&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD&gt;&lt;LABEL&gt;Pers\303\266nlicher Eindruck&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;&lt;DIV class=&quot;square plus&quot;&gt;+&lt;/DIV&gt;&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD&gt;&lt;LABEL&gt;Wirkung&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;&lt;DIV class=&quot;square minus&quot;&gt;-&lt;/DIV&gt;&lt;/TD&gt;&lt;/TR&gt;&lt;/TABLE&gt;&lt;/DIV&gt;&lt;DIV&gt;&lt;A href=&quot;http://de.oddb.org/de/feedbacks/pzn/12345&quot; name=&quot;feedback_feed_link&quot;&gt;&lt;/A&gt;&lt;/DIV&gt;&lt;/BODY&gt;&lt;/HTML&gt;</description>
       <author>de.ODDB.org</author>
       <pubDate>#{@f1.time.rfc2822}</pubDate>
       <guid isPermaLink=\"true\">http://de.oddb.org/de/feedback/pzn/12345/index/1</guid>

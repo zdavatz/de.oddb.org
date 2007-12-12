@@ -86,7 +86,7 @@ module PackageMethods
     end
   end
   def feedback(model)
-    if(@lookandfeel.enabled?(:feedback, false) && (code = model.code(:cid, 'DE')))
+    if(@lookandfeel.enabled?(:feedback) && (code = model.code(:cid, 'DE')))
       link = HtmlGrid::Link.new(:feedback_short, model, @session, self)
       link.href = @lookandfeel._event_url(:feedback, [:pzn, code.value])
       link.css_class = 'feedback square'

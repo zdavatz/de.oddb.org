@@ -37,7 +37,7 @@ class Exporter
 end
 class Feedback < Exporter
   def sorted_items
-    Util::Feedback.all.sort_by { |feedback| -feedback.time.to_f }
+    Util::Feedback.newest(:all)
   end
 end
     end
