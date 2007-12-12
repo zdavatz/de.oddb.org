@@ -19,10 +19,11 @@ class Search < View::Search
     [0,6] => :social_bookmarks,
     [0,7] => :screencast,
   }
+  CSS_MAP = {4 => "explain", 5 => "explain", 6 => "explain", 7 => "explain"}
   def product_count(model)
     link = HtmlGrid::Link.new(:products, model, @session, self)
     link.href = @lookandfeel._event_url(:products)
-    [ODDB::Drugs::Product.count, '&nbsp;', link]
+    [ODDB::Drugs::Package.count, '&nbsp;', link]
   end
 end
       end
