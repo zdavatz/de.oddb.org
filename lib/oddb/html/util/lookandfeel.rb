@@ -280,6 +280,15 @@ Medikamenten-Preisvergleichs-Portal Deutschlands.
   def price_factor
     tax_factor * currency_factor
   end
+  def products_components
+    {
+      [0,0] => :fachinfo_link,
+      [1,0] => :product,
+      [2,0] => :atc,
+      [3,0] => :company,
+      [4,0] => :google,
+    }
+  end
   def result_components
     {
       [0,0] => :fachinfo_link,
@@ -365,6 +374,14 @@ der Schweiz und Deutschland. Alle Preise sind in CHF.
     { 
       [0,0] => 'explain_remote',
       [0,1] => 'explain_zuzahlungsbefreit', 
+    }
+  end
+  def products_components
+    {
+      [0,0] => :product,
+      [1,0] => :atc,
+      [2,0] => :company,
+      [3,0] => :google,
     }
   end
   def result_components

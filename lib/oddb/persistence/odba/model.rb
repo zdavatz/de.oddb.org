@@ -36,6 +36,7 @@ module ODDB
     end
     class << self
       alias :all :odba_extent
+      alias :count :odba_count
       def serializables
         @serializables ||= []
       end

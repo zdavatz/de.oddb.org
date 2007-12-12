@@ -24,18 +24,14 @@ class ProductsList < View::List
   include View::OffsetHeader
   include ProductMethods
   include View::Google
-  COMPONENTS = {
-    [0,0] => :product,
-    [1,0] => :atc,
-    [2,0] => :company,
-    [3,0] => :google,
-  }
-  css_map = {}
-  COMPONENTS.each { |key, val|
-    css_map.store(key, val.to_s)
-  }
-  CSS_MAP = css_map
-  CSS_HEAD_MAP = css_map
+  def init
+    @components = @lookandfeel.products_components
+    @components.each { |key, val|
+      css_map.store(key, val.to_s)
+    }
+    @css_head_map = @css_map
+    super
+  end
   def atc(model)
     atcs = model.atcs.sort
     unless(atcs.empty?)
@@ -50,6 +46,15 @@ class ProductsList < View::List
       span.css_id = "atc_#@list_index"
       span.dojo_title = codes.join(', ')
       span
+    end
+  end
+  def fachinfo_link(model)
+    if((pac = model.packages.find { |pc| pc.fachinfo.send(@session.language) })\
+       && (code = pac.code(:cid)))
+      link = HtmlGrid::Link.new(:square_fachinfo, pac, @session, self)
+      link.css_class = 'square fachinfo'
+      link.href = @lookandfeel._event_url(:fachinfo, [:pzn, code.value])
+      link
     end
   end
   def product(model)

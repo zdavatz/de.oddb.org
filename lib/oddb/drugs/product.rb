@@ -7,7 +7,7 @@ module ODDB
   module Drugs
     class Product < Model
       belongs_to :company
-      has_many :sequences, on_delete(:cascade), delegates(:substances)
+      has_many :sequences, on_delete(:cascade), delegates(:substances, :packages)
       multilingual :name
       def initialize
         @sequences = []

@@ -3,7 +3,7 @@
 
 require 'oddb/html/view/drugs/template'
 require 'oddb/html/view/rss_preview'
-require 'oddb/html/view/search'
+require 'oddb/html/view/drugs/search'
 
 module ODDB
   module Html
