@@ -564,6 +564,7 @@ module Dimdi
     def import_row(row)
       @count += 1
       package = import_package(row)
+      return if package.nil?
       @confirmed_pzns.store(package.code(:cid).value, true)
       if(code = package.code(:zuzahlungsbefreit))
         if(code.value)
@@ -697,7 +698,9 @@ module Dimdi
                                       :country => 'DE')
     end
     def import_package(row)
-      pzn = u(cell(row, 1).to_i.to_s)
+      pzn = cell(row, 1).to_i
+      return if(pzn == 0)
+      pzn = u(pzn.to_s)
       package = Drugs::Package.find_by_code(:type => 'cid', 
                                             :value => pzn, 
                                             :country => 'DE')
