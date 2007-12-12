@@ -24,6 +24,7 @@ class FeedbackTemplate < HtmlGrid::DivTemplate
   end
 end
 class Feedback < HtmlGrid::Component
+  include Drugs::PackageMethods
   HTTP_HEADERS = {
     "Content-Type"  => "application/rss+xml",
   }
@@ -40,7 +41,7 @@ class Feedback < HtmlGrid::Component
         if(parent = feedback.item)
           item = feed.items.new_item
           item.author = "de.ODDB.org"
-          title = @lookandfeel.lookup(:feedback_for, parent.name, parent.size)
+          title = @lookandfeel.lookup(:feedback_for, parent.name, size(parent))
           item.title = title
           
           url = @lookandfeel._event_url(:feedback, 

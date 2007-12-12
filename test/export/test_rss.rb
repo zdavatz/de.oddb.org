@@ -28,7 +28,15 @@ class TestFeedback < Test::Unit::TestCase
     @i1 = flexmock('package')
     @i1.should_receive(:code).with(:cid).and_return { 
       Util::Code.new(:cid, 12345, 'DE') } 
+    @i1.should_receive(:name).and_return('Product')
     @i1.should_ignore_missing
+    u1 = Drugs::Unit.new
+    u1.name.de = 'Tabletten'
+    p1 = flexmock('part')
+    p1.should_receive(:size).and_return(10)
+    p1.should_receive(:unit).and_return(u1)
+    p1.should_ignore_missing
+    @i1.should_receive(:parts).and_return([p1])
     @f1.item = @i1
     @f2 = Util::Feedback.new
     @f2.time = Time.now
@@ -55,7 +63,7 @@ class TestFeedback < Test::Unit::TestCase
     <description>Patienten- und \303\204rztefeedback zu Medikamenten im Schweizer Gesundheitsmarkt</description>
     <language>de</language>
     <item>
-      <title>Feedback zu  in der Handelsform: </title>
+      <title>Feedback zu Product in der Handelsform: 10 Tabletten</title>
       <link>http://de.oddb.org/de/feedback/pzn/12345/index/1</link>
       <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01//EN&quot; &quot;http://www.w3.org/TR/html4/strict.dtd&quot;&gt;&lt;HTML&gt;&lt;HEAD&gt;&lt;TITLE&gt;DE - ODDB.org&lt;/TITLE&gt;&lt;LINK href=&quot;http://de.oddb.org/resources/oddb/oddb.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt;&lt;/HEAD&gt;&lt;BODY&gt;&lt;DIV&gt;&lt;TABLE cellspacing=&quot;0&quot;&gt;&lt;TR&gt;&lt;TD colspan=&quot;2&quot;&gt;Feedback von Test User&lt;br/&gt;erstellt am: #{@f1.time.strftime("%A, %d. %B %Y - %H:%M")}&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD&gt;&lt;LABEL for=&quot;email&quot;&gt;E-Mail&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;E-Mail wird nicht angezeigt.&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD class=&quot;top&quot;&gt;&lt;LABEL for=&quot;message&quot;&gt;Feedback&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;Test Message&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD&gt;&lt;LABEL&gt;Pers\303\266nliche Erfahrung&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;&lt;DIV class=&quot;square minus&quot;&gt;-&lt;/DIV&gt;&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD&gt;&lt;LABEL&gt;Empfehlung&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;&lt;DIV class=&quot;square minus&quot;&gt;-&lt;/DIV&gt;&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD&gt;&lt;LABEL&gt;Pers\303\266nlicher Eindruck&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;&lt;DIV class=&quot;square plus&quot;&gt;+&lt;/DIV&gt;&lt;/TD&gt;&lt;/TR&gt;&lt;TR&gt;&lt;TD&gt;&lt;LABEL&gt;Wirkung&lt;/LABEL&gt;&lt;/TD&gt;&lt;TD&gt;&lt;DIV class=&quot;square minus&quot;&gt;-&lt;/DIV&gt;&lt;/TD&gt;&lt;/TR&gt;&lt;/TABLE&gt;&lt;/DIV&gt;&lt;DIV&gt;&lt;A href=&quot;http://de.oddb.org/de/feedbacks/pzn/12345&quot; name=&quot;feedback_feed_link&quot;&gt;&lt;/A&gt;&lt;/DIV&gt;&lt;/BODY&gt;&lt;/HTML&gt;</description>
       <author>de.ODDB.org</author>
