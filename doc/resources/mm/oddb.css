@@ -9,6 +9,10 @@ a {
 a:hover {
   color: black;
 }
+a.fachinfo {
+  color: black;
+  background-color: #FFF455;
+}
 a.google {
   color: white;
   background-color: #184FCA;
@@ -29,6 +33,19 @@ div.before-searchbar {
 }
 div.atc, div.explain {
   padding: 4px;
+}
+div.chapter {
+  padding-left: 4px;
+}
+div.chapter table {
+  border-collapse: collapse;
+}
+div.chapter td {
+  border: 1px solid #666;
+}
+div#content {
+  overflow: auto;
+  width: 100%;
 }
 div.ddd {
   background-color: #dcefd6;
@@ -91,11 +108,11 @@ div#navigation {
   color: white;
   padding: 4px 0px;
 }
-div#navigation div.links a {
-  padding: 0px 4px;
+div#navigation a {
+  padding: 0px 4px 0px 6px;
   border-left: 1px solid white;
 }
-div#navigation div.links a:first-child {
+div#navigation a:first-child {
   border-left: 0px;
 }
 div#navigation a:link,  
@@ -138,6 +155,13 @@ div#result-search input[type=text] {
 }
 div#snapback {
   padding: 3px 4px;
+}
+div.square {
+  max-width: 20px;
+  height: 20px;
+  text-align: center;
+  vertical-align: middle;
+  font-size : 16px;
 }
 div#title, th {
   background-color: #2ba476;
@@ -224,6 +248,40 @@ td#alphaheader a:visited {
 td#alphaheader a:link:hover,
 td#alphaheader a:visited:hover {
   color: red;
+}
+td.atc {
+  padding: 4px;
+}
+td.atc a.search {
+  color: #2ba476;
+}
+td.atc.level1 {
+  font-weight: bold;
+  padding-top: 8px;
+}
+td.atc.level2 {
+  padding-top: 6px;
+}
+td.atc.level2.browser {
+  padding-left: 30px;
+}
+td.atc.level3 {
+  padding-top: 4px;
+}
+td.atc.level3.browser {
+  padding-left: 46px;
+}
+td.atc.level4 {
+  padding-top: 2px;
+}
+td.atc.level4.browser {
+  padding-left: 64px;
+}
+td.atc.level5 {
+  padding-top: 1px;
+}
+td.atc.level5.browser {
+  padding-left: 80px;
 }
 td.calculation {
   white-space: nowrap;

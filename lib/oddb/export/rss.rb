@@ -3,7 +3,6 @@
 
 require 'oddb/util/feedback'
 require 'oddb/export/l10n_sessions'
-require 'rss/maker'
 
 module ODDB
   module Export

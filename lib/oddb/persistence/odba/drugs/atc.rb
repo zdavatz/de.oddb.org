@@ -8,6 +8,7 @@ module ODDB
   module Drugs
     class Atc < Model
       odba_index :code
+      odba_index :level, :code
       odba_index :name, 'name.all'
     end
   end

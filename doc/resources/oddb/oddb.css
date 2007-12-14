@@ -283,6 +283,40 @@ td#alphaheader a:link:hover,
 td#alphaheader a:visited:hover {
   color: red;
 }
+td.atc {
+  padding: 4px;
+}
+td.atc a.search {
+  color: #2ba476;
+}
+td.atc.level1 {
+  font-weight: bold;
+  padding-top: 8px;
+}
+td.atc.level2 {
+  padding-top: 6px;
+}
+td.atc.level2.browser {
+  padding-left: 30px;
+}
+td.atc.level3 {
+  padding-top: 4px;
+}
+td.atc.level3.browser {
+  padding-left: 46px;
+}
+td.atc.level4 {
+  padding-top: 2px;
+}
+td.atc.level4.browser {
+  padding-left: 64px;
+}
+td.atc.level5 {
+  padding-top: 1px;
+}
+td.atc.level5.browser {
+  padding-left: 80px;
+}
 td.calculation {
   white-space: nowrap;
 }

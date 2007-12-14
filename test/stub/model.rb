@@ -79,6 +79,10 @@ module ODDB
         def find_by_code(code)
           @instances.find { |inst| inst.code == code }
         end
+        def search_by_level_and_code(level, code)
+          @instances.select { |inst| 
+            inst.level == level && inst.code[0,code.length] == code }
+        end
       end
     end
     class Composition < Model
@@ -92,6 +96,9 @@ module ODDB
     end
     class Package < Model
       simulate_database(:name, :atc, :substance, :company, :product)
+      def self.count
+        instances.size
+      end
     end
     class Part < Model
       simulate_database

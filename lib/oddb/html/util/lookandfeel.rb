@@ -19,6 +19,7 @@ class Lookandfeel < SBSM::Lookandfeel
       :administration_P           => 'Parenteral',
       :administration_R           => 'Rektal',
       :atc                        => 'ATC-Code',
+      :atc_browser                => 'ATC-Browser',
       :atc_unknown                => 'ATC-Code nicht bekannt',
       :breadcrumb_divider         => '&nbsp;&ndash;&nbsp;',
       :captcha                    => 'Was steht im Bild unten?',
@@ -333,7 +334,7 @@ class LookandfeelJustMedical < LookandfeelWrapper
     # Features:
     :external_css, :explain_price, 
     # Navigation-Links:
-    :home, :products,
+    :home, :products, :atc_browser,
   ]
   RESOURCES = {
     :external_css  =>  'http://www.just-medical.com/css/de.oddb.css',
@@ -362,7 +363,7 @@ der Schweiz und Deutschland. Alle Preise sind in CHF.
     # Features:
     :explain_price, :remote_databases,
     # Navigation-Links:
-    :contact, :home, :products,
+    :atc_browser, :contact, :home, :products, 
   ]
   RESOURCES = {
     :logo => 'logo.png', 

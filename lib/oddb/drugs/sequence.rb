@@ -11,7 +11,7 @@ module ODDB
       has_many :compositions, 
         delegates(:active_agents, :doses, :substances),
         on_delete(:cascade)
-      has_many :packages, on_delete(:cascade)
+      has_many :packages, on_delete(:cascade), on_save(:cascade)
       multilingual :fachinfo
       def comparable?(other)
         other.is_a?(Sequence) && compositions == other.compositions

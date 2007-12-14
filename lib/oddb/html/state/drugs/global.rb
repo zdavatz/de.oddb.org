@@ -89,7 +89,7 @@ class Global < State::Global
     end
   end
   def navigation
-    [:products].concat(super)
+    [:products, :atc_browser].concat(super)
   end
   def _package(code)
     if(package = _package_by_code(code))

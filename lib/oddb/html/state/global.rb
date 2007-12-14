@@ -2,12 +2,16 @@
 # Html::State::Drugs::Global -- de.oddb.org -- 27.10.2006 -- hwyss@ywesee.com
 
 require 'oddb/html/state/global_predefine'
+require 'oddb/html/state/drugs/atc_browser'
 
 module ODDB
   module Html
     module State
 class Global < SBSM::State
   attr_reader :passed_turing_test
+  def atc_browser
+    Drugs::AtcBrowser.new(@session, nil)
+  end
   def compare
     if(code = @session.user_input(:pzn))
       _compare(code)

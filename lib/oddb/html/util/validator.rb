@@ -19,9 +19,10 @@ class Validator < SBSM::Validator
       'price_public', 'product', 'size', 
     ],
   }
-  EVENTS = [ :ddd, :explain_ddd_price, :explain_price, :fachinfo, :feedback,
-             :package_infos, :compare, :compare_remote, :home, :login, :logout,
-             :package, :products, :remote_infos, :search, :sort, :update ]
+  EVENTS = [ :atc_browser, :ddd, :explain_ddd_price, :explain_price, :fachinfo,
+             :feedback, :package_infos, :compare, :compare_remote, :home,
+             :login, :logout, :package, :products, :remote_infos, :search,
+             :sort, :update ]
   NUMERIC = [ :offset, :pzn ]
   STRINGS = [ :captcha, :code, :fi_url, :message, :name, :query, :uid ]
   def page(value) 
