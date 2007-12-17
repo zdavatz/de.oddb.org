@@ -2,6 +2,7 @@
 # Html::View::Drugs::Search -- de.oddb.org -- 12.12.2007 -- hwyss@ywesee.com
 
 require 'oddb/html/view/search'
+require 'oddb/html/view/navigation'
 
 module ODDB
   module Html
@@ -15,15 +16,15 @@ class Search < View::Search
     [0,3] => :submit,
     [1,3] => :reset,
     [0,4] => "explain_search",
-    [0,5] => :product_count,
+    [0,5] => :package_count,
+    [2,5] => Navigation,
     [0,6] => :social_bookmarks,
     [0,7] => :screencast,
   }
-  CSS_MAP = {4 => "explain", 5 => "explain", 6 => "explain", 7 => "explain"}
-  def product_count(model)
-    link = HtmlGrid::Link.new(:products, model, @session, self)
-    link.href = @lookandfeel._event_url(:products)
-    [ODDB::Drugs::Package.count, '&nbsp;', link]
+  CSS_MAP = { 4 => "explain", 5 => "explain links", 
+              6 => "explain", 7 => "explain"}
+  def package_count(model)
+    ODDB::Drugs::Package.count
   end
 end
       end
