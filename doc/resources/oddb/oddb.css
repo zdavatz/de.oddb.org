@@ -113,12 +113,12 @@ div#legend, tr.groupheader, div.groupheader {
 div#legend table {
   margin: 2px;
 }
-div.links a {
+div.explain.links a {
   padding-right: 4px;
   padding-left: 6px;
   border-left: 1px solid black;
 }
-div.links a:first-child {
+div.explain.links a:first-child {
   border-left: 0px;
   padding-left: 4px;
 }

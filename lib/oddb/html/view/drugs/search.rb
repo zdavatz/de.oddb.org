@@ -22,7 +22,7 @@ class Search < View::Search
     [0,7] => :screencast,
   }
   CSS_MAP = { 4 => "explain", 5 => "explain links", 
-              6 => "explain", 7 => "explain"}
+              6 => "explain", 7 => "explain" }
   def package_count(model)
     ODDB::Drugs::Package.count
   end
