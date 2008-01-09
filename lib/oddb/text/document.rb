@@ -4,6 +4,7 @@
 module ODDB
   module Text
     class Document
+      attr_accessor :source
       attr_reader :chapters
       def initialize
         @chapters = []

@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # Import::TestPharmNet -- de.oddb.org -- 15.10.2007 -- hwyss@ywesee.com
 
+$: << File.expand_path('..', File.dirname(__FILE__))
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
 require 'test/unit'
@@ -13,6 +14,7 @@ require 'oddb/drugs/sequence'
 require 'oddb/drugs/substance'
 require 'oddb/import/pharmnet'
 require 'mechanize'
+require 'stub/model'
 
 module ODDB
   module Import
@@ -157,6 +159,8 @@ class TestPharmNet < Test::Unit::TestCase
   def setup
     @importer = FachInfo.new
     ODDB.config.var = File.expand_path('var', File.dirname(__FILE__))
+    ODDB.logger = flexmock('logger')
+    ODDB.logger.should_ignore_missing
   end
   def setup_search(resultfile='empty_result.html')
     agent = flexmock(WWW::Mechanize.new)
@@ -222,6 +226,7 @@ class TestPharmNet < Test::Unit::TestCase
     file.should_receive(:body).and_return { File.read path }
     document = @importer.import_rtf(agent, url)
     assert_instance_of Text::Document, document
+    assert_equal url, document.source
   end
   def test_result_page__empty_result
     agent = setup_search
@@ -283,6 +288,7 @@ class TestPharmNet < Test::Unit::TestCase
           :substance => "Natriumcromoglicat (Ph.Eur.)" }
       ],
       :date => Date.new(2007,06,29),
+      :registration => "3159.00.00",
     }
     assert_equal expected, details
   end
@@ -300,6 +306,7 @@ class TestPharmNet < Test::Unit::TestCase
       ],
       :data => ["Aspirin", "Tablette", "Bayer Vital GmbH"],
       :date => Date.new(2007,06,29),
+      :registration=>"3159.00.00",
     }
     assert_equal expected, result.first
     expected = {
@@ -314,6 +321,7 @@ class TestPharmNet < Test::Unit::TestCase
                 "magensaftresistente Tablette", 
                 "Bayer Vital GmbH"],
       :date => Date.new(2007,06,29),
+      :registration=>"3159.00.00",
     }
     assert_equal expected, result.last
   end
@@ -370,7 +378,7 @@ class TestPharmNet < Test::Unit::TestCase
     galform.description.de = 'Dosieraerosol'
     sequence.should_receive(:galenic_forms).and_return [flexmock(galform)]
     substance1 = Drugs::Substance.new
-    substance1.name.de = 'Reproterol'
+    substance1.name.de = 'Reproterolhydrochlorid'
     agent1 = Drugs::ActiveAgent.new substance1, 0
     substance2 = Drugs::Substance.new
     substance2.name.de = 'Cromoglicin'
@@ -379,6 +387,7 @@ class TestPharmNet < Test::Unit::TestCase
       .and_return [flexmock(agent1), flexmock(agent2)]
     @importer.assign_fachinfo agent, sequence
     assert !sequence.fachinfo.empty?
+    assert_equal(sequence.code(:registration, 'EU'), '3159.00.00')
   end
   def test_assign_fachinfo__many
     @displayfiles = %w{display2.html display3.html display1.html} * 6

@@ -5,6 +5,7 @@ require 'htmlentities'
 require 'oddb/import/import'
 require 'oddb/import/rtf'
 require 'oddb/util/mail'
+require 'pp'
 
 module ODDB
   module Import
@@ -101,22 +102,31 @@ class FiParser < Rtf
 end
 class FachInfo < Import
   def initialize
+    @stop = /(Pharma(ceuticals|zeutische\s*Fabrik)?
+             |Arzneim(ittel|\.)
+             |GmbH
+             |u\.?\s*Co\.?|Kg
+             )\s*/ie
     @htmlentities = HTMLEntities.new
     @result_cache = {}
     @distance_cache = {}
     @errors = []
-    @assigned = 0
+    @assigned = @removed = 0
     super
   end
-  def assign_fachinfo(agent, sequence, opts = {:replace => false})
-    return unless sequence.fachinfo.empty? || opts[:replace]
+  def assign_fachinfo(agent, sequence, 
+                      opts = {:replace => false, :remove => false})
+    return unless sequence.fachinfo.empty? || opts[:replace] || opts[:remove]
     url = nil
     term = sequence.name.de.dup
+    ODDB.logger.debug('FachInfo') { sprintf('Searching for %s', term) }
     result = []
     while result.empty?
       return if term.length < 3
-
       result.concat search(agent, term)
+      if(result.empty?)
+        result.concat search(agent, term.gsub(/\s+/, '-'))
+      end
       term.gsub! /\s*[^\s]+$/, ''
     end
     if result.size == 1
@@ -124,20 +134,51 @@ class FachInfo < Import
     else
       data = best_data sequence, result
     end
-    return unless data && (url = data[:fachinfo])
+    return(remove_fachinfo sequence, opts) unless data && (url = data[:fachinfo])
 
     cutoff = composition_relevance(sequence.active_agents, data[:composition])
-    return if(cutoff <= 1.25) # arbitrary value
+    return(remove_fachinfo sequence, opts) if(cutoff <= 1.25) # arbitrary value
 
     doc = import_rtf agent, url
     # arbitrary cutoff: fachinfos with less than 5 chapters can't be right...
     if doc.chapters.size > 5
+      ODDB.logger.debug('FachInfo') { 
+        sprintf("Assigning Fachinfo to %s", sequence.name.de) 
+      }
       sequence.fachinfo.de = doc
       sequence.save
       @assigned += 1
+    else
+      remove_fachinfo sequence, opts
     end
-  rescue
-    @errors.push [sequence.name.de, url]
+
+    # assign registration number if really good match
+    return if(cutoff < 2) # arbitrary value
+    assign_registration sequence, data[:registration]
+  rescue StandardError => error
+    @errors.push [sequence.name.de, error.message, error.backtrace[0].strip, url]
+  end
+  def assign_registration(sequence, registration)
+    if(registration)
+      ODDB.logger.debug('FachInfo') { 
+        sprintf('Assigning Registration-Number %s to %s', 
+                sequence.name.de, registration) 
+      }
+      conflict = Drugs::Sequence.find_by_code(:value   => registration, 
+                                              :type    => 'registration', 
+                                              :country => 'EU')
+      if(conflict && conflict != sequence)
+        raise sprintf("Multiple assignment of Registration-Number %s (%s-%i/%s-%i)",
+                      registration, sequence.name.de, sequence.odba_id, 
+                      conflict.name.de, conflict.odba_id)
+      end
+      if(code = sequence.code(:registration, 'EU'))
+        code.value = registration
+      else
+        sequence.add_code Util::Code.new(:registration, registration, 'EU')
+      end
+      sequence.save
+    end
   end
   def best_data(sequence, result)
     suitable = suitable_data sequence, result
@@ -155,15 +196,15 @@ class FachInfo < Import
     contenders.sort_by { |data| data[:date] }.last
   end
   def _composition_paired_relevance(agent, detail)
-    adose = agent.dose
-    ddose = detail[:dose]
-    drel = if(adose.to_f == 0 || adose == ddose)
+    adose = agent.dose.to_f
+    ddose = detail[:dose].to_f
+    drel = if(adose == 0 || adose == ddose)
              1
            else
              if(adose < ddose)
                ddose, adose = adose, ddose
              end
-             (ddose / adose).to_f
+             ddose / adose
            end rescue 0
     srel = ngram_similarity(agent.substance.name.de, detail[:substance])
     drel + srel
@@ -221,7 +262,7 @@ class FachInfo < Import
     if(oldest = hrefs.last) 
       data.update :date => oldest.first, :fachinfo => oldest.last
     end
-    table = (page/"table[@border=1]").first
+    table = (page/"table[@border=1]").first or return data
     rows = (table/"tr")[1..-1] || []
     composition = rows.collect { |row|
       spans = row/"span"
@@ -232,6 +273,14 @@ class FachInfo < Import
       }
     }
     data.store :composition, composition
+    previous = ''
+    (page/"span[@class='wbtxt']").each { |span|
+      if /Reg\.?-Nr\.?/.match previous
+        data.store :registration, span.inner_text
+        break
+      end
+      previous = span.inner_text
+    }
     data
   end
   def _extract_details(span)
@@ -296,16 +345,18 @@ class FachInfo < Import
     form.action = link.href
     form
   end
-  def import(agent, sequences)
+  def import(agent, sequences, opts = {:replace => false, :remove => false})
     sequences.each { |sequence|
-      assign_fachinfo(agent, sequence)
+      assign_fachinfo(agent, sequence, opts)
     }
     Util::Mail.notify_admins sprintf("%s: %s", Time.now.strftime('%c'),
                                      self.class), 
     [ "Assigned #@assigned Fachinfos",
+      "Removed #@removed Fachinfos",
       "Errors: #{@errors.size}",
-    ].concat(@errors.collect { |name, link| 
-      sprintf "%s -> http://gripsdb.pharmnet.de%s", name, link 
+    ].concat(@errors.collect { |name, message, line, link| 
+      sprintf "%s: %s (%s) -> http://gripsdb.pharmnet.de%s", 
+              name, message, line, link
     })
   end
   def import_rtf(agent, url)
@@ -319,6 +370,7 @@ class FachInfo < Import
         format.augment "b"
       end
     }
+    doc.source = url
     doc
   end
   def ngram_similarity(str1, str2, n=5)
@@ -338,6 +390,16 @@ class FachInfo < Import
   end
   def parse_dose(str)
     Drugs::Dose.new(str[/^\d*\.\d*/].to_f, str[/[^\d\.]+$/])
+  end
+  def remove_fachinfo(sequence, opts)
+    if opts[:remove] && sequence.fachinfo.de
+      @removed += 1
+      ODDB.logger.debug('FachInfo') { 
+        sprintf('Removing Fachinfo from %s', sequence.name.de) 
+      }
+      sequence.fachinfo.de = nil
+      sequence.save
+    end
   end
   def result_page(form, term)
     form.field('term').value = term
@@ -379,17 +441,26 @@ class FachInfo < Import
     result = []
     sums.each_with_index { |sum, idx|
       if sum == max
-        result.push selection[idx]
+        result.push preselection[idx]
       end
     }
     result
   end
   def _suitable_data(data, comparison, subcount, cutoff=0.25)
     idx = 0
-    dists = data[:data].collect { |str|
-      other = comparison[idx]
+    raw = data[:data].dup
+    
+    ptrn = /(#{Regexp.escape(raw[1].to_s).gsub(' ', '|')}|\b\d+\s*m?g)\s*/i
+    raw[0] = raw[0].gsub(ptrn, '')
+
+    tabl = /([a-z]{4,})tab.*/i
+    raw[1] = raw[1].to_s.gsub(tabl, '\1')
+    comparison[1] = comparison[1].to_s.gsub(tabl, '\1')
+    dists = raw.collect { |str|
+      str = str.to_s
+      other = comparison[idx].to_s
       idx += 1
-      relevance = ngram_similarity str, other
+      relevance = ngram_similarity str.gsub(@stop, ''), other.gsub(@stop, '')
       return if relevance < cutoff
       relevance
     }
