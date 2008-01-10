@@ -157,8 +157,8 @@ end
 class TestPharmNet < Test::Unit::TestCase
   include FlexMock::TestCase
   def setup
-    @importer = FachInfo.new
     ODDB.config.var = File.expand_path('var', File.dirname(__FILE__))
+    @importer = FachInfo.new
     ODDB.logger = flexmock('logger')
     ODDB.logger.should_ignore_missing
   end
@@ -222,6 +222,9 @@ class TestPharmNet < Test::Unit::TestCase
                             File.dirname(__FILE__))
     agent = flexmock('agent')
     file = flexmock('file')
+    spath = File.join(ODDB.config.var, 
+                      'rtf', 'pharmnet', 'OBFM654A78B701C54FC6.rtf')
+    file.should_receive(:save).with(spath)
     agent.should_receive(:get).with(url).and_return(file)
     file.should_receive(:body).and_return { File.read path }
     document = @importer.import_rtf(agent, url)
@@ -379,10 +382,10 @@ class TestPharmNet < Test::Unit::TestCase
     sequence.should_receive(:galenic_forms).and_return [flexmock(galform)]
     substance1 = Drugs::Substance.new
     substance1.name.de = 'Reproterolhydrochlorid'
-    agent1 = Drugs::ActiveAgent.new substance1, 0
+    agent1 = Drugs::ActiveAgent.new substance1, 0.5, 'mg'
     substance2 = Drugs::Substance.new
-    substance2.name.de = 'Cromoglicin'
-    agent2 = Drugs::ActiveAgent.new substance2, 0
+    substance2.name.de = 'Natriumcromoglicat (Ph.Eur.)'
+    agent2 = Drugs::ActiveAgent.new substance2, 1, 'mg'
     sequence.should_receive(:active_agents)\
       .and_return [flexmock(agent1), flexmock(agent2)]
     @importer.assign_fachinfo agent, sequence

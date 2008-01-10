@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # Import::PharmNet -- de.oddb.org -- 15.10.2007 -- hwyss@ywesee.com
 
+require 'fileutils'
 require 'htmlentities'
 require 'oddb/import/import'
 require 'oddb/import/rtf'
@@ -112,6 +113,8 @@ class FachInfo < Import
     @distance_cache = {}
     @errors = []
     @assigned = @removed = 0
+    @archive = File.join ODDB.config.var, 'rtf', 'pharmnet'
+    FileUtils.mkdir_p @archive
     super
   end
   def assign_fachinfo(agent, sequence, 
@@ -142,12 +145,7 @@ class FachInfo < Import
     doc = import_rtf agent, url
     # arbitrary cutoff: fachinfos with less than 5 chapters can't be right...
     if doc.chapters.size > 5
-      ODDB.logger.debug('FachInfo') { 
-        sprintf("Assigning Fachinfo to %s", sequence.name.de) 
-      }
-      sequence.fachinfo.de = doc
-      sequence.save
-      @assigned += 1
+      _assign_fachinfo doc, sequence
     else
       remove_fachinfo sequence, opts
     end
@@ -157,6 +155,17 @@ class FachInfo < Import
     assign_registration sequence, data[:registration]
   rescue StandardError => error
     @errors.push [sequence.name.de, error.message, error.backtrace[0].strip, url]
+  end
+  def _assign_fachinfo(doc, sequence)
+    ODDB.logger.debug('FachInfo') { 
+      sprintf("Assigning Fachinfo to %s", sequence.name.de) 
+    }
+    if(previous = sequence.fachinfo.de)
+      doc.previous_sources = [previous.previous_sources, previous.source]
+    end
+    sequence.fachinfo.de = doc
+    @assigned += 1
+    sequence.save
   end
   def assign_registration(sequence, registration)
     if(registration)
@@ -361,6 +370,8 @@ class FachInfo < Import
   end
   def import_rtf(agent, url)
     file = agent.get url
+    path = File.join @archive, File.basename(url)
+    file.save path
     doc = FiParser.new.import StringIO.new(file.body)
     doc.chapters.shift
     ## ensure that chapter-headings are bold

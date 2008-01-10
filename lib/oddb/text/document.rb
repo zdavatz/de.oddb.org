@@ -5,9 +5,10 @@ module ODDB
   module Text
     class Document
       attr_accessor :source
-      attr_reader :chapters
+      attr_reader :chapters, :previous_sources
       def initialize
         @chapters = []
+        @previous_sources = []
       end
       def chapter(idx_or_name)
         case idx_or_name
@@ -19,6 +20,13 @@ module ODDB
       end
       def add_chapter(chapter)
         @chapters.push chapter
+      end
+      def previous_sources=(sources)
+        @previous_sources.concat sources.flatten
+        @previous_sources.compact!
+        @previous_sources.uniq!
+        @previous_sources.delete @source
+        @previous_sources
       end
       def to_s
         @chapters.join("\n")
