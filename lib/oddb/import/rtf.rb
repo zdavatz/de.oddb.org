@@ -285,6 +285,10 @@ class Rtf
       @buffer.height = extra.to_i
     when '\\picw'
       @buffer.width = extra.to_i
+    when '\\picscalex'
+      @buffer.xscale = extra.to_i
+    when '\\picscaley'
+      @buffer.yscale = extra.to_i
     when '\\plain'
       current_group.delete_if { |item| item.is_a? String }
     when '\\row'
@@ -353,6 +357,7 @@ class Rtf
   def next_paragraph
     case @buffer
     when Text::Picture
+      @buffer.finalize!
       path = File.join(ODDB.config.var, @buffer.path)
       FileUtils.mkdir_p(File.dirname(path))
       File.open(path, 'w') { |fh|

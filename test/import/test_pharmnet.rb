@@ -369,6 +369,18 @@ class TestPharmNet < Test::Unit::TestCase
     @importer.assign_fachinfo agent, sequence
     assert sequence.fachinfo.empty?
   end
+  def test_assign_fachinfo__http_500
+    agent = flexmock(WWW::Mechanize.new)
+    agent.should_receive(:get).times(2).and_return { 
+      raise "500 => Net::HTTPInternalServerError"
+    }
+    sequence = flexmock(Drugs::Sequence.new)
+    sequence.should_receive(:name)\
+      .and_return(Util::Multilingual.new(:de => 'Aarane'))
+    assert_nothing_raised {
+      @importer.assign_fachinfo agent, sequence
+    }
+  end
   def test_assign_fachinfo
     agent = setup_search "result.html"
     sequence = flexmock(Drugs::Sequence.new)

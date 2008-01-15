@@ -154,7 +154,16 @@ class FachInfo < Import
     return if(cutoff < 2) # arbitrary value
     assign_registration sequence, data[:registration]
   rescue StandardError => error
-    @errors.push [sequence.name.de, error.message, error.backtrace[0].strip, url]
+    retries ||= 1
+    if(/ServerError/.match(error.message) && retries > 0)
+      retries -= 1
+      agent.history.clear
+      @search_form = nil
+      retry
+    else
+      @errors.push [ sequence.name.de, error.message, 
+        error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip, url ]
+    end
   end
   def _assign_fachinfo(doc, sequence)
     ODDB.logger.debug('FachInfo') { 
@@ -168,7 +177,7 @@ class FachInfo < Import
     sequence.save
   end
   def assign_registration(sequence, registration)
-    if(registration)
+    if(registration && sequence.code(:registration, 'EU') != registration)
       ODDB.logger.debug('FachInfo') { 
         sprintf('Assigning Registration-Number %s to %s', 
                 sequence.name.de, registration) 

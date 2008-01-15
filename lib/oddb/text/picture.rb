@@ -4,22 +4,36 @@
 module ODDB
   module Text
     class Picture < DelegateClass(String)
-      attr_accessor :height, :width
-      PNG_SCALE = 20 ## 1440 / 72
-      def initialize(str='')
-        @data = str.dup
-        super(@data)
+      attr_accessor :height, :width, :xscale, :yscale
+      TWIP = 20 ## see http://en.wikipedia.org/wiki/Twip
+      PCNT = 100 
+      def initialize
+        @xscale = @yscale = 100
+        super('')
       end
       def blob
-        [@data].pack('H*')
+        [self].pack('H*')
       end
       def empty?
         false if(image)
       rescue
         true
       end
+      def finalize!
+        img = image
+        geom = sprintf("%ix%i!", 
+                       (@width || img.columns) / TWIP * @xscale / PCNT, 
+                       (@height || img.rows) / TWIP * @yscale / PCNT)
+        img.change_geometry(geom) { |cols, rows, tmp|
+          img.resize!(cols, rows)
+        }
+        png = img.to_blob { 
+          self.format = 'PNG' 
+        }
+        replace png.unpack('H*').first
+      end
       def filename
-        @filename ||= "%s.png" % Digest::MD5.hexdigest(@data)
+        @filename ||= "%s.png" % Digest::MD5.hexdigest(self)
       end
       def image
         Magick::Image.from_blob(blob).first
@@ -31,15 +45,7 @@ module ODDB
       def set_format(*ignore)
       end
       def to_png
-        img = image
-        geom = sprintf("%ix%i!", (@width || img.columns) / PNG_SCALE, 
-                                 (@height || img.rows) / PNG_SCALE)
-        img.change_geometry(geom) { |cols, rows, tmp|
-          img.resize!(cols, rows)
-        }
-        img.to_blob { 
-          self.format = 'PNG' 
-        }
+        blob
       end
       def to_s
         image.inspect
