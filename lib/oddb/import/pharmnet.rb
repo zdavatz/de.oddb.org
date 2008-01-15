@@ -156,6 +156,7 @@ class FachInfo < Import
   rescue StandardError => error
     retries ||= 1
     if(/ServerError/.match(error.message) && retries > 0)
+      ODDB.logger.error('FachInfo') { error.message }
       retries -= 1
       agent.history.clear
       @search_form = nil
@@ -428,15 +429,22 @@ class FachInfo < Import
   def search(agent, term)
     term = term.downcase
     @result_cache.fetch(term) do
-      @search_form ||= get_search_form agent
-      page = result_page @search_form, term
-      result = extract_result agent, page
-      details = result.collect do |data|
-        dpg = get_details agent, page, data
-        detail = data.merge extract_details(dpg)
-        detail.delete :href
-        detail
+      if(minimal = term[/^\S+/])
+        @result_cache.delete_if { |key, _|
+          key < minimal
+        }
       end
+      @search_form ||= get_search_form agent
+      details = agent.transact {
+        page = result_page @search_form, term
+        result = extract_result agent, page
+        result.collect do |data|
+          dpg = get_details agent, page, data
+          detail = data.merge extract_details(dpg)
+          detail.delete :href
+          detail
+        end
+      }
       @result_cache.store term, details
     end
   end
