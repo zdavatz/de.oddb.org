@@ -115,6 +115,8 @@ class FachInfo < Import
     @assigned = @removed = 0
     @archive = File.join ODDB.config.var, 'rtf', 'pharmnet'
     FileUtils.mkdir_p @archive
+    @latest = File.join ODDB.config.var, 'html', 'pharmnet', 'latest.html'
+    FileUtils.mkdir_p File.dirname @latest
     super
   end
   def assign_fachinfo(agent, sequence, 
@@ -437,6 +439,7 @@ class FachInfo < Import
       @search_form ||= get_search_form agent
       details = agent.transact {
         page = result_page @search_form, term
+        page.save @latest
         result = extract_result agent, page
         result.collect do |data|
           dpg = get_details agent, page, data
