@@ -156,9 +156,9 @@ class FachInfo < Import
     return if(cutoff < 2) # arbitrary value
     assign_registration sequence, data[:registration]
   rescue StandardError => error
+    ODDB.logger.error('FachInfo') { error.message }
     retries ||= 1
     if(/ServerError/.match(error.message) && retries > 0)
-      ODDB.logger.error('FachInfo') { error.message }
       retries -= 1
       agent.history.clear
       @search_form = nil
