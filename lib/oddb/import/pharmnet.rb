@@ -116,7 +116,7 @@ class FachInfo < Import
     @archive = File.join ODDB.config.var, 'rtf', 'pharmnet'
     FileUtils.mkdir_p @archive
     @latest = File.join ODDB.config.var, 'html', 'pharmnet', 'latest.html'
-    FileUtils.mkdir_p File.dirname @latest
+    FileUtils.mkdir_p(File.dirname @latest)
     super
   end
   def assign_fachinfo(agent, sequence, 
@@ -183,7 +183,7 @@ class FachInfo < Import
     if(registration && sequence.code(:registration, 'EU') != registration)
       ODDB.logger.debug('FachInfo') { 
         sprintf('Assigning Registration-Number %s to %s', 
-                sequence.name.de, registration) 
+                registration, sequence.name.de) 
       }
       conflict = Drugs::Sequence.find_by_code(:value   => registration, 
                                               :type    => 'registration', 
