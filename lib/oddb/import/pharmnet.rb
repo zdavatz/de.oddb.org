@@ -428,10 +428,10 @@ class FachInfo < Import
     form.field('term').value = term
     form.submit
   end
-  def search(agent, term)
+  def search(agent, term, minimal=nil)
     term = term.downcase
     @result_cache.fetch(term) do
-      if(minimal = term[/^\S+/])
+      if(minimal = term[0,3])
         @result_cache.delete_if { |key, _|
           key < minimal
         }
