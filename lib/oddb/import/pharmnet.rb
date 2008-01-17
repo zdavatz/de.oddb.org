@@ -439,6 +439,13 @@ class FachInfo < Import
       @search_form ||= get_search_form agent
       details = agent.transact {
         page = result_page @search_form, term
+        termfield = (page/"//input[@name='term']").first
+        if(termfield.nil? || termfield.get_attribute(:value) != term)
+          agent.cookie_jar.clear!
+          agent.history.clear
+          @search_form = get_search_form agent
+          page = result_page @search_form, term
+        end
         page.save @latest
         result = extract_result agent, page
         result.collect do |data|

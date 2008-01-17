@@ -341,6 +341,15 @@ class TestPharmNet < Test::Unit::TestCase
     result2 = @importer.search agent2, 'aspirin'
     assert_equal result, result2
   end
+  def test_search__unresponsive
+    agent = setup_search "result.html"
+    history = ["history"]
+    flexmock(agent.cookie_jar).should_receive(:clear!).times(1)
+    agent.should_receive(:history).times(1).and_return { history }
+    result = @importer.search agent, 'Aspirin'
+    assert_equal(1, result.size)
+    assert_equal([], history)
+  end
   def test_assign_fachinfo__no_suitable_fachinfo_found__no_active_agents
     @resultfiles = %w{empty_result.html result.html}
     agent = setup_search
