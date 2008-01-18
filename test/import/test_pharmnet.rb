@@ -160,6 +160,9 @@ class TestPharmNet < Test::Unit::TestCase
     ODDB.config.var = File.expand_path('var', File.dirname(__FILE__))
     @importer = FachInfo.new
     ODDB.logger = flexmock('logger')
+    ODDB.logger.should_receive(:error).and_return { |type, block|
+      flunk block.call
+    }
     ODDB.logger.should_ignore_missing
   end
   def setup_search(resultfile='empty_result.html')
@@ -212,9 +215,17 @@ class TestPharmNet < Test::Unit::TestCase
     assert_equal("/websearch/servlet/FlowController/Search?uid=000002", 
                  form.action)
     radio = form.radiobuttons.find { |b| b.name == "WFTYP" && b.value == "YES" }
+    @importer.set_fi_only(form)
     assert_equal(true, radio.checked)
     field = form.field('term')
     assert_instance_of(WWW::Mechanize::Field, field)
+
+    ## if the sequence has incomplete active_agents, get all results
+    @importer.set_fi_only(form, "NO_RESTRICTION")
+    assert_equal(false, radio.checked)
+    radio = form.radiobuttons.find { |b| 
+      b.name == "WFTYP" && b.value == "NO_RESTRICTION" }
+    assert_equal(true, radio.checked)
   end
   def test_import_rtf
     url = "http://gripsdb.dimdi.de/amispb/doc/2136914-20050504/OBFM654A78B701C54FC6.rtf"
@@ -386,6 +397,8 @@ class TestPharmNet < Test::Unit::TestCase
     sequence = flexmock(Drugs::Sequence.new)
     sequence.should_receive(:name)\
       .and_return(Util::Multilingual.new(:de => 'Aarane'))
+    ODDB.logger = flexmock('logger')
+    ODDB.logger.should_ignore_missing
     assert_nothing_raised {
       @importer.assign_fachinfo agent, sequence
     }
@@ -406,11 +419,16 @@ class TestPharmNet < Test::Unit::TestCase
     agent1 = Drugs::ActiveAgent.new substance1, 0.5, 'mg'
     substance2 = Drugs::Substance.new
     substance2.name.de = 'Natriumcromoglicat (Ph.Eur.)'
-    agent2 = Drugs::ActiveAgent.new substance2, 1, 'mg'
+    agent2 = Drugs::ActiveAgent.new substance2, 0, 'mg'
     sequence.should_receive(:active_agents)\
       .and_return [flexmock(agent1), flexmock(agent2)]
     @importer.assign_fachinfo agent, sequence
     assert !sequence.fachinfo.empty?
+
+    # Agents should be corrected
+    assert_equal(Drugs::Dose.new(1, 'mg'), agent2.dose)
+
+    # Registration should be assigned
     assert_equal(sequence.code(:registration, 'EU'), '3159.00.00')
   end
   def test_assign_fachinfo__many

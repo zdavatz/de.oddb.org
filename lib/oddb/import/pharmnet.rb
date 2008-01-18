@@ -112,11 +112,11 @@ class FachInfo < Import
     @result_cache = {}
     @distance_cache = {}
     @errors = []
-    @assigned = @removed = 0
+    @assigned = @removed = @repaired = 0
     @archive = File.join ODDB.config.var, 'rtf', 'pharmnet'
     FileUtils.mkdir_p @archive
     @latest = File.join ODDB.config.var, 'html', 'pharmnet', 'latest.html'
-    FileUtils.mkdir_p(File.dirname @latest)
+    FileUtils.mkdir_p File.dirname(@latest)
     super
   end
   def assign_fachinfo(agent, sequence, 
@@ -128,9 +128,9 @@ class FachInfo < Import
     result = []
     while result.empty?
       return if term.length < 3
-      result.concat search(agent, term)
+      result.concat search(agent, term, sequence)
       if(result.empty?)
-        result.concat search(agent, term.gsub(/\s+/, '-'))
+        result.concat search(agent, term.gsub(/\s+/, '-'), sequence)
       end
       term.gsub! /\s*[^\s]+$/, ''
     end
@@ -141,7 +141,7 @@ class FachInfo < Import
     end
     return(remove_fachinfo sequence, opts) unless data && (url = data[:fachinfo])
 
-    cutoff = composition_relevance(sequence.active_agents, data[:composition])
+    cutoff = composition_relevance(sequence.active_agents, data)
     return(remove_fachinfo sequence, opts) if(cutoff <= 1.25) # arbitrary value
 
     doc = import_rtf agent, url
@@ -151,6 +151,8 @@ class FachInfo < Import
     else
       remove_fachinfo sequence, opts
     end
+
+    fix_composition sequence.active_agents, data
 
     # assign registration number if really good match
     return if(cutoff < 2) # arbitrary value
@@ -205,7 +207,7 @@ class FachInfo < Import
     suitable = suitable_data sequence, result
     max = 0
     relevances = suitable.collect { |data|
-      rel = composition_relevance(sequence.active_agents, data[:composition])
+      rel = composition_relevance(sequence.active_agents, data)
       max = rel if rel > max
     }
     contenders = []
@@ -230,7 +232,12 @@ class FachInfo < Import
     srel = ngram_similarity(agent.substance.name.de, detail[:substance])
     drel + srel
   end
-  def composition_relevance(agents, details)
+  def composition_relevance(agents, data)
+    if(relevance = data[:relevance])
+      return relevance
+    end
+
+    details = data[:composition]
     participants = [agents.size, details.size].max
     relevances = {}
     agents.each_with_index { |agent, aidx|
@@ -244,9 +251,12 @@ class FachInfo < Import
       sum = pairs.inject(0) { |memo, pair|
         memo + relevances[pair].to_f
       }
-      max = sum if sum > max
+      if sum > max
+        data.store :pairs, pairs
+        max = sum 
+      end
     }
-    max / participants
+    data.store :relevance, max / participants
   end
   def exclusive_permutation(participants)
     left = (0...participants).to_a
@@ -333,6 +343,34 @@ class FachInfo < Import
       }
     }
   end
+  def fix_composition(agents, data)
+    details = data[:composition]
+    data[:pairs].each { |aidx, didx|
+      agent = agents[aidx]
+      detail = details[didx]
+      if(agent.dose.nil? || agent.dose.qty == 0)
+        if(agent.substance == detail[:substance])
+          agent.dose = detail[:dose]
+          agent.save
+          @repaired += 1
+        elsif(!agent.chemical_equivalence)
+          puts "creating chemical equivalence"
+          agent.chemical_equivalence = Drugs::ActiveAgent.new agent.substance, agent.dose
+          agent.chemical_equivalence.save
+          substance = Drugs::Substance.find_by_name detail[:substance]
+          unless(substance)
+            substance = Drugs::Substance.new
+            substance.name.de = detail[:substance]
+            substance.save
+          end
+          agent.substance = substance
+          agent.dose = detail[:dose]
+          agent.save
+          @repaired += 1
+        end
+      end
+    }
+  end
   def get_details(agent, page, result)
     form = page.form("titlesForm")
     form.field("parinfo").value = 'true'
@@ -361,7 +399,6 @@ class FachInfo < Import
     form.action = link.href
     page = form.submit
     form = page.form("search_form")
-    form.radiobuttons.find { |b| b.name == "WFTYP" && b.value == "YES" }.check
     link = page.links.find { |l| l.attributes["id"] == 'goME' }
     form.action = link.href
     form
@@ -374,6 +411,7 @@ class FachInfo < Import
                                      self.class), 
     [ "Assigned #@assigned Fachinfos",
       "Removed #@removed Fachinfos",
+      "Repaired #@repaired Active Agents",
       "Errors: #{@errors.size}",
     ].concat(@errors.collect { |name, message, line, link| 
       sprintf "%s: %s (%s) -> http://gripsdb.pharmnet.de%s", 
@@ -428,7 +466,7 @@ class FachInfo < Import
     form.field('term').value = term
     form.submit
   end
-  def search(agent, term, minimal=nil)
+  def search(agent, term, sequence=nil)
     term = term.downcase
     @result_cache.fetch(term) do
       if(minimal = term[0,3])
@@ -437,6 +475,11 @@ class FachInfo < Import
         }
       end
       @search_form ||= get_search_form agent
+      ## if we need to repair the active agents, we want all results, otherwise only
+      #  those that have a FachInfo to parse.
+      fi_only = sequence && sequence.active_agents.any? { |act| 
+        act.dose.qty == 0 } ? 'NO_RESTRICTION' : 'YES'
+      set_fi_only(@search_form, fi_only)
       details = agent.transact {
         page = result_page @search_form, term
         div = (page/"div.wbsectionsubtitlebar").last
@@ -444,6 +487,7 @@ class FachInfo < Import
           agent.cookie_jar.clear!
           agent.history.clear
           @search_form = get_search_form agent
+          set_fi_only(@search_form, fi_only)
           page = result_page @search_form, term
         end
         page.save @latest
@@ -457,6 +501,9 @@ class FachInfo < Import
       }
       @result_cache.store term, details
     end
+  end
+  def set_fi_only(form, status="YES")
+    form.radiobuttons.find { |b| b.name == "WFTYP" && b.value == status }.check
   end
   def suitable_data(sequence, selection)
     comparison = [

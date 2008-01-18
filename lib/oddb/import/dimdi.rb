@@ -836,7 +836,7 @@ module Dimdi
             candidate != agent \
               && candidate.substance.name.de[0,name.length] == name })
             qty = other.dose.qty
-            if(qty == qty.to_i && !other.chemical_equivalence)
+            if(qty > 0 && qty == qty.to_i && !other.chemical_equivalence)
               agent, other = other, agent
             end
             if(agent.chemical_equivalence)
