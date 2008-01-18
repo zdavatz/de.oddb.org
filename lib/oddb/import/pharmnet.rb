@@ -439,8 +439,8 @@ class FachInfo < Import
       @search_form ||= get_search_form agent
       details = agent.transact {
         page = result_page @search_form, term
-        termfield = (page/"//input[@name='term']").first
-        if(termfield.nil? || termfield.get_attribute(:value) != term)
+        div = (page/"div.wbsectionsubtitlebar").last
+        if(div.nil? || !/Arzneimittelname:\s#{term}\?/.match(div.inner_text))
           agent.cookie_jar.clear!
           agent.history.clear
           @search_form = get_search_form agent
