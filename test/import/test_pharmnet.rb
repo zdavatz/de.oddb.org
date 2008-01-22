@@ -391,7 +391,7 @@ class TestPharmNet < Test::Unit::TestCase
   end
   def test_assign_fachinfo__http_500
     agent = flexmock(WWW::Mechanize.new)
-    agent.should_receive(:get).times(2).and_return { 
+    agent.should_receive(:get).times(3).and_return { 
       raise "500 => Net::HTTPInternalServerError"
     }
     sequence = flexmock(Drugs::Sequence.new)
@@ -400,7 +400,7 @@ class TestPharmNet < Test::Unit::TestCase
     ODDB.logger = flexmock('logger')
     ODDB.logger.should_ignore_missing
     assert_nothing_raised {
-      @importer.assign_fachinfo agent, sequence
+      @importer.assign_fachinfo agent, sequence, :retry_unit => 1, :retries => 2
     }
   end
   def test_assign_fachinfo
@@ -422,7 +422,7 @@ class TestPharmNet < Test::Unit::TestCase
     agent2 = Drugs::ActiveAgent.new substance2, 0, 'mg'
     sequence.should_receive(:active_agents)\
       .and_return [flexmock(agent1), flexmock(agent2)]
-    @importer.assign_fachinfo agent, sequence
+    @importer.assign_fachinfo agent, sequence, :repair => true
     assert !sequence.fachinfo.empty?
 
     # Agents should be corrected

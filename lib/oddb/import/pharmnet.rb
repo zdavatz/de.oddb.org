@@ -119,8 +119,11 @@ class FachInfo < Import
     FileUtils.mkdir_p File.dirname(@latest)
     super
   end
-  def assign_fachinfo(agent, sequence, 
-                      opts = {:replace => false, :remove => false})
+  def assign_fachinfo(agent, sequence, opts = { :replace => false,
+                                                :remove => false, 
+                                                :repair => false,
+                                                :retries => 3,
+                                                :retry_unit => 60 })
     return unless sequence.fachinfo.empty? || opts[:replace] || opts[:remove]
     url = nil
     term = sequence.name.de.dup
@@ -128,9 +131,9 @@ class FachInfo < Import
     result = []
     while result.empty?
       return if term.length < 3
-      result.concat search(agent, term, sequence)
+      result.concat search(agent, term, sequence, opts)
       if(result.empty?)
-        result.concat search(agent, term.gsub(/\s+/, '-'), sequence)
+        result.concat search(agent, term.gsub(/\s+/, '-'), sequence, opts)
       end
       term.gsub! /\s*[^\s]+$/, ''
     end
@@ -152,15 +155,16 @@ class FachInfo < Import
       remove_fachinfo sequence, opts
     end
 
-    fix_composition sequence.active_agents, data
+    fix_composition sequence.active_agents, data if(opts[:repair])
 
     # assign registration number if really good match
     return if(cutoff < 2) # arbitrary value
     assign_registration sequence, data[:registration]
   rescue StandardError => error
     ODDB.logger.error('FachInfo') { error.message }
-    retries ||= 1
+    retries ||= opts[:retries]
     if(/ServerError/.match(error.message) && retries > 0)
+      sleep opts[:retry_unit] * 4 ** (opts[:retries] - retries)
       retries -= 1
       agent.history.clear
       @search_form = nil
@@ -233,10 +237,6 @@ class FachInfo < Import
     drel + srel
   end
   def composition_relevance(agents, data)
-    if(relevance = data[:relevance])
-      return relevance
-    end
-
     details = data[:composition]
     participants = [agents.size, details.size].max
     relevances = {}
@@ -354,7 +354,6 @@ class FachInfo < Import
           agent.save
           @repaired += 1
         elsif(!agent.chemical_equivalence)
-          puts "creating chemical equivalence"
           agent.chemical_equivalence = Drugs::ActiveAgent.new agent.substance, agent.dose
           agent.chemical_equivalence.save
           substance = Drugs::Substance.find_by_name detail[:substance]
@@ -403,18 +402,35 @@ class FachInfo < Import
     form.action = link.href
     form
   end
-  def import(agent, sequences, opts = {:replace => false, :remove => false})
-    sequences.each { |sequence|
+  def import(agent, sequences, opts = { :replace => false, 
+                                        :remove => false, 
+                                        :repair => false,
+                                        :retries => 3,
+                                        :retry_unit => 60 })
+    sequences = sequences.sort_by { |sequence| sequence.name }
+    checked = sprintf "Checked %i Sequences from '%s' to '%s'",
+                      sequences.size, sequences.first.name, sequences.last.name
+    while sequence = sequences.shift
       assign_fachinfo(agent, sequence, opts)
+    end
+    sources = {}
+    count = 0
+    Drugs::Sequence.all { |sequence|
+      if(doc = sequence.fachinfo.de)
+        count += 1
+        sources[doc.source] = true
+      end
     }
     Util::Mail.notify_admins sprintf("%s: %s", Time.now.strftime('%c'),
                                      self.class), 
-    [ "Assigned #@assigned Fachinfos",
+    [ checked,
+      "Assigned #@assigned Fachinfos",
       "Removed #@removed Fachinfos",
+      "Total: #{sources.size} Fachinfos linked to #{count} Sequences",
       "Repaired #@repaired Active Agents",
       "Errors: #{@errors.size}",
     ].concat(@errors.collect { |name, message, line, link| 
-      sprintf "%s: %s (%s) -> http://gripsdb.pharmnet.de%s", 
+      sprintf "%s: %s (%s) -> http://gripsdb.dimdi.de%s", 
               name, message, line, link
     })
   end
@@ -466,7 +482,7 @@ class FachInfo < Import
     form.field('term').value = term
     form.submit
   end
-  def search(agent, term, sequence=nil)
+  def search(agent, term, sequence=nil, opts={})
     term = term.downcase
     @result_cache.fetch(term) do
       if(minimal = term[0,3])
@@ -477,7 +493,7 @@ class FachInfo < Import
       @search_form ||= get_search_form agent
       ## if we need to repair the active agents, we want all results, otherwise only
       #  those that have a FachInfo to parse.
-      fi_only = sequence && sequence.active_agents.any? { |act| 
+      fi_only = opts[:repair] && sequence && sequence.active_agents.any? { |act| 
         act.dose.qty == 0 } ? 'NO_RESTRICTION' : 'YES'
       set_fi_only(@search_form, fi_only)
       details = agent.transact {
@@ -549,7 +565,7 @@ class FachInfo < Import
       return if relevance < cutoff
       relevance
     }
-    cdist = (subcount - data[:composition].size).abs
+    cdist = (comp = data[:composition]) ? (subcount - comp.size).abs : subcount
     dists.push(cdist) unless cdist > 0
   end
 end
