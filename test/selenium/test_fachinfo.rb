@@ -95,7 +95,7 @@ class TestFachinfo < Test::Unit::TestCase
     paragraph.set_format()
     paragraph << " Behältnis"
     chapter.add_paragraph paragraph
-    picture = Text::Picture.new('not empty...')
+    picture = Text::Picture.new
     flexmock(picture).should_receive(:path).and_return('/resources/oddb/logo.png')
     flexmock(picture).should_receive(:filename).and_return('logo.png')
     chapter.add_paragraph picture 
@@ -107,7 +107,20 @@ class TestFachinfo < Test::Unit::TestCase
     package.fachinfo.de = setup_fachinfo
     open "/de/drugs/fachinfo/pzn/12345"
     assert_equal "DE - ODDB.org | Medikamente | Fachinformation | Amantadin by Producer | Open Drug Database", get_title
-    assert is_text_present "1. Bezeichnung\nAmantadin Product"
+    assert is_text_present("1. Bezeichnung\nAmantadin Product")
+  end
+  def test_fachinfo__limited
+    ODDB.config.query_limit = 1
+    package = setup_package
+    package.fachinfo.de = setup_fachinfo
+    open "/de/drugs/fachinfo/pzn/12345"
+    assert_equal "DE - ODDB.org | Medikamente | Fachinformation | Amantadin by Producer | Open Drug Database", get_title
+    open "/de/drugs/fachinfo/pzn/12345"
+    assert_equal 'DE - ODDB.org | Medikamente | Open Drug Database', 
+                 get_title
+    assert is_text_present("Abfragebeschränkung")
+  ensure
+    ODDB.config.query_limit = 20
   end
 end
   end

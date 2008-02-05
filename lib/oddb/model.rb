@@ -88,6 +88,7 @@ module ODDB
           unless(container.include?(inst))
             container.push(inst) 
           end
+          inst
         }
         define_method("remove_#{plural.to_s.singular}") { |inst|
           self.send(plural).delete(inst)

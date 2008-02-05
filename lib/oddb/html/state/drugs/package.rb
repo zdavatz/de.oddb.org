@@ -9,6 +9,7 @@ module ODDB
     module State
       module Drugs
 class Package < Global
+  LIMIT = true
   VIEW = View::Drugs::Package
   def direct_event
     direct_event = [:package]

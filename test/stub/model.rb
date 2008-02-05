@@ -68,6 +68,9 @@ module ODDB
     class Company < Model
       simulate_database(:name)
     end
+    class Invoice < Model
+      simulate_database(:yus_name, :id)
+    end
   end
   module Drugs
     class ActiveAgent < Model

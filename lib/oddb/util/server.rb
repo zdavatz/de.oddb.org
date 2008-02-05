@@ -5,8 +5,10 @@ require 'oddb/html/util/known_user'
 require 'oddb/html/util/session'
 require 'oddb/html/util/validator'
 require 'oddb/util/exporter'
+require 'oddb/util/ipn'
 require 'oddb/util/updater'
 require 'oddb/export/rss'
+require 'paypal'
 require 'sbsm/drbserver'
 
 module ODDB
@@ -46,6 +48,10 @@ module ODDB
         t.priority = priority
         @admin_threads.add(t)
         t
+      end
+      def ipn(notification)
+        Util::Ipn.process notification
+        nil # don't return the invoice back across drb - it's not defined in yipn
       end
       def login(email, pass)
         session = ODDB.auth.login(email, pass, ODDB.config.auth_domain)

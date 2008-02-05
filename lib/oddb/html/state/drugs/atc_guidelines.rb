@@ -9,6 +9,7 @@ module ODDB
     module State
       module Drugs
 class AtcGuidelines < Global
+  LIMIT = true
   VIEW = View::Drugs::AtcGuidelines
   def direct_event
     [:ddd, :code, @model.code]

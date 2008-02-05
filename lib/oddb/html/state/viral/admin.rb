@@ -10,6 +10,9 @@ module ODDB
       module Viral
 module Admin
 	include SBSM::ViralState
+  def limited?
+    false
+  end
   def _package(code)
     if(package = _package_by_code(code))
       State::Drugs::Admin::Package.new(@session, package)

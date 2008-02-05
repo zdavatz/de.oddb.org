@@ -25,6 +25,7 @@ class Feedback < Global
       @item.feedbacks.include? @current
     end
   end
+  LIMIT = true
   VIEW = View::Drugs::Feedback
   attr_reader :passed_turing_test
   def init

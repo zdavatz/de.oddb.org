@@ -12,6 +12,7 @@ module ODDB
       module Drugs
 class Compare < Global
   include Util::PackageSort
+  LIMIT = true
   VIEW = View::Drugs::Compare
   def init
     original = @model.origin

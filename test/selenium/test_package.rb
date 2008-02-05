@@ -101,12 +101,24 @@ class TestPackage < Test::Unit::TestCase
     assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Preisvergleich | Open Drug Database", 
                  get_title
   end
+  def test_package__limited
+    ODDB.config.query_limit = 1
+    package = setup_package
+    open "/de/drugs/package/pzn/12345"
+    assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", get_title
+    open "/de/drugs/package/pzn/12345"
+    assert_equal 'DE - ODDB.org | Medikamente | Open Drug Database', 
+                 get_title
+    assert is_text_present("Abfragebeschränkung")
+  ensure
+    ODDB.config.query_limit = 20
+  end
   def test_admin_package
     package = setup_package
     user = login_admin
     open "/de/drugs/package/pzn/12345"
     assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", get_title
-    assert is_element_present "fi_url"
+    assert is_element_present("fi_url")
     fachinfo = "A Fachinfo-Document"
     type "fi_url", "http://host.domain/path.rtf"
     flexmock(Import::PharmNet::FachInfo).new_instances\
@@ -114,8 +126,20 @@ class TestPackage < Test::Unit::TestCase
     click "//input[@name='update']"
     wait_for_page_to_load "30000"
     assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", get_title
-    assert is_text_present "FI"
+    assert is_text_present("FI")
     assert_equal(fachinfo, package.sequence.fachinfo.de)
+  end
+  def test_admin_package__not_limited
+    ODDB.config.query_limit = 1
+    package = setup_package
+    user = login_admin
+    2.times {
+      open "/de/drugs/package/pzn/12345"
+      assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", get_title
+      assert is_element_present("fi_url")
+    }
+  ensure
+    ODDB.config.query_limit = 20
   end
 end
   end

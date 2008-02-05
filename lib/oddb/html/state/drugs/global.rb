@@ -25,11 +25,7 @@ module ODDB
   module Html
     module State
       module Drugs
-class Global < State::Global
-  EVENT_MAP = {
-    :home  => Drugs::Init,
-    :login => Drugs::Login,
-  }
+module Events
   def compare_remote
     if((uid = @session.user_input(:uid)) \
        && (package = _remote_package(uid)))
@@ -87,6 +83,9 @@ class Global < State::Global
     if(package = _package_by_code(code))
       Feedback.new(@session, package)
     end
+  end
+  def limited?(*args)
+    super && !@session.allowed?('view', ODDB.config.auth_domain)
   end
   def navigation
     [:products, :atc_browser].concat(super)
@@ -201,6 +200,9 @@ class Global < State::Global
   def _search_remote(query)
     _remote_packages { |remote| remote.remote_packages(query) }
   end
+end
+class Global < State::Global
+  include Events
 end
       end
     end

@@ -10,6 +10,7 @@ module ODDB
       module Drugs
 class AtcBrowser < Drugs::Global
   DIRECT_EVENT = :atc_browser
+  LIMIT = true
   VIEW = View::Drugs::AtcBrowser
   def init
     @model = ODDB::Drugs::Atc.search_by_level_and_code(1, '')

@@ -3,14 +3,16 @@
 
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
+$log_level = 0
+
 if(pid = Kernel.fork)
   at_exit {
     Process.kill('HUP', pid)
-    $selenium.stop if($selenium.respond_to?(:stop))
+    $selenium.stop if($log_level == 0 && $selenium.respond_to?(:stop))
   }
 else
   path = File.expand_path('selenium-server.jar', File.dirname(__FILE__))
-  command = "java -jar #{path} &> /dev/null"
+  command = $log_level > 0 ? "java -jar #{path}" : "java -jar #{path} &> /dev/null"
   exec(command) 
 end
 
@@ -64,6 +66,11 @@ module TestCase
   include FlexMock::TestCase
   include SeleniumHelper
   def setup
+    Drugs::Atc.instances.clear
+    Drugs::Product.instances.clear
+    Drugs::Sequence.instances.clear
+    Drugs::Package.instances.clear
+    Business::Company.instances.clear
     ODDB.logger = Logger.new($stdout)
     ODDB.logger.level = Logger::DEBUG
     @auth = flexmock('authenticator')
@@ -77,7 +84,7 @@ module TestCase
       @drb_server = DRb.start_service(drb_url, @server) 
     }
     @drb.abort_on_exception = true
-    @http_server = Stub.http_server(drb_url)
+    @http_server = Stub.http_server(drb_url, $log_level)
     @webrick = Thread.new { @http_server.start }
     @verification_errors = []
     if $selenium
@@ -87,7 +94,8 @@ module TestCase
         ODDB.config.http_server + ":10080", 10000)
       @selenium.start
     end
-    @selenium.set_context("TestOddb", "info")
+    @selenium.set_context("info")
+    ODDB::Html::Util::Session.reset_query_limit
   end
   def teardown
     @selenium.stop unless $selenium
@@ -102,7 +110,7 @@ module TestCase
     open "/de/drugs/login"
     type "email", email
     type "pass", "test"
-    click "//input[@name='login']"
+    click "//input[@name='login_']"
     wait_for_page_to_load "30000"
     user
   end
@@ -120,8 +128,60 @@ module TestCase
       (@yus_entities ||= {})[email]
     }
     user.should_receive(:last_login)
+    user.should_receive(:permissions).and_return(permissions)
     user.should_ignore_missing
     user
+  end
+  def setup_package(name="Amantadin by Producer", atccode='N04BB01')
+    product = Drugs::Product.new
+    company = Business::Company.new
+    company.name.de = 'Producer AG'
+    product.company = company
+    company.save
+    sequence = Drugs::Sequence.new
+    sequence.product = product
+    atc = Drugs::Atc.new(atccode)
+    atc.name.de = 'Amantadin'
+    ddd = Drugs::Ddd.new('O')
+    ddd.dose = Drugs::Dose.new(10, 'mg')
+    atc.add_ddd(ddd)
+    sequence.atc = atc
+    composition = Drugs::Composition.new
+    galform = Drugs::GalenicForm.new
+    galform.description.de = 'Tabletten'
+    composition.galenic_form = galform
+    grp = Drugs::GalenicGroup.new('Tabletten')
+    grp.administration = 'O'
+    galform.group = grp
+    sequence.add_composition(composition)
+    substance = Drugs::Substance.new
+    substance.name.de = 'Amantadin'
+    dose = Drugs::Dose.new(100, 'mg')
+    active_agent = Drugs::ActiveAgent.new(substance, dose)
+    composition.add_active_agent(active_agent)
+    package = Drugs::Package.new
+    code = Util::Code.new(:cid, '12345', 'DE')
+    package.add_code(code)
+    code = Util::Code.new(:festbetragsstufe, 3, 'DE')
+    package.add_code(code)
+    code = Util::Code.new(:festbetragsgruppe, 4, 'DE')
+    package.add_code(code)
+    code = Util::Code.new(:zuzahlungsbefreit, true, 'DE')
+    package.add_code(code)
+    part = Drugs::Part.new
+    part.package = package
+    part.size = 5
+    part.composition = composition
+    unit = Drugs::Unit.new
+    unit.name.de = 'Ampullen'
+    part.unit = unit
+    part.quantity = Drugs::Dose.new(20, 'ml')
+    package.name.de = name
+    package.sequence = sequence
+    package.add_price(Util::Money.new(6, :public, 'DE'))
+    package.add_price(Util::Money.new(10, :festbetrag, 'DE'))
+    package.save
+    package
   end
 end
   end

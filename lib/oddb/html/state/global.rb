@@ -3,15 +3,24 @@
 
 require 'oddb/html/state/global_predefine'
 require 'oddb/html/state/drugs/atc_browser'
+require 'oddb/html/state/drugs/init'
+require 'oddb/html/state/drugs/login'
+require 'oddb/html/state/limit'
+require 'oddb/html/state/register_poweruser'
+require 'oddb/html/state/paypal/checkout'
+require 'oddb/business/invoice'
 
 module ODDB
   module Html
     module State
 class Global < SBSM::State
+  include PayPal::Checkout
   attr_reader :passed_turing_test
-  def atc_browser
-    Drugs::AtcBrowser.new(@session, nil)
-  end
+  LIMIT = false
+  GLOBAL_MAP = {
+    :atc_browser => Drugs::AtcBrowser,
+    :login       => Drugs::Login,
+  }
   def compare
     if(code = @session.user_input(:pzn))
       _compare(code)
@@ -38,9 +47,18 @@ class Global < SBSM::State
       _feedback(code)
     end
   end
+  def home
+    State::Drugs::Init.new @session, nil
+  end
+  def limited?
+    self.class.const_get(:LIMIT)
+  end
+  def limit_state
+    State::Limit.new(@session, nil)
+  end
   def logout
     @session.logout
-    trigger :home
+    home
   end
   def package
     if(code = @session.user_input(:pzn))
@@ -57,6 +75,27 @@ class Global < SBSM::State
       /^[a-z]$/.match(key)
     }
   end
+  def proceed_poweruser
+    days = @session.user_input(:days).to_i
+    total = ODDB.config.prices["org.oddb.de.view.#{days}"].to_f 
+    unless(days > 0 && total > 0)
+      @errors.store :days, create_error(:e_missing_days, :days, 0)
+      self
+    else
+      invoice = ODDB::Business::Invoice.new
+      item = invoice.add(:poweruser, "unlimited access", days, 
+                         @session.lookandfeel.lookup(:days), total / days)
+      State::RegisterPowerUser.new(@session, invoice)
+    end
+=begin
+      if(usr = @session.user_input(:pointer))
+        State::User::RenewPowerUser.new(@session, invoice)
+      else
+        State::User::RegisterPowerUser.new(@session, invoice)
+      end
+    end
+=end
+  end
   def products
     _products(@session.persistent_user_input(:range))
   end
@@ -67,6 +106,13 @@ class Global < SBSM::State
   end
   def navigation
     []
+  end
+  def method_missing(mth, *args)
+    if(mth.to_s[0] == ?_)
+      self
+    else
+      super
+    end
   end
 end
     end

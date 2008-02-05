@@ -21,7 +21,7 @@ module ODDB
       alias :print :<<
     end
     class HTTPServer < WEBrick::HTTPServer
-      attr_accessor :document_root
+      attr_accessor :document_root, :redirected_output
       def method_missing(method, *args, &block)
         @logger.warn "ignoring method: #{method}"
       end
@@ -57,8 +57,10 @@ module ODDB
           sbsm.cgi.cookies['_session_id'] = 'test:preset-session-id'
           sbsm.cgi.output = output
           sbsm.process
-          if(/^location:/i.match(output))
+          if(/^location: http...localhost/i.match(output))
             resp.status = 303
+          elsif(/^location:.*paypal/i.match(output))
+            req.server.redirected_output = output
           end
           resp.rawdata = true
           resp.body = output
@@ -116,6 +118,9 @@ module SBSM
   class Request
     def handle_exception(e)
       raise e
+    end
+    def remote_host(*args)
+      "127.0.0.1"
     end
   end
   module Apache

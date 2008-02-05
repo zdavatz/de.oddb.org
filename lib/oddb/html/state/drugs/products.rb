@@ -12,6 +12,7 @@ module ODDB
 class Products < Drugs::Global
   include Util::Sort
   DIRECT_EVENT = :products
+  LIMIT = true
   VIEW = View::Drugs::Products
   def init
     sort_by(:product)

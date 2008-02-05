@@ -30,6 +30,7 @@ class TestProducts < Test::Unit::TestCase
     product.save
   end
   def test_products
+    ODDB.config.query_limit = 20
     setup_product("Amantadin by Producer")
     setup_product("Amantadin by someone Else")
     setup_product("4N Pflaster")
@@ -119,6 +120,21 @@ class TestProducts < Test::Unit::TestCase
     @selenium.wait_for_page_to_load "30000"
     assert_equal "DE - ODDB.org | Medikamente | Arzneimittel A-Z | Open Drug Database", 
                  @selenium.get_title
+  end
+  def test_products__limited
+    ODDB.config.query_limit = 1
+    setup_product("Amantadin by Producer")
+    setup_product("Amantadin by someone Else")
+    setup_product("4N Pflaster")
+    open "/de/drugs/products"
+    assert_equal "DE - ODDB.org | Medikamente | Arzneimittel A-Z | Open Drug Database", 
+                 @selenium.get_title
+    open "/de/drugs/products"
+    assert_equal 'DE - ODDB.org | Medikamente | Open Drug Database', 
+                 get_title
+    assert is_text_present("Abfragebeschränkung")
+  ensure
+    ODDB.config.query_limit = 20
   end
 end
   end

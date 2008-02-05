@@ -14,7 +14,7 @@ class LoginForm < HtmlGrid::Form
     [0,1] =>  :pass,
     [1,2] =>  :submit,
   }
-  EVENT = :login
+  EVENT = :login_
   FORM_NAME = 'login'
   LABELS = true
   SYMBOL_MAP = {

@@ -60,6 +60,7 @@ class Result < Drugs::Global
     end
   end
   include Util::PackageSort
+  LIMIT = true
   VIEW = View::Drugs::Result
   def init
     partition!

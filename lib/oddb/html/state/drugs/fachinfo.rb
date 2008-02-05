@@ -9,6 +9,7 @@ module ODDB
     module State
       module Drugs
 class Fachinfo < Global
+  LIMIT = true
   VIEW = View::Drugs::Fachinfo
   def direct_event
     direct_event = [:fachinfo]

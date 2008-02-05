@@ -4,6 +4,7 @@
 $: << File.expand_path('..', File.dirname(__FILE__))
 
 require 'selenium/unit'
+require 'stub/model'
 require 'oddb/config'
 
 module ODDB
@@ -22,7 +23,7 @@ class TestLogin < Test::Unit::TestCase
     assert is_element_present("pass")
     assert_match Regexp.new(ODDB.config.http_server), 
       get_attribute("//form[@name='login']@action")
-    assert is_element_present("//input[@name='login']")
+    assert is_element_present("//input[@name='login_']")
   end
   def test_login__fail_unknown_user
     open "/"

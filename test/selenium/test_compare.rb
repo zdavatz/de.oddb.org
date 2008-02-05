@@ -15,9 +15,6 @@ module ODDB
 class TestCompare < Test::Unit::TestCase
   include Selenium::TestCase
   def setup
-    Drugs::Package.instances.clear
-    Drugs::Product.instances.clear
-    Business::Company.instances.clear
     @cache = flexstub(ODBA.cache)
     flexstub(Currency).should_receive(:rate)\
       .with('EUR', 'CHF').and_return(1.5)
@@ -154,6 +151,31 @@ class TestCompare < Test::Unit::TestCase
     assert_equal 'zuzahlungsbefreit', get_attribute('//tr[3]@class')
     assert is_text_present('Gelb = Zuzahlungsbefreit')
     assert !is_text_present('Rot = CH - Produkte')
+  end
+  def test_compare__limited
+    ODDB.config.query_limit = 1
+    package1 = setup_package("Amantadin by Producer", '12345', 6)
+    package2 = setup_package("By another name", '54321', 3)
+    package2.code(:zuzahlungsbefreit).value = false
+    flexstub(package1).should_receive(:comparables)\
+      .and_return([package2])
+    flexstub(package2).should_receive(:comparables)\
+      .and_return([package1])
+    open "/de/drugs/compare/pzn/12345"
+    assert_equal "DE - ODDB.org | Medikamente | Preisvergleich | Amantadin by Producer | Open Drug Database", get_title
+    assert is_text_present('-50.0%')
+    assert_equal 'origin zuzahlungsbefreit', 
+                 get_attribute('//tr[2]@class')
+    assert_raises(SeleniumCommandError) { get_attribute('//tr[3]@class') }
+
+
+    click 'link=By another name'
+    wait_for_page_to_load "30000"
+    assert_equal 'DE - ODDB.org | Medikamente | Open Drug Database', 
+                 get_title
+    assert is_text_present("Abfragebeschränkung")
+  ensure
+    ODDB.config.query_limit = 20
   end
   def test_sort
     package1 = setup_package("Amantadin by Producer", '12345', 6)

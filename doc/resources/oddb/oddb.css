@@ -228,11 +228,17 @@ form {
 img {
   border: 0px;
 }
+input[type=text], input[type=password] {
+  width: 160px;
+}
 input.url {
   width: 600px;
 }
 label {
   font-weight: bold;
+}
+label.error {
+  color: red;
 }
 span#delicious {
   background-image: url(/resources/images/delicious.gif);
@@ -267,6 +273,13 @@ span.social {
   margin-left: 8px;
   padding-left: 20px;
   padding-top: 1px;
+}
+table.invoice {
+  float: left;
+  margin-right: 40px;
+}
+table.invoice.items {
+	border: 1px solid #ccff99;
 }
 td {
   padding: 4px;
@@ -372,8 +385,14 @@ td.product {
 td.radio {
   max-width: 20px;
 }
+td.right {
+  text-align: right;
+}
 td.top {
   vertical-align: top;
+}
+td.total {
+  font-weight: bold;
 }
 td.warn {
   padding: 8px; 

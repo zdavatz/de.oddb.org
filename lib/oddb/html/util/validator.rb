@@ -13,18 +13,21 @@ class Validator < SBSM::Validator
     :display   => ['paged', 'grouped'],
     :dstype    => ['tradename', 'compare', 'substance', 'company'],
     :range     => ("A".."Z").to_a.push('0-9'),
+    :salutation => [nil, "salutation_f", "salutation_m"],
     :sortvalue => [ 'active_agents', 'atc', 'code_festbetragsstufe',
       'code_zuzahlungsbefreit', 'company', 'ddd_prices', 'difference',
       'doses', 'package_infos', 'price_festbetrag', 'price_difference',
       'price_public', 'product', 'size', 
     ],
   }
-  EVENTS = [ :atc_browser, :ddd, :explain_ddd_price, :explain_price, :fachinfo,
-             :feedback, :package_infos, :compare, :compare_remote, :home,
-             :login, :logout, :package, :products, :remote_infos, :search,
-             :sort, :update ]
-  NUMERIC = [ :offset, :pzn ]
-  STRINGS = [ :captcha, :code, :fi_url, :message, :name, :query, :uid ]
+  EVENTS = [ :ajax_autofill, :atc_browser, :collect, :ddd, :explain_ddd_price,
+             :explain_price, :fachinfo, :feedback, :checkout, :compare,
+             :compare_remote, :home, :login, :login_, :logout, :package,
+             :package_infos, :proceed_poweruser, :products, :remote_infos,
+             :search, :sort, :update ]
+  NUMERIC = [ :days, :offset, :pzn ]
+  STRINGS = [ :captcha, :code, :fi_url, :invoice, :message, :name, :name_first,
+              :name_last, :query, :uid ]
   def page(value) 
     if(num = validate_numeric(:page, value))
       # pages are 1-based for the human user

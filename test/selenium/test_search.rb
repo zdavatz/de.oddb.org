@@ -120,6 +120,7 @@ class TestSearch < Test::Unit::TestCase
     @currency.stop_service
   end
   def test_search
+    ODDB.config.query_limit = 20
     package = setup_package
     open "/"
     assert_equal "DE - ODDB.org | Medikamente | Home | Open Drug Database", get_title
@@ -325,7 +326,7 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     assert is_text_present('Amantadin by Producer')
 
     ## click through to Feedback
-    assert is_element_present "link=FB"
+    assert is_element_present("link=FB")
     click "//a[@name='feedback_short']"
     wait_for_page_to_load "30000"
     assert_equal "DE - ODDB.org | Medikamente | Feedback | Amantadin by Producer | Open Drug Database", 
@@ -336,6 +337,19 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     wait_for_page_to_load "30000"
     assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", 
                  get_title
+  end
+  def test_search__limited
+    ODDB.config.query_limit = 1
+    package = setup_package
+    open "/de/drugs/search/query/Amantadin"
+    assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Preisvergleich | Open Drug Database", 
+                 get_title
+    open "/de/drugs/search/query/Amantadin"
+    assert_equal 'DE - ODDB.org | Medikamente | Open Drug Database', 
+                 get_title
+    assert is_text_present("Abfragebeschränkung")
+  ensure
+    ODDB.config.query_limit = 20
   end
   def test_search__with_fachinfo
     package = setup_package

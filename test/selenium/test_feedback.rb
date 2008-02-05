@@ -101,8 +101,7 @@ class TestFeedback < Test::Unit::TestCase
     click "//input[@type='submit']"
     wait_for_page_to_load "30000"
     assert is_text_present('Ihre Eingabe stimmt nicht mit dem Bild überein. Bitte versuchen Sie es noch einmal.')
-    assert is_text_present('Bitte geben Sie einen Namen an.')
-    assert is_text_present('Bitte geben Sie eine gültige E-Mail-Adresse an.')
+    assert is_text_present('Bitte füllen Sie alle Felder aus.')
     assert is_element_present('name')
     assert is_element_present('email')
     assert is_element_present('email_public')
@@ -175,6 +174,18 @@ class TestFeedback < Test::Unit::TestCase
     wait_for_page_to_load "30000"
     assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Preisvergleich | Open Drug Database", 
                  get_title
+  end
+  def test_feedback__limited
+    ODDB.config.query_limit = 1
+    package = setup_package
+    open "/de/drugs/feedback/pzn/12345"
+    assert_equal "DE - ODDB.org | Medikamente | Feedback | Amantadin by Producer | Open Drug Database", get_title
+    open "/de/drugs/feedback/pzn/12345"
+    assert_equal 'DE - ODDB.org | Medikamente | Open Drug Database', 
+                 get_title
+    assert is_text_present("Abfragebeschränkung")
+  ensure
+    ODDB.config.query_limit = 20
   end
 end
   end

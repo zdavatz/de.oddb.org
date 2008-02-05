@@ -10,7 +10,8 @@ module ODDB
   module Selenium
 class TestAtcBrowser < Test::Unit::TestCase
   include Selenium::TestCase
-  def test_atc_browser
+  def setup
+    super
     atc1 = Drugs::Atc.new('N04BA02')
     atc1.name.de = 'Levodopa und Decarboxylasehemmer'
     ddd = Drugs::Ddd.new('O')
@@ -46,6 +47,8 @@ No separate DDDs are established for oral depot formulations.
     atc6.name.de = 'Levodopa, Decarboxylasehemmer und COMT-Hemmer'
     atc6.save
     flexstub(atc6).should_receive(:packages).and_return(['nonempty'])
+  end
+  def test_atc_browser
     open "/de/drugs/atc_browser"
 
     assert_equal 'DE - ODDB.org | Medikamente | ATC-Browser | Open Drug Database', 
@@ -100,6 +103,18 @@ No separate DDDs are established for oral depot formulations.
     ## has packages
     assert is_element_present("link=Levodopa, Decarboxylasehemmer und COMT-Hemmer (N04BA03)")
 
+  end
+  def test_atc_browser__limited
+    ODDB.config.query_limit = 1
+    open "/de/drugs/atc_browser"
+    assert_equal 'DE - ODDB.org | Medikamente | ATC-Browser | Open Drug Database', 
+                 get_title
+    open "/de/drugs/atc_browser"
+    assert_equal 'DE - ODDB.org | Medikamente | Open Drug Database', 
+                 get_title
+    assert is_text_present("Abfragebeschränkung")
+  ensure
+    ODDB.config.query_limit = 20
   end
 end
   end

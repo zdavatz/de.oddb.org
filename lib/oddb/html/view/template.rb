@@ -28,7 +28,7 @@ class Template < HtmlGrid::DivTemplate
     [0,3] => :foot,
   }
   CSS_ID_MAP = ['head', 'content', 'navigation', 'foot']
-  DOJO_DEBUG = false
+  DOJO_DEBUG = ODDB.config.dojo_debug
   DOJO_REQUIRE = [ 'dojo.widget.Tooltip' ]
   DOJO_PARSE_WIDGETS = true
   def title(context)
