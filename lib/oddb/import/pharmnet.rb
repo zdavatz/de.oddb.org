@@ -28,7 +28,7 @@ class FiParser < Rtf
              'galenic_form'
            when /^3\.1\.?\s*Stoff/i  
              'substance_group'
-           when /^3\.2\.?\s*Arzneilich/i  
+           when /^3\.2\.?\s*(Arzneilich|Bestandteile)/i  
              'active_agents'
            when /^4(\.1)?\.?\s*Anwendung/i 
              'indications'
