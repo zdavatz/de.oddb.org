@@ -43,6 +43,27 @@ div.chapter table {
 div.chapter td {
   border: 1px solid #666;
 }
+div#chapters {
+  background-color: #cf9;
+  overflow: auto;
+  border-bottom: 1px solid #2ba476;
+}
+div#chapters a, div#chapters a:hover {
+  color: black;
+}
+div#chapters a:link, div#chapters a:visited {
+  color: blue;
+}
+div#chapters div {
+  float: left;
+  height: auto;
+  width: 145px;
+  padding: 4px;
+}
+div#chapters div#chapter_ {
+  float: none;
+  width: 300px;
+}
 div#content {
   overflow: auto;
   width: 100%;
@@ -176,6 +197,7 @@ div#title, th {
   background-color: #2ba476;
   color: white;
   padding: 4px;
+  font-weight: bold;
 }
 div#user {
   float: right;
@@ -194,11 +216,17 @@ form {
 img {
   border: 0px;
 }
+input[type=text], input[type=password] {
+  width: 160px;
+}
 input.url {
   width: 600px;
 }
 label {
   font-weight: bold;
+}
+label.error {
+  color: red;
 }
 span#delicious {
   background-image: url(/resources/images/delicious.gif);
@@ -233,6 +261,13 @@ span.social {
   margin-left: 8px;
   padding-left: 20px;
   padding-top: 1px;
+}
+table.invoice {
+  float: left;
+  margin-right: 40px;
+}
+table.invoice.items {
+	border: 1px solid #ccff99;
 }
 td {
   padding: 4px;
@@ -328,9 +363,15 @@ td#offsetheader a:visited:hover {
 td.company, th.company {
   padding-left: 15px;
 }
+td.processingerror {
+  color: red;
+}
 td.product {
   font-size: 14px;
   font-weight: bold;
+}
+td.radio {
+  max-width: 20px;
 }
 td.remote, td.zuzahlungsbefreit {
   border: 2px solid #cf9;
@@ -340,13 +381,14 @@ td.remote, td.zuzahlungsbefreit {
 td.top {
   vertical-align: top;
 }
-td.sum {
-  border-top: 1px solid black;
-  font-weight: bold;
-}
 td.warn {
   padding: 8px; 
   color: #F70;
+  font-weight: bold;
+}
+td.zuzahlungsbefreit {
+  border: 2px solid #cf9;
+  padding: 2px;
   font-weight: bold;
 }
 th {

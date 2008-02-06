@@ -18,6 +18,13 @@ module ODDB
           @chapters.find { |ch| ch.name == idx_or_name }
         end
       end
+      def chapter_names
+        @chapters.select { |chapter| 
+          chapter.paragraphs.size > 1 
+        }.collect { |chapter| 
+          chapter.name 
+        }
+      end
       def add_chapter(chapter)
         @chapters.push chapter
       end

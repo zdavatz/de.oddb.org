@@ -7,6 +7,27 @@ require 'htmlgrid/image'
 module ODDB
   module Html
     module View
+class ChapterNames < HtmlGrid::DivList
+  COMPONENTS = {
+    [0,0] => :link,
+  }
+  def init
+    @current = @session.user_input(:chapter)
+    @model = @model.chapter_names.unshift(nil)
+    super
+    @css_grid = @model.collect { |name| { "id" => "chapter_%s" % name } }
+  end
+  def link(model)
+    link = HtmlGrid::Link.new("chapter_#{model}", model, @session, self)
+    if(@current != model)
+      event, args = @session.direct_event
+      args.push :chapter, model if(model)
+      link.href = @lookandfeel._event_url(event, args)
+    end
+    link.value ||= model
+    link
+  end
+end
 class Chapter < HtmlGrid::Component
   def to_html(context)
     @model.paragraphs.inject('') { |memo, paragraph|
@@ -63,6 +84,9 @@ class Document < HtmlGrid::DivList
   CSS_MAP = ["chapter"]
   def init
     @model = @model.chapters
+    if(name = @session.user_input(:chapter))
+      @model = @model.select { |chapter| chapter.name == name }
+    end
     super
   end
 end

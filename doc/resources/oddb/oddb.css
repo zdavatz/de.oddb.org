@@ -49,6 +49,27 @@ div.chapter table {
 div.chapter td {
   border: 1px solid #666;
 }
+div#chapters {
+  background-color: #cf9;
+  overflow: auto;
+  border-bottom: 1px solid #2ba476;
+}
+div#chapters a, div#chapters a:hover {
+  color: black;
+}
+div#chapters a:link, div#chapters a:visited {
+  color: blue;
+}
+div#chapters div {
+  float: left;
+  height: auto;
+  width: 145px;
+  padding: 4px;
+}
+div#chapters div#chapter_ {
+  float: none;
+  width: 300px;
+}
 div#content {
   overflow: auto;
   width: 100%;
@@ -210,6 +231,7 @@ div#title, th {
   background-color: #2ba476;
   color: white;
   padding: 4px;
+  font-weight: bold;
 }
 div#user {
   float: right;

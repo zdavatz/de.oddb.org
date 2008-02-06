@@ -26,8 +26,8 @@ class Validator < SBSM::Validator
              :package_infos, :proceed_poweruser, :products, :remote_infos,
              :search, :sort, :update ]
   NUMERIC = [ :days, :offset, :pzn ]
-  STRINGS = [ :captcha, :code, :fi_url, :invoice, :message, :name, :name_first,
-              :name_last, :query, :uid ]
+  STRINGS = [ :captcha, :chapter, :code, :fi_url, :invoice, :message, :name,
+              :name_first, :name_last, :query, :uid ]
   def page(value) 
     if(num = validate_numeric(:page, value))
       # pages are 1-based for the human user
