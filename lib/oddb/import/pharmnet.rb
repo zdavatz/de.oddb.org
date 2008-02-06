@@ -500,6 +500,10 @@ class FachInfo < Import
         page = result_page @search_form, term
         div = (page/"div.wbsectionsubtitlebar").last
         if(div.nil? || !/Arzneimittelname:\s#{term}\?/.match(div.inner_text))
+          ODDB.logger.error('FachInfo') { 
+            sprintf "Searched for '%s' but got result for '%s' - creating new session",
+              term, div.inner_text[/Arzneimittelname:[^?]+/]
+          }
           agent.cookie_jar.clear!
           agent.history.clear
           @search_form = get_search_form agent
