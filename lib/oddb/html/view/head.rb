@@ -43,6 +43,7 @@ class WelcomeHead < Head
   }
   CSS_ID_MAP = ["user", "welcome"]
   def welcome(model)
+    return unless @lookandfeel.enabled?(:welcome)
     link = HtmlGrid::Link.new(:welcome_drugs, model, @session, self)
     link.value.gsub!("\n", "<br>")
     link.href = @lookandfeel.lookup(:screencast_url)

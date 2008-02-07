@@ -84,6 +84,7 @@ class Lookandfeel < SBSM::Lookandfeel
       :comparison_for1            => '',
       :confirm_pass               => 'Bestätigung',
       :contact                    => 'Kontakt',
+      :contact_url                => 'http://wiki.oddb.org/wiki.php/ODDB/Kontakt',
       :days                       => 'Tage', 
       :days0                      => '', 
       :days1                      => ' Tage', 
@@ -443,6 +444,11 @@ class LookandfeelWrapper < SBSM::LookandfeelWrapper
   end
 end
 class LookandfeelJustMedical < LookandfeelWrapper
+  DICTIONARIES = {
+    "de" =>  {
+      :contact_url => 'http://www.just-medical.de/imprint.cfm',
+    }
+  }
   DISABLED = [ :country_links, :logo ]
   ENABLED = [
     # Features:
@@ -475,7 +481,8 @@ der Schweiz und Deutschland. Alle Preise sind in CHF.
   }
   ENABLED = [
     # Features:
-    :explain_price, :remote_databases,
+    :explain_price, :remote_databases, :query_limit, :welcome, 
+    :screencast, :social_bookmarks,
     # Navigation-Links:
     :atc_browser, :contact, :home, :products, 
   ]

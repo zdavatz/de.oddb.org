@@ -66,11 +66,14 @@ class Search < HtmlGrid::DivForm
       "http://www.simpy.com/simpy/LinkAdd.do?href=%s&note=%s"],
   ]
   def screencast(model)
-    link = HtmlGrid::Link.new(:screencast, model, @session, self)
-    link.href = @lookandfeel.lookup(:screencast_url)
-    link
+    if @lookandfeel.enabled?(:screencast)
+      link = HtmlGrid::Link.new(:screencast, model, @session, self)
+      link.href = @lookandfeel.lookup(:screencast_url)
+      link
+    end
   end
   def social_bookmarks(model)
+    return unless @lookandfeel.enabled?(:social_bookmarks)
     url = @lookandfeel.base_url
     title = escape(@lookandfeel.lookup(:explain_search))
     SOCIAL_BOOKMARKS.collect { |key, fmt|

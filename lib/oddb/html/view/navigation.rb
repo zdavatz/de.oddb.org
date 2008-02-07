@@ -43,7 +43,7 @@ class CountryLinks < Links
 end
 class HelpLinks < Links
   def contact(link)
-    link.href = "http://wiki.oddb.org/wiki.php/ODDB/Kontakt"
+    link.href = @lookandfeel.lookup(:contact_url)
   end
   def link_keys
     user_navigation.concat [:contact, :home]
