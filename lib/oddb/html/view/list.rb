@@ -44,9 +44,9 @@ class List < HtmlGrid::List
       when "tt_price_festbetrag"
         link.href = "http://www.dimdi.de/static/de/amg/fbag/index.htm"
       when "tt_price_public", "tt_price_difference"
-        link.href = "ftp://ftp.dimdi.de/pub/amg/satzbeschr_011006.pdf"
+        link.href = "ftp://ftp.dimdi.de/pub/amg/satzbeschr_010108.pdf"
       when "tt_price_exfactory"
-        link.href = "http://www.die-gesundheitsreform.de/glossar/arzneimittelpreisverordnung.html"
+        link.href = "http://wiki.oddb.org/uploads/Main/Aenderung_der_AMPVo_per_1.1.2004_-_632.pdf"
       else
         sortlink.dojo_title = title
       end
