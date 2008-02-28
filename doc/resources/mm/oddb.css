@@ -28,8 +28,9 @@ a.who-ddd {
   background-color: yellow;
   color: black;
 }
-div.before-searchbar {
+div.before-searchbar, div.lefthand {
   float: left;
+  clear: left; 
 }
 div.atc, div.explain {
   padding: 4px;
@@ -132,8 +133,9 @@ div.explain.links a:first-child {
   border-left: 0px;
   padding-left: 4px;
 }
-div.navigation {
+div.navigation, div.righthand {
   float: right;
+  clear: right;
 }
 div.navigation a {
   padding: 0px 4px;
@@ -187,6 +189,14 @@ div#result-search {
 }
 div#result-search input[type=text] {
   width: 200px;
+}
+div.sidebar {
+  width: 200px;
+  min-height: 300px;
+}
+div.sidebar div {
+  padding: 2px;
+  background-color: #dfd;
 }
 div#snapback {
   padding: 3px 4px;
