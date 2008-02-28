@@ -112,7 +112,7 @@ class FachInfo < Import
     @result_cache = {}
     @distance_cache = {}
     @errors = []
-    @assigned = @removed = @repaired = 0
+    @assigned = @removed = @not_removed = @repaired = 0
     @archive = File.join ODDB.config.var, 'rtf', 'pharmnet'
     FileUtils.mkdir_p @archive
     @latest = File.join ODDB.config.var, 'html', 'pharmnet', 'latest.html'
@@ -426,6 +426,7 @@ class FachInfo < Import
     [ checked,
       "Assigned #@assigned Fachinfos",
       "Removed #@removed Fachinfos",
+      "Kept #@not_removed unconfirmed Fachinfos",
       "Total: #{sources.size} Fachinfos linked to #{count} Sequences",
       "Repaired #@repaired Active Agents",
       "Errors: #{@errors.size}",
@@ -476,6 +477,8 @@ class FachInfo < Import
       }
       sequence.fachinfo.de = nil
       sequence.save
+    elsif sequence.fachinfo.de
+      @not_removed += 1
     end
   end
   def result_page(form, term)

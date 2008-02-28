@@ -36,6 +36,14 @@ module ODDB
           reported_import(Import::Dimdi::ZuzahlungsBefreiung.new, io)
         }
       end
+      def Updater.import_pharmnet_fachinfos(opts = { :replace => true, 
+                                                     :remove => false, 
+                                                     :repair => false,
+                                                     :retries => 3,
+                                                     :retry_unit => 60 })
+        Import::PharmNet::FachInfo.new.import(WWW::Mechanize.new,
+                                              Drugs::Sequence.all, opts)
+      end
       def Updater.import_product_infos
         Import::Csv::ProductInfos.download_latest { |io|
           reported_import(Import::Csv::ProductInfos.new, io)
@@ -67,6 +75,9 @@ module ODDB
         end
         import_dimdi_zuzahlungsbefreiung(today)
         import_product_infos
+        if(today.day == 1)
+          import_pharmnet_fachinfos
+        end
       end
     end
   end
