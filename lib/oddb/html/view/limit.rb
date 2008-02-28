@@ -97,7 +97,7 @@ class LimitComposite < HtmlGrid::DivComposite
   end
   def query_limit_more_info(model)
     link = HtmlGrid::Link.new(:query_limit_more_info, model, @session, self)
-    link.href = "http://www.ywesee.com/pmwiki.php?n=Main.WekoBlog"
+    link.href = "http://wiki.oddb.org/wiki.php/Main/DeODDB"
     link
   end
 end
