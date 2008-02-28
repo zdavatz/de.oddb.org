@@ -2,8 +2,9 @@
 # Html::View::Drugs::Init -- de.oddb.org -- 27.10.2006 -- hwyss@ywesee.com
 
 require 'oddb/html/view/drugs/template'
-require 'oddb/html/view/rss_preview'
 require 'oddb/html/view/drugs/search'
+require 'oddb/html/view/google_ads'
+require 'oddb/html/view/rss_preview'
 
 module ODDB
   module Html
@@ -24,6 +25,9 @@ class Init < Template
                  4 => 'navigation', 5 => 'foot' }
   HEAD = WelcomeHead
   def sidebar_left(model)
+    if(@lookandfeel.enabled?(:google_ads) && !@session.logged_in?)
+      GoogleAds.new 
+    end
   end
   def sidebar_right(model)
     if(@lookandfeel.enabled?(:feedback_rss))

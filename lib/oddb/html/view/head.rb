@@ -5,6 +5,7 @@ require 'htmlgrid/divcomposite'
 require 'htmlgrid/image'
 require 'htmlgrid/link'
 require 'htmlgrid/span'
+require 'oddb/html/view/google_ads'
 
 module ODDB
   module Html
@@ -12,9 +13,15 @@ module ODDB
 class Head < HtmlGrid::DivComposite
   COMPONENTS = {
     [0,0] => :user,
-    [0,1] => :logo,
+    [0,1] => :google_ads,
+    [0,2] => :logo,
   }
-  CSS_ID_MAP = ["user"]
+  CSS_ID_MAP = ["user", "google-ads"]
+  def google_ads(model)
+    if(@lookandfeel.enabled?(:google_ads) && !@session.logged_in?)
+      GoogleAds.new :width => 468, :height => 60, :channel => '6336403681'
+    end
+  end
   def logo(model)
     return if @lookandfeel.disabled? :logo
     target = :home

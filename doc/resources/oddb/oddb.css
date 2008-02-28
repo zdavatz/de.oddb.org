@@ -108,6 +108,11 @@ div#foot div.navigation a {
 div#foot div.navigation a:first-child {
   border-left: 0px;
 }
+div#google-ads {
+  float: right;
+  text-align: right;
+  clear: right;
+}
 div#head {
   margin-bottom: 30px;
 }

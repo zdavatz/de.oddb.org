@@ -481,7 +481,7 @@ der Schweiz und Deutschland. Alle Preise sind in CHF.
   }
   ENABLED = [
     # Features:
-    :explain_price, :remote_databases, :query_limit, :welcome, 
+    :explain_price, :google_ads, :remote_databases, :query_limit, :welcome,
     :screencast, :social_bookmarks,
     # Navigation-Links:
     :atc_browser, :contact, :home, :products, 
