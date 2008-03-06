@@ -306,7 +306,7 @@ class Rtf
       @groups.push current_group.dup
     when '}'
       if(@buffer.is_a?(Text::Picture) && !current_group.include?(:picture))
-        next_paragraph
+        @buffer = next_paragraph
       end
       @groups.pop
     end
