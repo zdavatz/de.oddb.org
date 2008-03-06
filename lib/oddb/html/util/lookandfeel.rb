@@ -47,6 +47,7 @@ class Lookandfeel < SBSM::Lookandfeel
       :chapter_other_advice       => 'Sonstige Hinweise', 
       :chapter_packaging          => 'Handelsformen', 
       :chapter_patinfo            => 'Vollständige Gebrauchsinformation', 
+      :chapter_personal           => 'Zusammenfassung',
       :chapter_pharmaceutic       => 'Pharmazeutische Angaben', 
       :chapter_pharmacodynamics   => 'Pharmakodynamik', 
       :chapter_pharmacokinetics   => 'Pharmakokinetik', 
