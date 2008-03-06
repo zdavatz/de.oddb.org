@@ -20,7 +20,9 @@ module ODDB
         true
       end
       def finalize!
-        img = image
+        img = Magick::Image.from_blob(blob) { 
+          self.density = "720x720"
+        }.first
         geom = sprintf("%ix%i!", 
                        (@width || img.columns) / TWIP * @xscale / PCNT, 
                        (@height || img.rows) / TWIP * @yscale / PCNT)
@@ -36,7 +38,7 @@ module ODDB
         @filename ||= "%s.png" % Digest::MD5.hexdigest(self)
       end
       def image
-        Magick::Image.from_blob(blob) { self.density = "1440x1440" }.first
+        Magick::Image.from_blob(blob).first
       end
       def path
         fn = filename
