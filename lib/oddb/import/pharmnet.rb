@@ -226,12 +226,12 @@ class Import < Import
     end
   end
   def _assign_info(key, doc, sequence, opts={})
-    ODDB.logger.debug('PharmNet') { 
-      sprintf("Assigning %s to %s", key, sequence.name.de) 
-    }
     info = sequence.send(key)
     return unless info.empty? || opts[:replace]
 
+    ODDB.logger.debug('PharmNet') { 
+      sprintf("Assigning %s to %s", key, sequence.name.de) 
+    }
     if(previous = info.de)
       doc.previous_sources = [previous.previous_sources, previous.source]
     end
