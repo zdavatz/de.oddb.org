@@ -21,7 +21,7 @@ module ODDB
     module PharmNet
 class TestFiParser < Test::Unit::TestCase
   def setup
-    @importer = FiParser.new
+    @importer = FiParser.new 'term is unimportant here'
     ODDB.config.var = File.expand_path('var', File.dirname(__FILE__))
   end
   def test_import__ace_hemmer
@@ -145,7 +145,7 @@ Angabe als geom. Mittelwerte Standardabweichung (* Angabe als Median und Streubr
     assert_equal(expected, document.chapter("pregnancy").to_s)
     expected = <<-EOS
 4.7\tAuswirkungen auf die Verkehrst\303\274chtigkeit und das Bedienen von Maschinen
-Die bei der kombinierten Einnahme von Selegilinhydrochlorid mit Levodopa enthaltenen Arzneimittel k\303\266nnen zentralnerv\303\266se Nebenwirkungen wie z.B. M\303\274digkeit, Benommenheit, Schwindel, vereinzelt Verwirrtheit oder Sehst\303\266rungen ausl\303\266sen. Deshalb kann auch bei bestimmungsgem\303\244\303\237em Gebrauch von Selegilinhydrochlorid das Reaktionsverm\303\266gen so weit ver\303\244ndert werden, dass die F\303\244higkeit zur aktiven Teilnahme am Stra\303\237enverkehr oder zum Bedienen von Maschinen unabh\303\244ngig von der zu behandelnden Grunderkrankung weiter beeintr\303\244chtigt wird. Ferner sind T\303\244tigkeiten, die mit erh\303\266hter Absturz- oder Unfallgefahr einhergehen, zu meiden. Dies gilt in verst\303\244rktem Ma\303\237e im Zusammenwirken mit Alkohol.
+Die bei der kombinierten Einnahme von Selegilinhydrochlorid mit Levodopa enthaltenen Arzneimittel k\303\266nnen zentralnerv\303\266se Nebenwirkungen wie z. B. M\303\274digkeit, Benommenheit, Schwindel, vereinzelt Verwirrtheit oder Sehst\303\266rungen ausl\303\266sen. Deshalb kann auch bei bestimmungsgem\303\244\303\237em Gebrauch von Selegilinhydrochlorid das Reaktionsverm\303\266gen so weit ver\303\244ndert werden, dass die F\303\244higkeit zur aktiven Teilnahme am Stra\303\237enverkehr oder zum Bedienen von Maschinen unabh\303\244ngig von der zu behandelnden Grunderkrankung weiter beeintr\303\244chtigt wird. Ferner sind T\303\244tigkeiten, die mit erh\303\266hter Absturz- oder Unfallgefahr einhergehen, zu meiden. Dies gilt in verst\303\244rktem Ma\303\237e im Zusammenwirken mit Alkohol.
     EOS
     assert_equal(expected.strip, document.chapter("driving_ability").to_s)
     expected = "7.\tPharmazeutischer Unternehmer\nHEUMANN PHARMA\nGmbH & Co. Generica KG\nS\303\274dwestpark 50\n90449 N\303\274rnberg\nTelefon/Telefax: 0700 4386 2667 "
@@ -154,14 +154,15 @@ Die bei der kombinierten Einnahme von Selegilinhydrochlorid mit Levodopa enthalt
     assert_equal(expected, chapters.last.to_s)
   end
 end
-class TestPharmNet < Test::Unit::TestCase
+class TestFachinfo < Test::Unit::TestCase
   include FlexMock::TestCase
   def setup
     ODDB.config.var = File.expand_path('var', File.dirname(__FILE__))
-    @importer = FachInfo.new
+    @importer = Import.new
+    @errors = []
     ODDB.logger = flexmock('logger')
     ODDB.logger.should_receive(:error).and_return { |type, block|
-      flunk block.call
+      @errors.push block.call
     }
     ODDB.logger.should_ignore_missing
   end
@@ -238,7 +239,7 @@ class TestPharmNet < Test::Unit::TestCase
     file.should_receive(:save).with(spath)
     agent.should_receive(:get).with(url).and_return(file)
     file.should_receive(:body).and_return { File.read path }
-    document = @importer.import_rtf(agent, url)
+    document = @importer.import_rtf(:fachinfo, agent, url, 'selegilin')
     assert_instance_of Text::Document, document
     assert_equal url, document.source
   end
@@ -294,14 +295,16 @@ class TestPharmNet < Test::Unit::TestCase
     assert_instance_of WWW::Mechanize::Page, page
     details = @importer.extract_details page
     expected = {
-      :fachinfo=>"/amispb/doc/2007/08/15/2103159/OBFM2F47BD1E01C7DE6A.rtf",
+      :patinfo  => "/amispb/doc/2007/08/15/2103159/OBFM262E63A401C7DE6A.rtf",
+      :fachinfo => "/amispb/doc/2007/08/15/2103159/OBFM2F47BD1E01C7DE6A.rtf",
       :composition=> [
         { :dose => Drugs::Dose.new(0.5, "mg"), :ask_nr => "", 
           :substance => "Reproterolhydrochlorid" },
         { :dose => Drugs::Dose.new(1, "mg"), :ask_nr => "", 
           :substance => "Natriumcromoglicat (Ph.Eur.)" }
       ],
-      :date => Date.new(2007,06,29),
+      :date_fachinfo => Date.new(2007,06,29),
+      :date_patinfo => Date.new(2007,06,29),
       :registration => "3159.00.00",
     }
     assert_equal expected, details
@@ -311,6 +314,7 @@ class TestPharmNet < Test::Unit::TestCase
     result = @importer.search agent, 'Aspirin'
     assert_equal 18, result.size
     expected = {
+      :patinfo=>"/amispb/doc/2007/08/15/2103159/OBFM262E63A401C7DE6A.rtf",
       :fachinfo=>"/amispb/doc/2007/08/15/2103159/OBFM2F47BD1E01C7DE6A.rtf",
       :composition=> [
         { :dose => Drugs::Dose.new(0.5, "mg"), :ask_nr => "", 
@@ -319,11 +323,13 @@ class TestPharmNet < Test::Unit::TestCase
           :substance=>"Natriumcromoglicat (Ph.Eur.)" }
       ],
       :data => ["Aspirin", "Tablette", "Bayer Vital GmbH"],
-      :date => Date.new(2007,06,29),
+      :date_fachinfo => Date.new(2007,06,29),
+      :date_patinfo => Date.new(2007,06,29),
       :registration=>"3159.00.00",
     }
     assert_equal expected, result.first
     expected = {
+      :patinfo=>"/amispb/doc/2007/08/15/2103159/OBFM262E63A401C7DE6A.rtf",
       :fachinfo=>"/amispb/doc/2007/08/15/2103159/OBFM2F47BD1E01C7DE6A.rtf",
       :composition=> [
         { :dose => Drugs::Dose.new(0.5, "mg"), :ask_nr => "", 
@@ -334,7 +340,8 @@ class TestPharmNet < Test::Unit::TestCase
       :data=> [ "Aspirin-Colfarit 100mg", 
                 "magensaftresistente Tablette", 
                 "Bayer Vital GmbH"],
-      :date => Date.new(2007,06,29),
+      :date_fachinfo => Date.new(2007,06,29),
+      :date_patinfo => Date.new(2007,06,29),
       :registration=>"3159.00.00",
     }
     assert_equal expected, result.last
@@ -360,8 +367,10 @@ class TestPharmNet < Test::Unit::TestCase
     result = @importer.search agent, 'Aspirin'
     assert_equal(1, result.size)
     assert_equal([], history)
+    assert_equal(["Searched for 'aspirin' but got result for 'Arzneimittelname: Aarane' - creating new session"], 
+                 @errors)
   end
-  def test_assign_fachinfo__no_suitable_fachinfo_found__no_active_agents
+  def test_process__no_suitable_fachinfo_found__no_active_agents
     @resultfiles = %w{empty_result.html result.html}
     agent = setup_search
     sequence = flexmock(Drugs::Sequence.new)
@@ -370,10 +379,10 @@ class TestPharmNet < Test::Unit::TestCase
     company = Business::Company.new
     company.name.de = 'Company'
     sequence.should_receive(:company).and_return flexmock(company)
-    @importer.assign_fachinfo agent, sequence
+    @importer.process agent, sequence
     assert sequence.fachinfo.empty?
   end
-  def test_assign_fachinfo__no_suitable_fachinfo_found
+  def test_process__no_suitable_fachinfo_found
     @resultfiles = %w{empty_result.html result.html}
     agent = setup_search
     sequence = flexmock(Drugs::Sequence.new)
@@ -386,10 +395,10 @@ class TestPharmNet < Test::Unit::TestCase
     substance.name.de = 'Acetylsalicylsäure'
     act = Drugs::ActiveAgent.new substance, 300
     sequence.should_receive(:active_agents).and_return [flexmock(act)]
-    @importer.assign_fachinfo agent, sequence
+    @importer.process agent, sequence
     assert sequence.fachinfo.empty?
   end
-  def test_assign_fachinfo__http_500
+  def test_process__http_500
     agent = flexmock(WWW::Mechanize.new)
     agent.should_receive(:get).times(3).and_return { 
       raise "500 => Net::HTTPInternalServerError"
@@ -400,10 +409,10 @@ class TestPharmNet < Test::Unit::TestCase
     ODDB.logger = flexmock('logger')
     ODDB.logger.should_ignore_missing
     assert_nothing_raised {
-      @importer.assign_fachinfo agent, sequence, :retry_unit => 1, :retries => 2
+      @importer.process agent, sequence, :retry_unit => 1, :retries => 2
     }
   end
-  def test_assign_fachinfo
+  def test_process
     agent = setup_search "result.html"
     sequence = flexmock(Drugs::Sequence.new)
     sequence.should_receive(:name)\
@@ -422,7 +431,7 @@ class TestPharmNet < Test::Unit::TestCase
     agent2 = Drugs::ActiveAgent.new substance2, 0, 'mg'
     sequence.should_receive(:active_agents)\
       .and_return [flexmock(agent1), flexmock(agent2)]
-    @importer.assign_fachinfo agent, sequence, :repair => true
+    @importer.process agent, sequence, :repair => true
     assert !sequence.fachinfo.empty?
 
     # Agents should be corrected
@@ -431,7 +440,7 @@ class TestPharmNet < Test::Unit::TestCase
     # Registration should be assigned
     assert_equal(sequence.code(:registration, 'EU'), '3159.00.00')
   end
-  def test_assign_fachinfo__many
+  def test_process__many
     @displayfiles = %w{display2.html display3.html display1.html} * 6
     agent = setup_search "paged_result_1.html"
     sequence = flexmock(Drugs::Sequence.new)
@@ -447,7 +456,7 @@ class TestPharmNet < Test::Unit::TestCase
     substance.name.de = 'Acetylsalicylsäure'
     act = Drugs::ActiveAgent.new substance, 300
     sequence.should_receive(:active_agents).and_return [flexmock(act)]
-    @importer.assign_fachinfo agent, sequence
+    @importer.process agent, sequence
     assert !sequence.fachinfo.empty?
   end
   def test_exclusive_permutation
@@ -497,6 +506,270 @@ class TestPharmNet < Test::Unit::TestCase
     comparison = ['Ace Hemmer Ratio', 'Tabletten', 'Ratiopharm']
 
     assert_not_nil @importer._suitable_data(data, comparison, 0)
+  end
+end
+class TestPiParser < Test::Unit::TestCase
+  def setup
+    ODDB.config.var = File.expand_path('var', File.dirname(__FILE__))
+  end
+  def test_import_pi__aarane
+    @importer = PiParser.new 'Aarane'
+    path = File.expand_path('data/rtf/pharmnet/aarane.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "precautions",
+                 "application", "unwanted_effects", "storage", 
+                 "additional_information", "date", "personal" ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+  end
+  def test_import_pi__ace_hemmer
+    @importer = PiParser.new 'ace-hemmer'
+    path = File.expand_path('data/rtf/pharmnet/ace_hemmer_ratio.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "precautions",
+                 "application", "unwanted_effects", "storage", "date" ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+    assert_equal(13, document.chapter('indications').paragraphs.size)
+  end
+  def test_import_pi__ace_hemmer_comp
+    @importer = PiParser.new 'Ace.Hemmer'
+    path = File.expand_path('data/rtf/pharmnet/ace_hemmer_comp_ratio.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "precautions",
+                 "application", "unwanted_effects", "storage",
+                 "additional_information", "company", "date" ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+    assert document.chapter('indications').paragraphs.size > 1
+  end
+  def test_import_pi__acemetacin
+    @importer = PiParser.new 'Acemetacin.Ct'
+    path = File.expand_path('data/rtf/pharmnet/acemetacin.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "precautions",
+                 "application", "unwanted_effects", "storage", 
+                 "additional_information", "company", "date" ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+    assert document.chapter('indications').paragraphs.size > 1
+  end
+  def test_import_pi__acemit
+    @importer = PiParser.new 'Acemit'
+    path = File.expand_path('data/rtf/pharmnet/acemit.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "packaging", "indications",
+                 "counterindications", "precautions", "application", 
+                 "unwanted_effects", "storage", "date", "additional_information" ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+    assert document.chapter('indications').paragraphs.size > 1
+  end
+  def test_import_pi__acerbon
+    @importer = PiParser.new 'Acerbon'
+    path = File.expand_path('data/rtf/pharmnet/acerbon.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "precautions",
+                 "application", "unwanted_effects", "storage", "date",
+                 "additional_information" ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+    assert document.chapter('indications').paragraphs.size > 1
+  end
+  def test_import_pi__acetylcystein
+    @importer = PiParser.new 'Acetylcystein'
+    path = File.expand_path('data/rtf/pharmnet/acetylcystein.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "precautions",
+                 "application", "unwanted_effects", "storage", "date", 
+                 "personal"  ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+    assert document.chapter('indications').paragraphs.size > 1
+  end
+  def test_import_pi__aciclo
+    @importer = PiParser.new 'Aciclo'
+    path = File.expand_path('data/rtf/pharmnet/aciclo.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "precautions",
+                 "application", "unwanted_effects", "storage", 
+                 "additional_information", "company", "date" ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+    assert document.chapter('indications').paragraphs.size > 1
+  end
+  def test_import_pi__aciclovir
+    @importer = PiParser.new 'Aciclovir'
+    path = File.expand_path('data/rtf/pharmnet/aciclovir.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "precautions",
+                 "application", "unwanted_effects", "storage", 
+                 "additional_information", "company", "date", "personal" ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+    assert document.chapter('indications').paragraphs.size > 1
+  end
+  def test_import_pi__actrapid
+    @importer = PiParser.new 'Actrapid'
+    path = File.expand_path('data/rtf/pharmnet/actrapid.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "precautions",
+                 "application", "emergency", "unwanted_effects", "storage", 
+                 "date" ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+    assert document.chapter('indications').paragraphs.size > 1
+  end
+  def test_import_pi__amlodipin
+    @importer = PiParser.new 'amlodipin'
+    path = File.expand_path('data/rtf/pharmnet/amlodipin.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "precautions",
+                 "application", "unwanted_effects", "storage", "date" ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+    expected = <<-EOS.strip
+Amlodipin Dexcel 10 mg Tabletten
+Wirkstoff: Amlodipinmaleat
+Der arzneilich wirksame Bestandteil ist Amlodipinmaleat.
+1 Tablette enth\303\244lt 10 mg Amlodipin (als Amlodipinmaleat).
+Die sonstigen Bestandteile sind: Lactose-Monohydrat; Povidon K 30; Povidon K 90; mikrokristalline Cellulose; Crospovidon; Natriumstearylfumarat.
+Amlodipin Dexcel 10 mg ist in Packungen mit 20, 50 und 
+100 Tabletten erh\303\244ltlich.
+    EOS
+    assert_equal(expected, chapters.at(1).to_s)
+    indications = <<-EOS.strip
+1. \tWAS IST Amlodipin Dexcel 10 mg UND WOF\303\234R WIRD ES ANGEWENDET?
+1.1\tAmlodipin Dexcel 10 mg ist ein Mittel zur Behandlung von Bluthochdruck und Engegef\303\274hl in der Brust (Angina pectoris).
+1.2\tvon:
+Dexcel Pharma GmbH
+R\303\266ntgenstra\303\237e 1
+63755 Alzenau
+hergestellt von:
+Losan Pharma GmbH 
+Otto-Hahn-Stra\303\237e 13
+79395 Neuenburg 
+1.3\tAmlodipin Dexcel 10 mg wird angewendet
+bei nicht organbedingtem Bluthochdruck (essentieller Hypertonie) und bei Belastung auftretender (chronischer) und im Ruhezustand auftretender (vasospastischer) Angina pectoris (Engegef\303\274hl in der Brust).
+    EOS
+    assert_equal(indications, chapters.at(2).to_s)
+    unwanted = document.chapter('unwanted_effects') 
+    assert_equal(unwanted, chapters.at(5))
+  end
+  def test_import_pi__aspirin
+    @importer = PiParser.new 'aspirin'
+    path = File.expand_path('data/rtf/pharmnet/aspirin.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "precautions",
+                 "application", "unwanted_effects", "storage", 
+                 "additional_information", "packaging", "company", "date" ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+  end
+  def test_import_pi__baymycard
+    @importer = PiParser.new 'Baymycard'
+    path = File.expand_path('data/rtf/pharmnet/baymycard.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "precautions",
+                 "application", "unwanted_effects", "storage", "date", 
+                 "additional_information", "personal" ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+  end
+  def test_import_pi__omeprazol
+    @importer = PiParser.new 'omeprazol'
+    path = File.expand_path('data/rtf/pharmnet/omeprazol.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "precautions",
+                 "application", "unwanted_effects", "storage", "date",
+                 "additional_information", "personal" ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+  end
+  def test_import_pi__selegilin
+    @importer = PiParser.new 'selegilin'
+    path = File.expand_path('data/rtf/pharmnet/selegilin.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "precautions",
+                 "application", "unwanted_effects", "storage", "date",
+                 "additional_information", "personal" ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
   end
 end
     end

@@ -57,6 +57,15 @@ class ProductsList < View::List
       link
     end
   end
+  def patinfo_link(model)
+    if((pac = model.packages.find { |pc| pc.patinfo.send(@session.language) })\
+       && (code = pac.code(:cid)))
+      link = HtmlGrid::Link.new(:square_patinfo, pac, @session, self)
+      link.css_class = 'square patinfo'
+      link.href = @lookandfeel._event_url(:patinfo, [:pzn, code.value])
+      link
+    end
+  end
   def product(model)
     link = HtmlGrid::Link.new(:product, model, @session, self)
     name = model.name.send(@session.language)

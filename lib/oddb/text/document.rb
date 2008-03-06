@@ -10,6 +10,9 @@ module ODDB
         @chapters = []
         @previous_sources = []
       end
+      def add_chapter(chapter)
+        @chapters.push chapter
+      end
       def chapter(idx_or_name)
         case idx_or_name
         when Integer
@@ -25,15 +28,15 @@ module ODDB
           chapter.name 
         }
       end
-      def add_chapter(chapter)
-        @chapters.push chapter
-      end
       def previous_sources=(sources)
         @previous_sources.concat sources.flatten
         @previous_sources.compact!
         @previous_sources.uniq!
         @previous_sources.delete @source
         @previous_sources
+      end
+      def remove_chapter(chapter)
+        @chapters.delete(chapter)
       end
       def to_s
         @chapters.join("\n")

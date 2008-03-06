@@ -23,8 +23,8 @@ class Validator < SBSM::Validator
   EVENTS = [ :ajax_autofill, :atc_browser, :collect, :ddd, :explain_ddd_price,
              :explain_price, :fachinfo, :feedback, :checkout, :compare,
              :compare_remote, :home, :login, :login_, :logout, :package,
-             :package_infos, :proceed_poweruser, :products, :remote_infos,
-             :search, :sort, :update ]
+             :package_infos, :patinfo, :proceed_poweruser, :products,
+             :remote_infos, :search, :sort, :update ]
   NUMERIC = [ :days, :offset, :pzn ]
   STRINGS = [ :captcha, :chapter, :code, :fi_url, :invoice, :message, :name,
               :name_first, :name_last, :query, :uid ]

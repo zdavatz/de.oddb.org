@@ -14,7 +14,8 @@ class Package < Drugs::Package
   VIEW = View::Drugs::Admin::Package
   def update
     if((seq = @model.sequence) && (url = @session.user_input(:fi_url)))
-      document = Import::PharmNet::FachInfo.new.import_rtf(WWW::Mechanize.new, url)
+      imp = Import::PharmNet::Import.new
+      document = imp.import_rtf(:fachinfo, WWW::Mechanize.new, url, seq.name.de)
       seq.fachinfo.de = document
       seq.save
     end

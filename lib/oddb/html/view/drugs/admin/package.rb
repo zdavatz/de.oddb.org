@@ -28,7 +28,8 @@ class PackageForm < Drugs::PackageInnerComposite
     [0,4] => :code_zuzahlungsbefreit,
     [2,4] => :equivalence_factor,
     [0,5] => :code_prescription,
-    [1,6] => :fachinfo_link,
+    [1,6,0] => :fachinfo_link,
+    [1,6,1] => :patinfo_link,
     [0,7] => :fi_url,
     [1,8] => :submit, 
   }

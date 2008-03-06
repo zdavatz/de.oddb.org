@@ -75,6 +75,11 @@ class Global < SBSM::State
       /^[a-z]$/.match(key)
     }
   end
+  def patinfo
+    if(code = @session.user_input(:pzn))
+      _patinfo(code)
+    end
+  end
   def proceed_poweruser
     days = @session.user_input(:days).to_i
     total = ODDB.config.prices["org.oddb.de.view.#{days}"].to_f 

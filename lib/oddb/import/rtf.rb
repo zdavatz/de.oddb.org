@@ -11,7 +11,6 @@ require 'oddb/text/picture'
 require 'oddb/text/table'
 require 'RMagick'
 
-
 module ODDB
   module Import
 class RtfReader < RTFReader
@@ -211,9 +210,7 @@ class Rtf
     reader = RtfReader.new(io)
     @iconv = Iconv.new('utf8//IGNORE//TRANSLIT', "cp1252")
     @groups = [[]]
-    @buffer = next_paragraph
-    @document = Text::Document.new
-    @document.add_chapter Text::Chapter.new('default')
+    init
     begin
       type = import_token(reader)
     end until type == 'eof'
@@ -240,7 +237,8 @@ class Rtf
       @iconv = Iconv.new('utf8//IGNORE//TRANSLIT', "cp#{extra}")
     when '\\fonttbl', '\\colortbl', '\\stylesheet', '\\listtable', 
          '\\listoverridetable', '\\rsidtbl', '\\generator', '\\info',
-         '\header', '\\headerr', '\footer', '\\footerr', '\\deleted'
+         '\header', '\\headerr', '\footer', '\\footerf', '\\footerr',
+         '\\deleted'
       current_group.push :ignore
     when '\\b', '\\i', '\\sub', '\\super', '\\v'
       if(extra == '0')
@@ -308,7 +306,7 @@ class Rtf
       @groups.push current_group.dup
     when '}'
       if(@buffer.is_a?(Text::Picture) && !current_group.include?(:picture))
-        @buffer = Text::Paragraph.new
+        next_paragraph
       end
       @groups.pop
     end
@@ -334,7 +332,8 @@ class Rtf
   def _import_text(value)
     @buffer.set_format(*current_group)
     _sanitize_text(value)
-    @buffer << value.gsub(/\\[\-~]/, '').gsub(/\\-/, '')
+    value.gsub!(/\\~/, ' ')
+    @buffer << value.gsub(/\\-/, '')
   end
   def import_token(reader)
     type, value, extra = reader.get_token
@@ -354,15 +353,22 @@ class Rtf
     end
     type
   end
+  def init
+    @buffer = next_paragraph
+    @document = Text::Document.new
+    @document.add_chapter Text::Chapter.new('default')
+  end
   def next_paragraph
     case @buffer
     when Text::Picture
-      @buffer.finalize!
-      path = File.join(ODDB.config.var, @buffer.path)
-      FileUtils.mkdir_p(File.dirname(path))
-      File.open(path, 'w') { |fh|
-        fh.puts @buffer.to_png
-      }
+      unless @buffer.empty?
+        @buffer.finalize!
+        path = File.join(ODDB.config.var, @buffer.path)
+        FileUtils.mkdir_p(File.dirname(path))
+        File.open(path, 'w') { |fh|
+          fh.puts @buffer.to_png
+        }
+      end
     end
     Text::Paragraph.new
   end

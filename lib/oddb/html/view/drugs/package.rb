@@ -95,6 +95,14 @@ module PackageMethods
       link
     end
   end
+  def patinfo_link(model)
+    if(model.patinfo.send(@session.language) && (code = model.code(:cid)))
+      link = HtmlGrid::Link.new(:square_patinfo, model, @session, self)
+      link.css_class = 'square patinfo'
+      link.href = @lookandfeel._event_url(:patinfo, [:pzn, code.value])
+      link
+    end
+  end
   def price_festbetrag(model)
     @price_id ||= 0
     @price_id += 1
@@ -238,7 +246,8 @@ class PackageInnerComposite < HtmlGrid::Composite
     [0,4] => :code_zuzahlungsbefreit,
     [2,4] => :equivalence_factor,
     [0,5] => :code_prescription,
-    [1,6] => :fachinfo_link,
+    [1,6,0] => :fachinfo_link,
+    [1,6,1] => :patinfo_link,
   }
   CSS_MAP = {
     [1,0] => 'google',

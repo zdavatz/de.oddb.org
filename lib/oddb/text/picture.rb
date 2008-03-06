@@ -36,7 +36,7 @@ module ODDB
         @filename ||= "%s.png" % Digest::MD5.hexdigest(self)
       end
       def image
-        Magick::Image.from_blob(blob).first
+        Magick::Image.from_blob(blob) { self.density = "1440x1440" }.first
       end
       def path
         fn = filename

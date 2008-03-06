@@ -11,7 +11,12 @@ require 'pp'
 module ODDB
   module Import
     module PharmNet
-class FiParser < Rtf
+class TermedRtf < Rtf
+  def initialize(term)
+    @term = term
+  end
+end
+class FiParser < TermedRtf
   def identify_chapter buffer
     name = case buffer 
            when /^1[08]\.?\s*Stand/i 
@@ -101,7 +106,91 @@ class FiParser < Rtf
     end
   end
 end
-class FachInfo < Import
+class PiParser < TermedRtf
+  def identify_chapter buffer
+    name = nil
+    if(/\b#@term\b/i.match buffer)
+      name = case buffer 
+             when /wof(ü|Ü|ue)r\s+wird\s+(es|sie)\s+(angewendet|eingenommen)/i,
+                  /wird\s+angewendet$/i
+               'indications'
+             when /Wie\s+ist.+?(anzuwenden|einzunehmen)\?/i
+               'application'
+             when /vor\s+der\s+(Anwendung|Einnahme)\s+von/i 
+               'precautions'
+             when /^([56]\.?\s*)?Wie\s+ist.+?aufzubewahren/i 
+               'storage'
+             when /^Bitte\s.+für\s+Kinder\s+nicht\s+erreichbar/i
+               'personal'
+             when /^([45]\.?\s*)?Welche\s+Nebenwirkungen/i, /^Nebenwirkungen:?$/i
+               'unwanted_effects'
+             when /Behandlungserfolg/i
+               nil ## prevent composition if this is a dodgy match
+             else
+               'composition'
+             end
+    else
+      name = case buffer
+             when /^([45]\.?\s*)?Welche\s+Nebenwirkungen/i, /^Nebenwirkungen:?$/i
+               'unwanted_effects'
+             when /^(4\.?\s*)?Verhalten\s+im\s+Notfall/i
+               'emergency'
+             when /^(6\.?\s*)?(Weitere\s+)?(Informationen|Angaben)/i,
+                  /^(6\.?\s*)?Gebrauchsanleitung/i,
+                  /^Zusätzliche\s+Informationen/i
+               'additional_information'
+             when /^Anwendungsgebiete/i
+               'indications'
+             when /^Vorsichtsma(ss|ß)nahmen/i 
+               'precautions'
+             when /^Dosierung\s*($|und)/i, /^Dosierungsanleitung/
+               'application'
+             when /Angaben\s+zur\s+Haltbarkeit/i 
+               'storage'
+             when /^Gegenanzeigen/i
+               'counterindications'
+             when /^Darreichungsform/i
+               'packaging'
+             when /^(Hersteller.+)?Pharmazeutischer\s+Unternehmer/i,
+                  /^Pharmazeutischer\s+Hersteller/i
+               'company'
+             when /^Stand\b/, /wurde\s+zuletzt\s+überarbeitet/i
+               'date'
+             when /^(Sehr\s+geehrte|Liebe)r?\s+Patient/i, 
+                  /^Bitte\s.+für\s+Kinder\s+nicht\s+erreichbar/i
+               'personal'
+             end
+    end
+    composition = @document.chapter('composition')
+    if(name && (name == 'composition' || composition))
+      chapter = @document.chapter(name)
+      if(chapter.nil?)
+        @document.add_chapter Text::Chapter.new(name)
+      elsif(chapter.paragraphs.size == 1) 
+        ## some PI insert a document-overview after the composition, in which
+        #  case we have an erroneous chapter, identified by only consisting of
+        #  a heading. In that case:
+        composition.append chapter
+        @document.remove_chapter chapter
+        @document.add_chapter Text::Chapter.new(name)
+      end
+    end
+    super
+  end
+  def _sanitize_text(value)
+    ## some rtfs have unusable information prior to the actual PI
+    case value
+    when /^PCX\b/
+      init
+    when /Gebrauchsinformation/
+      init if /Recyclinglogo/.match(current_chapter.to_s)
+    end
+    if @buffer.empty? && @buffer.is_a?(Text::Paragraph)
+      value.gsub! /^([P][A-Z0-9]{1,2})?\s*/, ''
+    end
+  end
+end
+class Import < Import
   def initialize
     @stop = /(Pharma(ceuticals|zeutische\s*Fabrik)?
              |Arzneim(ittel|\.)
@@ -112,82 +201,47 @@ class FachInfo < Import
     @result_cache = {}
     @distance_cache = {}
     @errors = []
-    @assigned = @removed = @not_removed = @repaired = 0
+    @assigned = Hash.new 0
+    @removed = Hash.new 0
+    @not_removed = Hash.new 0
+    @repaired = 0
     @archive = File.join ODDB.config.var, 'rtf', 'pharmnet'
     FileUtils.mkdir_p @archive
     @latest = File.join ODDB.config.var, 'html', 'pharmnet', 'latest.html'
     FileUtils.mkdir_p File.dirname(@latest)
     super
   end
-  def assign_fachinfo(agent, sequence, opts = { :replace => false,
-                                                :remove => false, 
-                                                :repair => false,
-                                                :retries => 3,
-                                                :retry_unit => 60 })
-    return unless sequence.fachinfo.empty? || opts[:replace] || opts[:remove]
-    url = nil
-    term = sequence.name.de.dup
-    ODDB.logger.debug('FachInfo') { sprintf('Searching for %s', term) }
-    result = []
-    while result.empty?
-      return if term.length < 3
-      result.concat search(agent, term, sequence, opts)
-      if(result.empty?)
-        result.concat search(agent, term.gsub(/\s+/, '-'), sequence, opts)
-      end
-      term.gsub! /\s*[^\s]+$/, ''
-    end
-    if result.size == 1
-      data = result.first
-    else
-      data = best_data sequence, result
-    end
-    return(remove_fachinfo sequence, opts) unless data && (url = data[:fachinfo])
+  def assign_info(key, agent, term, data, sequence, opts)
+    return(remove_info key, sequence, opts) unless(url = data[key])
 
-    cutoff = composition_relevance(sequence.active_agents, data)
-    return(remove_fachinfo sequence, opts) if(cutoff <= 1.25) # arbitrary value
-
-    doc = import_rtf agent, url
+    doc = import_rtf key, agent, url, term
     # arbitrary cutoff: fachinfos with less than 5 chapters can't be right...
     if doc.chapters.size > 5
-      _assign_fachinfo doc, sequence
+      _assign_info key, doc, sequence, opts
     else
-      remove_fachinfo sequence, opts
-    end
-
-    fix_composition sequence.active_agents, data if(opts[:repair])
-
-    # assign registration number if really good match
-    return if(cutoff < 2) # arbitrary value
-    assign_registration sequence, data[:registration]
-  rescue StandardError => error
-    ODDB.logger.error('FachInfo') { error.message }
-    retries ||= opts[:retries]
-    if(/ServerError/.match(error.message) && retries > 0)
-      sleep opts[:retry_unit] * 4 ** (opts[:retries] - retries)
-      retries -= 1
-      agent.history.clear
-      @search_form = nil
-      retry
-    else
-      @errors.push [ sequence.name.de, error.message, 
-        error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip, url ]
+      ODDB.logger.debug('PharmNet') { 
+        sprintf("Discarding %s for %s (%s)", key, sequence.name.de, term) 
+      }
+      remove_info key, sequence, opts
     end
   end
-  def _assign_fachinfo(doc, sequence)
-    ODDB.logger.debug('FachInfo') { 
-      sprintf("Assigning Fachinfo to %s", sequence.name.de) 
+  def _assign_info(key, doc, sequence, opts={})
+    ODDB.logger.debug('PharmNet') { 
+      sprintf("Assigning %s to %s", key, sequence.name.de) 
     }
-    if(previous = sequence.fachinfo.de)
+    info = sequence.send(key)
+    return unless info.empty? || opts[:replace]
+
+    if(previous = info.de)
       doc.previous_sources = [previous.previous_sources, previous.source]
     end
-    sequence.fachinfo.de = doc
-    @assigned += 1
+    info.de = doc
+    @assigned[key] += 1
     sequence.save
   end
   def assign_registration(sequence, registration)
     if(registration && sequence.code(:registration, 'EU') != registration)
-      ODDB.logger.debug('FachInfo') { 
+      ODDB.logger.debug('PharmNet') { 
         sprintf('Assigning Registration-Number %s to %s', 
                 registration, sequence.name.de) 
       }
@@ -220,7 +274,7 @@ class FachInfo < Import
         contenders.push suitable.at(idx)
       end
     }
-    contenders.sort_by { |data| data[:date] }.last
+    contenders.sort_by { |data| data[:date_fachinfo] || data[:date_patinfo] }.last
   end
   def _composition_paired_relevance(agent, detail)
     adose = agent.dose.to_f
@@ -282,17 +336,8 @@ class FachInfo < Import
   end
   def extract_details(page)
     data = {}
-    hrefs = page.links.inject([]) { |memo, link|
-      if(/Fachinformation/i.match link.text)
-        str = link.text[/(\d{2}\.){2}\d{4}/]
-        memo.push [Date.new(*str.split('.').reverse.collect { |num| num.to_i}), 
-          link.href]
-      end
-      memo
-    }.sort
-    if(oldest = hrefs.last) 
-      data.update :date => oldest.first, :fachinfo => oldest.last
-    end
+    _extract_newest_link(data, :fachinfo, "Fachinformation", page)
+    _extract_newest_link(data, :patinfo, "Gebrauchsinformation", page)
     table = (page/"table[@border=1]").first or return data
     rows = (table/"tr")[1..-1] || []
     composition = rows.collect { |row|
@@ -316,6 +361,19 @@ class FachInfo < Import
   end
   def _extract_details(span)
     @htmlentities.decode(span.inner_html).gsub(/[\t\n]|\302\240/, '')
+  end
+  def _extract_newest_link(data, key, search, page)
+    hrefs = page.links.inject([]) { |memo, link|
+      if(/#{search}\b/i.match link.text)
+        str = link.text[/(\d{2}\.){2}\d{4}/]
+        memo.push [Date.new(*str.split('.').reverse.collect { |num| num.to_i}), 
+          link.href]
+      end
+      memo
+    }.sort
+    if(oldest = hrefs.last) 
+      data.update :"date_#{key}" => oldest.first, key => oldest.last
+    end
   end
   def extract_result(agent, page)
     form = page.form("titlesForm")
@@ -411,35 +469,57 @@ class FachInfo < Import
     checked = sprintf "Checked %i Sequences from '%s' to '%s'",
                       sequences.size, sequences.first.name, sequences.last.name
     while sequence = sequences.shift
-      assign_fachinfo(agent, sequence, opts)
+      process(agent, sequence, opts)
     end
-    sources = {}
-    count = 0
+    fi_sources = { }
+    pi_sources = { }
+    fi_count = pi_count = 0
     Drugs::Sequence.all { |sequence|
       if(doc = sequence.fachinfo.de)
-        count += 1
-        sources[doc.source] = true
+        fi_count += 1
+        fi_sources[doc.source] = true
+      end
+      if(doc = sequence.patinfo.de)
+        pi_count += 1
+        pi_sources[doc.source] = true
       end
     }
     Util::Mail.notify_admins sprintf("%s: %s", Time.now.strftime('%c'),
                                      self.class), 
     [ checked,
-      "Assigned #@assigned Fachinfos",
-      "Removed #@removed Fachinfos",
-      "Kept #@not_removed unconfirmed Fachinfos",
-      "Total: #{sources.size} Fachinfos linked to #{count} Sequences",
+      "",
+      "Assigned #{@assigned[:fachinfo]} Fachinfos",
+      "Removed #{@removed[:fachinfo]} Fachinfos",
+      "Kept #{@not_removed[:fachinfo]} unconfirmed Fachinfos",
+      "Total: #{fi_sources.size} Fachinfos linked to #{fi_count} Sequences",
+      "",
+      "Assigned #{@assigned[:patinfo]} Patinfos",
+      "Removed #{@removed[:patinfo]} Patinfos",
+      "Kept #{@not_removed[:patinfo]} unconfirmed Patinfos",
+      "Total: #{pi_sources.size} Patinfos linked to #{pi_count} Sequences",
+      "",
       "Repaired #@repaired Active Agents",
+      "",
       "Errors: #{@errors.size}",
     ].concat(@errors.collect { |name, message, line, link| 
       sprintf "%s: %s (%s) -> http://gripsdb.dimdi.de%s", 
               name, message, line, link
     })
   end
-  def import_rtf(agent, url)
+  def import_rtf(key, agent, url, term)
+    pklass = case key
+             when :fachinfo
+               FiParser
+             when :patinfo
+               PiParser
+             end
     file = agent.get url
     path = File.join @archive, File.basename(url)
     file.save path
-    doc = FiParser.new.import StringIO.new(file.body)
+    term = term.gsub(/[\s-]/, '.')
+    ODDB.logger.debug('PharmNet') { 
+      sprintf('Parsing %s with term: %s', key, term) }
+    doc = pklass.new(term).import StringIO.new(file.body)
     doc.chapters.shift
     ## ensure that chapter-headings are bold
     doc.chapters.each { |chapter|
@@ -469,17 +549,77 @@ class FachInfo < Import
   def parse_dose(str)
     Drugs::Dose.new(str[/^\d*\.\d*/].to_f, str[/[^\d\.]+$/])
   end
-  def remove_fachinfo(sequence, opts)
-    if opts[:remove] && sequence.fachinfo.de
-      @removed += 1
-      ODDB.logger.debug('FachInfo') { 
+  def process(agent, sequence, opts = { :replace => false,
+                                        :remove => false, 
+                                        :repair => false,
+                                        :retries => 3,
+                                        :retry_unit => 60 })
+    return unless sequence.fachinfo.empty? || sequence.patinfo.empty? \
+                    || opts[:replace] || opts[:remove]
+    good, url = nil
+    term = sequence.name.de.dup
+    ODDB.logger.debug('PharmNet') { sprintf('Searching for %s', term) }
+    result = []
+    while result.empty?
+      return if term.length < 3
+      good = term.dup
+      result.concat search(agent, term, sequence, opts)
+      if(result.empty?)
+        good = term.gsub(/\s+/, '-')
+        result.concat search(agent, good, sequence, opts)
+      end
+      term.gsub! /\s*[^\s]+$/, ''
+    end
+    if result.size == 1
+      data = result.first
+    else
+      data = best_data sequence, result
+    end
+
+    return(remove_infos sequence, opts) unless data
+
+    cutoff = composition_relevance(sequence.active_agents, data)
+    return(remove_infos sequence, opts) if(cutoff <= 1.25) # arbitrary value
+
+    assign_info(:fachinfo, agent, good, data, sequence, opts)
+    assign_info(:patinfo, agent, good, data, sequence, opts)
+
+    fix_composition sequence.active_agents, data if(opts[:repair])
+
+    # assign registration number if really good match
+    return if(cutoff < 2) # arbitrary value
+    assign_registration sequence, data[:registration]
+
+  rescue StandardError => error
+    ODDB.logger.error('PharmNet') { error.message }
+    retries ||= opts[:retries]
+    if(/ServerError/.match(error.message) && retries > 0)
+      sleep opts[:retry_unit] * 4 ** (opts[:retries] - retries)
+      retries -= 1
+      agent.history.clear
+      @search_form = nil
+      retry
+    else
+      @errors.push [ sequence.name.de, error.message, 
+        error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip, url ]
+    end
+  end
+  def remove_info(key, sequence, opts)
+    info = sequence.send(key)
+    if opts[:remove] && info.de
+      @removed[key] += 1
+      ODDB.logger.debug('PharmNet') { 
         sprintf('Removing Fachinfo from %s', sequence.name.de) 
       }
-      sequence.fachinfo.de = nil
+      info.de = nil
       sequence.save
-    elsif sequence.fachinfo.de
-      @not_removed += 1
+    elsif info.de
+      @not_removed[key] += 1
     end
+  end
+  def remove_infos(sequence, opts)
+    remove_info :fachinfo, sequence, opts
+    remove_info :patinfo, sequence, opts
   end
   def result_page(form, term)
     form.field('term').value = term
@@ -495,7 +635,7 @@ class FachInfo < Import
       end
       @search_form ||= get_search_form agent
       ## if we need to repair the active agents, we want all results, otherwise only
-      #  those that have a FachInfo to parse.
+      #  those that have a Fach- or PatInfo to parse.
       fi_only = opts[:repair] && sequence && sequence.active_agents.any? { |act| 
         act.dose.qty == 0 } ? 'NO_RESTRICTION' : 'YES'
       set_fi_only(@search_form, fi_only)
@@ -503,7 +643,7 @@ class FachInfo < Import
         page = result_page @search_form, term
         div = (page/"div.wbsectionsubtitlebar").last
         if(div.nil? || !/Arzneimittelname:\s#{term}\?/.match(div.inner_text))
-          ODDB.logger.error('FachInfo') { 
+          ODDB.logger.error('PharmNet') { 
             sprintf "Searched for '%s' but got result for '%s' - creating new session",
               term, div.inner_text[/Arzneimittelname:[^?]+/]
           }

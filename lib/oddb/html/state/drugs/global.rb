@@ -16,6 +16,7 @@ require 'oddb/html/state/drugs/login'
 require 'oddb/html/state/drugs/fachinfo'
 require 'oddb/html/state/drugs/feedback'
 require 'oddb/html/state/drugs/package'
+require 'oddb/html/state/drugs/patinfo'
 require 'oddb/html/state/drugs/products'
 require 'oddb/html/state/drugs/result'
 require 'oddb/html/util/annotated_list'
@@ -103,6 +104,11 @@ module Events
   def _package_infos(code)
     if(package = _package_by_code(code))
       Ajax::PackageInfos.new(@session, package)
+    end
+  end
+  def _patinfo(code)
+    if((package = _package_by_code(code)) && package.patinfo)
+      Patinfo.new(@session, package)
     end
   end
   def _products(query)

@@ -14,6 +14,7 @@ module ODDB
       has_many :packages, on_delete(:cascade), on_save(:cascade)
       is_coded
       multilingual :fachinfo
+      multilingual :patinfo
       def comparable?(other)
         other.is_a?(Sequence) && compositions == other.compositions
       end

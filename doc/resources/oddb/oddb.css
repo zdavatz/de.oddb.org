@@ -9,7 +9,7 @@ a {
 a:hover {
   color: black;
 }
-a.fachinfo {
+a.fachinfo, a.patinfo {
   color: black;
   background-color: #FFF455;
 }
@@ -27,6 +27,7 @@ a.square {
   padding: 1px 4px;
   font-weight: bold;
   font-size: 11px;
+  margin: 0px 1px;
 }
 a.who-ddd {
   margin-left: 4px;

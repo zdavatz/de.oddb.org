@@ -7,8 +7,8 @@ module ODDB
   module Drugs
     class Package < Model
       belongs_to :sequence, 
-        delegates(:active_agents, :atc, :company, :ddds, :doses,
-                  :fachinfo, :galenic_forms, :product, :substances)
+        delegates(:active_agents, :atc, :company, :ddds, :doses, :fachinfo,
+                  :galenic_forms, :patinfo, :product, :substances)
       has_many :feedbacks, on_delete(:cascade)
       has_many :parts, on_delete(:cascade), delegates(:comparable_size)
       has_many :prices

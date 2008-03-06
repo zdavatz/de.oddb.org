@@ -12,6 +12,9 @@ module ODDB
       def add_paragraph(paragraph)
         @paragraphs.push paragraph unless paragraph.empty?
       end
+      def append(chapter)
+        @paragraphs.concat chapter.paragraphs
+      end
       def to_s
         @paragraphs.join("\n")
       end

@@ -11,14 +11,21 @@ class ChapterNames < HtmlGrid::DivList
   COMPONENTS = {
     [0,0] => :link,
   }
+  def initialize(type, *args)
+    @document_type = type
+    super(*args)
+  end
   def init
     @current = @session.user_input(:chapter)
     @model = @model.chapter_names.unshift(nil)
     super
-    @css_grid = @model.collect { |name| { "id" => "chapter_%s" % name } }
+    @css_grid = @model.collect { |name| 
+      { "id" => "chapter_%s" % name || @document_type } 
+    }
   end
   def link(model)
-    link = HtmlGrid::Link.new("chapter_#{model}", model, @session, self)
+    link = HtmlGrid::Link.new("chapter_#{model || @document_type}", 
+                              model, @session, self)
     if(@current != model)
       event, args = @session.direct_event
       args.push :chapter, model if(model)
