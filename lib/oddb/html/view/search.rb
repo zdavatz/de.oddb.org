@@ -19,6 +19,7 @@ end
 class SearchBar < HtmlGrid::InputText
   def init
     super
+    self.onload = "document.getElementById('searchbar').focus();"
     val = @lookandfeel.lookup(:query_info)
     txt_val = @session.persistent_user_input(@name) || val
     @attributes.store('value', txt_val)
