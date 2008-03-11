@@ -12,6 +12,7 @@ require 'oddb/drugs/part'
 require 'oddb/drugs/substance'
 require 'oddb/drugs/unit'
 require 'oddb/import/import'
+require 'oddb/import/pharmnet'
 require 'oddb/util/code'
 require 'oddb/config'
 require 'fileutils'
@@ -68,14 +69,69 @@ class ProductInfos < Import
     @count = 0
     @created = 0
     @created_companies = 0
+    @created_galenic_forms = 0
+    @created_packages = 0
+    @created_products = 0
+    @created_sequences = 0
+    @created_substances = 0
     @found = 0
+    @date = Date.today
   end
   def cell(row, idx)
     if((str = row.at(idx)) && !str.to_s.empty?)
       u(@@iconv.iconv(str.to_s))
     end
   end
-  def import(io)
+  def create_package(sequence, pzn, name, row)
+    @created_packages += 1
+    package = Drugs::Package.new
+    package.add_code(Util::Code.new(:cid, pzn, 'DE', @date))
+    part = Drugs::Part.new
+    part.composition = sequence.compositions.first
+    part.package = package
+    package.sequence = sequence
+    import_known(package, name, row)
+    package.save
+  end
+  def create_product(pzn, prodname, name, data, row)
+    @created_products += 1
+    product = Drugs::Product.new
+    product.name.de = prodname
+    sequence = create_sequence(product, pzn, name, data, row) 
+    product.save
+    sequence
+  end
+  def create_sequence(product, pzn, name, data, row)
+    @created_sequences += 1
+    sequence = Drugs::Sequence.new
+    composition = Drugs::Composition.new
+    data[:composition].each { |act|
+      substance = import_substance(act[:substance])
+      active_agent = Drugs::ActiveAgent.new(substance, act[:dose])
+      composition.add_active_agent(active_agent)
+    }
+    composition.galenic_form = import_galenic_form(cell(row, 5))
+    composition.save
+    sequence.add_composition(composition)
+    sequence.product = product
+    create_package(sequence, pzn, name, row)
+    sequence.save
+  end
+  def identify_details(result, pzn, name, row)
+    data = @pharmnet.suitable_data([name, cell(row, 5), cell(row, 9)], 
+                                   result, nil, 0.2)
+    if data.size > 1
+      ODDB.logger.error('ProductInfos') { 
+        sprintf("Found %i possible Details for %s (%s):\n%s", data.size, 
+                name, pzn, data.pretty_inspect)
+      }
+      nil
+    else
+      data.first
+    end
+  end
+  def import(io, agent=nil)
+    @agent = agent
     skip = @skip_rows
     begin
       CSV::IOReader.new(io, ';').each { |row|
@@ -94,36 +150,16 @@ class ProductInfos < Import
   end
   def import_row(row)
     pzn = u(row.at(0).to_i.to_s)
+    name = cell(row, 1).gsub(/[A-Z .&+-]+/) { |part| 
+      capitalize_all(part) }
     @count += 1
     if(package = Drugs::Package.find_by_code(:type    => 'cid',
                                              :value   => pzn,
                                              :country => 'DE'))
-      @found += 1
-      modified = false
-      name = cell(row, 1).gsub(/[A-Z .&+-]+/) { |part| 
-        capitalize_all(part) }
-      if(package.name != name)
-        modified = true
-        package.name.de = name
-      end
-      presc = row.at(2) == 'Rezeptpflichtig'
-      if(code = package.code(:prescription))
-        if(code.value != presc)
-          modified = true
-          code.value = presc
-        end
-      else
-        modified = true
-        package.add_code Util::Code.new(:prescription, presc, 'DE')
-      end
-      import_dose(row, package) && modified = true
-      package.save if(modified)
-      import_size(row, package)
-      product = package.product
-      unless(product.company)
-        product.company = import_company(row)
-        product.save
-      end
+      import_known(package, name, row)
+    else
+      @agent ||= WWW::Mechanize.new
+      import_unknown(@agent, pzn, name, row)
     end
   end
   def import_company(row)
@@ -151,6 +187,42 @@ class ProductInfos < Import
       end
     end
   end
+  def import_galenic_form(desc)
+    galform = Drugs::GalenicForm.find_by_description(desc)
+    if(galform.nil?)
+      @created_galenic_forms += 1
+      galform = Drugs::GalenicForm.new
+      galform.description.de = desc
+      galform.save
+    end
+    galform
+  end
+  def import_known(package, name, row)
+    @found += 1
+    modified = false
+    if(package.name != name)
+      modified = true
+      package.name.de = name
+    end
+    presc = row.at(2) == 'Rezeptpflichtig'
+    if(code = package.code(:prescription))
+      if(code.value != presc)
+        modified = true
+        code.value = presc
+      end
+    else
+      modified = true
+      package.add_code Util::Code.new(:prescription, presc, 'DE')
+    end
+    import_dose(row, package) && modified = true
+    package.save if(modified)
+    import_size(row, package)
+    product = package.product
+    unless(product.company)
+      product.company = import_company(row)
+      product.save
+    end
+  end
   def import_size(row, package)
     if(part = package.parts.first)
       dose, size, multi = row.at(3).to_s.split(/x/i, 3).reverse.compact
@@ -176,6 +248,42 @@ class ProductInfos < Import
       end
       part.save
     end
+  end
+  def import_substance(name)
+    sub = Drugs::Substance.find_by_name(name)
+    if(sub.nil?)
+      @created_substances += 1
+      sub = Drugs::Substance.new
+      sub.name.de = name
+      sub.save
+    end
+    sub
+  end
+  def import_unknown(agent, pzn, name, row)
+    @pharmnet ||= PharmNet::Import.new
+    result = @pharmnet.get_search_result(agent, name, nil, 
+                                         { :info_unrestricted => true, 
+                                           :retries           => 1})
+    return unless result
+    data = identify_details(result, pzn, name, row)
+    return unless data
+    prodname = data[:data].first
+    ODDB.logger.debug('ProductInfos') { 
+      sprintf("Creating new Package from\n%s", data.pretty_inspect)
+    }
+    products = Drugs::Product.search_by_name(prodname)
+    sequence = nil
+    if(products.empty?)
+      sequence = create_product(pzn, prodname, name, data, row)
+    elsif(products.size == 1)
+      sequence = update_product(products.first, pzn, name, data, row)
+    else 
+      return
+    end
+    opts = {:replace => true}
+    @pharmnet.assign_info(:fachinfo, agent, data, sequence, opts)
+    @pharmnet.assign_info(:patinfo, agent, data, sequence, opts)
+    sequence.product
   end
   def update_sequence(package, dose)
     sequence = package.sequence
@@ -206,13 +314,38 @@ class ProductInfos < Import
       package.save
     end
   end
+  def update_product(product, pzn, name, data, row)
+    doses = data[:composition].collect { |act| act[:dose] }.sort
+    sequence = product.sequences.find { |seq| doses == seq.doses.sort }
+    if(sequence.nil?)
+      sequence = create_sequence(product, pzn, name, data, row) 
+    else
+      create_package(sequence, pzn, name, row)
+    end
+    sequence
+  end
   def report
-    [
+    lines = [
       sprintf("Checked %5i Lines", @count),
       sprintf("Updated %5i Packages", @found),
       sprintf("Created %5i Sequences", @created),
       sprintf("Created %5i Companies", @created_companies),
+      sprintf("Created %5i Products", @created_products),
+      sprintf("Created %5i Sequences", @created_sequences),
+      sprintf("Created %5i Galenic Forms", @created_galenic_forms),
+      sprintf("Created %5i Substances", @created_substances),
+      sprintf("Created %5i Packages", @created_packages),
     ]
+    if @pharmnet
+      lines.concat [
+        "",
+        "Errors: #{@pharmnet.errors.size}",
+      ].concat(@pharmnet.errors.collect { |name, message, line, link| 
+        sprintf "%s: %s (%s) -> http://gripsdb.dimdi.de%s", 
+                name, message, line, link
+      })
+    end
+    lines
   end
 end
     end

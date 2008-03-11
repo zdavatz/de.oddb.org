@@ -41,8 +41,12 @@ module ODDB
                                            :repair => false,
                                            :retries => 3,
                                            :retry_unit => 60 })
-        Import::PharmNet::Import.new.import(WWW::Mechanize.new,
-                                            Drugs::Sequence.all, opts)
+        importer = Import::PharmNet::Import.new
+        _reported_import(importer) {
+          importer._import(WWW::Mechanize.new, Drugs::Sequence.all, opts)
+        }
+      rescue StandardError => error
+        ODDB.logger.error('Updater') { error.message }
       end
       def Updater.import_product_infos
         Import::Csv::ProductInfos.download_latest { |io|
@@ -54,11 +58,14 @@ module ODDB
                         WWW::Mechanize.new)
       end
       def Updater.reported_import(importer, io)
+        _reported_import(importer) { importer.import io }
+      end
+      def Updater._reported_import(importer, &block)
         lines = [
           sprintf("%s: %s#import", 
                   Time.now.strftime('%c'), importer.class)
         ]
-        lines.concat importer.import(io)
+        lines.concat block.call
       rescue StandardError => err
         lines.push(err.class, err.message, *err.backtrace)
         raise

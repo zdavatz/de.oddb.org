@@ -7,6 +7,7 @@ require 'selenium/unit'
 require 'stub/model'
 require 'oddb/drugs'
 require 'oddb/util'
+require 'oddb/import/pharmnet'
 
 module ODDB
   module Selenium
@@ -121,7 +122,7 @@ class TestPackage < Test::Unit::TestCase
     assert is_element_present("fi_url")
     fachinfo = "A Fachinfo-Document"
     type "fi_url", "http://host.domain/path.rtf"
-    flexmock(Import::PharmNet::FachInfo).new_instances\
+    flexmock(Import::PharmNet::Import).new_instances\
       .should_receive(:import_rtf).and_return { fachinfo }
     click "//input[@name='update']"
     wait_for_page_to_load "30000"

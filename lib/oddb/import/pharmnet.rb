@@ -522,6 +522,14 @@ class Import < Import
                                         :repair => false,
                                         :retries => 3,
                                         :retry_unit => 60 })
+    Util::Mail.notify_admins sprintf("%s: %s", Time.now.strftime('%c'),
+                                     self.class), _import(agent, sequences, opts)
+  end
+  def _import(agent, sequences, opts = { :replace => false, 
+                                        :remove => false, 
+                                        :repair => false,
+                                        :retries => 3,
+                                        :retry_unit => 60 })
     sequences = sequences.sort_by { |sequence| sequence.name }
     checked = sprintf "Checked %i Sequences from '%s' to '%s'",
                       sequences.size, sequences.first.name, sequences.last.name
@@ -541,8 +549,6 @@ class Import < Import
         pi_sources[doc.source] = true
       end
     }
-    Util::Mail.notify_admins sprintf("%s: %s", Time.now.strftime('%c'),
-                                     self.class), 
     [ checked,
       "",
       "Assigned #{@assigned[:fachinfo]} Fachinfos",

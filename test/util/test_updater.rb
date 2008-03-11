@@ -1,11 +1,13 @@
 #!/usr/bin/env ruby
 # Util::TestUpdater -- de.oddb.org -- 05.02.2007 -- hwyss@ywesee.com
 
+$: << File.expand_path('..', File.dirname(__FILE__))
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
 require 'test/unit'
 require 'oddb/util/updater'
 require 'flexmock'
+require 'stub/model'
 
 module ODDB
   module Util
@@ -21,10 +23,18 @@ module ODDB
         @config.should_receive(:var).and_return(@var)
         @config.should_receive(:data_dir).and_return(@data_dir)
         @updater = Updater
+        @errors = []
+        ODDB.logger = flexmock('logger')
+        ODDB.logger.should_receive(:error).and_return { |type, block|
+          msg = block.call
+          puts msg
+          @errors.push msg
+        }
+        ODDB.logger.should_ignore_missing
       end
       def test_run
         flexmock(Util::Mail).should_receive(:notify_admins)\
-          .with(String, Array).times(5)
+          .with(String, Array).times(6)
         arch = File.join(@xls_dir, 
           "liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls")
         today = Date.new(2006,10)
@@ -113,6 +123,15 @@ module ODDB
           assert(true) 
           ['report']
         }
+        pharmnet_import = flexmock('PharmNet')
+        flexmock(Import::PharmNet::Import)\
+          .should_receive(:new).and_return(pharmnet_import)
+        pharmnet_import.should_receive(:_import)\
+          .times(1).and_return { |agent, seqs, opts|
+          assert_instance_of(WWW::Mechanize, agent)
+          assert_equal([], seqs)
+          []
+        }
         @updater.run(today)
         assert(File.exist?(File.join(@xls_dir, 'wirkkurz_011006.xls')))
         assert(File.exist?(File.join(@xls_dir, 'darform_011006.xls')))
@@ -156,6 +175,11 @@ module ODDB
         stub.should_receive(:start).and_return { 
           raise "connection error 5"
         }
+        flexmock(Import::PharmNet::Import).new_instances\
+          .should_receive(:_import)\
+          .times(1).and_return { |agent, seqs, opts|
+          raise "import error"
+        }
         uriparse = flexmock(URI)
         uriparse.should_receive(:parse).with(Updater::DIMDI_INDEX)\
           .times(1).and_return(index_uri)
@@ -177,7 +201,7 @@ module ODDB
       end
       def test_run__later_errors
         flexmock(Util::Mail).should_receive(:notify_admins)\
-          .with(String, Array).times(5)
+          .with(String, Array).times(6)
         arch = File.join(@xls_dir, 
           "liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls")
         today = Date.new(2006,10)
@@ -264,6 +288,11 @@ module ODDB
         importer.should_receive(:import).with('file-handle')\
           .times(1).and_return { |io|
           assert_equal('file-handle', io)
+          raise "import error"
+        }
+        flexmock(Import::PharmNet::Import).new_instances\
+          .should_receive(:_import)\
+          .times(1).and_return { |agent, seqs, opts|
           raise "import error"
         }
         assert_nothing_raised {

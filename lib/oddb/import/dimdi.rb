@@ -45,7 +45,7 @@ module Dimdi
       }
     end
   rescue StandardError => e
-		warn e.message
+    ODDB.logger.error('Dimdi') { e.message }
   end
   def Dimdi.download_latest(url, today, &block)
     file = File.basename(url)
@@ -64,7 +64,8 @@ module Dimdi
         local << content
       }
     end
-  rescue StandardError
+  rescue StandardError => error
+    ODDB.logger.error('Dimdi') { error.message }
   end
   class GalenicForm < DatedExcel
     def initialize(date = Date.today)

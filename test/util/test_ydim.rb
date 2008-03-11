@@ -57,9 +57,8 @@ class TestYdim < Test::Unit::TestCase
     @yus.should_receive(:set_preference).with('test@invoice.com', :ydim_id, 158)
 
     today = Date.today
-    next_year = (today >> 12) - 1
+    next_year = (today >> 12)
     descr = "PowerUser de.oddb.org #{today.strftime("%d.%m.%Y")} - #{next_year.strftime("%d.%m.%Y")}"
-    puts descr
     ydim_inv = setup_ydim_invoice(1234, descr)
     @ydim.should_receive(:create_invoice).with(158).and_return {  ydim_inv }
     expected = [
