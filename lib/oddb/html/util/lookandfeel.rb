@@ -163,7 +163,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :festbetragsstufe_1         => 'Arzneimittel mit denselben Wirkstoffen',
       :festbetragsstufe_2         => 'Arzneimittel mit pharmakologisch-therapeutisch vergleichbaren Wirkstoffen, insbesondere mit chemisch verwandten Stoffen',
       :festbetragsstufe_3         => 'Arzneimittel mit therapeutisch vergleichbarer Wirkung, insbesondere Arzneimittelkombinationen',
-      :fi_url                     => 'URL zur Fachinfo',
+      :fi_url                     => 'URL zur Fachinformation',
       :google                     => 'G',
       :google0                    => 'Google-Suche nach ',
       :google1                    => '',
@@ -220,6 +220,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :paypal_msg_succ_poweruser  => 'Vielen Dank! Als angemeldeter Benutzer können Sie jetzt ohne Beschränkung Abfragen vornehmen.',
       :paypal_msg_unconfirmed     => 'Ihre Bezahlung ist von PayPal noch nicht bestätigt worden. Sobald dies geschieht werden wir Sie per E-Mail benachrichtigen.',
       :paypal_failed              => 'Fehler',
+      :pi_url                     => 'URL zur Gebrauchsinformation',
       :poweruser                  => 'Power-User Datenerfassung',
       :poweruser_descr            => 'Bitte geben Sie Ihre persönlichen Angaben ein und wählen Sie einen Benutzernamen und ein Passwort.',
 

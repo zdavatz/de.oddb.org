@@ -12,6 +12,7 @@ class PackageForm < Drugs::PackageInnerComposite
   include HtmlGrid::FormMethods
   COLSPAN_MAP = {
     [1,7] => 3,
+    [1,8] => 3,
   }
   COMPONENTS = {
     [0,0] => :name, 
@@ -31,14 +32,17 @@ class PackageForm < Drugs::PackageInnerComposite
     [1,6,0] => :fachinfo_link,
     [1,6,1] => :patinfo_link,
     [0,7] => :fi_url,
-    [1,8] => :submit, 
+    [0,8] => :pi_url,
+    [1,9] => :submit, 
   }
   COMPONENT_CSS_MAP = {
     [1,7] => 'url',
+    [1,8] => 'url',
   }
   EVENT = :update
   SYMBOL_MAP = {
     :fi_url => HtmlGrid::InputText,
+    :pi_url => HtmlGrid::InputText,
   }
 end
 class PackageComposite < Drugs::PackageComposite

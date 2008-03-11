@@ -13,13 +13,21 @@ module ODDB
 class Package < Drugs::Package
   VIEW = View::Drugs::Admin::Package
   def update
-    if((seq = @model.sequence) && (url = @session.user_input(:fi_url)))
-      imp = Import::PharmNet::Import.new
-      document = imp.import_rtf(:fachinfo, WWW::Mechanize.new, url, seq.name.de)
-      seq.fachinfo.de = document
+    fi_url = @session.user_input(:fi_url)
+    pi_url = @session.user_input(:pi_url)
+    if((seq = @model.sequence) && (fi_url || pi_url))
+      _import_rtf(:fachinfo, seq, fi_url)
+      _import_rtf(:patinfo, seq, pi_url)
       seq.save
     end
     self
+  end
+  def _import_rtf(key, seq, url)
+    if(url && !url.empty?)
+      imp = Import::PharmNet::Import.new
+      document = imp.import_rtf(key, WWW::Mechanize.new, url, seq.name.de)
+      seq.send(key).de = document
+    end
   end
 end
         end
