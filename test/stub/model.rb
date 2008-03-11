@@ -52,6 +52,7 @@ module ODDB
         }
         define_method(:save) {
           self.class.instances.push(self).uniq!
+          self
         }
         define_method(:delete) {
           self.class.instances.delete(self)

@@ -166,7 +166,8 @@ class PiParser < TermedRtf
       chapter = @document.chapter(name)
       if(chapter.nil?)
         @document.add_chapter Text::Chapter.new(name)
-      elsif(chapter.paragraphs.size == 1) 
+      elsif(chapter.paragraphs.size == 1 \
+            && /^\d+/.match(chapter.paragraphs.first)) 
         ## some PI insert a document-overview after the composition, in which
         #  case we have an erroneous chapter, identified by only consisting of
         #  a heading. In that case:
@@ -191,6 +192,7 @@ class PiParser < TermedRtf
   end
 end
 class Import < Import
+  attr_reader :errors
   def initialize
     @stop = /(Pharma(ceuticals|zeutische\s*Fabrik)?
              |Arzneim(ittel|\.)
@@ -211,9 +213,10 @@ class Import < Import
     FileUtils.mkdir_p File.dirname(@latest)
     super
   end
-  def assign_info(key, agent, term, data, sequence, opts)
+  def assign_info(key, agent, data, sequence, opts)
     return(remove_info key, sequence, opts) unless(url = data[key])
 
+    term = data[:search_term]
     doc = import_rtf key, agent, url, term
     # arbitrary cutoff: fachinfos with less than 5 chapters can't be right...
     if doc.chapters.size > 5
@@ -224,6 +227,10 @@ class Import < Import
       }
       remove_info key, sequence, opts
     end
+  rescue StandardError => error
+    ODDB.logger.error('PharmNet') { error.message }
+    @errors.push [ sequence ? sequence.name.de : '', error.message, 
+      error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip, url ]
   end
   def _assign_info(key, doc, sequence, opts={})
     info = sequence.send(key)
@@ -262,7 +269,12 @@ class Import < Import
     end
   end
   def best_data(sequence, result)
-    suitable = suitable_data sequence, result
+    comparison = [
+      sequence.name, 
+      (gf = sequence.galenic_forms.first) && gf.description,
+      (comp = sequence.company) && comp.name,
+    ].collect { |ml| ml ? ml.de : '' }
+    suitable = suitable_data comparison, result, sequence.active_agents.size
     max = 0
     relevances = suitable.collect { |data|
       rel = composition_relevance(sequence.active_agents, data)
@@ -460,6 +472,51 @@ class Import < Import
     form.action = link.href
     form
   end
+  def get_search_result(agent, term, sequence=nil, 
+                        opts = { :info_unrestricted => false, 
+                                 :repair => false, :retries => 3})
+    good = nil
+    term = term.dup
+    ODDB.logger.debug('PharmNet') { sprintf('Searching for %s', term) }
+    result = []
+    while result.empty?
+      return if term.length < 3
+      good = term.dup
+      result.concat search(agent, term, sequence, opts)
+      if(result.empty?)
+        good = term.gsub(/\s+/, '-')
+        result.concat search(agent, good, sequence, opts)
+      end
+      term.gsub! /\s*[^\s]+$/, ''
+    end
+    result.each { |data| data.store(:search_term, good) }
+    result
+  rescue StandardError => error
+    ODDB.logger.error('PharmNet') { error.message }
+    retries ||= opts[:retries]
+    if(/ServerError/.match(error.message) && retries > 0)
+      sleep opts[:retry_unit] * 4 ** (opts[:retries] - retries)
+      retries -= 1
+      agent.history.clear
+      @search_form = nil
+      retry
+    else
+      @errors.push [ sequence ? sequence.name.de : '', error.message, 
+        error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip ]
+    end
+    nil
+  end
+  def identify_details(agent, term, sequence=nil, 
+                       opts = { :info_unrestricted => false, 
+                                :repair => false, :retries => 3})
+    if result = get_search_result(agent, term, sequence, opts)
+      if result.size == 1
+        result.first
+      else
+        best_data sequence, result
+      end
+    end
+  end
   def import(agent, sequences, opts = { :replace => false, 
                                         :remove => false, 
                                         :repair => false,
@@ -556,53 +613,21 @@ class Import < Import
                                         :retry_unit => 60 })
     return unless sequence.fachinfo.empty? || sequence.patinfo.empty? \
                     || opts[:replace] || opts[:remove]
-    good, url = nil
-    term = sequence.name.de.dup
-    ODDB.logger.debug('PharmNet') { sprintf('Searching for %s', term) }
-    result = []
-    while result.empty?
-      return if term.length < 3
-      good = term.dup
-      result.concat search(agent, term, sequence, opts)
-      if(result.empty?)
-        good = term.gsub(/\s+/, '-')
-        result.concat search(agent, good, sequence, opts)
-      end
-      term.gsub! /\s*[^\s]+$/, ''
-    end
-    if result.size == 1
-      data = result.first
-    else
-      data = best_data sequence, result
-    end
+    data = identify_details(agent, sequence.name.de, sequence, opts)
 
     return(remove_infos sequence, opts) unless data
 
     cutoff = composition_relevance(sequence.active_agents, data)
     return(remove_infos sequence, opts) if(cutoff <= 1.25) # arbitrary value
 
-    assign_info(:fachinfo, agent, good, data, sequence, opts)
-    assign_info(:patinfo, agent, good, data, sequence, opts)
+    assign_info(:fachinfo, agent, data, sequence, opts)
+    assign_info(:patinfo, agent, data, sequence, opts)
 
     fix_composition sequence.active_agents, data if(opts[:repair])
 
     # assign registration number if really good match
     return if(cutoff < 2) # arbitrary value
     assign_registration sequence, data[:registration]
-
-  rescue StandardError => error
-    ODDB.logger.error('PharmNet') { error.message }
-    retries ||= opts[:retries]
-    if(/ServerError/.match(error.message) && retries > 0)
-      sleep opts[:retry_unit] * 4 ** (opts[:retries] - retries)
-      retries -= 1
-      agent.history.clear
-      @search_form = nil
-      retry
-    else
-      @errors.push [ sequence.name.de, error.message, 
-        error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip, url ]
-    end
   end
   def remove_info(key, sequence, opts)
     info = sequence.send(key)
@@ -636,22 +661,25 @@ class Import < Import
       @search_form ||= get_search_form agent
       ## if we need to repair the active agents, we want all results, otherwise only
       #  those that have a Fach- or PatInfo to parse.
-      fi_only = opts[:repair] && sequence && sequence.active_agents.any? { |act| 
-        act.dose.qty == 0 } ? 'NO_RESTRICTION' : 'YES'
+      fi_only = opts[:info_unrestricted] \
+        || (opts[:repair] && sequence && sequence.active_agents.any? { |act|
+        act.dose.qty == 0 }) ? 'NO_RESTRICTION' : 'YES'
       set_fi_only(@search_form, fi_only)
       details = agent.transact {
         page = result_page @search_form, term
-        div = (page/"div.wbsectionsubtitlebar").last
-        if(div.nil? || !/Arzneimittelname:\s#{term}\?/.match(div.inner_text))
+        if(found = _search_invalid? page, term)
           ODDB.logger.error('PharmNet') { 
             sprintf "Searched for '%s' but got result for '%s' - creating new session",
-              term, div.inner_text[/Arzneimittelname:[^?]+/]
+              term, found
           }
           agent.cookie_jar.clear!
           agent.history.clear
           @search_form = get_search_form agent
           set_fi_only(@search_form, fi_only)
           page = result_page @search_form, term
+          if(_search_invalid? page, term)
+            return []
+          end
         end
         page.save @latest
         result = extract_result agent, page
@@ -665,21 +693,23 @@ class Import < Import
       @result_cache.store term, details
     end
   end
+  def _search_invalid?(page, term)
+    div = (page/"div.wbsectionsubtitlebar").last
+    if(div.nil?)
+      ''
+    elsif(!/Arzneimittelname:\s#{term}\?/i.match(div.inner_text))
+      div.inner_text[/Arzneimittelname:[^?]+/]
+    end
+  end
   def set_fi_only(form, status="YES")
     form.radiobuttons.find { |b| b.name == "WFTYP" && b.value == status }.check
   end
-  def suitable_data(sequence, selection)
-    comparison = [
-      sequence.name, 
-      (gf = sequence.galenic_forms.first) && gf.description,
-      (comp = sequence.company) && comp.name,
-    ].collect { |ml| ml ? ml.de : '' }
-    subcount = sequence.active_agents.size
+  def suitable_data(comparison, selection, subcount=nil, cutoff=0.25)
     max = 0
     sums = []
     preselection = []
     selection.each_with_index { |data, idx|
-      if(dists = _suitable_data(data, comparison, subcount))
+      if(dists = _suitable_data(data, comparison, subcount, cutoff))
         sum = dists.inject { |a,b| a+b }
         max = sum if sum > max
         sums.push sum
@@ -694,7 +724,7 @@ class Import < Import
     }
     result
   end
-  def _suitable_data(data, comparison, subcount, cutoff=0.25)
+  def _suitable_data(data, comparison, subcount=nil, cutoff=0.25)
     idx = 0
     raw = data[:data].dup
     
@@ -712,8 +742,12 @@ class Import < Import
       return if relevance < cutoff
       relevance
     }
-    cdist = (comp = data[:composition]) ? (subcount - comp.size).abs : subcount
-    dists.push(cdist) unless cdist > 0
+    if(subcount)
+      cdist = (comp = data[:composition]) ? (subcount - comp.size).abs : subcount
+      dists.push(cdist) unless cdist > 0
+    else
+      dists
+    end
   end
 end
     end

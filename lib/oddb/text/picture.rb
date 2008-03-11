@@ -15,7 +15,7 @@ module ODDB
         [self].pack('H*')
       end
       def empty?
-        false if(image)
+        super || !image
       rescue
         true
       end

@@ -100,6 +100,27 @@ Angabe als geom. Mittelwerte Standardabweichung (* Angabe als Median und Streubr
     EOS
     assert_equal(expected.strip, chapters.last.to_s)
   end
+  def test_import__claversal
+    path = File.expand_path('data/rtf/pharmnet/claversal.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = ["default", "name", "sale_limitation", "composition",
+                "substance_group", "active_agents", "excipients",
+                "indications", "counterindications", "unwanted_effects",
+                "interactions", "precautions", "incompatibilities", "dosage",
+                "application", "overdose", "pharmacology", "toxicology",
+                "pharmacokinetics", "bioavailability", "other_advice",
+                "shelf_life", "storage", "packaging", "date", "company"]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+    chapter = chapters.at(-7)
+    picts = chapter.paragraphs.select { |par| par.is_a? Text::Picture }
+    assert_equal 3, picts.size, "Oh, dear - imagemagick won't convert wmf-files.."
+  end
   def test_import__omeprazol
     path = File.expand_path('data/rtf/pharmnet/omeprazol.rtf', 
                             File.dirname(__FILE__))
@@ -162,7 +183,9 @@ class TestFachinfo < Test::Unit::TestCase
     @errors = []
     ODDB.logger = flexmock('logger')
     ODDB.logger.should_receive(:error).and_return { |type, block|
-      @errors.push block.call
+      msg = block.call
+      puts msg
+      @errors.push msg
     }
     ODDB.logger.should_ignore_missing
   end
@@ -365,7 +388,7 @@ class TestFachinfo < Test::Unit::TestCase
     flexmock(agent.cookie_jar).should_receive(:clear!).times(1)
     agent.should_receive(:history).times(1).and_return { history }
     result = @importer.search agent, 'Aspirin'
-    assert_equal(1, result.size)
+    assert_equal(0, result.size)
     assert_equal([], history)
     assert_equal(["Searched for 'aspirin' but got result for 'Arzneimittelname: Aarane' - creating new session"], 
                  @errors)
@@ -770,6 +793,23 @@ bei nicht organbedingtem Bluthochdruck (essentieller Hypertonie) und bei Belastu
                  "application", "unwanted_effects", "storage", "date",
                  "additional_information", "personal" ]
     assert_equal(expected, chapters.collect { |ch| ch.name })
+  end
+  def test_import_pi__valium
+    @importer = PiParser.new 'valium'
+    path = File.expand_path('data/rtf/pharmnet/valium.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "packaging", "indications", 
+                 "counterindications", "precautions", "application",
+                 "unwanted_effects", "storage", "date", ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+    assert !/nebenwirkungen/i.match(chapters.at(1).to_s), 
+           "'Nebenwirkungen' should not appear in Composition"
   end
 end
     end

@@ -305,10 +305,10 @@ class Rtf
     when '{'
       @groups.push current_group.dup
     when '}'
+      @groups.pop
       if(@buffer.is_a?(Text::Picture) && !current_group.include?(:picture))
         @buffer = next_paragraph
       end
-      @groups.pop
     end
   end
   def import_text(value, extra)
@@ -332,8 +332,10 @@ class Rtf
   def _import_text(value)
     @buffer.set_format(*current_group)
     _sanitize_text(value)
+    value.gsub!(/\\-/, '')
     value.gsub!(/\\~/, ' ')
-    @buffer << value.gsub(/\\-/, '')
+    value.gsub!(/\\_/, '-')
+    @buffer << value
   end
   def import_token(reader)
     type, value, extra = reader.get_token
@@ -361,13 +363,14 @@ class Rtf
   def next_paragraph
     case @buffer
     when Text::Picture
-      unless @buffer.empty?
+      unless ignore? || @buffer.empty?
         @buffer.finalize!
         path = File.join(ODDB.config.var, @buffer.path)
         FileUtils.mkdir_p(File.dirname(path))
         File.open(path, 'w') { |fh|
           fh.puts @buffer.to_png
         }
+        current_chapter.add_paragraph @buffer
       end
     end
     Text::Paragraph.new
