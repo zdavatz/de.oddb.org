@@ -1,11 +1,13 @@
 #!/usr/bin/env ruby
 # Model -- de.oddb.org -- 04.09.2006 -- hwyss@ywesee.com
 
-require 'oddb/util/multilingual'
 require 'fixes/singular'
 require 'facet/module/basename'
 
 module ODDB
+  # forward definitions (circular dependency Model <-> M10lDocument)
+  class Model; end 
+  module Util; class M10lDocument < Model; end; end
   class Model
     class Predicate
       attr_reader :action, :type, :delegators
@@ -70,6 +72,9 @@ module ODDB
       def connections
         @connections ||= []
       end
+      def connector(key)
+        connectors.push "@#{key}"
+      end
       def connectors
         @connectors ||= []
       end
@@ -125,6 +130,15 @@ module ODDB
           codes.find { |code| code.is_for?(type, country || 'DE') }
         }
       end
+      def m10l_document(key)
+        varname = "@#{key}"
+        define_method(key) {
+          instance_variable_get(varname) or begin
+            instance_variable_set(varname, Util::M10lDocument.new)
+          end
+        }
+        connectors.push varname
+      end
       def multilingual(key)
         define_method(key) {
           instance_variable_get("@#{key}") or begin
@@ -155,3 +169,5 @@ module ODDB
     end
   end
 end
+
+require 'oddb/util/multilingual'

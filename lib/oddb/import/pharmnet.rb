@@ -207,7 +207,9 @@ class Import < Import
     @removed = Hash.new 0
     @not_removed = Hash.new 0
     @repaired = 0
+    @reparsed_fis = 0
     @archive = File.join ODDB.config.var, 'rtf', 'pharmnet'
+    @sources = {}
     FileUtils.mkdir_p @archive
     @latest = File.join ODDB.config.var, 'html', 'pharmnet', 'latest.html'
     FileUtils.mkdir_p File.dirname(@latest)
@@ -217,7 +219,7 @@ class Import < Import
     return(remove_info key, sequence, opts) unless(url = data[key])
 
     term = data[:search_term]
-    doc = import_rtf key, agent, url, term
+    doc = import_rtf key, agent, url, term, opts
     # arbitrary cutoff: fachinfos with less than 5 chapters can't be right...
     if doc.chapters.size > 5
       _assign_info key, doc, sequence, opts
@@ -239,11 +241,10 @@ class Import < Import
     ODDB.logger.debug('PharmNet') { 
       sprintf("Assigning %s to %s", key, sequence.name.de) 
     }
-    if(previous = info.de)
-      doc.previous_sources = [previous.previous_sources, previous.source]
-    end
     info.de = doc
     @assigned[key] += 1
+    doc.save
+    info.save
     sequence.save
   end
   def assign_registration(sequence, registration)
@@ -518,23 +519,30 @@ class Import < Import
     end
   end
   def import(agent, sequences, opts = { :replace => false, 
-                                        :remove => false, 
-                                        :repair => false,
+                                        :reload  => false, 
+                                        :remove  => false, 
+                                        :repair  => false,
+                                        :reparse => false,
                                         :retries => 3,
                                         :retry_unit => 60 })
     Util::Mail.notify_admins sprintf("%s: %s", Time.now.strftime('%c'),
                                      self.class), _import(agent, sequences, opts)
   end
   def _import(agent, sequences, opts = { :replace => false, 
-                                        :remove => false, 
-                                        :repair => false,
-                                        :retries => 3,
-                                        :retry_unit => 60 })
+                                         :reload  => false, 
+                                         :remove  => false, 
+                                         :repair  => false,
+                                         :reparse => false,
+                                         :retries => 3,
+                                         :retry_unit => 60 })
     sequences = sequences.sort_by { |sequence| sequence.name }
     checked = sprintf "Checked %i Sequences from '%s' to '%s'",
                       sequences.size, sequences.first.name, sequences.last.name
+    ## let odba cache release unneeded sequences ...
+    sequences.collect! { |sequence| sequence.odba_id }
     while sequence = sequences.shift
-      process(agent, sequence, opts)
+      ## ... and refetch them when necessary
+      process(agent, ODBA.cache.fetch(sequence), opts)
     end
     fi_sources = { }
     pi_sources = { }
@@ -561,6 +569,7 @@ class Import < Import
       "Kept #{@not_removed[:patinfo]} unconfirmed Patinfos",
       "Total: #{pi_sources.size} Patinfos linked to #{pi_count} Sequences",
       "",
+      "Reparsed #@reparsed_fis Fachinfos",
       "Repaired #@repaired Active Agents",
       "",
       "Errors: #{@errors.size}",
@@ -569,29 +578,40 @@ class Import < Import
               name, message, line, link
     })
   end
-  def import_rtf(key, agent, url, term)
+  def import_rtf(key, agent, url, term, opts = { :replace => false, 
+                                                 :reload  => false})
     pklass = case key
              when :fachinfo
                FiParser
              when :patinfo
                PiParser
              end
-    file = agent.get url
     path = File.join @archive, File.basename(url)
-    file.save path
-    term = term.gsub(/[\s-]/, '.')
-    ODDB.logger.debug('PharmNet') { 
-      sprintf('Parsing %s with term: %s', key, term) }
-    doc = pklass.new(term).import StringIO.new(file.body)
-    doc.chapters.shift
-    ## ensure that chapter-headings are bold
-    doc.chapters.each { |chapter|
-      if((paragraph = chapter.paragraphs.first) \
-         && (format = paragraph.formats.first))
-        format.augment "b"
+    doc = Text::Document.find_by_source(url)
+    if(doc.nil? || (opts[:replace] && !@sources[url]))
+      @sources.store url, true 
+      io = nil
+      if(opts[:reload] || !File.exist?(path))
+        file = agent.get url
+        file.save path
+        io = StringIO.new(file.body)
+      else 
+        io = File.open(path)
       end
-    }
-    doc.source = url
+      term = term.gsub(/[\s-]/, '.')
+      ODDB.logger.debug('PharmNet') { 
+        sprintf('Parsing %s with term: %s', key, term) }
+      doc = pklass.new(term).import io
+      doc.chapters.shift
+      ## ensure that chapter-headings are bold
+      doc.chapters.each { |chapter|
+        if((paragraph = chapter.paragraphs.first) \
+           && (format = paragraph.formats.first))
+          format.augment "b"
+        end
+      }
+      doc.source = url
+    end
     doc
   end
   def ngram_similarity(str1, str2, n=5)
@@ -613,12 +633,16 @@ class Import < Import
     Drugs::Dose.new(str[/^\d*\.\d*/].to_f, str[/[^\d\.]+$/])
   end
   def process(agent, sequence, opts = { :replace => false,
-                                        :remove => false, 
-                                        :repair => false,
+                                        :reload  => false,
+                                        :remove  => false, 
+                                        :repair  => false,
+                                        :reparse => false,
                                         :retries => 3,
                                         :retry_unit => 60 })
+
+    return(reparse_fachinfo agent, sequence) if opts[:reparse]
     return unless sequence.fachinfo.empty? || sequence.patinfo.empty? \
-                    || opts[:replace] || opts[:remove]
+                    || opts[:replace] || opts[:remove] || opts[:reparse]
     data = identify_details(agent, sequence.name.de, sequence, opts)
 
     return(remove_infos sequence, opts) unless data
@@ -651,6 +675,15 @@ class Import < Import
   def remove_infos(sequence, opts)
     remove_info :fachinfo, sequence, opts
     remove_info :patinfo, sequence, opts
+  end
+  def reparse_fachinfo(agent, sequence)
+    if((info = sequence.fachinfo.de) && (source = info.source) \
+       && (doc = import_rtf :fachinfo, agent, source, sequence.name.de,
+                            :replace => true))
+      @reparsed_fis += 1
+      info.chapters.replace doc.chapters
+      info.save
+    end
   end
   def result_page(form, term)
     form.field('term').value = term

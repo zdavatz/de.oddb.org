@@ -128,6 +128,13 @@ module ODDB
     class Feedback < Model
       simulate_database 
     end
+    class M10lDocument < Model
+    end
+  end
+  module Text
+    class Document < Model
+      simulate_database(:source)
+    end
   end
   Currency = Object.new
 end

@@ -1,21 +1,19 @@
 #!/usr/bin/env ruby
 # Util::Multilingual -- de.oddb.org -- 04.09.2006 -- hwyss@ywesee.com
 
+require 'oddb/model'
+
 module ODDB
   module Util
-    class Multilingual
+    module M10lMethods
       include Comparable
       attr_reader :canonical
       attr_reader :synonyms
       def initialize(canonical={})
         @canonical = canonical
-        @synonyms = []
-      end
-      def add_synonym(synonym)
-        @synonyms.push(synonym).uniq! && synonym
       end
       def all
-        @canonical.values.concat(@synonyms)
+        @canonical.values
       end
       def empty?
         @canonical.empty?
@@ -38,14 +36,57 @@ module ODDB
         when String
           @canonical.values.any? { |val| val == other } \
             || @synonyms.any? { |val| val == other }
-        when Multilingual
+        when M10lDocument
           @canonical == other.canonical && @synonyms == other.synonyms
+        when M10lMethods
+          @canonical == other.canonical
         else
           false
         end
       end
       def <=>(other)
         all.sort <=> other.all.sort
+      end
+    end
+    class Multilingual
+      include M10lMethods
+      def initialize(canonical={})
+        super
+        @synonyms = []
+      end
+      def add_synonym(synonym)
+        @synonyms.push(synonym).uniq! && synonym
+      end
+      def all
+        super.concat(@synonyms)
+      end
+    end
+    class M10lDocument < Model
+      include M10lMethods
+      connector :canonical
+      attr_reader :previous_sources
+      def initialize(canonical={})
+        super
+        @previous_sources = {}
+      end
+      def add_previous_source(lang, source)
+        sources = (@previous_sources[lang.to_sym] ||= [])
+        sources.push source
+        sources.compact!
+        sources.uniq!
+        sources
+      end
+      def method_missing(meth, *args, &block)
+        case meth.to_s
+        when /^([a-z]{2})=$/
+          lang = $~[1].to_sym
+          if(previous = @canonical[lang])
+            add_previous_source(lang, previous.source)
+          end
+          @canonical.store(lang, args.first)
+        else
+          super(meth, *args, &block)
+        end
       end
     end
   end

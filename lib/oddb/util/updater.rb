@@ -37,8 +37,10 @@ module ODDB
         }
       end
       def Updater.import_pharmnet(opts = { :replace => true, 
-                                           :remove => false, 
-                                           :repair => false,
+                                           :reload  => false, 
+                                           :remove  => false, 
+                                           :repair  => false,
+                                           :reparse => false,
                                            :retries => 3,
                                            :retry_unit => 60 })
         importer = Import::PharmNet::Import.new
