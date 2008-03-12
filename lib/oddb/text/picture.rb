@@ -14,13 +14,21 @@ module ODDB
       def blob
         [self].pack('H*')
       end
+      def digest
+        @digest ||= Digest::MD5.hexdigest(self)
+      end
       def empty?
-        super || !image
-      rescue
+        super #|| !image
+      rescue StandardError => err
+        puts err.class
+        puts err.message
         true
       end
       def finalize!
-        img = Magick::Image.from_blob(blob) { 
+        wmf = File.join ODDB.config.var, path("%s.wmf" % digest)
+        FileUtils.mkdir_p File.dirname wmf
+        File.open(wmf, 'w') { |fh| fh.puts blob }
+        img = Magick::Image.read(wmf) { 
           self.density = "720x720"
         }.first
         geom = sprintf("%ix%i!", 
@@ -33,15 +41,16 @@ module ODDB
           self.format = 'PNG' 
         }
         replace png.unpack('H*').first
+        path = File.join ODDB.config.var, path("%s.png" % digest)
+        File.open(path, 'w') { |fh| fh.puts to_png }
       end
       def filename
-        @filename ||= "%s.png" % Digest::MD5.hexdigest(self)
+        @filename ||= "%s.png" % digest
       end
       def image
         Magick::Image.from_blob(blob).first
       end
-      def path
-        fn = filename
+      def path(fn = filename)
         File.join('/images', fn[0,2], fn)
       end
       def set_format(*ignore)

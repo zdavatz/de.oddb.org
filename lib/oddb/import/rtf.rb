@@ -365,11 +365,6 @@ class Rtf
     when Text::Picture
       unless ignore? || @buffer.empty?
         @buffer.finalize!
-        path = File.join(ODDB.config.var, @buffer.path)
-        FileUtils.mkdir_p(File.dirname(path))
-        File.open(path, 'w') { |fh|
-          fh.puts @buffer.to_png
-        }
         current_chapter.add_paragraph @buffer
       end
     end
