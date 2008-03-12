@@ -95,7 +95,9 @@ class Result < Drugs::Global
     limit = @session.pagelength
     atcs.sort.each { |code, array|
       count += array.size
-      if(count > limit)
+      ## count > array.size: very large atc-classes may instantly get the count 
+      #                      to be > limit
+      if(count > array.size && count > limit)
         @model.next_page!
         count = array.size
       end
