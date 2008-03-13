@@ -216,6 +216,10 @@ class Rtf
     end until type == 'eof'
     @document
   end
+  def align(align)
+    current_group.push align
+    @buffer.align = align
+  end
   def current_chapter
     @document.chapters.last
   end
@@ -240,7 +244,7 @@ class Rtf
          '\header', '\\headerr', '\footer', '\\footerf', '\\footerr',
          '\\deleted'
       current_group.push :ignore
-    when '\\b', '\\i', '\\sub', '\\super', '\\v'
+    when '\\b', '\\i', '\\sub', '\\v'
       if(extra == '0')
         current_group.delete(value[1..-1])
       else
@@ -281,19 +285,35 @@ class Rtf
       @buffer = Text::Picture.new
     when '\\pich'
       @buffer.height = extra.to_i
+    when '\\pichgoal'
+      @buffer.height_goal = extra.to_i
     when '\\picw'
       @buffer.width = extra.to_i
+    when '\\picwgoal'
+      @buffer.width_goal = extra.to_i
     when '\\picscalex'
       @buffer.xscale = extra.to_i
     when '\\picscaley'
       @buffer.yscale = extra.to_i
     when '\\plain'
       current_group.delete_if { |item| item.is_a? String }
+    when '\\qc'
+      align :center
+    when '\\qj'
+      align :justify
+    when '\\ql'
+      align :left
+    when '\\qr'
+      align :right
     when '\\row'
       current_table.next_row!
       @table_flag = nil
+    when '\\super'
+      current_group.push 'sup'
     when '\\tab'
       _import_text("\t")
+    when '\\ul'
+      current_group.push "u"
     when '\\up'
       current_group.push "super"
     when '\\wmetafile'
@@ -368,7 +388,9 @@ class Rtf
         current_chapter.add_paragraph @buffer
       end
     end
-    Text::Paragraph.new
+    par = Text::Paragraph.new
+    par.align = (current_group & [:left, :right, :center, :justify]).last
+    par
   end
   def parent_group
     @groups[-2] || []

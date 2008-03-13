@@ -9,6 +9,7 @@ module ODDB
   module Text
     class Paragraph < DelegateClass(String)
       attr_reader :text, :formats
+      attr_accessor :align
       def initialize(str='')
         @formats = []
         @text = u(str.dup)
@@ -36,6 +37,7 @@ module ODDB
       end
       def <<(str)
         if(str.is_a? Paragraph)
+          @align = str.align
           txt = str.text
           str.formats.each { |fmt|
             set_format(*fmt.values)

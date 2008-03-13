@@ -4,11 +4,12 @@
 module ODDB
   module Text
     class Picture < DelegateClass(String)
-      attr_accessor :height, :width, :xscale, :yscale
+      attr_accessor :height, :width, :xscale, :yscale, :height_goal, :width_goal
       TWIP = 20 ## see http://en.wikipedia.org/wiki/Twip
       PCNT = 100 
+      BDNS = 180 ## base density
+      DMAX = 360 ## maximum density
       def initialize
-        @xscale = @yscale = 100
         super('')
       end
       def blob
@@ -20,20 +21,24 @@ module ODDB
       def empty?
         super #|| !image
       rescue StandardError => err
-        puts err.class
-        puts err.message
+        ODDB.logger.error("Text::Picture") { 
+          sprintf "%s: %s", err.class, err.message
+        }
         true
       end
       def finalize!
         wmf = File.join ODDB.config.var, path("%s.wmf" % digest)
         FileUtils.mkdir_p File.dirname(wmf)
         File.open(wmf, 'w') { |fh| fh.puts blob }
+        xdns = [DMAX, BDNS * _xscale / PCNT].min
+        ydns = [DMAX, BDNS * _yscale / PCNT].min
         img = Magick::Image.read(wmf) { 
-          self.density = "720x720"
+          self.density = "#{xdns}x#{ydns}"
         }.first
-        geom = sprintf("%ix%i!", 
-                       (@width || img.columns) / TWIP * @xscale / PCNT, 
-                       (@height || img.rows) / TWIP * @yscale / PCNT)
+        twidth = (@width || img.columns) * _xscale / PCNT
+        theight = (@height || img.rows) * _yscale / PCNT
+
+        geom = sprintf("%ix%i!", twidth / TWIP, theight / TWIP)
         img.change_geometry(geom) { |cols, rows, tmp|
           img.resize!(cols, rows)
         }
@@ -60,6 +65,24 @@ module ODDB
       end
       def to_s
         image.inspect
+      end
+      def _xscale
+        if @xscale
+          @xscale
+        elsif @width && @width_goal
+          PCNT * @width_goal / @width 
+        else
+          PCNT
+        end
+      end
+      def _yscale
+        if @yscale
+          @yscale
+        elsif @height && @height_goal
+          PCNT * @height_goal / @height 
+        else
+          PCNT
+        end
       end
     end
   end

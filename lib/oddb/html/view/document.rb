@@ -36,6 +36,13 @@ class ChapterNames < HtmlGrid::DivList
   end
 end
 class Chapter < HtmlGrid::Component
+  STYLES = {
+    "b"   => ["font-weight", "bold"],
+    "i"   => ["font-style", "italic"],
+    "sub" => ["vertical-align", "sub"],
+    "sup" => ["vertical-align", "sup"],
+    "u"   => ["text-decoration", "underline"],
+  }
   def to_html(context)
     @model.paragraphs.inject('') { |memo, paragraph|
       memo << case paragraph
@@ -66,8 +73,9 @@ class Chapter < HtmlGrid::Component
     if(stack.empty?)
       block.call
     else
-      stack = stack.dup
-      context.send(stack.pop) { formatted_string(context, stack, &block) }
+      styles = stack.inject({}) { |memo, fmt| memo.store(*STYLES[fmt]); memo }
+      args = { :style => styles.collect { |pair| pair.join(":") }.join(";") }
+      context.span(args) { block.call }
     end
   end
   def formatted_table(context, table)
@@ -76,7 +84,11 @@ class Chapter < HtmlGrid::Component
       table.each_normalized { |row|
         memo << context.tr {
           row.inject('') { |tr, cell| 
-            tr << context.td { _formatted_paragraph(context, cell) }
+            args = {}
+            if(align = cell.align)
+              args.store :style, "text-align: #{align}"
+            end
+            tr << context.td(args) { _formatted_paragraph(context, cell) }
           }
         }
       }

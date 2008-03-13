@@ -5,7 +5,7 @@ module ODDB
   module Text
     class Format
       attr_accessor :start, :end, :values
-      VALID_FORMATS = %w{b i sub}
+      VALID_FORMATS = %w{b i sub sup u}
       def initialize(*args)
         @values = []
         augment *args
