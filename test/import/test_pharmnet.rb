@@ -175,7 +175,7 @@ Die bei der kombinierten Einnahme von Selegilinhydrochlorid mit Levodopa enthalt
     assert_equal(expected, chapters.last.to_s)
   end
 end
-class TestFachinfo < Test::Unit::TestCase
+class TestImport < Test::Unit::TestCase
   include FlexMock::TestCase
   def setup
     ODDB.config.var = File.expand_path('var', File.dirname(__FILE__))
@@ -221,6 +221,8 @@ class TestFachinfo < Test::Unit::TestCase
                (@displayfiles ||= []).shift || 'display.html'
              when %r{/amispb/doc}
                '../../rtf/pharmnet/aspirin.rtf'
+             when /display_.*.html/
+               argument
              else
                flunk "encountered unknown path: #{argument}"
              end
@@ -529,6 +531,32 @@ class TestFachinfo < Test::Unit::TestCase
     comparison = ['Ace Hemmer Ratio', 'Tabletten', 'Ratiopharm']
 
     assert_not_nil @importer._suitable_data(data, comparison, 0)
+  end
+  def test_best_data__tramal
+    agent = setup_search "result.html"
+    page = agent.get '/display_tramal.html'
+
+    sequence = flexmock(Drugs::Sequence.new)
+    sequence.should_receive(:name)\
+      .and_return(Util::Multilingual.new(:de => 'Tramal'))
+    company = Business::Company.new
+    company.name.de = 'Gruenenthal GmbH'
+    sequence.should_receive(:company).and_return flexmock(company)
+    galform = Drugs::GalenicForm.new
+    galform.description.de = 'Injektionslösung'
+    sequence.should_receive(:galenic_forms).and_return [flexmock(galform)]
+    substance1 = Drugs::Substance.new
+    substance1.name.de = 'Tramadol'
+    agent1 = Drugs::ActiveAgent.new substance1, 100, 'mg'
+    sequence.should_receive(:active_agents)\
+      .and_return [flexmock(agent1)]
+
+    details = @importer.extract_details page
+    details.store :data, ['Tramal 100 mg', 'Injektionsl?sung', 'Gr?nenthal GmbH']
+    assert_equal details, @importer.best_data(sequence, [details])
+
+    relevance = @importer.composition_relevance([agent1], details)
+    assert 1.25 < relevance, "Relevance #{relevance} should be > 1.25"
   end
 end
 class TestPiParser < Test::Unit::TestCase

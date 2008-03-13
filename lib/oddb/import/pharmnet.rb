@@ -300,7 +300,10 @@ class Import < Import
              end
              ddose / adose
            end rescue 0
-    srel = ngram_similarity(agent.substance.name.de, detail[:substance])
+    ignore = /hydrochlorid/
+    subname = agent.substance.name.de.gsub(ignore, '')
+    detname = detail[:substance].gsub(ignore, '')
+    srel = ngram_similarity(subname, detname)
     drel + srel
   end
   def composition_relevance(agents, data)

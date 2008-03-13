@@ -381,6 +381,12 @@ class Rtf
     @document.add_chapter Text::Chapter.new('default')
   end
   def next_paragraph
+    _next_paragraph
+    par = Text::Paragraph.new
+    par.align = (current_group & [:left, :right, :center, :justify]).last
+    par
+  end
+  def _next_paragraph
     case @buffer
     when Text::Picture
       unless ignore? || @buffer.empty?
@@ -388,9 +394,8 @@ class Rtf
         current_chapter.add_paragraph @buffer
       end
     end
-    par = Text::Paragraph.new
-    par.align = (current_group & [:left, :right, :center, :justify]).last
-    par
+  rescue StandardError => error
+    ODDB.logger.error("RTF") { sprintf "%s: %s", error.class, error.message }
   end
   def parent_group
     @groups[-2] || []

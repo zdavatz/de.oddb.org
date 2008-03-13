@@ -28,7 +28,7 @@ module ODDB
       __odba_save__
       odba_isolated_store
       self.class.connectors.each { |name|
-        if(conn = instance_variable_get(name))
+        if((conn = instance_variable_get(name)) && conn.respond_to?(:odba_store))
           conn.odba_store
         end
       }

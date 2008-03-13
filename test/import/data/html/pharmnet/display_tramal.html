@@ -1,0 +1,634 @@
+<HTML><HEAD><META content="text/html; charset=ISO-8859-1" http-equiv="content-type"><TITLE class="dom_value::getApplicationInfo().getApplicationLongName()">DIMDI SmartSearch</TITLE><META content="0" http-equiv="expires"><META content="" name="description"><META content="" name="keywords"><LINK class="dom_value::getDesignData().getStyleSheet()::href" href="http://gripsdb.dimdi.de:80/websearch/pharmnet_smartsearch.css" rel="stylesheet" type="text/css"><LINK class="dom_relocation" href="/websearch/amisdocumentprint.css" media="print" rel="stylesheet" type="text/css"><LINK class="dom_if::getApplicationInfo().getPharmnetAccess()" href="/websearch/img/pharmnet_favicon.ico" rel="shortcut icon" type="image/ico"><SCRIPT class="dom_relocation" language="javascript" src="/websearch/lib/globals.js" type="text/javascript"></SCRIPT><SCRIPT class="dom_relocation" language="javascript" src="/websearch/lib/senddata.js" type="text/javascript"></SCRIPT><SCRIPT class="dom_relocation" language="javascript" src="/websearch/lib/utilities.js" type="text/javascript"></SCRIPT></HEAD><BODY onload="focus(); initOutputSetSelection(); check();"><DIV class="document dom_position" id="workPanel"><SCRIPT type="text/javascript">        function showDocument(action) {
+            document.showDocForm.action = action;
+            document.showDocForm.submit();
+            return false;
+        }
+
+        self.resizeTo(Math.round(0.75*screen.availWidth), Math.round(0.75*screen.availHeight));
+
+        if (self.opener) {
+            opener.displayWait(false);
+        }
+
+        if (self.t1 != null) clearTimeout(t1);
+        if (self.t2 != null) clearTimeout(t2);
+
+        if (self.killMe != null && self.killMe == true) self.close();
+
+        function linkedSearch(dbid, query, subset, fields, layout, sortCrit, stylesheet, report) {
+            document.linkedSearchForm.dbId.value = dbid;
+            document.linkedSearchForm.query.value = query;
+            document.linkedSearchForm.subset.value = subset;
+            document.linkedSearchForm.reqModifier.value = fields;
+            document.linkedSearchForm.layout.value = layout;
+            document.linkedSearchForm.sortCrit.value = sortCrit;
+            document.linkedSearchForm.stylesheet.value = stylesheet;
+            document.linkedSearchForm.report.value = report;
+            document.linkedSearchForm.submit();
+        }
+
+        function LinkedSearch(dbid, query, subset, fields, layout, sortCrit) {
+            document.linkedSearchForm.dbId.value = dbid;
+            document.linkedSearchForm.query.value = query;
+            document.linkedSearchForm.subset.value = subset;
+            document.linkedSearchForm.reqModifier.value = fields;
+            document.linkedSearchForm.layout.value = layout;
+            document.linkedSearchForm.sortCrit.value = sortCrit;
+            document.linkedSearchForm.submit();
+        }
+
+        function markTitleSeen(dir) {
+            try {
+
+                opener.markTitleSeen(dir == "prev" ?
+                        document.markDoc.documentsView_previousDocId.value :
+                        document.markDoc.documentsView_nextDocId.value);
+            } catch (e) {
+                // tu nix, opener ist wohl nicht mehr da oder nicht in der Titelausgabe
+            }
+        }
+
+        function markBlockTitlesSeen(dir) {
+            var start;
+            var end;
+
+            if (dir == "prev") {
+                end   = parseInt(document.markDoc.documentsView_startItemIndex.value);
+                start = end - parseInt(document.markDoc.documentsView_blockSize.value);
+            } else {
+                start = parseInt(document.markDoc.documentsView_endItemIndex.value) + 1;
+                end   = start + parseInt(document.markDoc.documentsView_blockSize.value);
+            }
+
+            try {
+                for (var i =  start;i <= end; i++) {
+                    opener.markTitleSeen(i);
+                }
+            } catch (e) {
+                // tu nix, opener ist wohl nicht mehr da oder nicht in der Titelausgabe
+            }
+        }
+
+        // �berpr�ft, ob es eingeblendete Divs mit dem gegebenen Namen gibt
+        function visibleDivExists(name) {
+            var idKeyedDiv = document.getElementsByName(name)[0];
+            if ((idKeyedDiv != null) &&
+                (idKeyedDiv.style.display=='block')) {
+                // Suche nach einem kind-tag, das nicht div oder a und damit entsprechend des XSL-Aufbaus sichtbar ist
+                for (i=0; i<idKeyedDiv.childNodes.length; i++) {
+                    if ((idKeyedDiv.childNodes[i].tagName != null) &&
+                        (idKeyedDiv.childNodes[i].tagName != 'DIV') &&
+                        (idKeyedDiv.childNodes[i].tagName != 'A')) {
+                        return true;
+                    } else {
+                    }
+                }
+
+                // no visible child found
+                return false;
+            }
+
+           /* var divs = document.getElementsByTagName('DIV');
+            for (var i=0; i<divs.length; i++) {
+                checkAttrib = getNameWithoutOutputsetPostfix(divs[i]);
+                if (checkAttrib != name) {
+                    continue;
+                }
+
+                //alert('type is ' + divs[i].tagName +', childnodes=' + divs[i].childNodes.length);
+                // eventuell ist ein Linebreak im DIV, was ein childnode ist...
+                if ((divs[i].style.display == 'block') && ((divs[i].childNodes.length > 1) || (divs[i].childNodes.length == 1 && divs[i].childNodes[0].nodeType!=3))) {
+                    return true;
+                }
+            }
+            return false;*/
+        }
+
+        // diese Methode liefert das name-Attribut ohne den mit ":" abgetrennten Outputset-Postfix
+        // und funktioniert sowohl f�r IE als auch f�r Firefox!
+        function getNameWithoutOutputsetPostfix(element)
+        {
+            var nameAttribute = '' + element.getAttribute('name');
+            return nameAttribute.split(':')[0];
+        }
+
+        // parent ist das Checkbox-Element oberster Ebene
+        // frm ist das BrowseContentsForm
+        function showChildren(parent,frm)
+        {
+            var checkAttrib;
+            var parentChildrenCount = 0;
+            var parentChildrenCountChecked = 0;
+            var visibleDivFound; // es k�nnen mehrere sichtbare divs vorkommen...
+            var divs = document.getElementsByTagName('DIV');
+
+            // untersuche Kind-Checkboxen
+            for(var i=0;i<frm.elements.length;i++) {
+                var child=frm.elements[i];
+                // Finde alle Checkboxen, die mit der ElternId beginnen
+                if (child.type=='checkbox' && child.id.indexOf(parent.id+'.') == 0) {
+                    parentChildrenCount++;
+                    var childMode = child.checked;
+                    //var childVal = child.value;
+                    var childId = child.id;
+                    // 1) ankreuzen, alle divs anzeigen und merken, dass es ein angekreuztes Child gibt oder
+                    // 2) ausblenden
+
+                    // iteriere �ber s�mtliche passenden divs
+                    visibleDivFound=false;
+                    for (var j=0; j<divs.length; j++) {
+                        checkAttrib = getNameWithoutOutputsetPostfix(divs[j]);
+                        if (checkAttrib != childId) {
+                            continue;
+                        }
+                        if (childMode) {
+                            visibleDivFound=true;
+                            divs[j].style.display = 'block';
+                        } else {
+                            divs[j].style.display = 'none';
+                        }
+                    }
+                    if (visibleDivFound)
+                    {
+                        parentChildrenCountChecked++;
+                    }
+                }
+            }
+
+            /* Setzen der Sichtbarkeit des DIV des Gesamtabschnitts:
+             * verstecken, wenn 1a) Kinder vorhanden aber keins angekreuzt ist oder
+             *                  1b) Keine Kinder vorhanden und die Elterncheckbox nicht angekreuzt ist
+             * sonst anzeigen.
+             */
+            if ((parentChildrenCount > 0 && parentChildrenCountChecked == 0) ||
+                (parentChildrenCount == 0 && !parent.checked))
+            {
+                //document.getElementById(parent.id).style.display = 'none';
+                for (var i=0; i<divs.length; i++) {
+                    checkAttrib = getNameWithoutOutputsetPostfix(divs[i]);
+                    if (checkAttrib == parent.id) {
+                        divs[i].style.display = 'none';
+                    }
+                }
+            } else {
+                //document.getElementById(parent.id).style.display = 'block';
+                for (var i=0; i<divs.length; i++) {
+                    checkAttrib = getNameWithoutOutputsetPostfix(divs[i]);
+                    if (checkAttrib == parent.id) {
+                        divs[i].style.display = 'block';
+                    }
+                }
+            }
+
+            /* Bestimmung der Sichtbarkeit von Punkten, die nicht in der Nav enthalten sind
+             * zeigen, wenn alle Kinder sichtbar sind (Anzahl kann beliebig insb. auch 0 sein)
+             */
+            if (parentChildrenCount == parentChildrenCountChecked) {
+                var nonNavDisplayValue = 'block';
+            } else {
+                var nonNavDisplayValue = 'none';
+            }
+            for (var i=0; i<divs.length; i++) {
+                checkAttrib = getNameWithoutOutputsetPostfix(divs[i]);
+                if (checkAttrib == parent.id+'.0') {
+                    divs[i].style.display = nonNavDisplayValue;
+                }
+            }
+        }
+
+        function initOutputSetSelection() {
+            updateOutputSetPulldown();
+            document.showDocForm.fieldSet.value='init';
+        }
+
+        function updateOutputSetPulldown() {
+            // initialisiert nach dem Laden die Auswahl des OutputSetPulldowns
+            document.browseContentsForm.OutputSetsSelection.value = document.showDocForm.fieldSet.value;
+        }
+
+        function updateOutputSetFormfield() {
+            // initialisiert nach dem Laden die Auswahl des OutputSetPulldowns
+            document.showDocForm.fieldSet.value = document.browseContentsForm.OutputSetsSelection.value;
+        }
+
+        /* diese Methode wechselt die Dokumentansicht in Abh�ngigkeit vom ausgew�hlten Outputset.
+           R�ckgabewert: true, falls die aktuelle Auswahl als sessionauswahl gespeichert werden soll
+                         false, falls dies nicht geschehen soll, weil z.B. ein anderes Outputset angew�hlt wurde. */
+        function check()
+        {
+            var currentOutputSet = document.forms.browseContentsForm.OutputSetsSelection.value;
+            var lastOutputSet = document.forms.showDocForm.fieldSet.value;
+
+            updateOutputSetFormfield();
+
+            // Bemerkung: Beim erstmaligen Laden der Seite wird zuerst der Formularfeldwert in das Pulldown
+            // kopiert und dann das Formularfeld gel�scht, damit das als 'Outputset-Pulldown-Wechsel' gedeutet wird
+            // und dann das jeweilige Start-Outputset geladen wird. Siehe AmisDocumentsFrame.html Body-Onload-Handler
+
+            // 1) Zuerst wird geschaut, ob sich das Outputset-Pulldown ge�ndert hat
+            if ( lastOutputSet != currentOutputSet) {
+                // Lade das neu ausgewaehlte Outputset
+                if (currentOutputSet == 'XMLALL') {
+                    setMaxOutputSet();
+                } else if (currentOutputSet == 'SMIMP' || currentOutputSet == 'SMEXP' || currentOutputSet == 'SMEXPA' || currentOutputSet == 'SMALLO' || currentOutputSet == 'SMSTP') {
+                    if (currentOutputSet == 'SMIMP') {
+                        setNavigationToFieldSet(document.forms.showDocForm.AmisInfo_FieldSetImp.value);
+                    } else if (currentOutputSet == 'SMEXP') {
+                        setNavigationToFieldSet(document.forms.showDocForm.AmisInfo_FieldSetExp.value);
+                    } if (currentOutputSet == 'SMEXPA') {
+                        setNavigationToFieldSet(document.forms.showDocForm.AmisInfo_FieldSetExpa.value);
+                    } else if (currentOutputSet == 'SMALLO') {
+                        setNavigationToFieldSet(document.forms.showDocForm.AmisInfo_FieldSetAllo.value);
+                    } else if (currentOutputSet == 'SMSTP') {
+                        setNavigationToFieldSet(document.forms.showDocForm.AmisInfo_FieldSetStp.value);
+                    }
+                } else if (currentOutputSet == 'OWN') {
+                    setNavigationToFieldSet(document.forms.showDocForm.AmisInfo_FieldSetOwn.value);
+                } else {
+                    alert('Unbekannte Ausgabemenge ' + currentOutputSet + '!');
+                }
+                displaySelectedNavItems(currentOutputSet);
+                setMissingFieldsInNavi();
+                return false;
+            } else {
+                // Das Outputset ist unver�ndert
+                // 1) wechsle manuell zum OWN-OutputSet, Dokumentansicht wird erst nach Reload an die Nav-Auswahl angepasst dargestellt
+                document.browseContentsForm.OutputSetsSelection.value = 'OWN';
+                updateOutputSetFormfield();
+                setMissingFieldsInNavi();
+                // 2) setze einen Request zum speichern als session-Auswahl
+                return true;
+            }
+        }
+
+        // setze alle Checkboxen
+        function setMaxOutputSet() {
+            var frm=document.forms["browseContentsForm"];
+            for(var i=0;i<frm.elements.length;i++) {
+                var element=frm.elements[i];
+                if (element.type=='checkbox') {
+                    element.checked=true;
+                }
+            }
+        }
+
+        /* diese Methode schaltet die Sichtbarkeit von DIV-Bl�cken, die exklusiv bei bestimmten
+         * OutputSets sichtbar sein sollen. Diese m�ssen im 'name' den String ":<Setname>" haben.
+         */
+        function toggleOutputSetExclusiveFields(fieldset) {
+            var divs = document.getElementsByTagName('DIV');
+            var nameAttribute;
+            for (var i=0; i<divs.length; i++) {
+                nameAttribute = '' + divs[i].getAttribute('name');
+                if (nameAttribute.indexOf(':') != -1)
+                {
+                    nameAttribute = ','+nameAttribute.split(':')[1] + ',';
+                } else {
+                    continue;
+                }
+
+                // Anzeige, wenn Angabe f�r exclusives oder nicht-exclusives Outputset gefunden wird.
+                if ((nameAttribute.indexOf(',' + fieldset + ',') != -1) || (nameAttribute.indexOf(',ADD_' + fieldset + ',') != -1))
+                {
+                    divs[i].style.display = 'block';
+                    continue;
+                }
+
+                // Anzeige, wenn ein NOT_ enthalten ist, das aber nicht das aktuelle Outputset ist
+                if ((nameAttribute.indexOf(',NOT_') != -1) && (nameAttribute.indexOf(',NOT_' + fieldset) == -1))
+                {
+                    divs[i].style.display = 'block';
+                    continue;
+                }
+
+                // Verstecke DIV, wenn nur exclusive Angaben (d.h. keine mit 'add') gefunden wurden oder das aktuelle
+                // Outputset explizit ausgeschlossen wurde
+                if ((nameAttribute.indexOf(',ADD_') == -1) || (nameAttribute.indexOf(',NOT_' + fieldset + ',') != -1)) {
+                    divs[i].style.display = 'none';
+                }
+            }
+        }
+
+        function setNavigationToFieldSet(setFields)
+        {
+            setFields=',' + setFields + ','; // umgebe felder mit kommas fuer spaetere suche
+            var navForm=document.forms.browseContentsForm;
+            var element;
+            var checkboxFields;
+            var allFieldsPresent;
+            var fieldIndex;
+            // iteriere �ber alle Checkboxen und pruefe, ob alle im value enthaltene Felder im outputset sind, falls ja ankreuzen
+            for(var i=0;i<navForm.elements.length;i++) {
+                element=navForm.elements[i];
+                if (element.type=='checkbox') {
+                    checkboxFields = new Array(element.value.split());
+                    allFieldsPresent=true;
+                    for (fieldIndex=0; fieldIndex < checkboxFields.length; fieldIndex++) {
+                        if (setFields.indexOf(',' + checkboxFields[fieldIndex] + ',') == -1) {
+                            allFieldsPresent=false;
+                            break;
+                        }
+                    }
+
+                    if (allFieldsPresent) {
+                        element.checked=true;
+                    } else {
+                        element.checked=false;
+                    }
+                }
+            }
+        }
+
+        function displaySelectedNavItems(currentOutputSet)
+        {
+            var frm=document.forms["browseContentsForm"];
+            for(var i=0;i<frm.elements.length;i++) {
+                var element=frm.elements[i];
+                // iteriere �ber die oberste Ebene, falls ein Haupt-Div mit id gefunden wird (letzteres sollte immer der Fall sein)
+                if (element.type=='checkbox' && element.id.indexOf('.') == -1 && document.getElementsByName(element.id)[0] != null) {
+                    showChildren(element,frm);
+                }
+            }
+            toggleOutputSetExclusiveFields(currentOutputSet);
+        }
+
+        function showHideHelp(id)
+        {
+            blockid = "FachGebrauchsInfo" + id;
+            buttonid = "helpButton" + id;
+            if (document.getElementById(blockid).style.display == 'block'){
+                document.getElementById(buttonid).innerHTML="+ Fach-/Gebrauchsinformationen";
+                document.getElementById(blockid).style.display = 'none';
+            }
+            else {
+                document.getElementById(buttonid).innerHTML="- Fach-/Gebrauchsinformationen";
+                document.getElementById(blockid).style.display = 'block';
+            }
+        }
+
+        function showHideHelp(id, buttontext)
+        {
+            blockid = "block_" + id;
+            if (document.getElementById(blockid).style.display == 'block') {
+                document.getElementById(id).innerHTML="+ " + buttontext;
+                document.getElementById(blockid).style.display = 'none';
+            } else {
+                document.getElementById(id).innerHTML="- " + buttontext;
+                document.getElementById(blockid).style.display = 'block';
+            }
+        }
+
+        function showHidePIV(id)
+        {
+            blockid = "Parallelimporte" + id;
+            buttonid = "parallelimporteButton" + id;
+            if (document.getElementById(blockid).style.display == 'block'){
+                document.getElementById(buttonid).innerHTML="+ Parallelimporte";
+                document.getElementById(blockid).style.display = 'none';
+            }
+            else {
+                document.getElementById(buttonid).innerHTML="- Parallelimporte";
+                document.getElementById(blockid).style.display = 'block';
+            }
+        }
+
+        function showHidePIS(id){
+            blockid = "OriginalAM" + id;
+            buttonid = "originalAMButton" + id;
+            if (document.getElementById(blockid).style.display == 'block'){
+               document.getElementById(buttonid).innerHTML="+ OriginalAM";
+               document.getElementById(blockid).style.display = 'none';
+            }
+            else {
+               document.getElementById(buttonid).innerHTML="- OriginalAM";
+               document.getElementById(blockid).style.display = 'block';
+            }
+        }
+
+        function setMissingFieldsInNavi()
+        {
+            var frm=document.forms["browseContentsForm"];
+            for(var i=0;i<frm.elements.length;i++) {
+                var element=frm.elements[i];
+                if (element.type=='checkbox') {
+                    if (!visibleDivExists(element.id)){
+                        element.parentNode.parentNode.lastChild.firstChild.className='wbinactivetxtlink';
+                        element.parentNode.parentNode.lastChild.firstChild.firstChild.style["color"]="#D3D3D3";
+                    } else {
+                        element.parentNode.parentNode.lastChild.firstChild.className='wbtxtlink';
+                        element.parentNode.parentNode.lastChild.firstChild.firstChild.style["color"]="#FFFFFF";
+                    }
+                }
+            }
+        }
+
+        </SCRIPT><FORM action="" method="POST" name="nextForm"><INPUT name="_changebranch" type="hidden" value="false"> <INPUT name="uid" type="hidden" value=""> <INPUT name="browse" type="hidden" value=""> <INPUT class="dom_value::getDocumentsView().getShowParinfoAsString()" name="parinfo" type="hidden" value="true"> <!-- outputset darf hier nicht applicationInfo_documentsOutputSets heissen, weil sonst der Paramlistener
+                 DocumentsView anspringt und docId auf 0 zuruechsetzt. Auch ein Mitgeben von docId geht nicht, weil
+                 damit zwischen Einzel- und Mehrdokumentausgabe unterschieden wird und der DocumentsStep
+                 eine Einzeldokumentausgabe ausl�st --> <INPUT class="dom_item::getDocumentsView().getDocId()" name="docId" type="hidden" value="1"> <INPUT name="outputset" type="hidden" value=""><INPUT name="magicrequestid" type="hidden" value=""><INPUT name="stationid" type="hidden" value="AmisDocuments"><INPUT name="_stationbranch" type="hidden" value="true"></FORM><FORM action="" method="POST" name="nextBlock"><INPUT name="_changebranch" type="hidden" value="false"> <INPUT name="uid" type="hidden" value=""> <INPUT name="browse" type="hidden" value=""> <INPUT name="docId" type="hidden" value=""> <INPUT name="outputset" type="hidden" value=""><INPUT name="magicrequestid" type="hidden" value=""><INPUT name="stationid" type="hidden" value="AmisDocuments"><INPUT name="_stationbranch" type="hidden" value="true"></FORM><FORM action="/websearch/servlet/FlowController/ShowDocsAtOnce-perform?_changebranch=true" class="dom_action" method="POST" name="linkedSearchForm" target="_linkedSearch"><INPUT name="uid" type="hidden" value="000002"><INPUT name="_changebranch" type="hidden" value="false"> <INPUT name="dbId" type="hidden" value=""> <INPUT name="query" type="hidden" value=""> <INPUT name="subset" type="hidden" value="1"> <INPUT name="reqModifier" type="hidden" value=""> <INPUT name="layout" type="hidden" value=""> <INPUT name="sortCrit" type="hidden" value=""> <INPUT name="sortOrder" type="hidden" value="CBI_ASCENDING"> <INPUT name="stylesheet" type="hidden" value=""> <INPUT name="report" type="hidden" value=""><INPUT name="magicrequestid" type="hidden" value=""><INPUT name="stationid" type="hidden" value="AmisDocuments"><INPUT name="_stationbranch" type="hidden" value="true"></FORM><FORM action="" method="POST" name="showDocForm"><INPUT class="dom_value::getSearchResults().getCurrentResultForDocView().getId()" name="searchResults_currentResultForDocView_id" type="hidden" value="2"> <INPUT class="dom_value::getSearchResults().getCurrentResultForDocView().getQuery().getString()" name="searchResults_currentResultForDocView_query_string" type="hidden" value="(AM=&quot;Tramal&quot;?) AND WFTYP=(LABPAL;PAL;PALDE;SPCDE;SPCEN;SPCPAL)"> <INPUT class="dom_value::getAmisInfo().getLastFieldSet()" name="fieldSet" type="hidden" value="CBI_FULL"> <INPUT class="dom_value::getAmisInfo().getAmisBrowseContentsInfo().getFieldSetImp()" name="AmisInfo_FieldSetImp" type="hidden" value=""> <INPUT class="dom_value::getAmisInfo().getAmisBrowseContentsInfo().getFieldSetExp()" name="AmisInfo_FieldSetExp" type="hidden" value=""> <INPUT class="dom_value::getAmisInfo().getAmisBrowseContentsInfo().getFieldSetExpa()" name="AmisInfo_FieldSetExpa" type="hidden" value=""> <INPUT class="dom_value::getAmisInfo().getAmisBrowseContentsInfo().getFieldSetAllo()" name="AmisInfo_FieldSetAllo" type="hidden" value=""> <INPUT class="dom_value::getAmisInfo().getAmisBrowseContentsInfo().getFieldSetStp()" name="AmisInfo_FieldSetStp" type="hidden" value=""> <INPUT class="dom_value::getAmisInfo().getAmisBrowseContentsInfo().getFieldSetOwn()" name="AmisInfo_FieldSetOwn" type="hidden" value="ENR,AM,DFG,ZGCTXT,TTI.TINR,TTI.TI,WZFT,TWTZ,ENR,AM,DFG,ZGCTXT,TTI.TINR,TTI.TI,ANWG,TIND.INDNR,TIND.IND,ANWG,TIND.INDNR,TIND.IND,AMRUHT,AMRUHTBIS,ZU,SZTXT,BDZUL,BARTCODE,BARTTXT,ZNR,KENNZ,REGNR,PZUDAT,HOMCTXT,ANTCTXT,PHYCTXT,P49CTXT,AMRUHT,AMRUHTBIS,ZU,SZTXT,BDZUL,BARTCODE,BARTTXT,ZNR,KENNZ,REGNR,PZUDAT,HOMCTXT,ANTCTXT,PHYCTXT,P49CTXT,PARCCODE,PARCTXT,PARIMP.WSPENR,PARIMP.WSPBAR,PARIMP.WSPBD,PARIMP.WSPZNR,PARPG.PARENR,PARPG.PARBAR,PARPG.PARBD,PARPG.PARZNR,TPI.PIS,TPI.PIF,TPI.PIBD,TPI.PIZNR,TPI.PIAM,EUZCTXT,EUV,EUZCTXT,EUV,TANTR.PNRANT,TANTR.AMPU.NAAS,TANTR.AMPU.POFAA,TANTR.AMPU.STRA,TANTR.AMPU.KFZA,TANTR.AMPU.PLZA,TANTR.AMPU.ORTA,TANTR.AMPU.BLDA,THERW.PNRHWS,THERW.AMPU.NAHWS,THERW.AMPU.POFAHW,THERW.AMPU.STRHW,THERW.AMPU.KFZHW,THERW.AMPU.PLZHW,THERW.AMPU.ORTHW,THERW.AMPU.BLDHW,THER.PNRHER,THER.AMPU.NAHS,THER.AMPU.POFAH,THER.AMPU.STRH,THER.AMPU.KFZH,THER.AMPU.PLZH,THER.AMPU.ORTH,THER.AMPU.BLDH,THERS.PNRHSO,THERS.AMPU.NAHSS,THERS.AMPU.POFAHS,THERS.AMPU.STRHS,THERS.AMPU.KFZHS,THERS.AMPU.PLZHS,THERS.AMPU.ORTHS,THERS.AMPU.BLDHS,TVERTR.PNRVER,TVERTR.AMPU.NAVS,TVERTR.AMPU.POFAV,TVERTR.AMPU.STRV,TVERTR.AMPU.KFZV,TVERTR.AMPU.PLZV,TVERTR.AMPU.ORTV,TVERTR.AMPU.BLDV,TANTR.PNRANT,TANTR.AMPU.NAAS,TANTR.AMPU.POFAA,TANTR.AMPU.STRA,TANTR.AMPU.KFZA,TANTR.AMPU.PLZA,TANTR.AMPU.ORTA,TANTR.AMPU.BLDA,THERW.PNRHWS,THERW.AMPU.NAHWS,THERW.AMPU.POFAHW,THERW.AMPU.STRHW,THERW.AMPU.KFZHW,THERW.AMPU.PLZHW,THERW.AMPU.ORTHW,THERW.AMPU.BLDHW,THER.PNRHER,THER.AMPU.NAHS,THER.AMPU.POFAH,THER.AMPU.STRH,THER.AMPU.KFZH,THER.AMPU.PLZH,THER.AMPU.ORTH,THER.AMPU.BLDH,THERS.PNRHSO,THERS.AMPU.NAHSS,THERS.AMPU.POFAHS,THERS.AMPU.STRHS,THERS.AMPU.KFZHS,THERS.AMPU.PLZHS,THERS.AMPU.ORTHS,THERS.AMPU.BLDHS,TVERTR.PNRVER,TVERTR.AMPU.NAVS,TVERTR.AMPU.POFAV,TVERTR.AMPU.STRV,TVERTR.AMPU.KFZV,TVERTR.AMPU.PLZV,TVERTR.AMPU.ORTV,TVERTR.AMPU.BLDV,TTEIL.LNRTEIL,TTEIL.TBEZ,TTEIL.TDF,TTEIL.TAA.AA,TTEIL.BMFT,TTEIL.BMMEN,TTEIL.BMMA,TTEIL.TAWB.STFNRAWB,TTEIL.TAWB.STFAWB,TTEIL.TAWB.BEMAS83AWB,TTEIL.TAWB.STMEAWB,TTEIL.TAWB.STMAAWB,TTEIL.TWB.STFNRWB,TTEIL.TWB.STFWB,TTEIL.TWB.BEMAS83WB,TTEIL.TWB.STMEWB,TTEIL.TWB.STMAWB,TTEIL.THILF.STFNRHILF,TTEIL.THILF.STFHILF,TTEIL.THILF.BEMAS83HILF,TTEIL.THILF.STORTHILF,TTEIL.THILF.STBEMHILF,TTEIL.TAWB.STFNRAWB,TTEIL.TAWB.STFAWB,TTEIL.TAWB.BEMAS83AWB,TTEIL.TAWB.STMEAWB,TTEIL.TAWB.STMAAWB,TTEIL.TWB.STFNRWB,TTEIL.TWB.STFWB,TTEIL.TWB.BEMAS83WB,TTEIL.TWB.STMEWB,TTEIL.TWB.STMAWB,TTEIL.THILF.STFNRHILF,TTEIL.THILF.STFHILF,TTEIL.THILF.BEMAS83HILF,TTEIL.THILF.STORTHILF,TTEIL.THILF.STBEMHILF,VKG,DAUWG,DAUEG,TPACK.PACK,TPACK.PAEIN,TPACK.PAVK,TPACK.PADAUW,TPACK.PADAUE,TPACK.PABESO,"><INPUT name="magicrequestid" type="hidden" value=""><INPUT name="stationid" type="hidden" value="AmisDocuments"><INPUT name="_stationbranch" type="hidden" value="true"></FORM><FORM action="" method="POST" name="markDoc"><INPUT name="_changebranch" type="hidden" value="false"> <INPUT class="dom_item::getDocumentsView().getPreviousDocId()" name="documentsView_previousDocId" type="hidden" value="0"> <INPUT class="dom_item::getDocumentsView().getNextDocId()" name="documentsView_nextDocId" type="hidden" value="2"> <INPUT class="dom_value::getDocumentsView().getStartItemIndex()" name="documentsView_startItemIndex" type="hidden" value="0"> <INPUT class="dom_value::getDocumentsView().getEndItemIndex()" name="documentsView_endItemIndex" type="hidden" value="9"> <INPUT class="dom_value::getDocumentsView().getBlockSize()" name="documentsView_blockSize" type="hidden" value="10"><INPUT name="magicrequestid" type="hidden" value=""><INPUT name="stationid" type="hidden" value="AmisDocuments"><INPUT name="_stationbranch" type="hidden" value="true"></FORM><TABLE border="0" cellpadding="0" cellspacing="0" style="border-right: 1px solid #999999; width: 100%;" summary=""><TR class="noprint" style="padding:3px"><TD colspan="2" style="border-bottom: 1px solid #999999"><TABLE cellspacing="4" summary="" width="100%"><TR><TD align="right" colspan="2"><FORM><SPAN style="width:100%;text-align:right;"><A class="wbstdbutton dom_translate::documentPrintRaquo" href="JavaScript: window.print();">&raquo; Dokument drucken &raquo;</A> <SPAN class="dom_if::getAmisInfo().getOneDocOutput()"><A class="wbstdbuttoninactive dom_inactive::getDocumentsView().getHasNoListPreviousDocId() dom_value::getDocumentsView().getPreviousDocId() dom_translate::prevDocRaquo" name="documentsView_previousDocId">&raquo; vorheriges Dokument &raquo;</A> <A class="wbstdbutton dom_inactive::getDocumentsView().getHasNoListNextDocId() dom_translate::nextDocRaquo dom_action" href="/websearch/servlet/FlowController/Documents-display?uid=000002&amp;browse=next" onclick="document.forms.nextForm.outputset.value=document.forms.showDocForm.fieldSet.value; return fireForm( window.document.nextForm, this.href);">&raquo; n&auml;chstes Dokument &raquo;</A></SPAN>  <A class="wbstdbutton dom_translate::closeWindowRaquo" href="JavaScript: window.close()">&raquo; Fenster schlie&szlig;en &raquo;</A></SPAN><INPUT name="magicrequestid" type="hidden" value=""><INPUT name="stationid" type="hidden" value="AmisDocuments"><INPUT name="_stationbranch" type="hidden" value="true"></FORM></TD></TR></TABLE></TD></TR><TR><TD align="left" class="wbtxt" colspan="1" id="rechts" style="padding:0px 0px 0px 0px;border-left:1px solid #999999;width:70%" valign="top"><DIV class="dom_position" id="document" style="width:100%"><DIV class="dom_cdatavalue::getDocumentsView().getDocuments().getDocBody()" name="document"><DIV id="contentFrame" xmlns:DIMDI="http://www.dimdi.de/database">
+<TABLE border="0" cellpadding="0" cellspacing="0" style="padding:10px 10px 0px 10px;" width="100%">
+<TR class="noprint">
+<TD valign="top"><A class="wbstdbutton dom_translate::fachgebrauchsinfos" id="fgis" onclick="showHideHelp('fgis', 'Fach-/Gebrauchsinformationen')" style="white-space:nowrap" title="Fach-/Gebrauchsinformationen">+ Fach-/Gebrauchsinformationen</A></TD><TD valign="top"><A class="wbstdbuttoninactive" style="white-space:nowrap" title="&Ouml;ff. Beurteilungsbericht">
+                    &Ouml;ff. Beurteilungsbericht
+                  </A></TD><TD valign="top"><A class="wbstdbuttoninactive" style="white-space:nowrap" title="Pub. Assessment Report">
+                    Pub. Assessment Report
+                  </A></TD>
+</TR>
+<TR class="noprint">
+<TD colspan="1" valign="top">
+<DIV id="block_fgis" style="display:none">
+<SPAN class="wbtxt" style="white-space:nowrap"><A class="wbtxtlink" href="/amispb/doc/2101118-20040917/OBFM3143D7AA01C49A24.rtf" target="new">16.07.2004
+                      &nbsp;
+                      
+                      Gebrauchsinformation (deutsch)</A></SPAN>
+<BR>
+<SPAN class="wbtxt" style="white-space:nowrap"><A class="wbtxtlink" href="/amispb/doc/2007/12/04/2101118/OBFM37AE970401C7E5F7.rtf" target="new">23.08.2007
+                      &nbsp;
+                      
+                      Gebrauchsinformation (deutsch)</A></SPAN>
+<BR>
+<SPAN class="wbtxt" style="white-space:nowrap"><A class="wbtxtlink" href="/amispb/doc/2007/12/04/2101118/OBFM3806F3E501C7E5F7.rtf" target="new">23.08.2007
+                      &nbsp;
+                      
+                      Fachinformation (deutsch)</A></SPAN>
+<BR>
+</DIV>
+            &nbsp;
+          </TD><TD colspan="1" valign="top">
+<DIV id="block_parde" style="display:none"></DIV>
+            &nbsp;
+          </TD><TD colspan="1" valign="top">
+<DIV id="block_paren" style="display:none"></DIV>
+            &nbsp;
+          </TD>
+</TR>
+</TABLE>
+<TABLE border="0" cellpadding="0" cellspacing="0" style="padding:10px 10px 0px 10px;" width="100%">
+<TR>
+<TD class="wbtxt">2/1 von 16&nbsp;
+				DIMDI: AMIS-&Ouml;ffentlicher Teil (AJ29) &copy;
+				BfArM</TD>
+</TR>
+<BR>
+<TR>
+<TD class="wbsectiontitlebar">Tramal 100 mg;
+				Injektionsl&ouml;sung;
+				Gr&uuml;nenthal GmbH</TD>
+</TR>
+<TR>
+<TD class="wbsectionsubtitlebar">
+          Weitergehende Zulassungsinformationen zu diesem Arzneimittel k&ouml;nnen Sie auch unkompliziert mit Ihrer Kreditkarte kaufen!
+        </TD>
+</TR>
+<TR>
+<TD align="left" class="wbtxt" id="rechts" valign="top"><A name="Section1"></A>
+<DIV name="1">
+<H2>Allgemeine Angaben</H2>
+<A name="Section1.1"></A>
+<DIV name="1.1"></DIV>
+<A name="Section1.2"></A>
+<DIV name="1.2">
+<SPAN class="wbtxt"><B>Arzneimittelname:
+											</B></SPAN><SPAN class="wbtxt">Tramal 100 mg</SPAN>
+<BR>
+</DIV>
+<A name="Section1.3"></A>
+<DIV name="1.3">
+<SPAN class="wbtxt"><B>Darreichungsform-Text
+											: </B></SPAN><SPAN class="wbtxt">Injektionsl&ouml;sung</SPAN>
+<BR>
+</DIV>
+<A name="Section1.4"></A>
+<DIV name="1.4"></DIV>
+<A name="Section1.5"></A>
+<DIV name="1.5"></DIV>
+<DIV name="1.0"></DIV>
+</DIV>
+<A name="Section2"></A>
+<DIV name="2">
+<A name="Section2.1"></A>
+<DIV name="2.1"></DIV>
+<A name="Section2.2"></A>
+<DIV name="2.2">
+<TABLE cellpadding="0" cellspacing="0"></TABLE>
+</DIV>
+</DIV>
+<A name="Section3"></A>
+<DIV name="3">
+<H2>Administrative Daten</H2>
+<A name="Section3.1"></A>
+<DIV name="3.1"></DIV>
+<DIV name="3.0">
+<SPAN class="wbtxt"><B>Antragsteller:&nbsp;</B></SPAN><SPAN class="wbtxt"></SPAN> &nbsp;
+								<SPAN class="wbtxt">Gr&uuml;nenthal GmbH</SPAN>
+<BR>
+</DIV>
+<A name="Section3.2"></A>
+<DIV name="3.2"></DIV>
+<A name="Section3.3"></A>
+<DIV name="3.3"></DIV>
+<A name="Section3.4"></A>
+<DIV name="3.4"></DIV>
+<DIV name="3.0"></DIV>
+<A name="Section3.5"></A>
+<DIV name="3.5"></DIV>
+<DIV name="3.0">
+<SPAN class="wbtxt"><B>Verkehrsf&auml;hig
+											: </B></SPAN><SPAN class="wbtxt">ja</SPAN>
+<BR>
+</DIV>
+<A name="Section3.6"></A>
+<DIV name="3.6">
+<SPAN class="wbtxt"><B>Zulassungs-/Reg-Nr.(AMG76)
+											: </B></SPAN><SPAN class="wbtxt">1116.00.02</SPAN>
+<BR>
+</DIV>
+<DIV name="3.0"></DIV>
+<A name="Section3.7"></A>
+<DIV name="3.7"></DIV>
+<DIV name="3.0"></DIV>
+<A name="Section3.8"></A>
+<DIV name="3.8"></DIV>
+<A name="Section3.9"></A>
+<DIV name="3.9"></DIV>
+<A name="Section3.10"></A>
+<DIV name="3.10"></DIV>
+<DIV name="3.0"></DIV>
+<A name="Section3.11"></A>
+<DIV name="3.11"></DIV>
+</DIV>
+<A name="Section4"></A>
+<DIV name="4"></DIV>
+<A name="Section5"></A>
+<DIV name="5">
+<A name="Section5.1"></A>
+<DIV name="5.1"></DIV>
+<A name="Section5.2"></A>
+<DIV name="5.2"></DIV>
+<DIV name="5.0"></DIV>
+</DIV>
+<A name="Section6"></A>
+<DIV name="6">
+<A name="Section6.1"></A>
+<DIV name="6.1"></DIV>
+<DIV name="6.0"></DIV>
+<A name="Section6.2"></A>
+<DIV name="6.2"></DIV>
+<A name="Section6.3"></A>
+<DIV name="6.3"></DIV>
+<A name="Section6.4"></A>
+<DIV name="6.4"></DIV>
+<A name="Section6.5"></A>
+<DIV name="6.5"></DIV>
+</DIV>
+<A name="Section7"></A>
+<DIV name="7">
+<H2>Zusammensetzung</H2>
+<DIV name="7.0"></DIV>
+<DIV name="7.0"></DIV>
+<A name="Section7.1"></A>
+<DIV name="7.1">
+<H3>Arzneilich wirksame Bestandteile</H3>
+<TABLE border="1" cellpadding="2" cellspacing="0">
+<THEAD>
+<TR>
+<TD class="wbtxt" valign="top"><B>ASK-Nr.</B></TD><TD class="wbtxt" valign="top"><B>Stoffname</B></TD><TD class="wbtxt" valign="top"><B>Stoffmenge</B></TD>
+</TR>
+</THEAD>
+<TBODY>
+<TR>
+<TD valign="top"><SPAN class="wbtxt">
+															&nbsp;
+														</SPAN></TD><TD valign="top"><SPAN class="wbtxt">Tramadolhydrochlorid
+															&nbsp;
+														</SPAN></TD><TD valign="top"><SPAN class="wbtxt">100.mg
+															&nbsp;
+														</SPAN></TD>
+</TR>
+</TBODY>
+</TABLE>
+</DIV>
+<DIV name="7.0"></DIV>
+<A name="Section7.2"></A>
+<DIV name="7.2"></DIV>
+<DIV name="7.0"></DIV>
+<A name="Section7.3"></A>
+<DIV name="7.3"></DIV>
+<DIV name="7.0"></DIV>
+<DIV name="7.0"></DIV>
+</DIV>
+<A name="Section8"></A>
+<DIV name="8">
+<TABLE border="1" cellpadding="2" cellspacing="0">
+<THEAD>
+<TR></TR>
+</THEAD>
+</TABLE>
+</DIV>
+</TD>
+</TR>
+<TR>
+<TD colspan="5" height="40" style="margin-bottom:0px;border-bottom:2px solid #999999;">&nbsp;</TD>
+</TR>
+</TABLE>
+</DIV></DIV></DIV><DIV class="noprint" style="margin:4px; text-align:right;"><A class="wbstdbutton dom_translate::closeWindowRaquo" href="JavaScript: window.close()">&raquo; Fenster schlie&szlig;en &raquo;</A></DIV></TD></TR></TABLE></DIV></BODY></HTML>

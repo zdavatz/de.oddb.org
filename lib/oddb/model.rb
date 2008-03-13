@@ -90,13 +90,13 @@ module ODDB
         }
         define_method("add_#{plural.to_s.singular}") { |inst|
           container = self.send(plural)
-          unless(container.include?(inst))
+          unless(container.any? { |other| inst.eql? other })
             container.push(inst) 
           end
           inst
         }
         define_method("remove_#{plural.to_s.singular}") { |inst|
-          self.send(plural).delete(inst)
+          self.send(plural).delete_if { |other| inst.eql? other }
         }
         connectors.push(varname)
         predicates.each { |predicate|

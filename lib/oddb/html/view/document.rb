@@ -37,11 +37,11 @@ class ChapterNames < HtmlGrid::DivList
 end
 class Chapter < HtmlGrid::Component
   STYLES = {
-    "b"   => ["font-weight", "bold"],
-    "i"   => ["font-style", "italic"],
-    "sub" => ["vertical-align", "sub"],
-    "sup" => ["vertical-align", "sup"],
-    "u"   => ["text-decoration", "underline"],
+    "b"   => [["font-weight", "bold"]],
+    "i"   => [["font-style", "italic"]],
+    "sub" => [["vertical-align", "sub"], ["font-size", "smaller"]],
+    "sup" => [["vertical-align", "sup"], ["font-size", "smaller"]],
+    "u"   => [["text-decoration", "underline"]],
   }
   def to_html(context)
     @model.paragraphs.inject('') { |memo, paragraph|
@@ -73,7 +73,10 @@ class Chapter < HtmlGrid::Component
     if(stack.empty?)
       block.call
     else
-      styles = stack.inject({}) { |memo, fmt| memo.store(*STYLES[fmt]); memo }
+      styles = stack.inject({}) { |memo, fmt| 
+        STYLES[fmt].each { |pair| memo.store(*pair) } 
+        memo
+      }
       args = { :style => styles.collect { |pair| pair.join(":") }.join(";") }
       context.span(args) { block.call }
     end
@@ -85,7 +88,7 @@ class Chapter < HtmlGrid::Component
         memo << context.tr {
           row.inject('') { |tr, cell| 
             args = {}
-            if(align = cell.align)
+            if(cell && (align = cell.align))
               args.store :style, "text-align: #{align}"
             end
             tr << context.td(args) { _formatted_paragraph(context, cell) }

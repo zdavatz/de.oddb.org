@@ -22,9 +22,10 @@ module ODDB
         [@substance, @dose] <=> [other.substance, other.dose]
       end
       def ==(other)
-        other && ([@substance, @dose] == [other.substance, other.dose] \
-          || @chemical_equivalence == other \
-          || ((other = other.chemical_equivalence) && self == other)) \
+        other.is_a?(ActiveAgent) \
+          && ([@substance, @dose] == [other.substance, other.dose] \
+              || @chemical_equivalence == other \
+              || ((other = other.chemical_equivalence) && self == other)) \
           || false
       end
     end
