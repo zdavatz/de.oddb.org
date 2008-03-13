@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 # Util::Multilingual -- de.oddb.org -- 04.09.2006 -- hwyss@ywesee.com
 
-require 'oddb/model'
-
 module ODDB
   module Util
     module M10lMethods
@@ -59,34 +57,6 @@ module ODDB
       end
       def all
         super.concat(@synonyms)
-      end
-    end
-    class M10lDocument < Model
-      include M10lMethods
-      connector :canonical
-      attr_reader :previous_sources
-      def initialize(canonical={})
-        super
-        @previous_sources = {}
-      end
-      def add_previous_source(lang, source)
-        sources = (@previous_sources[lang.to_sym] ||= [])
-        sources.push source
-        sources.compact!
-        sources.uniq!
-        sources
-      end
-      def method_missing(meth, *args, &block)
-        case meth.to_s
-        when /^([a-z]{2})=$/
-          lang = $~[1].to_sym
-          if(previous = @canonical[lang])
-            add_previous_source(lang, previous.source)
-          end
-          @canonical.store(lang, args.first)
-        else
-          super(meth, *args, &block)
-        end
       end
     end
   end

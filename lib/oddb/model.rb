@@ -170,4 +170,4 @@ module ODDB
   end
 end
 
-require 'oddb/util/multilingual'
+require 'oddb/util/m10l_document'

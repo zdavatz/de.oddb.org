@@ -18,7 +18,7 @@ require 'oddb/persistence/odba/drugs/substance'
 require 'oddb/persistence/odba/drugs/substance_group'
 require 'oddb/persistence/odba/drugs/unit'
 require 'oddb/persistence/odba/text/document'
-require 'oddb/persistence/odba/util/multilingual'
+require 'oddb/persistence/odba/util/m10l_document'
 
 module ODDB
   module Persistence
