@@ -220,6 +220,7 @@ class Import < Import
 
     term = data[:search_term]
     doc = import_rtf key, agent, url, term, opts
+    doc.date = data[:"date_#{key}"]
     # arbitrary cutoff: fachinfos with less than 5 chapters can't be right...
     if doc.chapters.size > 5
       _assign_info key, doc, sequence, opts
