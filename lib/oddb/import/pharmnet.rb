@@ -662,6 +662,10 @@ class Import < Import
     # assign registration number if really good match
     return if(cutoff < 2) # arbitrary value
     assign_registration sequence, data[:registration]
+  rescue StandardError => error
+    ODDB.logger.error('PharmNet') { error.message }
+    @errors.push [ sequence.name.de, error.message, 
+      error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip ]
   end
   def remove_info(key, sequence, opts)
     info = sequence.send(key)
@@ -770,16 +774,23 @@ class Import < Import
   def _suitable_data(data, comparison, subcount=nil, cutoff=0.25)
     idx = 0
     raw = data[:data].dup
+    comp = comparison.dup
     
-    ptrn = /(#{Regexp.escape(raw[1].to_s).gsub(' ', '|')}|\b\d+\s*m?g)\s*/i
+    ptrn = /(#{Regexp.escape(raw[1].to_s).gsub(' ', '|')}|\b\d+\s*m?g)[\-\s]*/i
     raw[0] = raw[0].gsub(ptrn, '')
+    comp[0] = comp[0].gsub(ptrn, '')
 
     tabl = /([a-z]{4,})tab.*/i
     raw[1] = raw[1].to_s.gsub(tabl, '\1')
-    comparison[1] = comparison[1].to_s.gsub(tabl, '\1')
+    # Import::Csv::ProductInfos passes a comparison without Galenic Form if 
+    #                           no suitable data is found on the first try
+    if comp[1] 
+      comp[1] = comp[1].to_s.gsub(tabl, '\1')
+    end
     dists = raw.collect { |str|
       str = str.to_s
-      other = comparison[idx].to_s
+      othr = comparison[idx]
+      other = othr ? othr.to_s : str
       idx += 1
       relevance = ngram_similarity str.gsub(@stop, ''), other.gsub(@stop, '')
       return if relevance < cutoff

@@ -192,9 +192,9 @@ class TestProductInfos < Test::Unit::TestCase
     package8.save
 
     input = open(@path)
-    @import.import(input, agent)
+    @import.import(input, :import_known => true ,
+                          :import_unknown => true, :agent => agent)
 
-    ## for now, no new packages are created.
     assert_equal 9, Drugs::Package.instances.size
     assert_equal([ package1, package2, package3, package4, package5, 
                    package6, package7, package8], 

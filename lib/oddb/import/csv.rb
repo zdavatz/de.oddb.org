@@ -59,10 +59,14 @@ class ProductInfos < Import
     elsif(/application.zip/.match message.header.content_type('text/plain'))
       path = File.join(ODDB.config.var, 'product_infos.zip')
       File.open(path, 'w') { |fh| fh << message.decode }
-      Zip::ZipFile.foreach(path) { |zh|
-        block.call(zh.get_input_stream) 
-      }       
+      open(path, &block)
     end
+  end
+  def ProductInfos.open(path = File.join(ODDB.config.var, 'product_infos.zip'),
+                        &block)
+    Zip::ZipFile.foreach(path) { |zh|
+      block.call(zh.get_input_stream) 
+    }       
   end
   def initialize
     super
@@ -118,8 +122,13 @@ class ProductInfos < Import
     sequence.save
   end
   def identify_details(result, pzn, name, row)
-    data = @pharmnet.suitable_data([name, cell(row, 5), cell(row, 9)], 
-                                   result, nil, 0.2)
+    compname = name.gsub(/\d+\s*mg.*/, '') << ' ' << cell(row, 3)
+    data = @pharmnet.suitable_data([compname, cell(row, 5), cell(row, 9)], 
+                                   result, nil, 0.12)
+    if(data.empty?)
+      data = @pharmnet.suitable_data([compname, nil, cell(row, 9)], 
+                                     result, nil, 0.12)
+    end
     if data.size > 1
       ODDB.logger.error('ProductInfos') { 
         sprintf("Found %i possible Details for %s (%s):\n%s", data.size, 
@@ -130,15 +139,14 @@ class ProductInfos < Import
       data.first
     end
   end
-  def import(io, agent=nil)
-    @agent = agent
+  def import(io, opts = {:import_unknown => false, :import_known => true})
     skip = @skip_rows
     begin
       CSV::IOReader.new(io, ';').each { |row|
         if(skip > 0)
           skip -= 1
         else
-          import_row(row)
+          import_row(row, opts)
         end
       }
     rescue CSV::IllegalFormatError
@@ -148,18 +156,20 @@ class ProductInfos < Import
     end
     report
   end
-  def import_row(row)
+  def import_row(row, opts = {:import_unknown => false, :import_known => true})
     pzn = u(row.at(0).to_i.to_s)
     name = cell(row, 1).gsub(/[A-Z .&+-]+/) { |part| 
       capitalize_all(part) }
     @count += 1
-    if(package = Drugs::Package.find_by_code(:type    => 'cid',
-                                             :value   => pzn,
-                                             :country => 'DE'))
+    if(opts[:import_known] \
+       && (package = Drugs::Package.find_by_code(:type    => 'cid',
+                                                 :value   => pzn,
+                                                 :country => 'DE')))
       import_known(package, name, row)
-    else
-      @agent ||= WWW::Mechanize.new
-      import_unknown(@agent, pzn, name, row)
+    elsif(opts[:import_unknown] \
+          && (!opts[:pattern] || opts[:pattern].match(name)))
+      opts[:agent] ||= WWW::Mechanize.new
+      import_unknown(opts[:agent], pzn, name, row)
     end
   end
   def import_company(row)

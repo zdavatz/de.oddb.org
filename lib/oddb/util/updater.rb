@@ -36,6 +36,15 @@ module ODDB
           reported_import(Import::Dimdi::ZuzahlungsBefreiung.new, io)
         }
       end
+      def Updater.import_missing(name)
+        importer = Import::Csv::ProductInfos.new
+        Import::Csv::ProductInfos.open { |io|
+          _reported_import(importer) {
+            importer.import(io, :pattern => %r{#{name}}i, :import_known => false,
+                                :import_unknown => true)
+          }
+        }
+      end
       def Updater.import_pharmnet(opts = { :replace => true, 
                                            :reload  => false, 
                                            :remove  => false, 
