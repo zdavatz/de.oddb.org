@@ -275,8 +275,9 @@ class ProductInfos < Import
                                          { :info_unrestricted => true, 
                                            :retries           => 1})
     return unless result
+    result.delete_if { |data| data[:composition].nil? }
     data = identify_details(result, pzn, name, row)
-    return unless data
+    return unless data && data[:composition]
     prodname = data[:data].first
     ODDB.logger.debug('ProductInfos') { 
       sprintf("Creating new Package from\n%s", data.pretty_inspect)
