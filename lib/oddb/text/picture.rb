@@ -30,24 +30,21 @@ module ODDB
         wmf = File.join ODDB.config.var, path("%s.wmf" % digest)
         FileUtils.mkdir_p File.dirname(wmf)
         File.open(wmf, 'w') { |fh| fh.puts blob }
-        xdns = [DMAX, BDNS * _xscale / PCNT].min
-        ydns = [DMAX, BDNS * _yscale / PCNT].min
-        img = Magick::Image.read(wmf) { 
-          self.density = "#{xdns}x#{ydns}"
-        }.first
-        twidth = (@width || img.columns) * _xscale / PCNT
-        theight = (@height || img.rows) * _yscale / PCNT
+
+        twidth = @width ? @width * _xscale / PCNT : @width_goal
+        theight = @height ? @height * _yscale / PCNT : @height_goal
 
         geom = sprintf("%ix%i!", twidth / TWIP, theight / TWIP)
-        img.change_geometry(geom) { |cols, rows, tmp|
-          img.resize!(cols, rows)
-        }
-        png = img.to_blob { 
-          self.format = 'PNG' 
-        }
-        replace png.unpack('H*').first
         path = File.join ODDB.config.var, path("%s.png" % digest)
-        File.open(path, 'w') { |fh| fh.puts to_png }
+        
+        # let imagemagick take care of file-conversion externally
+        out = %x{convert -resize #{geom} #{wmf} #{path}}
+        if $? != 0
+          raise out
+        end
+
+        png = File.read path
+        replace png.unpack('H*').first
       end
       def filename
         @filename ||= "%s.png" % digest
