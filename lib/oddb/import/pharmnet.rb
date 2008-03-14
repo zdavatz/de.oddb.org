@@ -744,7 +744,7 @@ class Import < Import
     div = (page/"div.wbsectionsubtitlebar").last
     if(div.nil?)
       ''
-    elsif(!/Arzneimittelname:\s#{term}\?/i.match(div.inner_text))
+    elsif(!/Arzneimittelname:\s#{Regexp.escape(term)}\?/i.match(div.inner_text))
       div.inner_text[/Arzneimittelname:[^?]+/]
     end
   end
