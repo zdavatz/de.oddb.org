@@ -155,6 +155,12 @@ module ODDB
       def serialize(key)
       end
     end
+    def data_origin(key)
+      data_origins[key]
+    end
+    def data_origins
+      @data_origins ||= {}
+    end
     def delete
       self.class.predicates.each { |predicate|
         predicate.execute(:delete, self)

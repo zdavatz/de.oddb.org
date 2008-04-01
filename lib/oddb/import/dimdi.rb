@@ -259,6 +259,7 @@ module Dimdi
         price = Util::Money.new(amount, type, 'DE')
         package.add_price(price)
       end
+      package.data_origins.store :"price_#{type}", :dimdi
     end
     def import_sequence(row, product, package=nil)
       ## be simplistic here - the input file can not describe

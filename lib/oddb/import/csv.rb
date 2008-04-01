@@ -14,6 +14,7 @@ require 'oddb/drugs/unit'
 require 'oddb/import/import'
 require 'oddb/import/pharmnet'
 require 'oddb/util/code'
+require 'oddb/util/money'
 require 'oddb/config'
 require 'fileutils'
 require 'rmail'
@@ -122,16 +123,16 @@ class ProductInfos < Import
     sequence.save
   end
   def identify_details(result, pzn, name, row)
-    compname = name.gsub(/\d+\s*mg.*/, '') << ' ' << cell(row, 3)
+    compname = name.dup << ' ' << cell(row, 3)
     data = @pharmnet.suitable_data([compname, cell(row, 5), cell(row, 9)], 
-                                   result, nil, 0.12)
+                                   result, :cutoff => 0.12, :keep_dose => true)
     if(data.empty?)
       data = @pharmnet.suitable_data([compname, nil, cell(row, 9)], 
-                                     result, nil, 0.12)
+                                     result, :cutoff => 0.12, :keep_dose => true)
     end
     if data.size > 1
       ODDB.logger.error('ProductInfos') { 
-        sprintf("Found %i possible Details for %s (%s):\n%s", data.size, 
+        sprintf("Error: Found %i possible Details for %s (%s)\n%s", data.size, 
                 name, pzn, data.pretty_inspect)
       }
       nil
@@ -224,6 +225,24 @@ class ProductInfos < Import
       modified = true
       package.add_code Util::Code.new(:prescription, presc, 'DE')
     end
+    amount = cell(row, 6).to_f
+    if(amount > 0)
+      price = package.price(:public)
+      either = false
+      if price.nil?
+        package.add_price Util::Money.new(amount, :public, 'DE')
+        either = true
+      elsif package.data_origin(:price_public) == :csv_product_infos
+        if price != amount
+          price.amount = amount
+          either = true
+        end
+      end
+      if either
+        package.data_origins.store :price_public, :csv_product_infos
+        modified = true
+      end
+    end
     import_dose(row, package) && modified = true
     package.save if(modified)
     import_size(row, package)
@@ -278,7 +297,9 @@ class ProductInfos < Import
     result.delete_if { |data| data[:composition].nil? }
     data = identify_details(result, pzn, name, row)
     return unless data && data[:composition]
-    prodname = data[:data].first
+    prod = cell(row, 1)[/^([A-Z]{2,}\s)+/]
+    comp = cell(row, 9)[/^([\d.]\s|[0-9A-Z])+/]
+    prodname = "#{prod} #{comp}"
     ODDB.logger.debug('ProductInfos') { 
       sprintf("Creating new Package from\n%s", data.pretty_inspect)
     }
