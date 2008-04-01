@@ -532,6 +532,16 @@ class TestImport < Test::Unit::TestCase
 
     assert_not_nil @importer._suitable_data(data, comparison, 0)
   end
+  def test_suitable_data__neupro
+    data = {
+      :data => ["Neupro 4 mg/24 h transdermales Pflaster - OP28", 
+                "transdermales Pflaster", "kohlpharma GmbH"],
+      :composition => []
+    }
+    comparison = ["Neupro  28", nil, "KOHLPHARMA GMBH"]
+
+    assert_not_nil @importer._suitable_data(data, comparison, 0)
+  end
   def test_best_data__tramal
     agent = setup_search "result.html"
     page = agent.get '/display_tramal.html'

@@ -276,7 +276,8 @@ class Import < Import
       (gf = sequence.galenic_forms.first) && gf.description,
       (comp = sequence.company) && comp.name,
     ].collect { |ml| ml ? ml.de : '' }
-    suitable = suitable_data comparison, result, sequence.active_agents.size
+    suitable = suitable_data comparison, result, 
+                             :subcount => sequence.active_agents.size
     max = 0
     relevances = suitable.collect { |data|
       rel = composition_relevance(sequence.active_agents, data)
@@ -582,7 +583,7 @@ class Import < Import
               name, message, line, link
     })
   end
-  def import_rtf(key, agent, url, term, opts = { :replace => false, 
+  def import_rtf(key, agent, url, term, opts = { :reparse => false, 
                                                  :reload  => false})
     pklass = case key
              when :fachinfo
@@ -592,10 +593,14 @@ class Import < Import
              end
     path = File.join @archive, File.basename(url)
     doc = Text::Document.find_by_source(url)
-    if(doc.nil? || (opts[:replace] && !@sources[url]))
+    ODDB.logger.debug('PharmNet') { 
+      sprintf('Comparing %s-sources for %s', key, term) }
+    if(doc.nil? || (opts[:reparse] && !@sources[url]))
       @sources.store url, true 
       io = nil
       if(opts[:reload] || !File.exist?(path))
+        ODDB.logger.debug('PharmNet') { 
+          sprintf('Downloading %s for %s from %s', key, term, url) }
         file = agent.get url
         file.save path
         io = StringIO.new(file.body)
@@ -619,8 +624,8 @@ class Import < Import
     doc
   end
   def ngram_similarity(str1, str2, n=5)
-    str1 = u(str1).downcase.gsub(/[\s,.\-]/, '')
-    str2 = u(str2).downcase.gsub(/[\s,.\-]/, '')
+    str1 = u(str1).downcase.gsub(/[\s,.\-\/]+/, '')
+    str2 = u(str2).downcase.gsub(/[\s,.\-\/]+/, '')
     if(str1.length < str2.length)
       str1, str2 = str2, str1
     end
@@ -646,7 +651,7 @@ class Import < Import
 
     return(reparse_fachinfo agent, sequence) if opts[:reparse]
     return unless sequence.fachinfo.empty? || sequence.patinfo.empty? \
-                    || opts[:replace] || opts[:remove] || opts[:reparse]
+                    || opts[:replace] || opts[:remove]
     data = identify_details(agent, sequence.name.de, sequence, opts)
 
     return(remove_infos sequence, opts) unless data
@@ -687,7 +692,7 @@ class Import < Import
   def reparse_fachinfo(agent, sequence)
     if((info = sequence.fachinfo.de) && (source = info.source) \
        && (doc = import_rtf :fachinfo, agent, source, sequence.name.de,
-                            :replace => true))
+                            :reparse => true))
       @reparsed_fis += 1
       info.chapters.replace doc.chapters
       info.save
@@ -751,17 +756,23 @@ class Import < Import
   def set_fi_only(form, status="YES")
     form.radiobuttons.find { |b| b.name == "WFTYP" && b.value == status }.check
   end
-  def suitable_data(comparison, selection, subcount=nil, cutoff=0.25)
+  def suitable_data(comparison, selection, opts = {})
     max = 0
     sums = []
     preselection = []
+    ODDB.logger.debug('PharmNet') { 
+      "Checking for suitable data in #{selection.size} results" 
+    }
     selection.each_with_index { |data, idx|
-      if(dists = _suitable_data(data, comparison, subcount, cutoff))
+      if(dists = _suitable_data(data, comparison, opts))
         sum = dists.inject { |a,b| a+b }
         max = sum if sum > max
         sums.push sum
         preselection.push data
       end
+    }
+    ODDB.logger.debug('PharmNet') { 
+      "Found a preselection of #{preselection.size} results" 
     }
     result = []
     sums.each_with_index { |sum, idx|
@@ -769,16 +780,23 @@ class Import < Import
         result.push preselection[idx]
       end
     }
+    ODDB.logger.debug('PharmNet') { 
+      "Returning the best #{result.size} results" 
+    }
     result
   end
-  def _suitable_data(data, comparison, subcount=nil, cutoff=0.25)
+  def _suitable_data(data, comparison, opts)
+    opts[:cutoff] ||= 0.25
     idx = 0
     raw = data[:data].dup
     comp = comparison.dup
     
-    ptrn = /(#{Regexp.escape(raw[1].to_s).gsub(' ', '|')}|\b\d+\s*m?g)[\-\s]*/i
-    raw[0] = raw[0].gsub(ptrn, '')
-    comp[0] = comp[0].gsub(ptrn, '')
+    unless(opts[:keep_dose])
+      part = Regexp.escape(raw[1].to_s).gsub('\ ', ')|(')
+      ptrn = /(#{part})|(\b\d+\s*m?g(\s*\/\s*\d+\s*h)?)[\-\s]*/i
+      raw[0] = raw[0].gsub(ptrn, '')
+      comp[0] = comp[0].gsub(ptrn, '')
+    end
 
     tabl = /([a-z]{4,})tab.*/i
     raw[1] = raw[1].to_s.gsub(tabl, '\1')
@@ -792,11 +810,12 @@ class Import < Import
       othr = comparison[idx]
       other = othr ? othr.to_s : str
       idx += 1
+
       relevance = ngram_similarity str.gsub(@stop, ''), other.gsub(@stop, '')
-      return if relevance < cutoff
+      return if relevance < opts[:cutoff]
       relevance
     }
-    if(subcount)
+    if(subcount = opts[:subcount])
       cdist = (comp = data[:composition]) ? (subcount - comp.size).abs : subcount
       dists.push(cdist) unless cdist > 0
     else
