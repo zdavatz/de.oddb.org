@@ -48,6 +48,5 @@ module ODDB
         }
       end
     end
-    serialize :data_origins
   end
 end
