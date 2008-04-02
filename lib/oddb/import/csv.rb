@@ -217,17 +217,17 @@ class ProductInfos < Import
     name = cell(row, 1).gsub(/[A-Z .&+-]+/) { |part| 
       capitalize_all(part) }
     @count += 1
-    if(package = Drugs::Package.find_by_code(:type    => 'cid',
-                                             :value   => pzn,
-                                             :country => 'DE'))
-      if((opts[:import_known] || (opts[:fix_product] && opts[:pattern] \
-                                  && opts[:pattern].match(name))))
-        import_known(package, name, row, opts)
+    if(!opts[:pattern] || opts[:pattern].match(name))
+      if(package = Drugs::Package.find_by_code(:type    => 'cid',
+                                               :value   => pzn,
+                                               :country => 'DE'))
+        if(opts[:import_known] || opts[:fix_product])
+          import_known(package, name, row, opts)
+        end
+      elsif(opts[:import_unknown])
+        opts[:agent] ||= WWW::Mechanize.new
+        import_unknown(opts[:agent], pzn, name, row)
       end
-    elsif(opts[:import_unknown] \
-          && (!opts[:pattern] || opts[:pattern].match(name)))
-      opts[:agent] ||= WWW::Mechanize.new
-      import_unknown(opts[:agent], pzn, name, row)
     end
   end
   def import_company(row)
