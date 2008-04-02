@@ -69,6 +69,12 @@ class ProductInfos < Import
       block.call(zh.get_input_stream) 
     }       
   end
+  def ProductInfos.fix_product(name)
+    self.open { |io|
+      self.new.import(io, :pattern => %r{#{name}}i, :import_known => false,
+                          :import_unknown => false, :fix_product => true)
+    }
+  end
   def initialize
     super
     @count = 0
@@ -122,6 +128,53 @@ class ProductInfos < Import
     create_package(sequence, pzn, name, row)
     sequence.save
   end
+  def fix_product(package, row)
+    product = previous = package.product
+    prodname = product_name(row)
+    if(previous.name.de != prodname)
+      product = Drugs::Product.find_by_name(prodname)
+      if(previous.company.name.de == company_name(row.at(9)))
+        if(product.nil?)
+          previous.name.de = prodname
+          previous.save
+          product = previous
+        else
+          sequence = package.sequence
+          sequence.product = product
+          sequence.save
+          if(previous.sequences.empty?)
+            previous.delete
+          end
+        end
+      else
+        if(product.nil?)
+          @created_products += 1
+          product = Drugs::Product.new
+          product.name.de = prodname
+        end
+        other = package.sequence
+        sequence = product.sequences.find { |seq| seq.comparable?(other) }
+        if(sequence.nil?)
+          sequence = Drugs::Sequence.new
+          other.compositions.each { |comp|
+            composition = Drugs::Composition.new
+            comp.active_agents.each { |act|
+              active_agent = Drugs::ActiveAgent.new(act.substance, act.dose.dup)
+              composition.add_active_agent(active_agent)
+            }
+            composition.galenic_form = comp.galenic_form
+            composition.save
+            sequence.add_composition(composition)
+          }
+          sequence.product = product
+          sequence.save
+        end
+        package.sequence = sequence
+        package.save
+      end
+    end
+    product
+  end
   def identify_details(result, pzn, name, row)
     compname = name.dup << ' ' << cell(row, 3)
     data = @pharmnet.suitable_data([compname, cell(row, 5), cell(row, 9)], 
@@ -140,7 +193,8 @@ class ProductInfos < Import
       data.first
     end
   end
-  def import(io, opts = {:import_unknown => false, :import_known => true})
+  def import(io, opts = {:import_unknown => false, :import_known => true, 
+                         :fix_product => false})
     skip = @skip_rows
     begin
       CSV::IOReader.new(io, ';').each { |row|
@@ -157,16 +211,19 @@ class ProductInfos < Import
     end
     report
   end
-  def import_row(row, opts = {:import_unknown => false, :import_known => true})
+  def import_row(row, opts = {:import_unknown => false, :import_known => true,
+                              :fix_product => false})
     pzn = u(row.at(0).to_i.to_s)
     name = cell(row, 1).gsub(/[A-Z .&+-]+/) { |part| 
       capitalize_all(part) }
     @count += 1
-    if(opts[:import_known] \
-       && (package = Drugs::Package.find_by_code(:type    => 'cid',
-                                                 :value   => pzn,
-                                                 :country => 'DE')))
-      import_known(package, name, row)
+    if(package = Drugs::Package.find_by_code(:type    => 'cid',
+                                             :value   => pzn,
+                                             :country => 'DE'))
+      if((opts[:import_known] || (opts[:fix_product] && opts[:pattern] \
+                                  && opts[:pattern].match(name))))
+        import_known(package, name, row, opts)
+      end
     elsif(opts[:import_unknown] \
           && (!opts[:pattern] || opts[:pattern].match(name)))
       opts[:agent] ||= WWW::Mechanize.new
@@ -208,7 +265,7 @@ class ProductInfos < Import
     end
     galform
   end
-  def import_known(package, name, row)
+  def import_known(package, name, row, opts = {:fix_product => false})
     @found += 1
     modified = false
     if(package.name != name)
@@ -246,7 +303,7 @@ class ProductInfos < Import
     import_dose(row, package) && modified = true
     package.save if(modified)
     import_size(row, package)
-    product = package.product
+    product = opts[:fix_product] ? fix_product(package, row) : package.product
     unless(product.company)
       product.company = import_company(row)
       product.save
@@ -297,9 +354,7 @@ class ProductInfos < Import
     result.delete_if { |data| data[:composition].nil? }
     data = identify_details(result, pzn, name, row)
     return unless data && data[:composition]
-    prod = cell(row, 1)[/^([A-Z]{2,}\s)+/]
-    comp = cell(row, 9)[/^([\d.]\s|[0-9A-Z])+/]
-    prodname = "#{prod} #{comp}"
+    prodname = product_name(row)
     ODDB.logger.debug('ProductInfos') { 
       sprintf("Creating new Package from\n%s", data.pretty_inspect)
     }
@@ -316,6 +371,11 @@ class ProductInfos < Import
     @pharmnet.assign_info(:fachinfo, agent, data, sequence, opts)
     @pharmnet.assign_info(:patinfo, agent, data, sequence, opts)
     sequence.product
+  end
+  def product_name(row)
+    prod = cell(row, 1)[/^([A-Z]{2,}\s)+/]
+    comp = cell(row, 9)[/^([\d.]\s|[0-9A-Z])+/]
+    "#{prod} #{comp}"
   end
   def update_sequence(package, dose)
     sequence = package.sequence
