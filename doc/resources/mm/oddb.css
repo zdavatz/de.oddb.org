@@ -439,7 +439,7 @@ tr.zuzahlungsbefreit.bg, td.zuzahlungsbefreit {
   background-color: #fafc6d;
 }
 .difference, .doses, .price_festbetrag, .price_difference,
-.price_public, .package_infos, .ddd_prices {
+.price_exfactory, .price_public, .package_infos, .ddd_prices {
   text-align: right;
 }
 .code_festbetragsstufe, td.code_zuzahlungsbefreit, 
