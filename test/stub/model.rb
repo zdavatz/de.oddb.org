@@ -64,6 +64,7 @@ module ODDB
         }
       end
     end
+    alias :uid :object_id
   end
   module Business
     class Company < Model

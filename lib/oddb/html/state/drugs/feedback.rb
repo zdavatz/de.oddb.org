@@ -3,6 +3,7 @@
 
 require 'delegate'
 require 'oddb/html/state/global_predefine'
+require 'oddb/html/util/need_all_input'
 require 'oddb/html/view/drugs/feedback'
 require 'oddb/util/feedback'
 
@@ -11,6 +12,7 @@ module ODDB
     module State
       module Drugs
 class Feedback < Global
+  include Util::NeedAllInput
   class Feedbackable < SimpleDelegator
     INDEX_STEP = 10
     attr_accessor :index

@@ -285,7 +285,7 @@ class TestProductInfos < Test::Unit::TestCase
     row = CSV.parse(src, ';').first
     prod = @import.import_unknown(agent, '7448554', 'Aarane', row)
     assert_instance_of Drugs::Product, prod
-    assert_equal "AARANE N", prod.name.de
+    assert_equal "AARANE  SANOFI", prod.name.de
     assert_equal 1, prod.sequences.size
     seq = prod.sequences.first
     assert_instance_of Drugs::Sequence, seq
@@ -335,12 +335,12 @@ class TestProductInfos < Test::Unit::TestCase
     EOS
     row = CSV.parse(src, ';').first
     product = Drugs::Product.new
-    product.name.de = "AARANE N"
+    product.name.de = "AARANE  SANOFI"
     product.save
     prod = @import.import_unknown(agent, '7448554', 'Aarane', row)
     assert_equal product, prod
 
-    assert_equal "AARANE N", prod.name.de
+    assert_equal "AARANE  SANOFI", prod.name.de
     assert_equal 1, prod.sequences.size
     seq = prod.sequences.first
     assert_instance_of Drugs::Sequence, seq
@@ -388,7 +388,7 @@ class TestProductInfos < Test::Unit::TestCase
     EOS
     row = CSV.parse(src, ';').first
     product = Drugs::Product.new
-    product.name.de = "AARANE N"
+    product.name.de = "AARANE  SANOFI"
     sequence = Drugs::Sequence.new
     composition = Drugs::Composition.new
     sub1 = Drugs::Substance.new
@@ -417,7 +417,7 @@ class TestProductInfos < Test::Unit::TestCase
 
     assert_equal product, prod
 
-    assert_equal "AARANE N", prod.name.de
+    assert_equal "AARANE  SANOFI", prod.name.de
     assert_equal 1, prod.sequences.size
     seq = prod.sequences.first
     assert_equal sequence, seq

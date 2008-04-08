@@ -66,6 +66,9 @@ div#chapters div#chapter_ {
   float: none;
   width: 300px;
 }
+div#compositions td td {
+  padding: 0px; 
+}
 div#content {
   overflow: auto;
   width: 100%;
@@ -234,6 +237,12 @@ img {
 }
 input[type=text], input[type=password] {
   width: 160px;
+}
+input.right {
+  text-align: right;
+}
+input.short {
+  width: 80px;
 }
 input.url {
   width: 600px;

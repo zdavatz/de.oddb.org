@@ -101,12 +101,22 @@ class Global < SBSM::State
     end
 =end
   end
+  def product
+    if(uid = @session.user_input(:uid))
+      _product(uid)
+    end
+  end
   def products
     _products(@session.persistent_user_input(:range))
   end
   def remote_infos
     if(id = @session.user_input(:uid))
       _remote_infos(id)
+    end
+  end
+  def sequence
+    if(uid = @session.user_input(:uid))
+      _sequence(uid)
     end
   end
   def navigation

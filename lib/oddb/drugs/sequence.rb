@@ -50,6 +50,9 @@ module ODDB
           comp.include?(substance, dose, unit)
         }
       end
+      def registration
+        code(:registration, 'EU')
+      end
     end
   end
 end

@@ -27,6 +27,9 @@ module ODDB
       def substances
         active_agents.collect { |agent| agent.substance }
       end
+      def to_s(language=:de)
+        active_agents.collect { |agent| agent.to_s(language) }.join(', ')
+      end
       def ==(other)
         other.is_a?(Composition) \
           && @galenic_form == other.galenic_form \

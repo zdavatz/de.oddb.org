@@ -18,6 +18,9 @@ module ODDB
           @dose = Dose.new(dose, unit)
         end
       end
+      def to_s(language=:de)
+        [@substance.name.send(language), @dose].join(' ')
+      end
       def <=>(other)
         [@substance, @dose] <=> [other.substance, other.dose]
       end

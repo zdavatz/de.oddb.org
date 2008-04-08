@@ -34,11 +34,23 @@ module ODDB
       }
       self
     end
+    alias :uid :odba_id
     class << self
       alias :all :odba_extent
       alias :count :odba_count
+      def find_by_uid(uid)
+        obj = ODBA.cache.fetch(uid)
+        obj if(obj.class == self)
+      end
       def serializables
-        @serializables ||= []
+        @serializables ||= _serializables
+      end
+      def _serializables
+        if((kls = ancestors.at(1)) && kls.respond_to?(:serializables))
+          kls.serializables.dup
+        else
+          []
+        end
       end
       def serialize(*keys)
         keys.each { |key|
@@ -48,5 +60,6 @@ module ODDB
         }
       end
     end
+    serialize :data_origins
   end
 end

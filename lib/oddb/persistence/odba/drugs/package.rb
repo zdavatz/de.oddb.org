@@ -16,7 +16,7 @@ module ODDB
       odba_index :substance, :substances, 'name.all', Drugs::Substance
       odba_index :company, :company, 'name.all', Business::Company
       odba_index :product, :product, 'name.all', Drugs::Product
-      serialize :codes, :prices, :data_origins
+      serialize :codes, :prices
     end
   end
 end

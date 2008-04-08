@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 # Html::View::Drugs::Package -- de.oddb.org -- 11.12.2006 -- hwyss@ywesee.com
 
-require 'oddb/html/view/list'
 require 'oddb/html/view/drugs/template'
 require 'oddb/html/view/google'
+require 'oddb/html/view/list'
 require 'oddb/html/view/search'
 require 'oddb/html/view/snapback'
 
@@ -216,12 +216,11 @@ class Part < View::List
     super(model.active_agents, offset)
   end
   def compose_header(offset=[0,0])
-    part = [@model.size, ' ', @model.unit]
+    part = [@model.size.to_i, ' ', @model.unit]
     if(quantity = @model.quantity)
       part.push(' x ', quantity)
     end
     @grid.add(part, *offset)
-    #resolve_offset(offset, [0,1])
     offset
   end
   def substance(model)
@@ -332,15 +331,13 @@ class PackageComposite < HtmlGrid::DivComposite
   CSS_MAP = { 0 => 'before-searchbar', 4 => 'divider' }
   def init
     model.parts.each_with_index { |part, idx|
-      name = "part_#{idx}".to_sym
-      components.store([0,components.size+idx], name)
-      meta_eval { 
-        define_method(name) { |model|
-          Part.new(part, @session, self)
-        }
-      }
+      partline(part, idx)
     }
     super
+  end
+  def breadcrumbs(model)
+    [ @lookandfeel.lookup(:package_details_for, 
+                          model.name.send(@session.language)) ]
   end
   def name(model)
     name = [model.name]
@@ -352,6 +349,18 @@ class PackageComposite < HtmlGrid::DivComposite
   def parts(model)
     key = model.parts.size > 1 ? :parts : :package_and_substances
     @lookandfeel.lookup(key)
+  end
+  def partline(part, idx)
+    name = "part_#{idx}".to_sym
+    components.store([0,components.size+idx], name)
+    meta_eval { 
+      define_method(name) { |model|
+        Part.new(part, @session, self)
+      }
+    }
+  end
+  def snapback(model)
+    [ super, @lookandfeel.lookup(:breadcrumb_divider) ].concat breadcrumbs(model)
   end
 end
 class Package < Template

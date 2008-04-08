@@ -119,6 +119,15 @@ class TestPackage < Test::Unit::TestCase
     user = login_admin
     open "/de/drugs/package/pzn/12345"
     assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", get_title
+    assert is_element_present("name")
+    assert is_element_present("code_cid")
+    assert is_element_present("price_public")
+    assert is_element_present("price_festbetrag")
+    assert is_element_present("code_festbetragsstufe")
+    assert is_element_present("code_festbetragsgruppe")
+    assert is_element_present("code_zuzahlungsbefreit")
+    assert is_element_present("code_prescription")
+=begin
     assert is_element_present("fi_url")
     fachinfo = "A Fachinfo-Document"
     type "fi_url", "http://host.domain/path.rtf"
@@ -129,6 +138,7 @@ class TestPackage < Test::Unit::TestCase
     assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", get_title
     assert is_text_present("FI")
     assert_equal(fachinfo, package.sequence.fachinfo.de)
+=end
   end
   def test_admin_package__not_limited
     ODDB.config.query_limit = 1
@@ -137,7 +147,14 @@ class TestPackage < Test::Unit::TestCase
     2.times {
       open "/de/drugs/package/pzn/12345"
       assert_equal "DE - ODDB.org | Medikamente | Details | Amantadin by Producer | Open Drug Database", get_title
-      assert is_element_present("fi_url")
+      assert is_element_present("name")
+      assert is_element_present("code_cid")
+      assert is_element_present("price_public")
+      assert is_element_present("price_festbetrag")
+      assert is_element_present("code_festbetragsstufe")
+      assert is_element_present("code_festbetragsgruppe")
+      assert is_element_present("code_zuzahlungsbefreit")
+      assert is_element_present("code_prescription")
     }
   ensure
     ODDB.config.query_limit = 20

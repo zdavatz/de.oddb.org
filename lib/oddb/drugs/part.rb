@@ -7,7 +7,7 @@ require 'oddb/drugs/dose'
 module ODDB
   module Drugs
     class Part < Model
-      belongs_to :package
+      belongs_to :package, delegates(:sequence)
       belongs_to :composition, delegates(:active_agents)
       ## A partial package can be described as e.g. 
       #  10 x 5 Ampoules of 20 ml 
@@ -26,7 +26,7 @@ module ODDB
       end
       def size=(size)
         size ||= 1
-        if(size.to_i == size)
+        if(size.to_f == size.to_i.to_f)
           @size = size.to_i
         else
           @size = size.to_f

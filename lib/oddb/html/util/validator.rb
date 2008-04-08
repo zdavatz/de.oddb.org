@@ -7,8 +7,9 @@ module ODDB
   module Html
     module Util
 class Validator < SBSM::Validator
-  BOOLEAN = [ :email_public, :item_good_experience, :item_good_impression, 
-              :item_recommended, :item_helps, ]
+  BOOLEAN = [ :code_prescription, :code_zuzahlungsbefreit, :email_public,
+              :item_good_experience, :item_good_impression, :item_recommended,
+              :item_helps, ]
   ENUMS = {
     :display   => ['paged', 'grouped'],
     :dstype    => ['tradename', 'compare', 'substance', 'company'],
@@ -23,11 +24,17 @@ class Validator < SBSM::Validator
   EVENTS = [ :ajax_autofill, :atc_browser, :collect, :ddd, :explain_ddd_price,
              :explain_price, :fachinfo, :feedback, :checkout, :compare,
              :compare_remote, :home, :login, :login_, :logout, :package,
-             :package_infos, :patinfo, :proceed_poweruser, :products,
-             :remote_infos, :search, :sort, :update ]
-  NUMERIC = [ :days, :offset, :pzn ]
-  STRINGS = [ :captcha, :chapter, :code, :fi_url, :invoice, :message, :name,
-              :name_first, :name_last, :pi_url, :query, :uid ]
+             :package_infos, :patinfo, :proceed_poweruser, :product, :products,
+             :remote_infos, :search, :sequence, :sort, :update ]
+  NUMERIC = [ :code_cid, :code_festbetragsgruppe, :code_festbetragsstufe,
+              :composition, :days, :equivalence_factor, :multi, :offset,
+              :price_festbetrag, :price_public, :pzn, :size ]
+  PATTERNS = {
+    :atc => /[ABCGHJLMNPRSV](\d{2}([A-Z]([A-Z](\d{2})?)?)?)?/,
+  }
+  STRINGS = [ :atc_name, :captcha, :chapter, :code, :company, :dose, :fi_url,
+              :invoice, :message, :name, :name_first, :name_last, :pi_url,
+              :quantity, :query, :registration, :substance, :uid, :unit ]
   def page(value) 
     if(num = validate_numeric(:page, value))
       # pages are 1-based for the human user
