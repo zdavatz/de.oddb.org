@@ -26,6 +26,7 @@ module ODDB
         cname.gsub!(/Gmbh/, 'GmbH')
         cname.gsub!(/Ag\b/, 'AG')
         cname.gsub!(/\bKg\b/, 'KG')
+        cname.strip!
         u(cname)
       end
       def postprocess

@@ -31,9 +31,9 @@ class Product < Global
             end
       unless(set.nil?)
         @model.data_origins.store :company, @session.user.email
+        @model.save
       end
     end
-    @model.save
     self
   end
   def product
