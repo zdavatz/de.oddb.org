@@ -386,8 +386,6 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     assert is_element_present("atc-assign")
     assert is_element_present("atc-assign-toggle")
     assert is_element_present("atc-assign-form")
-    assert !is_visible("atc-assign")
-    click "link=ATC zuweisen"
     assert is_visible("atc-assign")
 
     type "atc-assign", "N04BB01"

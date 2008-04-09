@@ -13,6 +13,7 @@ module ODDB
 module Admin
 	include SBSM::ViralState
   def atc_assign
+    email = @session.user.email
     newstate = search
     code = user_input(:code)
     if(atc = ODDB::Drugs::Atc.find_by_code(code))
@@ -20,6 +21,7 @@ module Admin
       packages.each { |package| 
         if((seq = package.sequence) && seq.atc.nil?)
           seq.atc = atc
+          seq.data_origins[:atc] = email
           seq.save
         end
       }
