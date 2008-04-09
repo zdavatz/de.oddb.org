@@ -4,6 +4,7 @@
 require 'oddb/html/state/drugs/package'
 require 'oddb/html/view/drugs/admin/package'
 require 'oddb/import/pharmnet'
+require 'oddb/util/code'
 
 module ODDB
   module Html
@@ -64,7 +65,7 @@ class Package < Drugs::Package
     if(code = @model.code(type))
       code.value = value unless(code == value)
     else
-      @model.add_code Util::Code.new(type, value, 'DE')
+      @model.add_code ODDB::Util::Code.new(type, value, 'DE')
     end
   end
   def update_parts(input)
