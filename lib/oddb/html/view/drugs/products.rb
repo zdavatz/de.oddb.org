@@ -70,7 +70,8 @@ class ProductsList < View::List
     link = HtmlGrid::Link.new(:product, model, @session, self)
     name = model.name.send(@session.language)
     link.value = name
-    link.href = @lookandfeel._event_url(:search, :query => name)
+    link.href = @lookandfeel._event_url(:search, 
+                                        [:query, name, :dstype, 'tradename'])
     link
   end
   def query_key
