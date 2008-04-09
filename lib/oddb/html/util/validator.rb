@@ -21,11 +21,12 @@ class Validator < SBSM::Validator
       'price_public', 'product', 'size', 
     ],
   }
-  EVENTS = [ :ajax_autofill, :atc_browser, :collect, :ddd, :explain_ddd_price,
-             :explain_price, :fachinfo, :feedback, :checkout, :compare,
-             :compare_remote, :home, :login, :login_, :logout, :package,
-             :package_infos, :patinfo, :proceed_poweruser, :product, :products,
-             :remote_infos, :search, :sequence, :sort, :update ]
+  EVENTS = [ :ajax_autofill, :atc_assign, :atc_browser, :collect, :ddd,
+             :explain_ddd_price, :explain_price, :fachinfo, :feedback,
+             :checkout, :compare, :compare_remote, :home, :login, :login_,
+             :logout, :package, :package_infos, :patinfo, :proceed_poweruser,
+             :product, :products, :remote_infos, :search, :sequence, :sort,
+             :update ]
   NUMERIC = [ :code_cid, :code_festbetragsgruppe, :code_festbetragsstufe,
               :composition, :days, :equivalence_factor, :multi, :offset,
               :price_festbetrag, :price_public, :pzn, :size ]

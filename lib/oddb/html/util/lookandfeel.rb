@@ -19,6 +19,7 @@ class Lookandfeel < SBSM::Lookandfeel
       :administration_P           => 'Parenteral',
       :administration_R           => 'Rektal',
       :atc                        => 'ATC-Code',
+      :atc_assign                 => 'ATC zuweisen',
       :atc_browser                => 'ATC-Browser',
       :atc_name                   => 'ATC-Name',
       :atc_unknown                => 'ATC-Code nicht bekannt',

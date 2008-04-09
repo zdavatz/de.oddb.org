@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 # Selenium::TestSearch -- de.oddb.org -- 21.11.2006 -- hwyss@ywesee.com
 
-
 $: << File.expand_path('..', File.dirname(__FILE__))
 
 require 'selenium/unit'
@@ -348,6 +347,57 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     assert_equal 'DE - ODDB.org | Medikamente | Open Drug Database', 
                  get_title
     assert is_text_present("Abfragebeschränkung")
+  ensure
+    ODDB.config.query_limit = 20
+  end
+  def test_search__admin_not_limited
+    ODDB.config.query_limit = 1
+    package = setup_package
+    user = login_admin
+    2.times {
+      open "/de/drugs/search/query/Amantadin"
+      assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Preisvergleich | Open Drug Database", 
+                   get_title
+    }
+  ensure
+    ODDB.config.query_limit = 20
+  end
+  def test_search__admin_atc
+    package = setup_package
+    package.sequence.atc = nil
+    user = login_admin
+    open "/de/drugs/search/query/Amantadin"
+    assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Preisvergleich | Open Drug Database", 
+                 get_title
+    assert !is_text_present('Amantadin (N04BB01) - 1 Präparate')
+    assert is_element_present("atc-assign")
+    assert is_element_present("atc-assign-toggle")
+    assert is_element_present("atc-assign-form")
+    assert !is_visible("atc-assign")
+    click "link=ATC zuweisen"
+    assert is_visible("atc-assign")
+    
+    type "atc-assign", "N04BB02"
+    submit "atc-assign-form"
+    wait_for_page_to_load "30000"
+
+    assert is_text_present('Der ATC-Code "N04BB02" ist nicht bekannt.')
+    assert !is_text_present('Amantadin (N04BB01) - 1 Präparate')
+    assert is_element_present("atc-assign")
+    assert is_element_present("atc-assign-toggle")
+    assert is_element_present("atc-assign-form")
+    assert !is_visible("atc-assign")
+    click "link=ATC zuweisen"
+    assert is_visible("atc-assign")
+
+    type "atc-assign", "N04BB01"
+    submit "atc-assign-form"
+    wait_for_page_to_load "30000"
+
+    assert is_text_present('Amantadin (N04BB01) - 1 Präparate')
+    assert !is_element_present("atc-assign")
+    assert !is_element_present("atc-assign-toggle")
+    assert !is_element_present("atc-assign-form")
   ensure
     ODDB.config.query_limit = 20
   end

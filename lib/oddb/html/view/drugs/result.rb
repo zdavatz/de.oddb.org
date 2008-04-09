@@ -2,6 +2,8 @@
 # Html::View::Drugs::Result -- de.oddb.org -- 07.11.2006 -- hwyss@ywesee.com
 
 require 'htmlgrid/div'
+require 'htmlgrid/divform'
+require 'htmlgrid/errormessage'
 require 'htmlgrid/span'
 require 'oddb/html/view/google'
 require 'oddb/html/view/list'
@@ -15,6 +17,32 @@ module ODDB
   module Html
     module View
       module Drugs
+class AtcAssign < HtmlGrid::DivForm
+  COMPONENTS = { [0,0,0] => :toggle, [0,0,1] => :atc_assign }
+  EVENT = :atc_assign
+  FORM_ID = 'atc-assign-form'
+  def atc_assign(model)
+    input = HtmlGrid::InputText.new(:code, model, @session, self)
+    style = 'margin-left: 4px;'
+    style << ' display: none;' unless @session.error(:atc_assign)
+    input.set_attribute('style', style)
+    input.css_id = 'atc-assign'
+    input
+  end
+  def hidden_fields(context)
+    %w{query dstype}.inject(super) { |memo, key| 
+      memo << context.hidden(key, @session.persistent_user_input(key))
+    }
+  end
+  def toggle(model)
+    link = HtmlGrid::Link.new(:atc_assign, model, @session, self)
+    unless @session.error(:atc_assign)
+      link.onclick = "dojo.lfx.toggle.fade.show('atc-assign', 500); this.onclick=null;"
+    end
+    link.css_id = 'atc-assign-toggle'
+    link
+  end
+end
 class Pager < HtmlGrid::Div
   CSS_CLASS = 'pager'
   def init
@@ -58,6 +86,10 @@ class Packages < View::List
     description = @lookandfeel.lookup(:atc_unknown)
     parts = []
     atc = model.atc
+    if(atc.nil? \
+       && @session.allowed?('login', ODDB.config.auth_domain + '.Admin'))
+      parts.push AtcAssign.new(atc, @session, self)
+    end
     if(atc)
       description = sprintf("%s (%s)", 
                             atc.name.send(@session.language), atc.code)
@@ -74,6 +106,15 @@ class Packages < View::List
       parts.push Pager.new(@model, @session, self)
     end
     parts.reverse
+  end
+  def atc_assign
+    div = HtmlGrid::DivForm.new(nil, @session, self)
+    div.extend(HtmlGrid::FormMethods)
+    div.value = [
+      @lookandfeel.lookup(:atc_assign),
+      HtmlGrid::Input.new(:atc_assign, nil, @session, self),
+    ]
+    div
   end
   def atc_code(model)
     model ? model.code : 'X'
@@ -212,6 +253,7 @@ class Packages < View::List
   end
 end
 class ResultComposite < HtmlGrid::DivComposite
+  include HtmlGrid::ErrorMessage
   COMPONENTS = {
     [0,0] => :title_found, 
     [0,1] => "explain_compare", 
@@ -222,6 +264,10 @@ class ResultComposite < HtmlGrid::DivComposite
   CSS_ID_MAP = ['result-found', 'explain-compare', 'result-search', 
                 'result-list', 'legend' ]
   CSS_MAP = { 1 => 'before-searchbar', 3 => 'result' }
+  def init
+    super
+    error_message
+  end
   def title_found(model)
     @lookandfeel.lookup(:title_found, @model.query, @model.total)
   end

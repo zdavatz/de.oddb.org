@@ -170,12 +170,12 @@ module Events
   end
   def search
     _search(@session.persistent_user_input(:query),
-            @session.persistent_user_input(:dstype))
+            @session.persistent_user_input(:dstype) || ODDB.config.default_dstype)
   end
   def _search(query, dstype)
     result = Util::AnnotatedList.new
     result.query = query
-    result.dstype = dstype || 'compare'
+    result.dstype = dstype || ODDB.config.default_dstype
     if(query.length < 3)
       result.error = :e_query_short
     else

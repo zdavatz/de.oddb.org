@@ -12,6 +12,23 @@ module ODDB
       module Viral
 module Admin
 	include SBSM::ViralState
+  def atc_assign
+    newstate = search
+    code = user_input(:code)
+    if(atc = ODDB::Drugs::Atc.find_by_code(code))
+      packages = newstate.model.find { |list| list.atc.nil? }
+      packages.each { |package| 
+        if((seq = package.sequence) && seq.atc.nil?)
+          seq.atc = atc
+          seq.save
+        end
+      }
+      packages.atc = atc
+    else
+      @errors.store :atc_assign, create_error(:e_unknown_atc, :atc_assign, code)
+    end
+    newstate
+  end
   def limited?
     false
   end

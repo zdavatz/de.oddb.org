@@ -25,6 +25,7 @@ module ODDB
     'db_backend'          => :psql,
     'debug_recipients'    => [],
     'dojo_debug'          => false,
+    'default_dstype'      => 'compare',
     'export_hour'         => 4,
     'invoice_server'      => 'druby://localhost:12375',
     'pharmacy_percentage' => 3,
