@@ -14,7 +14,7 @@ module ODDB
 class CompositionSelect < HtmlGrid::AbstractSelect
   def selection(context)
     lang = @session.language
-    @selected ||= @model.composition.to_s(lang)
+    @selected ||= (comp = @model.composition) && comp.to_s(lang)
     res = []
     @model.sequence.compositions.each_with_index { |composition, idx|
       comp = composition.to_s(lang)

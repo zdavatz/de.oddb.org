@@ -21,15 +21,16 @@ class Validator < SBSM::Validator
       'price_public', 'product', 'size', 
     ],
   }
-  EVENTS = [ :ajax_autofill, :atc_assign, :atc_browser, :collect, :ddd,
-             :explain_ddd_price, :explain_price, :fachinfo, :feedback,
-             :checkout, :compare, :compare_remote, :home, :login, :login_,
-             :logout, :package, :package_infos, :patinfo, :proceed_poweruser,
-             :product, :products, :remote_infos, :search, :sequence, :sort,
-             :update ]
-  NUMERIC = [ :code_cid, :code_festbetragsgruppe, :code_festbetragsstufe,
-              :composition, :days, :equivalence_factor, :multi, :offset,
-              :price_festbetrag, :price_public, :pzn, :size ]
+  EVENTS = [ :ajax_autofill, :ajax_create_active_agent, :ajax_create_composition,
+             :ajax_delete_active_agent, :ajax_delete_composition, :atc_assign,
+             :atc_browser, :collect, :ddd, :delete, :explain_ddd_price,
+             :explain_price, :fachinfo, :feedback, :checkout, :compare,
+             :compare_remote, :home, :login, :login_, :logout, :new_sequence,
+             :package, :package_infos, :patinfo, :proceed_poweruser, :product,
+             :products, :remote_infos, :search, :sequence, :sort, :update ]
+  NUMERIC = [ :active_agent, :code_cid, :code_festbetragsgruppe,
+              :code_festbetragsstufe, :composition, :days, :equivalence_factor,
+              :multi, :offset, :price_festbetrag, :price_public, :pzn, :size ]
   PATTERNS = {
     :atc => /[ABCGHJLMNPRSV](\d{2}([A-Z]([A-Z](\d{2})?)?)?)?/,
   }

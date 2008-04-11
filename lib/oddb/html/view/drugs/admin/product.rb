@@ -12,10 +12,12 @@ module ODDB
       module Drugs
         module Admin
 class Sequences < View::List
+  include HtmlGrid::FormMethods
   COMPONENTS = {
     [0,0] => :uid,
     [1,0] => :compositions,
   }
+  EVENT = :new_sequence
   OMIT_HEADER = true
   def compositions(model)
     lang = @session.language
@@ -24,6 +26,12 @@ class Sequences < View::List
         [act.substance.name.send(lang), act.dose].join(' ')
       }.join(', ')
     }.join(' + ')
+  end
+  def compose_footer(offset)
+    @grid.add submit(@model), *offset
+  end
+  def hidden_fields(context)
+    super << context.hidden("uid", @container.model.uid)
   end
   def uid(model)
     link = HtmlGrid::Link.new(:uid, model, @session, self)
@@ -50,6 +58,9 @@ class ProductForm < HtmlGrid::Form
   def init
     super
     error_message
+  end
+  def hidden_fields(context)
+    super << context.hidden("uid", @model.uid)
   end
 end
 class ProductComposite < HtmlGrid::DivComposite

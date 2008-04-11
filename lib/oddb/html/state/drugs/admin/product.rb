@@ -11,6 +11,11 @@ module ODDB
         module Admin
 class Product < Global
   VIEW = View::Drugs::Admin::Product
+  def check_model
+    if(@model.uid.to_s != @session.user_input(:uid))
+      @errors.store :uid, create_error(:e_state_expired, :uid, nil)
+    end
+  end
   def direct_event
     direct_event = [:product]
     if(uid = @model.uid)

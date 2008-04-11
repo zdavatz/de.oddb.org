@@ -208,7 +208,19 @@ module Events
   end
 end
 class Global < State::Global
+  class << self
+    def transparent_login(*events)
+      events.each { |event|
+        define_method(event) {
+          state = trigger(:login)
+          state.desired_input = @session.valid_input.dup
+          state
+        }
+      }
+    end
+  end
   include Events
+  transparent_login :_product, :_sequence
 end
       end
     end

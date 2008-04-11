@@ -9,8 +9,80 @@ module ODDB
     module State
       module Drugs
         module Admin
+class AjaxActiveAgents < Global
+  VOLATILE = true
+  VIEW = View::Drugs::Admin::ActiveAgents
+end
+class AjaxCompositions < Global
+  VOLATILE = true
+  VIEW = View::Drugs::Admin::Compositions
+end
 class Sequence < Global
   VIEW = View::Drugs::Admin::Sequence
+  def ajax_create_active_agent
+    check_model
+    keys = [:uid, :composition]
+    input = user_input(keys, keys)
+    agents = []
+    if(!error? \
+       && (composition = @model.compositions.at(input[:composition].to_i)))
+      agents = composition.active_agents
+    end
+    AjaxActiveAgents.new(@session, agents.dup.push(nil))
+  end
+  def ajax_create_composition
+    check_model
+    comps = @model.compositions.dup
+    if(!error?)
+      comp = ODDB::Drugs::Composition.new
+      comp.active_agents.push nil
+      comps.push comp
+    end
+    AjaxCompositions.new @session, comps
+  end
+  def ajax_delete_active_agent
+    check_model
+    keys = [:uid, :active_agent, :composition]
+    input = user_input(keys, keys)
+    agents = []
+    if(!error? \
+       && (composition = @model.compositions.at(input[:composition].to_i)))
+      if(agent = composition.active_agents.at(input[:active_agent].to_i))
+        agent.delete
+        composition.remove_active_agent(agent)
+        composition.save
+      end
+      agents = composition.active_agents
+    end
+    AjaxActiveAgents.new(@session, agents)
+  end
+  def ajax_delete_composition
+    check_model
+    keys = [:uid, :composition]
+    input = user_input(keys, keys)
+    agents = []
+    if(!error? \
+       && (composition = @model.compositions.at(input[:composition].to_i)))
+      composition.delete
+    end
+    AjaxCompositions.new(@session, @model.compositions)
+  end
+  def check_model
+    if(@model.uid.to_s != @session.user_input(:uid))
+      @errors.store :uid, create_error(:e_state_expired, :uid, nil)
+    end
+  end
+  def delete
+    check_model
+    unless error?
+      prod = @model.product
+      if(prod.is_a? Util::UnsavedHelper)
+        prod = prod.delegate
+      end
+      @model.delete
+      Product.new(@session, prod)
+    end
+  end
   def direct_event
     direct_event = [:sequence]
     if(uid = @model.uid)
@@ -26,6 +98,7 @@ class Sequence < Global
     end
   end
   def update
+    check_model
     mandatory = [ :atc ]
     keys = [ :atc_name, :registration, :fi_url, :pi_url, :substance, :dose ]
     input = user_input(mandatory + keys, mandatory)
@@ -39,6 +112,9 @@ class Sequence < Global
                       others.collect { |seq| seq.name.de }.join(', ')
       @errors.store(:registration, 
                     create_error(:e_duplicate_registration, :registration, value))
+    end
+    if((prod = @model.product) && prod.is_a?(Util::UnsavedHelper))
+      @model.product = prod.delegate
     end
     input.each { |key, value|
       unless(@errors[key])
@@ -90,21 +166,32 @@ class Sequence < Global
   private
   def update_compositions(input)
     saved = nil
-    input[:substance].each { |cmp_idx, substances|
-      doses = input[:dose][cmp_idx]
-      cmp_idx = cmp_idx.to_i
-      if comp = @model.compositions.at(cmp_idx)
+    if(substances = input[:substance])
+      substances.each { |cmp_idx, substances|
+        doses = input[:dose][cmp_idx]
+        cmp_idx = cmp_idx.to_i
+        comp = @model.compositions.at(cmp_idx)
         substances.each { |sub_idx, sub|
           parts = doses[sub_idx].split(/(?=[^\d.,])/, 2)
           sub_idx = sub_idx.to_i
           if(substance = ODDB::Drugs::Substance.find_by_name(sub))
-            agent = comp.active_agents.at(sub_idx)
             changed = false
+            if(comp.nil?)
+              comp = @model.add_composition ODDB::Drugs::Composition.new
+              changed = true
+            end
+            dose = ODDB::Drugs::Dose.new(*parts) unless parts.empty?
+            agent = comp.active_agents.at(sub_idx)
+            if(agent.nil?)
+              agent = ODDB::Drugs::ActiveAgent.new substance, dose
+              comp.add_active_agent agent
+              comp.save
+              changed = true
+            end
             if(agent.substance != substance)
               agent.substance = substance 
               changed = true
             end
-            dose = ODDB::Drugs::Dose.new(*parts)
             if(agent.dose != dose)
               agent.dose = dose
               changed = true
@@ -118,9 +205,18 @@ class Sequence < Global
             @errors.store key, create_error(:e_unknown_substance, key, sub)
           end
         }
-      end
-    }
+      }
+    end
     saved
+  end
+end
+class NewSequence < Sequence
+  def direct_event
+    # disable redirector
+  end
+  def update
+    super
+    Sequence.new(@session, @model)
   end
 end
         end

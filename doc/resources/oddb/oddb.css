@@ -9,6 +9,24 @@ a {
 a:hover {
   color: black;
 }
+a.ajax {
+  cursor: pointer;
+}
+a.create {
+  color: #000; 
+  cursor: pointer;
+  background-color: #AFA;
+  border: 1px solid #0F0;
+}
+a.delete {
+  color: #000; 
+  cursor: pointer;
+  background-color: #FAA;
+  border: 1px solid #F00;
+}
+a.delete.square {
+  padding: 1px 5px;
+}
 a.fachinfo, a.patinfo {
   color: black;
   background-color: #FFF455;
@@ -71,8 +89,16 @@ div#chapters div#chapter_ {
   float: none;
   width: 300px;
 }
-div#compositions td td {
+div#composition-list div {
+  padding: 4px; 
+  float: left;
+}
+div#compositions {
+  overflow: auto;
+}
+div#compositions td {
   padding: 0px; 
+  height: 19px;
 }
 div#content {
   overflow: auto;

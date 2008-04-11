@@ -213,7 +213,7 @@ class Part < View::List
   }
   SORT_DEFAULT = nil
   def compose(model=@model, offset=[0,0])
-    super(model.active_agents, offset)
+    super(model.active_agents || [], offset)
   end
   def compose_header(offset=[0,0])
     part = [@model.size.to_i, ' ', @model.unit]

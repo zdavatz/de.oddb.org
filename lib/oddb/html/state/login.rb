@@ -10,9 +10,15 @@ module ODDB
   module Html
     module State
 module LoginMethods
+  attr_accessor :desired_input
   def login_
     reconsider_permissions(@session.login)
-    @session.desired_state || trigger(:home)
+    if(@desired_input)
+      @session.valid_input.update @desired_input
+      trigger @desired_input[:event]
+    else
+      @session.desired_state || trigger(:home)
+    end
   rescue Yus::UnknownEntityError
     @errors.store(:email, create_error(:e_authentication_error, :email, nil))
     self

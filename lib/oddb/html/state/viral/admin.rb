@@ -4,6 +4,7 @@
 require 'oddb/html/state/drugs/admin/package'
 require 'oddb/html/state/drugs/admin/product'
 require 'oddb/html/state/drugs/admin/sequence'
+require 'oddb/html/util/unsaved_helper'
 require 'sbsm/viralstate'
 
 module ODDB
@@ -33,6 +34,14 @@ module Admin
   end
   def limited?
     false
+  end
+  def new_sequence
+    if((uid = @session.user_input(:uid)) \
+       && (product = ODDB::Drugs::Product.find_by_uid(uid)))
+      seq = ODDB::Drugs::Sequence.new
+      seq.product = Util::UnsavedHelper.new(product)
+      Drugs::Admin::NewSequence.new(@session, seq)
+    end
   end
   def _package(code)
     if(package = _package_by_code(code))
