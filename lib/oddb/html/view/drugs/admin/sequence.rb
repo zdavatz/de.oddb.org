@@ -101,7 +101,8 @@ class CompositionList < HtmlGrid::DivList
   end
   def compose
     super
-    @grid.push [add(@model)] unless @model.last.active_agents.compact.empty?
+    comp = @model.last
+    @grid.push [add(@model)] if comp.nil? || !comp.active_agents.compact.empty?
   end
   def composition(model)
     ActiveAgents.new(model.active_agents, @session, self)
