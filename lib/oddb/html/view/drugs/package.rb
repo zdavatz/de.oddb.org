@@ -186,45 +186,50 @@ module PackageMethods
   def size(model)
     model.parts.collect { |part|
       parts = [] 
+      multi = part.multi.to_i
+      if(multi > 1)
+        parts.push multi, 'x'
+      end
 			size = part.size.to_i
 			if(size > 1)
 				parts.push(size)
 			end
-      multi = part.multi.to_i
-      if(multi > 1)
-        parts.unshift(multi, 'x')
-      end
-      parts.compact!
-      if(q = part.quantity)
-        parts.push('x') unless parts.empty?
-        parts.push(q)
-      end
       if(unit = part.unit)
         parts.push(unit.name.send(@session.language))
+      end
+      if(quantity = part.quantity)
+        parts.push 'à', quantity
       end
       parts.join(' ')
     }.join(' + ')
   end
 end
-class Part < View::List
+class Parts < View::List
   COMPONENTS = {
-    [1,0] => :substance,
-    [2,0] => :dose,
+    [0,0] => :size,
+    [1,0] => :active_agents,
   }
+  CSS_MAP = { [0,0,2] => 'top' }
+  OMIT_HEADER = true
   SORT_DEFAULT = nil
-  def compose(model=@model, offset=[0,0])
-    super(model.active_agents || [], offset)
-  end
-  def compose_header(offset=[0,0])
-    part = [@model.size.to_i, ' ', @model.unit]
-    if(quantity = @model.quantity)
-      part.push(' x ', quantity)
+  def active_agents(model)
+    if(comp = model.composition)
+      comp.active_agents.collect { |act| 
+        [ (sub = act.substance) && sub.name.send(@session.language), 
+          act.dose ].join(' ')
+      }.join("<BR>")
     end
-    @grid.add(part, *offset)
-    offset
   end
-  def substance(model)
-    model.substance.name
+  def size(model)
+    part = []
+    if(multi = model.multi)
+      part.push multi, 'x'
+    end
+    part.push model.size.to_i, model.unit
+    if(quantity = model.quantity)
+      part.push 'à', quantity
+    end
+    part.join(' ')
   end
 end
 class PackageInnerComposite < HtmlGrid::Composite
@@ -325,16 +330,11 @@ class PackageComposite < HtmlGrid::DivComposite
     [0,1] => InlineSearch, 
     [0,2] => :name,
     [0,3] => PackageInnerComposite,
-    [0,4] => :parts,
+    [0,4] => :parts_heading,
+    [0,5] => :parts,
   }
   CSS_ID_MAP = [ 'snapback', 'result-search', 'title' ]
   CSS_MAP = { 0 => 'before-searchbar', 4 => 'divider' }
-  def init
-    model.parts.each_with_index { |part, idx|
-      partline(part, idx)
-    }
-    super
-  end
   def breadcrumbs(model)
     [ @lookandfeel.lookup(:package_details_for, 
                           model.name.send(@session.language)) ]
@@ -347,17 +347,11 @@ class PackageComposite < HtmlGrid::DivComposite
     name
   end
   def parts(model)
+    Parts.new(model.parts, @session, self)
+  end
+  def parts_heading(model)
     key = model.parts.size > 1 ? :parts : :package_and_substances
     @lookandfeel.lookup(key)
-  end
-  def partline(part, idx)
-    name = "part_#{idx}".to_sym
-    components.store([0,components.size+idx], name)
-    meta_eval { 
-      define_method(name) { |model|
-        Part.new(part, @session, self)
-      }
-    }
   end
   def snapback(model)
     [ super, @lookandfeel.lookup(:breadcrumb_divider) ].concat breadcrumbs(model)

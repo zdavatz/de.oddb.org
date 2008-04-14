@@ -23,6 +23,7 @@ class ActiveAgents < View::List
   }
   COMPONENT_CSS_MAP = { [2,0] => 'short right' }
   DEFAULT_CLASS = HtmlGrid::InputText
+  EMPTY_LIST = true
   OMIT_HEADER = true
   STRIPED_BG = false
   def add(model)
@@ -31,7 +32,7 @@ class ActiveAgents < View::List
     link.css_class = 'create square'
     args = [ :uid, @session.state.model.uid, :composition, composition ]
     url = @session.lookandfeel.event_url(:ajax_create_active_agent, args)
-    link.onclick = "edit_compositions('#{css_id}', '#{url}');"
+    link.onclick = "replace_element('#{css_id}', '#{url}');"
     link
   end
   def compose_footer(offset)
@@ -57,7 +58,7 @@ class ActiveAgents < View::List
       args = [ :uid, @session.state.model.uid, :composition, composition, 
                :active_agent, @list_index ]
       url = @session.lookandfeel.event_url(:ajax_delete_active_agent, args)
-      link.onclick = "edit_compositions('#{css_id}', '#{url}');"
+      link.onclick = "replace_element('#{css_id}', '#{url}');"
       link
     end
   end
@@ -66,7 +67,7 @@ class ActiveAgents < View::List
     link.css_class = 'ajax'
     args = [ :uid, @session.state.model.uid, :composition, composition ]
     url = @session.lookandfeel.event_url(:ajax_delete_composition, args)
-    link.onclick = "edit_compositions('composition-list', '#{url}');"
+    link.onclick = "replace_element('composition-list', '#{url}');"
     link
   end
   def dose(model)
@@ -96,7 +97,7 @@ class CompositionList < HtmlGrid::DivList
     link.css_class = 'ajax'
     args = [ :uid, @session.state.model.uid ]
     url = @session.lookandfeel.event_url(:ajax_create_composition, args)
-    link.onclick = "edit_compositions('composition-list', '#{url}');"
+    link.onclick = "replace_element('composition-list', '#{url}');"
     link
   end
   def compose
@@ -113,14 +114,21 @@ class Compositions < HtmlGrid::DivComposite
   CSS_ID = 'composition-list'
 end
 class Packages < View::List
+  include HtmlGrid::FormMethods
   include PackageMethods
   COMPONENTS = {
     [0,0] => :pzn,
     [1,0] => :name,
     [2,0] => :size,
   }
+  EVENT = :new_package
   OMIT_HEADER = true
-  STRIPED_BG = true
+  def compose_footer(offset)
+    @grid.add submit(@model), *offset
+  end
+  def hidden_fields(context)
+    super << context.hidden("uid", @container.model.uid)
+  end
   def pzn(model)
     code = model.code(:cid)
     link = HtmlGrid::Link.new(:cid, model, @session, self)
@@ -235,7 +243,7 @@ class SequenceComposite < HtmlGrid::DivComposite
 end
 class Sequence < Template
   CONTENT = SequenceComposite
-  JAVASCRIPTS = ['sequence']
+  JAVASCRIPTS = ['admin']
   def _title
     super[0..-2].push(@model.name.send(@session.language))
   end

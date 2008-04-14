@@ -25,39 +25,99 @@ class CompositionSelect < HtmlGrid::AbstractSelect
     res
   end
 end
+class SequenceSelect < HtmlGrid::AbstractSelect
+  def compositions(model)
+    lang = @session.language
+    res = model.compositions.collect { |comp|
+      comp.active_agents.collect { |act|
+        [act.substance.name.send(lang), act.dose].join(' ')
+      }.join(', ')
+    }.join(' + ')
+    if(res.length > 72)
+      res[0,69] << '...'
+    else
+      res
+    end
+  end
+  def selection(context)
+    lang = @session.language
+    @selected ||= (seq = @model.sequence) && seq.uid
+    res = []
+    @model.product.sequences.each_with_index { |sequence, idx|
+      uid = sequence.uid
+      attribs = { "value" => uid }
+      attribs.store("selected", 1) if(uid == selected)
+      res << context.option(attribs) { compositions(sequence) }
+    }
+    res
+  end
+end
 class Parts < List
   class << self
     def input_text(*keys)
       keys.each { |key|
         define_method(key) { |model| 
           input = HtmlGrid::Input.new(name(key), model, @session, self)
-          input.value = model.send(key)
+          input.value = model.send(key) if model
           input
         }
       }
     end
   end
   COMPONENTS = {
-    [0,0] => :multi,
-    [1,0] => "x",
-    [2,0] => :size,
-    [3,0] => :unit,
-    [4,0] => "à",
-    [5,0] => :quantity,
-    [6,0] => :composition,
+    [0,0] => :delete,
+    [1,0] => :multi,
+    [2,0] => "x",
+    [3,0] => :size,
+    [4,0] => :unit,
+    [5,0] => "à",
+    [6,0] => :quantity,
+    [7,0] => :composition,
   }
   COMPONENT_CSS_MAP = { 
-    [0,0,3] => "short right",
-    [5,0]   => "short right",
+    [1,0,3] => "short right",
+    [6,0]   => "short right",
   }
+  CSS_ID = 'parts'
   DEFAULT_CLASS = HtmlGrid::InputText
+  EMPTY_LIST = true
   OMIT_HEADER = true
   input_text :multi, :size, :unit, :quantity
+  def add(model)
+    if(@model.empty? || @model.last.saved?)
+      link = HtmlGrid::Link.new(:plus, model, @session, self)
+      link.set_attribute('title', @lookandfeel.lookup(:create_part))
+      link.css_class = 'create square'
+      args = [ :code_cid, @session.state.model.code(:cid) ]
+      url = @session.lookandfeel.event_url(:ajax_create_part, args)
+      link.onclick = "replace_element('#{css_id}', '#{url}');"
+      link
+    end
+  end
+  def compose_footer(offset)
+    if(@model.empty? || @model.last.saved?)
+      @grid.add add(@model), *offset
+    end
+  end
   def composition(model)
     CompositionSelect.new(name("composition"), model, @session, self)
   end
+  def delete(model)
+    if(@model.size > 1)
+      link = HtmlGrid::Link.new(:minus, model, @session, self)
+      link.set_attribute('title', @lookandfeel.lookup(:delete))
+      link.css_class = 'delete square'
+      args = [ :code_cid, @session.state.model.code(:cid), :part, @list_index ]
+      url = @session.lookandfeel.event_url(:ajax_delete_part, args)
+      link.onclick = "replace_element('#{css_id}', '#{url}');"
+      link
+    end
+  end
   def name(part)
     "#{part}[#@list_index]"
+  end
+  def unsaved(model)
+    @lookandfeel.lookup(:unsaved) unless model.saved?
   end
 end
 class PackageInnerForm < Drugs::PackageInnerComposite
@@ -91,14 +151,20 @@ class PackageInnerForm < Drugs::PackageInnerComposite
     [0,3] => :code_festbetragsstufe,
     [2,3] => :code_festbetragsgruppe,
     [0,4] => :code_zuzahlungsbefreit,
+    [2,4] => :sequence,
     [0,5] => :code_prescription,
-    [1,6] => :submit, 
+    [1,6,0] => :submit, 
+    [1,6,1] => :delete, 
   }
   SYMBOL_MAP = {
     :name   => HtmlGrid::InputText,
   }
   input_text :code_pzn, :price_public, :price_festbetrag, :code_festbetragsstufe,
              :code_festbetragsgruppe, :equivalence_factor
+  def init
+    super
+    error_message
+  end
   def code_boolean(model, key)
     box = HtmlGrid::InputCheckbox.new("code_#{key}", model, @session, self)
     box.set_attribute('checked', (code = model.code(key)) && code.value)
@@ -109,9 +175,13 @@ class PackageInnerForm < Drugs::PackageInnerComposite
     input.value = super
     input
   end
-  def init
-    super
-    error_message
+  def delete(model)
+    button = HtmlGrid::Button.new(:delete, model, @session, self)
+    button.onclick = "if(confirm('#{@lookandfeel.lookup(:delete_package_confirm)}')) { this.form.event.value = 'delete'; this.form.submit(); }"
+    button
+  end
+  def sequence(model)
+    SequenceSelect.new("sequence", model, @session, self)
   end
 end
 class PackageForm < HtmlGrid::DivComposite
@@ -153,6 +223,7 @@ class PackageComposite < Drugs::PackageComposite
 end
 class Package < Drugs::Package
   CONTENT = PackageComposite
+  JAVASCRIPTS = ['admin']
 end
         end
       end

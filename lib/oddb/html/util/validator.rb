@@ -22,15 +22,18 @@ class Validator < SBSM::Validator
     ],
   }
   EVENTS = [ :ajax_autofill, :ajax_create_active_agent, :ajax_create_composition,
-             :ajax_delete_active_agent, :ajax_delete_composition, :atc_assign,
+             :ajax_create_part, :ajax_delete_active_agent, 
+             :ajax_delete_composition, :ajax_delete_part, :atc_assign,
              :atc_browser, :collect, :ddd, :delete, :explain_ddd_price,
              :explain_price, :fachinfo, :feedback, :checkout, :compare,
-             :compare_remote, :home, :login, :login_, :logout, :new_sequence,
-             :package, :package_infos, :patinfo, :proceed_poweruser, :product,
-             :products, :remote_infos, :search, :sequence, :sort, :update ]
+             :compare_remote, :home, :login, :login_, :logout, :new_package,
+             :new_sequence, :package, :package_infos, :patinfo,
+             :proceed_poweruser, :product, :products, :remote_infos, :search,
+             :sequence, :sort, :update ]
   NUMERIC = [ :active_agent, :code_cid, :code_festbetragsgruppe,
               :code_festbetragsstufe, :composition, :days, :equivalence_factor,
-              :multi, :offset, :price_festbetrag, :price_public, :pzn, :size ]
+              :multi, :offset, :price_festbetrag, :price_public, :pzn,
+              :sequence, :size ]
   PATTERNS = {
     :atc => /[ABCGHJLMNPRSV](\d{2}([A-Z]([A-Z](\d{2})?)?)?)?/,
   }

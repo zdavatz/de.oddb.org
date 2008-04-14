@@ -35,6 +35,17 @@ module Admin
   def limited?
     false
   end
+  def new_package
+    if((uid = @session.user_input(:uid)) \
+       && (sequence = ODDB::Drugs::Sequence.find_by_uid(uid)))
+      pac = ODDB::Drugs::Package.new
+      pac.sequence = Util::UnsavedHelper.new(sequence)
+      part = ODDB::Drugs::Part.new
+      part.package = Util::UnsavedHelper.new(pac)
+      pac.parts.push part
+      Drugs::Admin::NewPackage.new(@session, pac)
+    end
+  end
   def new_sequence
     if((uid = @session.user_input(:uid)) \
        && (product = ODDB::Drugs::Product.find_by_uid(uid)))

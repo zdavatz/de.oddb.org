@@ -1,4 +1,4 @@
-function edit_compositions(id, url) {
+function replace_element(id, url) {
   document.body.style.cursor = 'wait';
   dojo.io.bind({
 		url: url,

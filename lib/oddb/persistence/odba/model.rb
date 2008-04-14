@@ -34,6 +34,9 @@ module ODDB
       }
       self
     end
+    def saved?
+      !odba_unsaved?
+    end
     alias :uid :odba_id
     class << self
       alias :all :odba_extent
