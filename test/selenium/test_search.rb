@@ -131,7 +131,7 @@ class TestSearch < Test::Unit::TestCase
     assert is_text_present('Amantadin (N04BB01) - 1 Präparate')
     assert is_text_present('Amantadin by Producer')
     assert is_text_present('100 mg')
-    assert is_text_present('5 x 20 ml Ampullen')
+    assert is_text_present('5 Ampullen à 20 ml')
     assert is_text_present('6.00')
     assert is_text_present('10.00')
     assert is_text_present('-4.00')
@@ -229,9 +229,9 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     assert is_text_present('Stärke')
     assert is_text_present('100 mg')
     assert is_text_present('Packungsgrösse')
-    assert is_text_present('5 x 20 ml Ampullen')
+    assert is_text_present('5 Ampullen à 20 ml')
     assert is_text_present('Berechnung')
-    assert is_text_present('( 10 mg / 100 mg ) x ( 6.00 / 5 x 20 ml Ampullen ) = EUR 0.01 / Tag')
+    assert is_text_present('( 10 mg / 100 mg ) x ( 6.00 / 5 Ampullen à 20 ml ) = EUR 0.01 / Tag')
   end
   def test_search__company
     setup_package
@@ -246,7 +246,7 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
                  get_title
     assert is_text_present('Amantadin by Producer')
     assert is_text_present('100 mg')
-    assert is_text_present('5 x 20 ml Ampullen')
+    assert is_text_present('5 Ampullen à 20 ml')
     assert is_text_present('6.00')
     assert is_text_present('10.00')
     assert is_text_present('-4.00')
@@ -268,7 +268,7 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
                  get_title
     assert is_text_present('Amantadin by Producer')
     assert is_text_present('100 mg')
-    assert is_text_present('5 x 20 ml Ampullen')
+    assert is_text_present('5 Ampullen à 20 ml')
     assert is_text_present('6.00')
     assert is_text_present('10.00')
     assert is_text_present('-4.00')
@@ -412,7 +412,7 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     assert is_text_present('FI')
     assert is_text_present('Amantadin by Producer')
     assert is_text_present('100 mg')
-    assert is_text_present('5 x 20 ml Ampullen')
+    assert is_text_present('5 Ampullen à 20 ml')
     assert is_text_present('6.00')
     assert is_text_present('10.00')
     assert is_text_present('-4.00')
@@ -780,7 +780,7 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
                  get_title
     assert is_text_present('Amantadin by Producer')
     assert is_text_present('100 mg')
-    assert is_text_present('5 x 20 ml Ampullen')
+    assert is_text_present('5 Ampullen à 20 ml')
     assert is_text_present('6.00')
     assert is_text_present('10.00')
     assert is_text_present('-4.00')

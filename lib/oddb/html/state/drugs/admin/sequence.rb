@@ -102,7 +102,6 @@ class Sequence < Global
     mandatory = [ :atc ]
     keys = [ :atc_name, :registration, :fi_url, :pi_url, :substance, :dose ]
     input = user_input(mandatory + keys, mandatory)
-    email = @session.user.email
     others = ODDB::Drugs::Sequence.search_by_code(:type => 'registration',
                                                   :value => input[:registration],
                                                   :country => 'EU')
@@ -113,6 +112,10 @@ class Sequence < Global
       @errors.store(:registration, 
                     create_error(:e_duplicate_registration, :registration, value))
     end
+    _update input
+  end
+  def _update input
+    email = @session.user.email
     if((prod = @model.product) && prod.is_a?(Util::UnsavedHelper))
       @model.product = prod.delegate
     end
@@ -172,7 +175,7 @@ class Sequence < Global
         cmp_idx = cmp_idx.to_i
         comp = @model.compositions.at(cmp_idx)
         substances.each { |sub_idx, sub|
-          parts = doses[sub_idx].split(/(?=[^\d.,])/, 2)
+          parts = doses[sub_idx].split(/\s*(?=[^\d.,])/, 2)
           sub_idx = sub_idx.to_i
           if(substance = ODDB::Drugs::Substance.find_by_name(sub))
             changed = false
@@ -214,9 +217,11 @@ class NewSequence < Sequence
   def direct_event
     # disable redirector
   end
-  def update
-    super
-    Sequence.new(@session, @model)
+  def _update input
+    unless @errors[:registration]
+      super
+      Sequence.new(@session, @model)
+    end
   end
 end
         end

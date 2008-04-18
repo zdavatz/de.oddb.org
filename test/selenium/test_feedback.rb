@@ -72,7 +72,7 @@ class TestFeedback < Test::Unit::TestCase
     package = setup_package
     open "/de/drugs/feedback/pzn/12345"
     assert_equal "DE - ODDB.org | Medikamente | Feedback | Amantadin by Producer | Open Drug Database", get_title
-    assert is_text_present('Feedback zu Amantadin by Producer in der Handelsform: 5 x 20 ml Ampullen')
+    assert is_text_present('Feedback zu Amantadin by Producer in der Handelsform: 5 Ampullen à 20 ml')
     assert is_element_present('name')
     assert is_element_present('email')
     assert is_element_present('email_public')
@@ -87,7 +87,7 @@ class TestFeedback < Test::Unit::TestCase
     package = setup_package
     open "/de/drugs/feedback/pzn/12345"
     assert_equal "DE - ODDB.org | Medikamente | Feedback | Amantadin by Producer | Open Drug Database", get_title
-    assert is_text_present('Feedback zu Amantadin by Producer in der Handelsform: 5 x 20 ml Ampullen')
+    assert is_text_present('Feedback zu Amantadin by Producer in der Handelsform: 5 Ampullen à 20 ml')
     assert is_element_present('name')
     assert is_element_present('email')
     assert is_element_present('email_public')
@@ -119,7 +119,7 @@ class TestFeedback < Test::Unit::TestCase
     package = setup_package
     open "/de/drugs/feedback/pzn/12345"
     assert_equal "DE - ODDB.org | Medikamente | Feedback | Amantadin by Producer | Open Drug Database", get_title
-    assert is_text_present('Feedback zu Amantadin by Producer in der Handelsform: 5 x 20 ml Ampullen')
+    assert is_text_present('Feedback zu Amantadin by Producer in der Handelsform: 5 Ampullen à 20 ml')
     assert is_element_present('name')
     assert is_element_present('email')
     assert is_element_present('email_public')

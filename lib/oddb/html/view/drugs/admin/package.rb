@@ -132,6 +132,9 @@ class PackageInnerForm < Drugs::PackageInnerComposite
           else
             input.value = value
           end
+          if input.value.to_s.empty?
+            input.value = @session.user_input key
+          end
           input
         }
       }
@@ -143,7 +146,7 @@ class PackageInnerForm < Drugs::PackageInnerComposite
     ## google's third parameter ensures that its link is written before 
     #  the name - this allows a float: right in css to work correctly
     [1,0,0] => :google,  
-    [2,0] => :code_pzn, 
+    [2,0] => :code_cid, 
     [0,1] => :company, 
     [2,1] => :atc,
     [0,2] => :price_public, 
@@ -159,7 +162,7 @@ class PackageInnerForm < Drugs::PackageInnerComposite
   SYMBOL_MAP = {
     :name   => HtmlGrid::InputText,
   }
-  input_text :code_pzn, :price_public, :price_festbetrag, :code_festbetragsstufe,
+  input_text :code_cid, :price_public, :price_festbetrag, :code_festbetragsstufe,
              :code_festbetragsgruppe, :equivalence_factor
   def init
     super
@@ -170,14 +173,14 @@ class PackageInnerForm < Drugs::PackageInnerComposite
     box.set_attribute('checked', (code = model.code(key)) && code.value)
     box
   end
-  def code_pzn(model)
-    input = HtmlGrid::InputText.new(:code_cid, model, @session, self)
-    input.value = super
-    input
-  end
   def delete(model)
     button = HtmlGrid::Button.new(:delete, model, @session, self)
-    button.onclick = "if(confirm('#{@lookandfeel.lookup(:delete_package_confirm)}')) { this.form.event.value = 'delete'; this.form.submit(); }"
+    script = "this.form.event.value = 'delete'; this.form.submit();" 
+    if(model.saved?)
+      confirm = @lookandfeel.lookup(:delete_package_confirm)
+      script = "if(confirm('#{confirm}')) { #{script} };"
+    end
+    button.onclick = script
     button
   end
   def sequence(model)

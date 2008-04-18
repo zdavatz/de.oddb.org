@@ -11,9 +11,6 @@ module ODBA
     end
   end
   module Persistable
-    unless(instance_methods.include?('__odba_to_yaml_properties__'))
-      alias :__odba_to_yaml_properties__ :to_yaml_properties
-    end
     def to_yaml_properties
       (super - odba_exclude_vars).reject { |name| 
         /^@odba_/.match name}

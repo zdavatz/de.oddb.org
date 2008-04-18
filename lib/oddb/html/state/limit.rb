@@ -11,12 +11,6 @@ module ODDB
 class Limit < Global
   include State::LoginMethods
   VIEW = View::Limit
-  def init
-    @desired_input = @session.valid_input
-  end
-  def limit_state
-    self
-  end
 end
     end
   end

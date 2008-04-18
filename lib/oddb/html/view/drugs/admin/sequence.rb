@@ -173,18 +173,13 @@ class SequenceInnerForm < HtmlGrid::Composite
   end
   def delete(model)
     button = HtmlGrid::Button.new(:delete, model, @session, self)
-    button.onclick = "if(confirm('#{@lookandfeel.lookup(:delete_sequence_confirm)}')) { this.form.event.value = 'delete'; this.form.submit(); }"
+    script = "this.form.event.value = 'delete'; this.form.submit();" 
+    if(model.saved?)
+      confirm = @lookandfeel.lookup(:delete_sequence_confirm)
+      script = "if(confirm('#{confirm}')) { #{script} };"
+    end
+    button.onclick = script
     button
-  end
-  def fachinfo_link(model)
-    if pac = model.packages.first
-      super pac
-    end
-  end
-  def patinfo_link(model)
-    if pac = model.packages.first
-      super pac
-    end
   end
   def show_atc_name(model)
     if(atc = model.atc)
@@ -230,7 +225,7 @@ class SequenceComposite < HtmlGrid::DivComposite
     name
   end
   def packages(model)
-    Packages.new(model.packages, @session, self)
+    Packages.new(model.packages, @session, self) if(@model.saved?)
   end
   def snapback(model)
     div = @lookandfeel.lookup(:breadcrumb_divider)
@@ -245,7 +240,11 @@ class Sequence < Template
   CONTENT = SequenceComposite
   JAVASCRIPTS = ['admin']
   def _title
-    super[0..-2].push(@model.name.send(@session.language))
+    if @model.saved?
+      super.push(@model.uid)
+    else
+      super.push(@lookandfeel.lookup(:new_sequence))
+    end
   end
 end
         end

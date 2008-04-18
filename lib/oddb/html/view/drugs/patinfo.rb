@@ -2,7 +2,7 @@
 # Html::View::Drugs::Patinfo -- de.oddb.org -- 30.10.2007 -- hwyss@ywesee.com
 
 require 'oddb/html/view/document'
-require 'oddb/html/view/drugs/package'
+require 'oddb/html/view/drugs/template'
 
 module ODDB
   module Html
@@ -30,8 +30,11 @@ class PatinfoComposite < HtmlGrid::DivComposite
     end
   end
 end
-class Patinfo < Package
+class Patinfo < Template
   CONTENT = PatinfoComposite
+  def _title
+    super.push(@model.name.send(@session.language))
+  end
 end
       end
     end

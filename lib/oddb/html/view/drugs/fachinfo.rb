@@ -2,7 +2,7 @@
 # Html::View::Drugs::Fachinfo -- de.oddb.org -- 30.10.2007 -- hwyss@ywesee.com
 
 require 'oddb/html/view/document'
-require 'oddb/html/view/drugs/package'
+require 'oddb/html/view/drugs/template'
 
 module ODDB
   module Html
@@ -30,8 +30,11 @@ class FachinfoComposite < HtmlGrid::DivComposite
     end
   end
 end
-class Fachinfo < Package
+class Fachinfo < Template
   CONTENT = FachinfoComposite
+  def _title
+    super.push(@model.name.send(@session.language))
+  end
 end
       end
     end

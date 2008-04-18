@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Selenium::TestFachinfo -- de.oddb.org -- 01.11.2007 -- hwyss@ywesee.com
+# Selenium::TestPatinfo -- de.oddb.org -- 18.04.2008 -- hwyss@ywesee.com
 
 
 $: << File.expand_path('..', File.dirname(__FILE__))
@@ -11,7 +11,7 @@ require 'oddb/util'
 
 module ODDB
   module Selenium
-class TestFachinfo < Test::Unit::TestCase
+class TestPatinfo < Test::Unit::TestCase
   include Selenium::TestCase
   def setup
     Drugs::Package.instances.clear
@@ -63,7 +63,7 @@ class TestFachinfo < Test::Unit::TestCase
     package.save
     package
   end
-  def setup_fachinfo
+  def setup_patinfo
     document = Text::Document.new
     chapter = Text::Chapter.new('name')
     paragraph = Text::Paragraph.new
@@ -103,20 +103,20 @@ class TestFachinfo < Test::Unit::TestCase
     document.add_chapter(chapter)
     document
   end
-  def test_fachinfo
+  def test_patinfo
     package = setup_package
-    package.fachinfo.de = setup_fachinfo
-    open "/de/drugs/fachinfo/uid/#{package.sequence.uid}"
-    assert_equal "DE - ODDB.org | Medikamente | Fachinformation | Amantadin by Producer | Open Drug Database", get_title
+    package.patinfo.de = setup_patinfo
+    open "/de/drugs/patinfo/uid/#{package.sequence.uid}"
+    assert_equal "DE - ODDB.org | Medikamente | Gebrauchsinformation | Amantadin by Producer | Open Drug Database", get_title
     assert is_text_present("1. Bezeichnung\nAmantadin Product")
   end
-  def test_fachinfo__limited
+  def test_patinfo__limited
     ODDB.config.query_limit = 1
     package = setup_package
-    package.fachinfo.de = setup_fachinfo
-    open "/de/drugs/fachinfo/uid/#{package.sequence.uid}"
-    assert_equal "DE - ODDB.org | Medikamente | Fachinformation | Amantadin by Producer | Open Drug Database", get_title
-    open "/de/drugs/fachinfo/uid/#{package.sequence.uid}"
+    package.patinfo.de = setup_patinfo
+    open "/de/drugs/patinfo/uid/#{package.sequence.uid}"
+    assert_equal "DE - ODDB.org | Medikamente | Gebrauchsinformation | Amantadin by Producer | Open Drug Database", get_title
+    open "/de/drugs/patinfo/uid/#{package.sequence.uid}"
     assert_equal 'DE - ODDB.org | Medikamente | Open Drug Database', 
                  get_title
     assert is_text_present("Abfragebeschränkung")

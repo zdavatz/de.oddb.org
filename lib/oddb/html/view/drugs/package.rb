@@ -78,10 +78,10 @@ module PackageMethods
     val
   end
   def fachinfo_link(model)
-    if(model.fachinfo.send(@session.language) && (code = model.code(:cid)))
+    if(model.fachinfo.send(@session.language))
       link = HtmlGrid::Link.new(:square_fachinfo, model, @session, self)
       link.css_class = 'square fachinfo'
-      link.href = @lookandfeel._event_url(:fachinfo, [:pzn, code.value])
+      link.href = @lookandfeel._event_url(:fachinfo, [:uid, model.fachinfo.uid])
       link
     end
   end
@@ -96,10 +96,10 @@ module PackageMethods
     end
   end
   def patinfo_link(model)
-    if(model.patinfo.send(@session.language) && (code = model.code(:cid)))
+    if(model.patinfo.send(@session.language))
       link = HtmlGrid::Link.new(:square_patinfo, model, @session, self)
       link.css_class = 'square patinfo'
-      link.href = @lookandfeel._event_url(:patinfo, [:pzn, code.value])
+      link.href = @lookandfeel._event_url(:patinfo, [:uid, model.patinfo.uid])
       link
     end
   end
@@ -240,7 +240,7 @@ class PackageInnerComposite < HtmlGrid::Composite
     ## google's third parameter ensures that its link is written before 
     #  the name - this allows a float: right in css to work correctly
     [1,0,0] => :google,  
-    [2,0] => :code_pzn, 
+    [2,0] => :code_cid, 
     [0,1] => :company, 
     [2,1] => :atc,
     [0,2] => :price_public, 
@@ -291,7 +291,7 @@ class PackageInnerComposite < HtmlGrid::Composite
       span
     end
   end
-  def code_pzn(model)
+  def code_cid(model)
     model.code(:cid, 'DE')
   end
   def company(model)
@@ -360,7 +360,11 @@ end
 class Package < Template
   CONTENT = PackageComposite
   def _title
-    super[0..-2].push(@model.name.send(@session.language))
+    if @model.saved?
+      super[0..-2].push(@model.name.send(@session.language))
+    else
+      super.push(@lookandfeel.lookup(:new_package))
+    end
   end
 end
       end

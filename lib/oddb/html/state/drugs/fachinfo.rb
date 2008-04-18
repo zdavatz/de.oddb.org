@@ -12,11 +12,7 @@ class Fachinfo < Global
   LIMIT = true
   VIEW = View::Drugs::Fachinfo
   def direct_event
-    direct_event = [:fachinfo]
-    if(code = @model.code(:cid, 'DE'))
-      direct_event.push([:pzn, code.value])
-    end
-    direct_event
+    [:fachinfo, [:uid, @model.uid]]
   end
 end
       end

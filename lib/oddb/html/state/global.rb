@@ -38,8 +38,8 @@ class Global < SBSM::State
     end
   end
   def fachinfo
-    if(code = @session.user_input(:pzn))
-      _fachinfo(code)
+    if(uid = @session.user_input(:uid))
+      _fachinfo(uid)
     end
   end
   def feedback
@@ -76,8 +76,8 @@ class Global < SBSM::State
     }
   end
   def patinfo
-    if(code = @session.user_input(:pzn))
-      _patinfo(code)
+    if(uid = @session.user_input(:uid))
+      _patinfo(uid)
     end
   end
   def proceed_poweruser

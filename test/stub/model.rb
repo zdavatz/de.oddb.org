@@ -51,12 +51,25 @@ module ODDB
           }
         }
         define_method(:save) {
+          @saved = true
           self.class.instances.push(self).uniq!
           self
         }
         define_method(:delete) {
           self.class.instances.delete(self)
+          self.class.connections.each { |name|
+            method = "remove_#{self.class.singular}"
+            conn = instance_variable_get(name)
+            if conn.respond_to?(method)
+              conn.send(method, self) 
+            end
+          }
+          checkout
+          super
         }
+      end
+      def find_by_uid(uid)
+        ObjectSpace._id2ref(uid.to_i)
       end
       def index_keys(name, *keys)
         meta_eval {
@@ -65,6 +78,19 @@ module ODDB
       end
     end
     alias :uid :object_id
+    attr_accessor :saved
+    def checkout
+    end
+    def saved?
+      @saved
+    end
+    #unless(instance_methods.include?('__stub_to_yaml_properties__'))
+    #  alias :__stub_to_yaml_properties__ :to_yaml_properties
+      def to_yaml_properties
+        super - ['@saved']
+    #    __stub_to_yaml_properties__ - ['@saved']
+      end
+    #end
   end
   module Business
     class Company < Model
@@ -92,6 +118,9 @@ module ODDB
     end
     class Composition < Model
       simulate_database
+      def checkout
+        Sequence.all { |seq| seq.remove_composition self }
+      end
     end
     class GalenicForm < Model
       simulate_database(:description)
@@ -107,6 +136,9 @@ module ODDB
     end
     class Part < Model
       simulate_database
+      def checkout
+        Package.all { |pac| pac.remove_part self }
+      end
     end
     class Product < Model
       simulate_database(:name)

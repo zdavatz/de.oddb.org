@@ -80,6 +80,11 @@ module Events
       Fachinfo.new(@session, package)
     end
   end
+  def _fachinfo(uid)
+    if(sequence = ODDB::Drugs::Sequence.find_by_uid(uid))
+      Fachinfo.new(@session, sequence)
+    end
+  end
   def _feedback(code)
     if(package = _package_by_code(code))
       Feedback.new(@session, package)
@@ -109,6 +114,11 @@ module Events
   def _patinfo(code)
     if((package = _package_by_code(code)) && package.patinfo)
       Patinfo.new(@session, package)
+    end
+  end
+  def _patinfo(uid)
+    if(sequence = ODDB::Drugs::Sequence.find_by_uid(uid))
+      Patinfo.new(@session, sequence)
     end
   end
   def _products(query)

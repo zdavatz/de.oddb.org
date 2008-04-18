@@ -148,7 +148,7 @@ class Package < Drugs::Package
           part.unit = nil
         end
         if(str = current[:quantity])
-          part.quantity = ODDB::Drugs::Dose.new(*str.split(/(?=[^\d.,])/, 2))
+          part.quantity = ODDB::Drugs::Dose.new(*str.split(/\s*(?=[^\d.,])/, 2))
         else
           part.quantity = nil
         end

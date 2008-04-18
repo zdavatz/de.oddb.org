@@ -94,7 +94,7 @@ end
 class Product < Template
   CONTENT = ProductComposite
   def _title
-    super[0..-2].push(@model.name.send(@session.language))
+    super.push(@model.uid)
   end
 end
         end

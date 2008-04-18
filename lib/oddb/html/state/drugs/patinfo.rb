@@ -12,11 +12,7 @@ class Patinfo < Global
   LIMIT = true
   VIEW = View::Drugs::Patinfo
   def direct_event
-    direct_event = [:patinfo]
-    if(code = @model.code(:cid, 'DE'))
-      direct_event.push([:pzn, code.value])
-    end
-    direct_event
+    [:patinfo, [:uid, @model.uid]]
   end
 end
       end

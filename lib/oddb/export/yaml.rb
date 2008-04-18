@@ -39,7 +39,7 @@ module ODDB
         class << self 
           def export(*args)
             define_method(:to_yaml_properties) {
-              super.push(*args).reject { |name| 
+              super.push(*args).uniq.reject { |name| 
                 instance_variable_get(name).nil? }
             }
           end
@@ -63,6 +63,11 @@ module ODDB
     end
     class Multilingual
       include OddbUri
+    end
+  end
+  module Business
+    class Company
+      export '@name'
     end
   end
   module Drugs

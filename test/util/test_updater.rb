@@ -191,6 +191,7 @@ module ODDB
           .times(1).and_return(fbetrag_uri)
         uriparse.should_receive(:parse).with(zuzahlung)\
           .times(1).and_return(zuzahlung_uri)
+        flexmock(Util::Mail).should_receive(:notify_admins).times(1)
         assert_nothing_raised {
           @updater.run(today)
         }
