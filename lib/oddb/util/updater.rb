@@ -5,6 +5,8 @@ require 'date'
 require 'mechanize'
 require 'oddb/import/csv'
 require 'oddb/import/dimdi'
+require 'oddb/import/pharma24'
+require 'oddb/import/pharmnet'
 require 'oddb/import/whocc'
 require 'oddb/util/mail'
 
@@ -92,10 +94,20 @@ module ODDB
           import_dimdi_products(date)
         end
         import_dimdi_zuzahlungsbefreiung(today)
-        import_product_infos
-        if(today.day == 1)
+        case today.day
+        when 1
           import_pharmnet
+        when 15
+          update_prices
         end
+      end
+      def Updater.update_prices(packages = Drugs::Package.all)
+        importer = Import::Pharma24.new
+        _reported_import(importer) {
+          importer.import WWW::Mechanize.new, packages
+        }
+      rescue StandardError => error
+        ODDB.logger.error('Updater') { error.message }
       end
     end
   end

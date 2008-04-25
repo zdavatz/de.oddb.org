@@ -31,6 +31,9 @@ module ODDB
       end
       def postprocess
       end
+      def utf8(str)
+        u @@iconv.iconv(str) if str
+      end
     end
   end
 end
