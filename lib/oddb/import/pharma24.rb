@@ -13,7 +13,7 @@ class Pharma24 < Import
     @found = 0
     @host = 'http://www.apotheke-online-internet.de'
   end
-  def import(agent, packages, opts={})
+  def import(agent, packages, opts={:all => false})
     agent.max_history = 1
     packages.collect! { |package| package.odba_id }
     while id = packages.shift
@@ -116,8 +116,12 @@ class Pharma24 < Import
     extract_data page
   end
   def update_package agent, package, opts={}
-    @count += 1
-    if code = package.code(:cid, 'DE')
+    price = package.price(:public)
+    resale = [ :pharma24,
+               :csv_product_infos ].include?(package.data_origin(:price_public))
+    needs_update = opts[:all] || price.nil? || resale
+    if needs_update && (code = package.code(:cid, 'DE'))
+      @count += 1
       data, = search agent, code.value
       if data
         @found += 1
@@ -132,12 +136,11 @@ class Pharma24 < Import
         end
         amount = data[:price_public]
         if(amount > 0)
-          price = package.price(:public)
           either = false
           if price.nil?
             package.add_price Util::Money.new(amount, :public, 'DE')
             either = true
-          elsif package.data_origin(:price_public) == :pharma24
+          elsif resale
             if price != amount
               price.amount = amount
               either = true

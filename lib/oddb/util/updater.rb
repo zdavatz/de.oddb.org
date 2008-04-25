@@ -101,7 +101,8 @@ module ODDB
           update_prices
         end
       end
-      def Updater.update_prices(packages = Drugs::Package.all)
+      def Updater.update_prices(packages = Drugs::Package.all,
+                                opts={:all => false})
         importer = Import::Pharma24.new
         _reported_import(importer) {
           importer.import WWW::Mechanize.new, packages
