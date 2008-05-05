@@ -497,10 +497,11 @@ class Import < Import
     end
     result.each { |data| data.store(:search_term, good) }
     result
-  rescue StandardError => error
+  rescue Timeout::Error, StandardError => error
     ODDB.logger.error('PharmNet') { error.message }
     retries ||= opts[:retries]
-    if(/ServerError/.match(error.message) && retries > 0)
+    if((error.is_a?(Timeout::Error) || /ServerError/.match(error.message)) \
+       && retries > 0)
       sleep opts[:retry_unit] * 4 ** (opts[:retries] - retries)
       retries -= 1
       agent.history.clear
