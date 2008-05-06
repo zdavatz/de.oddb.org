@@ -548,7 +548,7 @@ class Import < Import
     sequences.collect! { |sequence| sequence.odba_id }
     while sequence = sequences.shift
       ## ... and refetch them when necessary
-      process(agent, ODBA.cache.fetch(sequence), opts)
+      process(agent, ODBA.cache.fetch(sequence), opts) rescue ODBA::OdbaError
     end
     fi_sources = { }
     pi_sources = { }
