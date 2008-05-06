@@ -78,7 +78,7 @@ module PackageMethods
     val
   end
   def fachinfo_link(model)
-    if(model.fachinfo.send(@session.language))
+    if(model.respond_to?(:fachinfo) && model.fachinfo.send(@session.language))
       link = HtmlGrid::Link.new(:square_fachinfo, model, @session, self)
       link.css_class = 'square fachinfo'
       link.href = @lookandfeel._event_url(:fachinfo, [:uid, model.fachinfo.uid])
@@ -96,7 +96,7 @@ module PackageMethods
     end
   end
   def patinfo_link(model)
-    if(model.patinfo.send(@session.language))
+    if(model.respond_to?(:patinfo) && model.patinfo.send(@session.language))
       link = HtmlGrid::Link.new(:square_patinfo, model, @session, self)
       link.css_class = 'square patinfo'
       link.href = @lookandfeel._event_url(:patinfo, [:uid, model.patinfo.uid])
