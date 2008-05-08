@@ -139,7 +139,6 @@ class Packages < View::List
 end
 class SequenceInnerForm < HtmlGrid::Composite
   include HtmlGrid::ErrorMessage
-  include PackageMethods
   COLSPAN_MAP = {
     [1,3] => 3,
     [1,4] => 3,
@@ -180,6 +179,22 @@ class SequenceInnerForm < HtmlGrid::Composite
     end
     button.onclick = script
     button
+  end
+  def fachinfo_link(model)
+    if(model.respond_to?(:fachinfo) && model.fachinfo.send(@session.language))
+      link = HtmlGrid::Link.new(:square_fachinfo, model, @session, self)
+      link.css_class = 'square fachinfo'
+      link.href = @lookandfeel._event_url(:fachinfo, [:uid, model.uid])
+      link
+    end
+  end
+  def patinfo_link(model)
+    if(model.respond_to?(:patinfo) && model.patinfo.send(@session.language))
+      link = HtmlGrid::Link.new(:square_patinfo, model, @session, self)
+      link.css_class = 'square patinfo'
+      link.href = @lookandfeel._event_url(:patinfo, [:uid, model.uid])
+      link
+    end
   end
   def show_atc_name(model)
     if(atc = model.atc)

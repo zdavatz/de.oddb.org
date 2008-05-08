@@ -49,20 +49,18 @@ class ProductsList < View::List
     end
   end
   def fachinfo_link(model)
-    if((pac = model.packages.find { |pc| pc.fachinfo.send(@session.language) })\
-       && (code = pac.code(:cid)))
-      link = HtmlGrid::Link.new(:square_fachinfo, pac, @session, self)
+    if(seq = model.sequences.find { |sq| sq.fachinfo.send(@session.language) })
+      link = HtmlGrid::Link.new(:square_fachinfo, seq, @session, self)
       link.css_class = 'square fachinfo'
-      link.href = @lookandfeel._event_url(:fachinfo, [:pzn, code.value])
+      link.href = @lookandfeel._event_url(:fachinfo, [:uid, seq.uid])
       link
     end
   end
   def patinfo_link(model)
-    if((pac = model.packages.find { |pc| pc.patinfo.send(@session.language) })\
-       && (code = pac.code(:cid)))
-      link = HtmlGrid::Link.new(:square_patinfo, pac, @session, self)
+    if(seq = model.sequences.find { |sq| sq.patinfo.send(@session.language) })
+      link = HtmlGrid::Link.new(:square_patinfo, seq, @session, self)
       link.css_class = 'square patinfo'
-      link.href = @lookandfeel._event_url(:patinfo, [:pzn, code.value])
+      link.href = @lookandfeel._event_url(:patinfo, [:uid, seq.uid])
       link
     end
   end

@@ -81,7 +81,7 @@ module PackageMethods
     if(model.respond_to?(:fachinfo) && model.fachinfo.send(@session.language))
       link = HtmlGrid::Link.new(:square_fachinfo, model, @session, self)
       link.css_class = 'square fachinfo'
-      link.href = @lookandfeel._event_url(:fachinfo, [:uid, model.fachinfo.uid])
+      link.href = @lookandfeel._event_url(:fachinfo, [:uid, model.sequence.uid])
       link
     end
   end
@@ -99,7 +99,7 @@ module PackageMethods
     if(model.respond_to?(:patinfo) && model.patinfo.send(@session.language))
       link = HtmlGrid::Link.new(:square_patinfo, model, @session, self)
       link.css_class = 'square patinfo'
-      link.href = @lookandfeel._event_url(:patinfo, [:uid, model.patinfo.uid])
+      link.href = @lookandfeel._event_url(:patinfo, [:uid, model.sequence.uid])
       link
     end
   end

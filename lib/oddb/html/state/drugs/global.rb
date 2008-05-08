@@ -75,11 +75,6 @@ module Events
       Ajax::ExplainPrice.new(@session, package.price(:public))
     end
   end
-  def _fachinfo(code)
-    if((package = _package_by_code(code)) && package.fachinfo)
-      Fachinfo.new(@session, package)
-    end
-  end
   def _fachinfo(uid)
     if(sequence = ODDB::Drugs::Sequence.find_by_uid(uid))
       Fachinfo.new(@session, sequence)
@@ -109,11 +104,6 @@ module Events
   def _package_infos(code)
     if(package = _package_by_code(code))
       Ajax::PackageInfos.new(@session, package)
-    end
-  end
-  def _patinfo(code)
-    if((package = _package_by_code(code)) && package.patinfo)
-      Patinfo.new(@session, package)
     end
   end
   def _patinfo(uid)
