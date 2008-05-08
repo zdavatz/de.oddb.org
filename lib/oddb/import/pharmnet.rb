@@ -541,6 +541,12 @@ class Import < Import
                                          :reparse => false,
                                          :retries => 3,
                                          :retry_unit => 60 })
+    if resume = opts[:resume]
+      resume = resume.to_s.downcase
+      sequences = sequences.select { |sequence| 
+        sequence.name.de.to_s.downcase >= resume
+      }
+    end
     sequences = sequences.sort_by { |sequence| sequence.name }
     checked = sprintf "Checked %i Sequences from '%s' to '%s'",
                       sequences.size, sequences.first.name, sequences.last.name

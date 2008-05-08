@@ -47,13 +47,11 @@ module ODDB
           }
         }
       end
-      def Updater.import_pharmnet(opts = { :replace => true, 
-                                           :reload  => false, 
-                                           :remove  => false, 
-                                           :repair  => false,
-                                           :reparse => false,
-                                           :retries => 3,
-                                           :retry_unit => 60 })
+      def Updater.import_pharmnet(opts = {})
+        opts = { :replace => true,  :reload  => false, 
+                 :remove  => false, :repair  => false,
+                 :reparse => false, :retries => 3,
+                 :retry_unit => 60 }.update opts
         importer = Import::PharmNet::Import.new
         _reported_import(importer) {
           importer._import(WWW::Mechanize.new, Drugs::Sequence.all, opts)
