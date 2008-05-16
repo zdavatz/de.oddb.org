@@ -103,7 +103,7 @@ class TestComparisonDeCh < Test::Unit::TestCase
     ragent.should_receive(:substance).and_return(rsubstance)
     rsubstance.should_receive(:de).and_return('Amantadinum')
     rgalform = flexmock('Remote Galenic Form')
-    rpackage.should_receive(:galenic_form).and_return(rgalform)
+    rpackage.should_receive(:galenic_forms).and_return([rgalform])
     rgalform.should_receive(:de).and_return('Tropfen')
     rgroup = flexmock('Remote Galenic Group')
     rgroup.should_receive(:de).and_return('Unbekannt')

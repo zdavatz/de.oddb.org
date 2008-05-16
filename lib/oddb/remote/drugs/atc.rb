@@ -9,13 +9,18 @@ module ODDB
     module Drugs
 class Atc < Remote::Object
   delegate :code, :parent_code
+  def initialize *args
+    super
+    @ddds = {}
+  end
   def name
     @name ||= Util::Multilingual.new(:de => @@iconv.iconv(@remote.name))
   end
   def ddds(administration)
-    []
-    #@ddds ||= @remote.ddds.select { |roa, ddd| 
-    #  ddd.administration_route == administration }
+    @ddds[administration] ||= @remote.ddds.inject([]) { |memo, (roa, ddd)| 
+      memo.push ddd if roa == administration 
+      memo
+    }
   end
   def interesting?
     false

@@ -9,13 +9,14 @@ require 'oddb/remote/drugs/active_agent'
 require 'oddb/remote/drugs/atc'
 require 'oddb/remote/drugs/dose'
 require 'oddb/remote/drugs/galenic_form'
+require 'oddb/remote/drugs/part'
 require 'oddb/remote/drugs/unit'
 
 module ODDB
   module Remote
     module Drugs
 class Package < Remote::Object
-  delegate :ikscat, :sl_entry, :multi
+  delegate :ddds, :ikscat, :sl_entry
   def initialize(source, remote, currency_rate, tax_factor=1.0)
     @tax_factor = tax_factor.to_f
     @currency_rate = currency_rate.to_f
@@ -48,35 +49,46 @@ class Package < Remote::Object
     @comparable_size ||= @remote.comparable_size
   end
   def ddds
-    @ddds or begin
-      if(group = galenic_form.group)
-        @ddds = atc.ddds(group.administration)
-      else
-        @ddds = []
+    @ddds ||= galenic_forms.inject([]) { |memo, form|
+      if(group = form.group)
+        memo.concat atc.ddds(group.administration)
       end
-    end
+      memo
+    }
   end
-  def galenic_form
-    @galenic_form ||= Remote::Drugs::GalenicForm.new(@source, 
-                        @remote.galenic_form)
+  def dose_price(dose)
+    if(price = price(:public))
+      pdose = doses.first.want(dose.unit)
+      Util::Money.new((dose / pdose).to_f * (price.to_f / size))
+    end
+  rescue StandardError
   end
   def galenic_forms
-    [galenic_form]
+    @galenic_forms ||= @remote.galenic_forms.collect { |form|
+      Remote::Drugs::GalenicForm.new(@source, form)
+    }
   end
   def local_comparables
     comparables = []
     doses = active_agents.collect { |act| act.dose }
     if(doses.size == 1 \
        && (atc = ODDB::Drugs::Atc.find_by_code(self.atc.code)))
-      description = galenic_form.description.de
-      groupname = galenic_form.groupname
+      descriptions = galenic_forms.collect { |form| form.description.de }
+      groupnames = galenic_forms.collect { |form| form.groupname }
       range = (size*0.75)..(size*1.25)
       atc.products.each { |prod|
         prod.sequences.each { |seq|
-          if(seq.doses == doses && (form = seq.galenic_forms.first))
-            group = form.group
-            if(form.description == description \
-               || (group && group.name == groupname))
+          if(seq.doses == doses)
+            descs = []
+            names = []
+            seq.galenic_forms.each { |form|
+              descs.push form.description
+              if grp = form.group
+                names.push grp.name
+              end
+            }
+            if(descs == descriptions || groupnames.all? { |name|
+               names.any? { |other| other == name } })
               comparables.concat seq.packages.select { |pac|
                 range.include?(pac.size)
               }
@@ -91,7 +103,9 @@ class Package < Remote::Object
     @name ||= Util::Multilingual.new(:de => @@iconv.iconv(@remote.name_base))
   end
   def parts
-    [self]
+    @parts ||= @remote.parts.collect { |part| 
+      Remote::Drugs::Part.new(@source, part)
+    }
   end
   def price(type)
     case type
@@ -99,19 +113,12 @@ class Package < Remote::Object
       @cache.fetch(type) { @cache.store(type, remote_price(type)) }
     end
   end
-  def quantity
-    nil
-  end
   def remote_price(key)
     pr = @remote.send("price_#{key}").to_f * @currency_rate / @tax_factor
     Util::Money.new(pr.to_f) if(pr > 0)
   end
   def size
     @size ||= comparable_size.qty
-  end
-  def unit
-    @unit ||= Remote::Drugs::Unit.new(@source, 
-                @@iconv.iconv(@remote.comform || comparable_size.unit))
   end
 end
     end

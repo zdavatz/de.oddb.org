@@ -78,11 +78,11 @@ class TestCompare < Test::Unit::TestCase
     rpackage.should_receive(:comparable_size)\
       .and_return(Drugs::Dose.new(4))
     rpackage.should_receive(:__drbref).and_return(uid)
-    rpackage.should_receive(:comform)
     rcompany = flexmock('Remote Company')
     rpackage.should_receive(:company).and_return(rcompany)
     rcompany.should_receive(:name).and_return('Producer (Schweiz) AG')
     ratc = flexmock('Remote Atc Class')
+    ratc.should_receive(:ddds).and_return []
     rpackage.should_receive(:atc_class).and_return(ratc)
     ratc.should_receive(:code).and_return('N04BB01')
     ratc.should_receive(:de).and_return('Amantadine')
@@ -93,11 +93,16 @@ class TestCompare < Test::Unit::TestCase
     ragent.should_receive(:substance).and_return(rsubstance)
     rsubstance.should_receive(:de).and_return('Amantadinum')
     rgalform = flexmock('Remote Galenic Form')
-    rpackage.should_receive(:galenic_form).and_return(rgalform)
+    rpackage.should_receive(:galenic_forms).and_return([rgalform])
     rgalform.should_receive(:de).and_return('Tropfen-Ampullen')
     rgroup = flexmock('Remote Galenic Group')
     rgroup.should_receive(:de).and_return('Tropfen')
     rgalform.should_receive(:galenic_group).and_return(rgroup)
+    rpart = flexmock('Remote Part')
+    rpart.should_receive(:comparable_size)\
+      .and_return(Drugs::Dose.new(4))
+    rpart.should_ignore_missing
+    rpackage.should_receive(:parts).and_return [rpart]
     @cache.should_receive(:fetch).with(uid.to_i).and_return(rpackage)
     rpackage.should_ignore_missing
     rpackage

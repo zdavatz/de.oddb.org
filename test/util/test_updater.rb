@@ -34,7 +34,7 @@ module ODDB
       end
       def test_run
         flexmock(Util::Mail).should_receive(:notify_admins)\
-          .with(String, Array).times(6)
+          .with(String, Array).times(5)
         arch = File.join(@xls_dir, 
           "liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls")
         today = Date.new(2006,10)
@@ -111,6 +111,7 @@ module ODDB
           assert_equal('zuzahlung-xls-io', io.read)
           []
         }
+=begin
         importer = flexmock('ProductInfos')
         stub = flexmock(Import::Csv::ProductInfos)
         stub.should_receive(:download_latest).and_return { |block|
@@ -123,6 +124,7 @@ module ODDB
           assert(true) 
           ['report']
         }
+=end
         pharmnet_import = flexmock('PharmNet')
         flexmock(Import::PharmNet::Import)\
           .should_receive(:new).and_return(pharmnet_import)
@@ -202,7 +204,7 @@ module ODDB
       end
       def test_run__later_errors
         flexmock(Util::Mail).should_receive(:notify_admins)\
-          .with(String, Array).times(6)
+          .with(String, Array).times(5)
         arch = File.join(@xls_dir, 
           "liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls")
         today = Date.new(2006,10)
@@ -279,6 +281,7 @@ module ODDB
           assert_equal('zuzahlung-xls-io', io.read)
           raise "import error"
         }
+=begin
         importer = flexmock('ProductInfos')
         stub = flexmock(Import::Csv::ProductInfos)
         stub.should_receive(:download_latest).and_return { |block|
@@ -291,6 +294,7 @@ module ODDB
           assert_equal('file-handle', io)
           raise "import error"
         }
+=end
         flexmock(Import::PharmNet::Import).new_instances\
           .should_receive(:_import)\
           .times(1).and_return { |agent, seqs, opts|

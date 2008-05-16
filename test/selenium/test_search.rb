@@ -94,9 +94,13 @@ class TestSearch < Test::Unit::TestCase
     rpackage.should_receive(:company).and_return(rcompany)
     rcompany.should_receive(:name).and_return('Producer (Schweiz) AG')
     ratc = flexmock('Remote Atc Class')
+    ratc.should_receive(:ddds).and_return []
     rpackage.should_receive(:atc_class).and_return(ratc)
     ratc.should_receive(:code).and_return('N04BB01')
-    ratc.should_receive(:de).and_return('Amantadine')
+    ratc.should_receive(:parent_code).and_return('N04BB')
+    flexmock(Drugs::Atc).should_receive(:find_by_code)
+    ratc.should_receive(:name).and_return("Rem\366tadine")
+    #ratc.should_receive(:de).and_return('Amantadine')
     ragent = flexmock('Remote ActiveAgent')
     rpackage.should_receive(:active_agents).and_return([ragent])
     rsubstance = flexmock('Remote Substance')
@@ -104,11 +108,16 @@ class TestSearch < Test::Unit::TestCase
     ragent.should_receive(:substance).and_return(rsubstance)
     rsubstance.should_receive(:de).and_return('Amantadinum')
     rgalform = flexmock('Remote Galenic Form')
-    rpackage.should_receive(:galenic_form).and_return(rgalform)
+    rpackage.should_receive(:galenic_forms).and_return([rgalform])
     rgalform.should_receive(:de).and_return('Tropfen')
     rgroup = flexmock('Remote Galenic Group')
     rgroup.should_receive(:de).and_return('Unbekannt')
     rgalform.should_receive(:galenic_group).and_return(rgroup)
+    rpart = flexmock('Remote Part')
+    rpart.should_receive(:comparable_size)\
+      .and_return(Drugs::Dose.new(4))
+    rpart.should_ignore_missing
+    rpackage.should_receive(:parts).and_return [rpart]
     @cache.should_receive(:fetch).with(uid.to_i).and_return(rpackage)
     rpackage.should_ignore_missing
     rpackage
@@ -532,29 +541,8 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     ODDB.config.remote_databases = [drb.uri]
 
     remote.should_receive(:get_currency_rate).with('EUR').and_return 0.6
-    rpackage = flexmock('Remote Package')
+    rpackage = setup_remote_package 'Remotadin'
     remote.should_receive(:remote_packages).and_return([rpackage])
-    rpackage.should_receive(:barcode).and_return('Barcode')
-    rpackage.should_receive(:name_base).and_return('Remotadin')
-    rpackage.should_receive(:price_public).and_return(12)
-    rpackage.should_receive(:comparable_size)\
-      .and_return(Drugs::Dose.new(100, 'ml'))
-    rpackage.should_receive(:__drbref).and_return("55555")
-    rpackage.should_receive(:comform)
-    rcompany = flexmock('Remote Company')
-    rpackage.should_receive(:company).and_return(rcompany)
-    rcompany.should_receive(:name).and_return('Producer (Schweiz) AG')
-    ratc = flexmock('Remote Atc Class')
-    rpackage.should_receive(:atc_class).and_return(ratc)
-    ratc.should_receive(:code).and_return('N04BB01')
-    ratc.should_receive(:de).and_return('Amantadine')
-    ragent = flexmock('Remote ActiveAgent')
-    rpackage.should_receive(:active_agents).and_return([ragent])
-    rsubstance = flexmock('Remote Substance')
-    ragent.should_receive(:dose).and_return(Drugs::Dose.new(100, 'mg'))
-    ragent.should_receive(:substance).and_return(rsubstance)
-    rsubstance.should_receive(:de).and_return('Amantadinum')
-    rpackage.should_ignore_missing
 
     package = setup_package
     # switch to mm-flavor
@@ -669,6 +657,7 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     rcompany.should_receive(:name).and_return('Producer (Schweiz) AG')
     ratc = flexmock('Remote Atc Class')
     rpackage.should_receive(:atc_class).and_return(ratc)
+    ratc.should_receive(:ddds).and_return []
     ratc.should_receive(:code).and_return('N04BB01')
     ratc.should_receive(:de).and_return('Amantadine')
     ragent = flexmock('Remote ActiveAgent')
@@ -676,6 +665,12 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     rsubstance = flexmock('Remote Substance')
     ragent.should_receive(:dose).and_return(Drugs::Dose.new(100, 'mg'))
     ragent.should_receive(:substance).and_return(rsubstance)
+    rpart = flexmock('Remote Part')
+    rpart.should_receive(:comparable_size)\
+      .and_return(Drugs::Dose.new(4))
+    rpart.should_ignore_missing
+    rpackage.should_receive(:parts).and_return [rpart]
+    rpackage.should_receive(:galenic_forms).and_return []
     rsubstance.should_receive(:de).and_return('Amantadinum')
     rpackage.should_ignore_missing
 
@@ -697,31 +692,8 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     ODDB.config.remote_databases = [drb.uri]
 
     remote.should_receive(:get_currency_rate).with('EUR').and_return 0.6
-    rpackage = flexmock('Remote Package')
+    rpackage = setup_remote_package 'Remotadin'
     remote.should_receive(:remote_packages).and_return([rpackage])
-    rpackage.should_receive(:barcode).and_return('Barcode')
-    rpackage.should_receive(:name_base).and_return('Remotadin')
-    rpackage.should_receive(:price_public).and_return(12)
-    rpackage.should_receive(:comparable_size)\
-      .and_return(Drugs::Dose.new(100, 'ml'))
-    rpackage.should_receive(:__drbref).and_return("55555")
-    rpackage.should_receive(:comform)
-    rcompany = flexmock('Remote Company')
-    rpackage.should_receive(:company).and_return(rcompany)
-    rcompany.should_receive(:name).and_return('Producer (Schweiz) AG')
-    ratc = flexmock('Remote Atc Class')
-    rpackage.should_receive(:atc_class).and_return(ratc)
-    ratc.should_receive(:code).and_return('N04BB01')
-    ratc.should_receive(:parent_code).and_return('N04BB')
-    flexmock(Drugs::Atc).should_receive(:find_by_code)
-    ratc.should_receive(:name).and_return("Rem\366tadine")
-    ragent = flexmock('Remote ActiveAgent')
-    rpackage.should_receive(:active_agents).and_return([ragent])
-    rsubstance = flexmock('Remote Substance')
-    ragent.should_receive(:dose).and_return(Drugs::Dose.new(100, 'mg'))
-    ragent.should_receive(:substance).and_return(rsubstance)
-    rsubstance.should_receive(:de).and_return('Amantadinum')
-    rpackage.should_ignore_missing
 
     # switch to mm-flavor
     open "/de/drugs/home/flavor/mm"
