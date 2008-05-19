@@ -24,7 +24,6 @@ class ActiveAgents < View::List
   COMPONENT_CSS_MAP = { [2,0] => 'short right' }
   DEFAULT_CLASS = HtmlGrid::InputText
   EMPTY_LIST = true
-  OMIT_HEADER = true
   STRIPED_BG = false
   def add(model)
     link = HtmlGrid::Link.new(:plus, model, @session, self)
@@ -43,6 +42,20 @@ class ActiveAgents < View::List
       @grid.add_style 'right', *offset
       @grid.set_colspan offset.at(0), offset.at(1)
     end
+  end
+  def compose_header(offset)
+    comp = if act = @model.first
+             act.composition
+           end
+    input = galenic_form(comp)
+    label = HtmlGrid::SimpleLabel.new(:galenic_form, input, @session, self)
+    pos = *offset.dup
+    pos[0] += 1
+    @grid.add [label, input], *pos
+    pos.push 2
+    @grid.set_colspan *pos
+    offset[1] += 1
+    offset
   end
   def composition
     @container ? @container.list_index : @session.user_input(:composition)
@@ -73,6 +86,14 @@ class ActiveAgents < View::List
   def dose(model)
     input = HtmlGrid::InputText.new(name("dose"), model, @session, self)
     input.value = model.dose.to_s if model
+    input
+  end
+  def galenic_form(model)
+    input = HtmlGrid::InputText.new("galenic_form[#{composition}]", 
+                                    model, @session, self)
+    if model && gf = model.galenic_form
+      input.value = gf.description.send @session.language
+    end
     input
   end
   def name(part)

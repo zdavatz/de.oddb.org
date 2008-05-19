@@ -93,6 +93,12 @@ div#composition-list div {
   padding: 4px; 
   float: left;
 }
+div#composition-list label {
+  padding-right: 4px; 
+}
+div#composition-list input.right {
+  float: right;
+}
 div#compositions {
   overflow: auto;
 }

@@ -288,7 +288,7 @@ module Dimdi
         end
         substances.each { |substance|
           active_agent = Drugs::ActiveAgent.new(substance, dose)
-          composition.add_active_agent(active_agent)
+          active_agent.composition = composition
         }
         composition.galenic_form = galform
         if(factor = cell(row, 11))
@@ -674,8 +674,7 @@ module Dimdi
           end
         else
           agent = Drugs::ActiveAgent.new(substance, dose)
-          composition.add_active_agent(agent)
-          composition.save
+          agent.composition = composition
         end
       end
     end
@@ -772,8 +771,7 @@ module Dimdi
         composition = Drugs::Composition.new
         substances.each_with_index { |sub, idx|
           act = Drugs::ActiveAgent.new(sub, doses.at(idx))
-          composition.add_active_agent(act)
-          act.save
+          act.composition = composition
         }
         composition.galenic_form = galform
         composition.save

@@ -119,7 +119,7 @@ class ProductInfos < Import
     data[:composition].each { |act|
       substance = import_substance(act[:substance])
       active_agent = Drugs::ActiveAgent.new(substance, act[:dose])
-      composition.add_active_agent(active_agent)
+      active_agent.composition = composition
     }
     composition.galenic_form = import_galenic_form(cell(row, 5))
     composition.save
@@ -160,7 +160,7 @@ class ProductInfos < Import
             composition = Drugs::Composition.new
             comp.active_agents.each { |act|
               active_agent = Drugs::ActiveAgent.new(act.substance, act.dose.dup)
-              composition.add_active_agent(active_agent)
+              active_agent.composition = composition
             }
             composition.galenic_form = comp.galenic_form
             composition.save
@@ -398,8 +398,7 @@ class ProductInfos < Import
       seq = Drugs::Sequence.new
       comp = Drugs::Composition.new
       agent = Drugs::ActiveAgent.new(substance, dose)
-      comp.add_active_agent(agent)
-      comp.save
+      agent.composition = comp
       seq.add_composition(comp)
       seq.product = sequence.product
       package.sequence = seq

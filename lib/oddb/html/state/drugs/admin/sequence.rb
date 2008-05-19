@@ -100,7 +100,8 @@ class Sequence < Global
   def update
     check_model
     mandatory = [ :atc ]
-    keys = [ :atc_name, :registration, :fi_url, :pi_url, :substance, :dose ]
+    keys = [ :atc_name, :registration, :fi_url, :pi_url, :galenic_form,
+      :substance, :dose ]
     input = user_input(mandatory + keys, mandatory)
     others = ODDB::Drugs::Sequence.search_by_code(:type => 'registration',
                                                   :value => input[:registration],
@@ -172,23 +173,30 @@ class Sequence < Global
     if(substances = input[:substance])
       substances.each { |cmp_idx, substances|
         doses = input[:dose][cmp_idx]
+        gfstr = input[:galenic_form][cmp_idx]
         cmp_idx = cmp_idx.to_i
         comp = @model.compositions.at(cmp_idx)
+        if(comp.nil?)
+          comp = @model.add_composition ODDB::Drugs::Composition.new
+        end
+        if gfstr.to_s.empty?
+          comp.galenic_form = nil
+        elsif gform = ODDB::Drugs::GalenicForm.find_by_description(gfstr)
+          comp.galenic_form = gform
+        else 
+          key = :"galenic_form[#{cmp_idx}]"
+          @errors.store key, create_error(:e_unknown_galenic_form, key, gfstr)
+        end
         substances.each { |sub_idx, sub|
           parts = doses[sub_idx].split(/\s*(?=[^\d.,])/, 2)
           sub_idx = sub_idx.to_i
           if(substance = ODDB::Drugs::Substance.find_by_name(sub))
             changed = false
-            if(comp.nil?)
-              comp = @model.add_composition ODDB::Drugs::Composition.new
-              changed = true
-            end
             dose = ODDB::Drugs::Dose.new(*parts) unless parts.empty?
             agent = comp.active_agents.at(sub_idx)
             if(agent.nil?)
               agent = ODDB::Drugs::ActiveAgent.new substance, dose
-              comp.add_active_agent agent
-              comp.save
+              agent.composition = comp
               changed = true
             end
             if(agent.substance != substance)
@@ -208,6 +216,7 @@ class Sequence < Global
             @errors.store key, create_error(:e_unknown_substance, key, sub)
           end
         }
+        comp.save
       }
     end
     saved

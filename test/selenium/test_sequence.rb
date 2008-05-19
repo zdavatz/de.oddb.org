@@ -18,6 +18,7 @@ class TestAdminSequence < Test::Unit::TestCase
     Drugs::Composition.instances.clear
     Drugs::Sequence.instances.clear
     Drugs::Product.instances.clear
+    Drugs::GalenicForm.instances.clear
     Business::Company.instances.clear
     super
   end
@@ -44,7 +45,11 @@ class TestAdminSequence < Test::Unit::TestCase
     substance.save
     dose = Drugs::Dose.new(100, 'mg')
     active_agent = Drugs::ActiveAgent.new(substance, dose)
-    composition.add_active_agent(active_agent)
+    active_agent.composition = composition
+    galform = Drugs::GalenicForm.new
+    galform.description.de = 'Tabletten'
+    galform.save
+    composition.galenic_form = galform
     sequence.save
     sequence
   end
@@ -273,15 +278,63 @@ class TestAdminSequence < Test::Unit::TestCase
     click "link=+"
     sleep(0.5)
     assert is_element_present("substance[0][2]")
-    click "//table[@id='active-agents-0']//tr[3]//td[1]//a"
+    click "//table[@id='active-agents-0']//tr[4]//td[1]//a"
     sleep(0.5)
     assert is_element_present("link=+")
     assert !is_element_present("substance[0][2]")
  
-    click "//table[@id='active-agents-0']//tr[2]//td[1]//a"
+    click "//table[@id='active-agents-0']//tr[3]//td[1]//a"
     sleep(0.5)
     assert !is_element_present("substance[0][1]")
     assert_equal 1, composition.active_agents.size
+  end
+  def test_sequence__galenic_form
+    sequence = setup_sequence
+
+    sub1 = ODDB::Drugs::Substance.new
+    sub1.name.de = 'Enalapril'
+    sub1.save
+
+    user = login_admin
+    uid = sequence.uid
+    open "/de/drugs/sequence/uid/#{uid}"
+
+    assert_equal "DE - ODDB.org | Medikamente | Sequenz | #{uid} | Open Drug Database", get_title
+    assert is_element_present("galenic_form[0]")
+    assert_equal 'Tabletten', get_value("galenic_form[0]")
+
+    type "galenic_form[0]", ''
+    click "update"
+    wait_for_page_to_load "30000"
+
+    composition = sequence.compositions.first
+    assert_nil composition.galenic_form
+    assert_equal '', get_value("galenic_form[0]")
+
+    type "galenic_form[0]", 'Filmtabletten'
+    click "update"
+    wait_for_page_to_load "30000"
+
+    assert_nil composition.galenic_form
+    assert_equal 'Filmtabletten', get_value("galenic_form[0]")
+    assert is_text_present('Die Galenische Form "Filmtabletten" ist nicht bekannt')
+
+    refresh
+    wait_for_page_to_load "30000"
+    
+    assert_nil composition.galenic_form
+    assert_equal '', get_value("galenic_form[0]")
+
+    galform = Drugs::GalenicForm.new
+    galform.description.de = 'Filmtabletten'
+    galform.save
+
+    type "galenic_form[0]", 'Filmtabletten'
+    click "update"
+    wait_for_page_to_load "30000"
+
+    assert_equal galform, composition.galenic_form
+    assert_equal 'Filmtabletten', get_value("galenic_form[0]")
   end
   def test_sequence__compositions
     sequence = setup_sequence
@@ -341,6 +394,7 @@ class TestAdminSequence < Test::Unit::TestCase
     click "//table[@id='active-agents-1']//a[text()='Bestandteil löschen']"
     sleep(0.5)
     assert !is_element_present("substance[1][0]")
+    composition = sequence.compositions.last
     assert_equal 1, composition.active_agents.size
   end
   def test_new_sequence__success

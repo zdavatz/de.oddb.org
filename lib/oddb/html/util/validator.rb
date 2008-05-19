@@ -38,8 +38,9 @@ class Validator < SBSM::Validator
     :atc => /[ABCGHJLMNPRSV](\d{2}([A-Z]([A-Z](\d{2})?)?)?)?/,
   }
   STRINGS = [ :atc_name, :captcha, :chapter, :code, :company, :dose, :fi_url,
-              :invoice, :message, :name, :name_first, :name_last, :pi_url,
-              :quantity, :query, :registration, :substance, :uid, :unit ]
+              :galenic_form, :invoice, :message, :name, :name_first,
+              :name_last, :pi_url, :quantity, :query, :registration,
+              :substance, :uid, :unit ]
   def page(value) 
     if(num = validate_numeric(:page, value))
       # pages are 1-based for the human user
