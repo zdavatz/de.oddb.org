@@ -33,10 +33,13 @@ module ODDB
         }
       end
       def Updater.import_dimdi_zuzahlungsbefreiung(today)
-        url = "http://www.die-gesundheitsreform.de/gesetze_meilensteine/gesetze/pdf/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls"
-        Import::Dimdi.download_latest(url, today) { |io|
-          reported_import(Import::Dimdi::ZuzahlungsBefreiung.new, io)
-        }
+        url = "http://www.gkv.info/gkv/index.php?id=445"
+        if match = /zuzahlungsbefreiung_excel_\d+.xls/.match(open(url).read)
+          url = "http://www.gkv.info/gkv/fileadmin/user_upload/Projekte/arzneimittelzuzahlungsbefreiung/#{match}"
+          Import::Dimdi.download_latest(url, today) { |io|
+            reported_import(Import::Dimdi::ZuzahlungsBefreiung.new, io)
+          }
+        end
       end
       def Updater.import_missing(name)
         importer = Import::Csv::ProductInfos.new

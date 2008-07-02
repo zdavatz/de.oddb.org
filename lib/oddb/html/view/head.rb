@@ -61,7 +61,7 @@ class WelcomeHead < Head
       @lookandfeel.lookup(:drugs_fixprices), "\n",
       url_link("http://www.dimdi.de/static/de/amg/fbag/index.htm"),
       "\n\n", @lookandfeel.lookup(:drugs_copay_free), "\n", 
-      url_link("http://www.bkk.de/bkk/powerslave,id,1081,nodeid,.html"),
+      url_link("http://www.gkv.info/gkv/index.php?id=445"),
       "\n\n", @lookandfeel.lookup(:drugs_atc_codes), "\n",
       url_link("http://www.whocc.no/atcddd/"),
     ]

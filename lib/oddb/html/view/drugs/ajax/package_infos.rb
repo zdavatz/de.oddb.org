@@ -79,7 +79,7 @@ class PackageInfos < HtmlGrid::Composite
   end
   def link_zuzahlungsbefreit(model)
     link = HtmlGrid::Link.new(:zuzahlungsbefreit, model, @session, self)
-    link.href = "http://www.bkk.de/bkk/powerslave,id,1081,nodeid,.html"
+    link.href = "http://www.gkv.info/gkv/index.php?id=445"
     link
   end
   def opener(code, type)
