@@ -654,7 +654,14 @@ module Dimdi
           sequence.add_composition(composition)
           sequence.save
         end
-        candidate_names = [ name[/^\S+/], name[/^[^-]+/] ].uniq
+        candidate_names = [ name[/^\S+/], name[/^[^-]+/] ]
+        composition.active_agents.each { |agent|
+          other = agent.substance.name.de
+          if other == name[0,other.length]
+            candidate_names.push other
+          end
+        }
+        candidate_names.uniq!
         agent = nil
         if(agent = composition.active_agent(substance))
           agent.dose = dose

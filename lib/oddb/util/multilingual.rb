@@ -58,6 +58,9 @@ module ODDB
       def all
         super.concat(@synonyms)
       end
+      def merge(other)
+        @synonyms.concat(other.all).uniq!
+      end
     end
   end
 end
