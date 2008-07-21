@@ -1,0 +1,15 @@
+The german dictionaries from OpenOffice.org are missing the compound flags necessary for recognising words that can be compunds of other words.
+German language depends heavily on compound words such as "Haustür", which need to be lexized
+as "'tür':1 'haus':1 'haustür':1" by tsearch in order to yield 'haustür' when searching for 'tür'.
+
+compound.pl adds the /z Flag to all words that can be contained in other words.
+It searches the input dictionary word by word and checks if the given entry is part of another word 
+e.g. 'tür' will be found in 'haustür', thus creating the entry tür/z in the dictionary.
+
+Usage:
+compound.pl -i german.dic -o german.dict
+
+where german.dic is the original dictionary File from OpenOffice.org and german.dict the compound-extended version.
+
+The resulting file must then be processed by the tool in /my2ispell/ that originally handles the norwegian dictionaries only. You must adjust the Makefile to take the german dictionary + aff-File.
+
