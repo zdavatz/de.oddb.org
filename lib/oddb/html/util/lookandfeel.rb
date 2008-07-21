@@ -196,6 +196,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :home                       => 'Home',
       :html_title                 => 'DE - ODDB.org',
       :html_owner                 => 'Open Drug Database',
+      :indication                 => 'Indikation',
       :item_good_experience       => 'Persönliche Erfahrung',
       :item_good_experience_true  => 'Ich habe mit diesem Medikament positive Erfahrungen gemacht.',
       :item_good_experience_false => 'Ich habe mit diesem Medikament negative Erfahrungen gemacht.',

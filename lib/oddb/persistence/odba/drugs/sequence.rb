@@ -9,6 +9,9 @@ module ODDB
     class Sequence < Model
       odba_index :code, :codes, {:type => 'type.to_s', :country => 'country', 
         :value => 'to_s'}, Util::Code
+      odba_index :fachinfo_indications_de, 'fachinfo.de',
+                 'chapter("indications").to_s', Text::Document,
+                 :fulltext => true, :dictionary => 'default_german'
       serialize :codes
     end
   end

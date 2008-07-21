@@ -190,6 +190,9 @@ module Events
         _search_by(:substance, query, result) if result.empty?
         _complete(_search_by(:name, query, result)) if result.empty?
         _complete(_search_by(:product, query, result)) if result.empty?
+      when 'indication'
+        seqs = ODDB::Drugs::Sequence.search_by_fachinfo_indications_de(query)
+        seqs.each { |seq| result.concat seq.packages }
       else
         _search_by(:name, query, result)
         _search_by(:product, query, result) if result.empty?

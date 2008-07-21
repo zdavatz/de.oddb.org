@@ -49,6 +49,15 @@ module ODDB
         @admin_threads.add(t)
         t
       end
+      def generate_dictionary(language, locale)
+        ODBA.storage.remove_dictionary(language)
+        base = File.join(ODDB.config.data_dir,
+                         "fulltext", "data", "dicts", language)
+        ODBA.storage.generate_dictionary(language, locale, base)
+      end
+      def generate_dictionaries
+        generate_dictionary('german', 'de_DE@euro')
+      end
       def ipn(notification)
         Util::Ipn.process notification
         nil # don't return the invoice back across drb - it's not defined in yipn

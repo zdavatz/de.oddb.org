@@ -12,7 +12,8 @@ class Validator < SBSM::Validator
               :item_helps, ]
   ENUMS = {
     :display   => ['paged', 'grouped'],
-    :dstype    => ['tradename', 'compare', 'substance', 'company'],
+    :dstype    => ['tradename', 'compare', 'substance', 'company',
+                   'indication'],
     :range     => ("A".."Z").to_a.push('0-9'),
     :salutation => [nil, "salutation_f", "salutation_m"],
     :sortvalue => [ 'active_agents', 'atc', 'code_festbetragsstufe',
