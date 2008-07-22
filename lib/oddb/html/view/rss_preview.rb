@@ -28,7 +28,7 @@ class RssFeedbackList < HtmlGrid::DivList
     if(parent = model.item)
       link = HtmlGrid::Link.new(:feedback, model, @session, self)
       link.href = @lookandfeel._event_url(:feedback, :pzn => parent.code(:cid))
-      link.value = @lookandfeel.lookup :feedback_for, parent.name, size(parent)
+      link.value = @lookandfeel.lookup :feedback_preview, parent.name, size(parent)
       link
     end
   end
