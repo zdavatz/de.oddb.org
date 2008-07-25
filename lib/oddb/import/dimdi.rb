@@ -167,7 +167,7 @@ module Dimdi
       sequence
     end
     def import_atc(row, sequence)
-      atc_name = cell(row, 2)
+      atc_name = cell(row, 10)
       substances = sequence.substances.uniq
       candidates = []
       if(substances.size == 1)
@@ -195,21 +195,21 @@ module Dimdi
     def import_row(row)
       @package_date = cell(row, 13) || @date
       @count += 1
-      pzn = u(cell(row, 10).to_i.to_s)
+      pzn = u(cell(row, 0).to_i.to_s)
       package = Drugs::Package.find_by_code(:type    => 'cid',
                                             :value   => pzn,
                                             :country => 'DE')
-      name = capitalize_all(cell(row, 0))
+      name = product_name(row)
       product = Drugs::Product.find_by_name(name)
       if(!package)
         ## new package and possibly new product
         import_product(row, product, name)
-      elsif(!product)
+      #elsif(!product)
         ## known package but unknown product
-        rename_product(row, package, name)
-      elsif(product != package.product)
+      #  rename_product(row, package, name)
+      #elsif(product != package.product)
         ## product-name has changed
-        move_package(row, product, package, name)
+      #  move_package(row, product, package, name)
       else
         ## update package-data
         update_package(row, package)
@@ -217,9 +217,9 @@ module Dimdi
     end
     def import_package(row, sequence, unitname)
       ## we don't expect any multipart packages here
-      psize = cell(row, 6)
+      psize = cell(row, 2)
       package = Drugs::Package.new
-      pzn = u(cell(row, 10).to_i.to_s)
+      pzn = u(cell(row, 0).to_i.to_s)
       package.add_code(Util::Code.new(:cid, pzn, 'DE', @package_date))
       part = Drugs::Part.new
       part.size = psize
@@ -244,9 +244,9 @@ module Dimdi
         @existing += 1
       else
         @created += 1
-        product = Drugs::Product.new
-        product.name.de = name
-        product.save
+        #product = Drugs::Product.new
+        #product.name.de = name
+        #product.save
       end
       import_sequence(row, product)
     end
@@ -268,15 +268,17 @@ module Dimdi
       sequence, composition, substance, dose = nil
       substances = import_substances(row)
       galform = import_galenic_form(row)
-      if(dose = cell(row, 5))
+      if(dose = cell(row, 8))
         dose = Drugs::Dose.new(dose, 'mg')
       end
-      sequence = product.sequences.find { |seq|
-        doses = seq.doses
-        seq.galenic_forms == [galform] \
-          && seq.substances == substances \
-          && (doses.empty? || doses.inject { |a, b| a + b } == dose)
-      } 
+      if product
+        sequence = product.sequences.find { |seq|
+          doses = seq.doses
+          seq.galenic_forms == [galform] \
+            && seq.substances == substances \
+            && (doses.empty? || doses.inject { |a, b| a + b } == dose)
+        } 
+      end
       if(sequence)
         @existing_sequences += 1
       else
@@ -291,7 +293,7 @@ module Dimdi
           active_agent.composition = composition
         }
         composition.galenic_form = galform
-        if(factor = cell(row, 11))
+        if(factor = cell(row, 9))
           composition.equivalence_factor = factor
         end
         composition.save
@@ -313,14 +315,14 @@ module Dimdi
       end
     end
     def import_galenic_form(row)
-      Drugs::GalenicForm.find_by_code(:value   => cell(row, 4),
+      Drugs::GalenicForm.find_by_code(:value   => cell(row, 6),
                                       :type    => "galenic_form",
                                       :country => 'DE')
     end
     def import_substances(row)
       subs = []
-      groupname = cell(row, 2)
-      if(abbr = cell(row, 1))
+      groupname = cell(row, 10)
+      if(abbr = cell(row, 7))
         if(sub = Drugs::Substance.find_by_code(:value => abbr, 
                    :type => "substance", :country => "DE"))
           assign_substance_group(sub, groupname)
@@ -411,6 +413,11 @@ module Dimdi
         }
       }
     end
+    def product_name(row)
+      if data = cell(row, 1)
+        capitalize_all(data.gsub(/[^A-Z\s]/, '').gsub(/\s+/, ' ')).strip
+      end
+    end
     def rename_product(row, package, name)
       @renamed_products += 1
       product = package.product
@@ -425,7 +432,7 @@ module Dimdi
         sprintf("Visited    %5i existing Products", @existing),
         sprintf("Visited    %5i existing Sequences", 
                 @existing_sequences),
-        sprintf("Created    %5i new Products", @created),
+        sprintf("Ignored    %5i unknown Products", @created),
         sprintf("Created    %5i new Sequences", @created_sequences),
         sprintf("Created    %5i new Substances from Combinations",
                 @created_substances),
@@ -437,7 +444,7 @@ module Dimdi
     end
     def update_package(row, package)
       modified = false
-      fpgroup = cell(row, 3)
+      fpgroup = cell(row, 11)
       unless(fpgroup.is_a?(String))
         fpgroup = u(fpgroup.to_i.to_s)
       end
@@ -451,8 +458,8 @@ module Dimdi
         package.add_code(Util::Code.new(:festbetragsgruppe, 
                                         fpgroup, 'DE', @package_date))
       end
-      import_price(package, :public, cell(row, 7)) && modified = true
-      import_price(package, :festbetrag, cell(row, 8)) && modified = true
+      import_price(package, :public, cell(row, 3)) && modified = true
+      import_price(package, :festbetrag, cell(row, 4)) && modified = true
       if(level = cell(row, 12))
         if(code = package.code(:festbetragsstufe))
           if(code.value != level.to_i)
@@ -735,7 +742,7 @@ module Dimdi
       package
     end
     def import_product(package, row)
-      name = capitalize_all(cell(row, 2))
+      name = product_name(row)
       search = name.dup
       product = nil
       candidates = []
@@ -858,6 +865,11 @@ module Dimdi
           end
         }
       }
+    end
+    def product_name(row)
+      if data = cell(row, 2)
+        capitalize_all(data.gsub(/[^A-Z\s]/, '').gsub(/\s+/, ' ')).strip
+      end
     end
     def report
       [
