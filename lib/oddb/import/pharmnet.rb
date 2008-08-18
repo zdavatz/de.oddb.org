@@ -547,7 +547,11 @@ class Import < Import
         sequence.name.de.to_s.downcase >= resume
       }
     end
-    sequences = sequences.sort_by { |sequence| sequence.name }
+    sequences = sequences.select { |sequence|
+      sequence.name
+    }.sort_by { |sequence|
+      sequence.name
+    }
     checked = sprintf "Checked %i Sequences from '%s' to '%s'",
                       sequences.size, sequences.first.name, sequences.last.name
     ## let odba cache release unneeded sequences ...
