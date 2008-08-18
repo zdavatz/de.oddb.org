@@ -23,7 +23,7 @@ Kernel.trap('INT') {
   end
 }
 
-prompt = 'oddb> '
+prompt = 'de.oddb> '
 DRb.start_service('druby://localhost:0')
 oddb = DRbObject.new(nil, ODDB.config.server_url)
 last_error = nil
