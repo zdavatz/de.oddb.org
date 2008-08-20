@@ -36,12 +36,13 @@ module ODDB
         flexmock(Util::Mail).should_receive(:notify_admins)\
           .with(String, Array).times(5)
         arch = File.join(@xls_dir, 
-          "liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls")
+          "Zuzahlungsbefreiung_Excel_080815.XLS")
         today = Date.new(2006,10)
         wirkkurz = "ftp://ftp.dimdi.de/pub/amg/wirkkurz_011006.xls"
         darform = "ftp://ftp.dimdi.de/pub/amg/darform_011006.xls"
         fbetrag = "ftp://ftp.dimdi.de/pub/amg/fb011006.xls"
-        zuzahlung = "http://www.die-gesundheitsreform.de/gesetze_meilensteine/gesetze/pdf/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls"
+        zuzahlung_index = "http://www.gkv.info/gkv/index.php?id=445"
+        zuzahlung = "http://www.gkv.info/gkv/fileadmin/user_upload/Projekte/arzneimittelzuzahlungsbefreiung/Zuzahlungsbefreiung_Excel_080815.XLS"
         index_uri = flexmock('Index-URI')
         index_uri.should_receive(:open)\
           .times(1).and_return(StringIO.new("xyzfb011006.xlsABC"))
@@ -60,6 +61,11 @@ module ODDB
           .times(1).and_return { |block|
           block.call StringIO.new("festbetrag-xls-io") 
         }
+        zuzahlung_index_file = File.expand_path('data/html/gkv_index.html',
+                                                File.dirname(__FILE__))
+        zuzahlung_index_uri = flexmock('Zuzahlungsbefreiung-Index-URI')
+        zuzahlung_index_uri.should_receive(:open)\
+          .times(1).and_return(File.open(zuzahlung_index_file))
         zuzahlung_uri = flexmock('Zuzahlungsbefreiung-URI')
         zuzahlung_uri.should_receive(:open)\
           .times(1).and_return(StringIO.new("zuzahlung-xls-io"))
@@ -72,6 +78,8 @@ module ODDB
           .times(1).and_return(darform_uri)
         uriparse.should_receive(:parse).with(fbetrag)\
           .times(1).and_return(fbetrag_uri)
+        uriparse.should_receive(:parse).with(zuzahlung_index)\
+          .times(1).and_return(zuzahlung_index_uri)
         uriparse.should_receive(:parse).with(zuzahlung)\
           .times(1).and_return(zuzahlung_uri)
         wirkkurz_import = flexmock('DimdiSubstance')
@@ -140,16 +148,17 @@ module ODDB
         assert(File.exist?(File.join(@xls_dir, 'fb011006.xls')))
         assert(File.exist?(arch))
         assert(File.exist?(File.join(@xls_dir, 
-          "2006.10.01-liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls")))
+          "2006.10.01-Zuzahlungsbefreiung_Excel_080815.XLS")))
       end
       def test_run__errors
         arch = File.join(@xls_dir, 
-          "liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls")
+          "Zuzahlungsbefreiung_Excel_080815.XLS")
         today = Date.new(2006,10)
         wirkkurz = "ftp://ftp.dimdi.de/pub/amg/wirkkurz_011006.xls"
         darform = "ftp://ftp.dimdi.de/pub/amg/darform_011006.xls"
         fbetrag = "ftp://ftp.dimdi.de/pub/amg/fb011006.xls"
-        zuzahlung = "http://www.die-gesundheitsreform.de/gesetze_meilensteine/gesetze/pdf/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls"
+        zuzahlung_index = "http://www.gkv.info/gkv/index.php?id=445"
+        zuzahlung = "http://www.gkv.info/gkv/fileadmin/user_upload/Projekte/arzneimittelzuzahlungsbefreiung/Zuzahlungsbefreiung_Excel_080815.XLS"
         index_uri = flexmock('Index-URI')
         index_uri.should_receive(:open)\
           .times(1).and_return(StringIO.new("xyzfb011006.xlsABC"))
@@ -168,6 +177,11 @@ module ODDB
           .times(1).and_return { 
           raise "connection error 3"
         }
+        zuzahlung_index_file = File.expand_path('data/html/gkv_index.html',
+                                                File.dirname(__FILE__))
+        zuzahlung_index_uri = flexmock('Zuzahlungsbefreiung-Index-URI')
+        zuzahlung_index_uri.should_receive(:open)\
+          .times(1).and_return(File.open(zuzahlung_index_file))
         zuzahlung_uri = flexmock('Zuzahlungsbefreiung-URI')
         zuzahlung_uri.should_receive(:open)\
           .times(1).and_return {
@@ -191,6 +205,8 @@ module ODDB
           .times(1).and_return(darform_uri)
         uriparse.should_receive(:parse).with(fbetrag)\
           .times(1).and_return(fbetrag_uri)
+        uriparse.should_receive(:parse).with(zuzahlung_index)\
+          .times(1).and_return(zuzahlung_index_uri)
         uriparse.should_receive(:parse).with(zuzahlung)\
           .times(1).and_return(zuzahlung_uri)
         flexmock(Util::Mail).should_receive(:notify_admins).times(1)
@@ -206,12 +222,13 @@ module ODDB
         flexmock(Util::Mail).should_receive(:notify_admins)\
           .with(String, Array).times(5)
         arch = File.join(@xls_dir, 
-          "liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls")
+          "Zuzahlungsbefreiung_Excel_080815.XLS")
         today = Date.new(2006,10)
         wirkkurz = "ftp://ftp.dimdi.de/pub/amg/wirkkurz_011006.xls"
         darform = "ftp://ftp.dimdi.de/pub/amg/darform_011006.xls"
         fbetrag = "ftp://ftp.dimdi.de/pub/amg/fb011006.xls"
-        zuzahlung = "http://www.die-gesundheitsreform.de/gesetze_meilensteine/gesetze/pdf/liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls"
+        zuzahlung_index = "http://www.gkv.info/gkv/index.php?id=445"
+        zuzahlung = "http://www.gkv.info/gkv/fileadmin/user_upload/Projekte/arzneimittelzuzahlungsbefreiung/Zuzahlungsbefreiung_Excel_080815.XLS"
         index_uri = flexmock('Index-URI')
         index_uri.should_receive(:open)\
           .times(1).and_return(StringIO.new("xyzfb011006.xlsABC"))
@@ -230,6 +247,11 @@ module ODDB
           .times(1).and_return { |block|
           block.call StringIO.new("festbetrag-xls-io") 
         }
+        zuzahlung_index_file = File.expand_path('data/html/gkv_index.html',
+                                                File.dirname(__FILE__))
+        zuzahlung_index_uri = flexmock('Zuzahlungsbefreiung-Index-URI')
+        zuzahlung_index_uri.should_receive(:open)\
+          .times(1).and_return(File.open(zuzahlung_index_file))
         zuzahlung_uri = flexmock('Zuzahlungsbefreiung-URI')
         zuzahlung_uri.should_receive(:open)\
           .times(1).and_return(StringIO.new("zuzahlung-xls-io"))
@@ -242,6 +264,8 @@ module ODDB
           .times(1).and_return(darform_uri)
         uriparse.should_receive(:parse).with(fbetrag)\
           .times(1).and_return(fbetrag_uri)
+        uriparse.should_receive(:parse).with(zuzahlung_index)\
+          .times(1).and_return(zuzahlung_index_uri)
         uriparse.should_receive(:parse).with(zuzahlung)\
           .times(1).and_return(zuzahlung_uri)
         wirkkurz_import = flexmock('DimdiSubstance')
@@ -307,7 +331,7 @@ module ODDB
         assert(!File.exist?(File.join(@xls_dir, 'darform_011006.xls')))
         assert(!File.exist?(File.join(@xls_dir, 'fb011006.xls')))
         assert(!File.exist?(File.join(@xls_dir, 
-          "2006.10.06-liste_zuzahlungsbefreite_arzneimittel_suchfunktion.xls")))
+          "Zuzahlungsbefreiung_Excel_080815.XLS")))
       end
       def test_import_whocc_guidelines
         flexmock(Util::Mail).should_receive(:notify_admins)\

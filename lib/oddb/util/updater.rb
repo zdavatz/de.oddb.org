@@ -34,7 +34,7 @@ module ODDB
       end
       def Updater.import_dimdi_zuzahlungsbefreiung(today)
         url = "http://www.gkv.info/gkv/index.php?id=445"
-        if match = /zuzahlungsbefreiung_excel_\d+.xls/.match(open(url).read)
+        if match = /zuzahlungsbefreiung_excel_\d+.xls/i.match(open(url).read)
           url = "http://www.gkv.info/gkv/fileadmin/user_upload/Projekte/arzneimittelzuzahlungsbefreiung/#{match}"
           Import::Dimdi.download_latest(url, today) { |io|
             reported_import(Import::Dimdi::ZuzahlungsBefreiung.new, io)
