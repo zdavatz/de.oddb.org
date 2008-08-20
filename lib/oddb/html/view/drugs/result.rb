@@ -255,18 +255,28 @@ end
 class ResultComposite < HtmlGrid::DivComposite
   include HtmlGrid::ErrorMessage
   COMPONENTS = {
-    [0,0] => :title_found, 
-    [0,1] => "explain_compare", 
-    [0,2] => InlineSearch, 
-    [0,3] => Packages, 
-    [0,4] => Legend,
+    [0,0] => :title_found,
+    [0,1] => :export_cvs,
+    [0,2] => "explain_compare",
+    [0,3] => InlineSearch,
+    [0,4] => Packages,
+    [0,5] => Legend,
   }
-  CSS_ID_MAP = ['result-found', 'explain-compare', 'result-search', 
-                'result-list', 'legend' ]
-  CSS_MAP = { 1 => 'before-searchbar', 3 => 'result' }
+  CSS_ID_MAP = ['result-found', 'result-search', 'explain-compare',
+                'result-search', 'result-list', 'legend' ]
+  CSS_MAP = { 0 => 'lefthand', 2 => 'before-searchbar', 4 => 'result' }
   def init
     super
     error_message
+  end
+  def export_cvs(model)
+    button = HtmlGrid::Button.new(:export_csv, model, @session, self)
+    query = @session.persistent_user_input(:query)
+    dstype = @session.persistent_user_input(:dstype) || ODDB.config.default_dstype
+    url = @lookandfeel._event_url(:proceed_export,
+                                  [ :query, query, :dstype, dstype ])
+    button.onclick = "location.href='#{url}';"
+    button
   end
   def title_found(model)
     @lookandfeel.lookup(:title_found, @model.query, @model.total)

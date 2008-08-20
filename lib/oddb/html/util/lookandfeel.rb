@@ -113,6 +113,8 @@ class Lookandfeel < SBSM::Lookandfeel
       :delete_sequence_confirm    => 'Wollen Sie diese Sequenz wirklich löschen?',
       :display_grouped            => 'Zur ATC-Übersicht',
       :display_paged              => 'Alle Präparate anzeigen',
+      :download_export_mail_body  => 'Die Bezahlung für Ihren CSV-Export konnte erfolgreich abgewickelt werden.',
+      :download_export_mail_instr => 'Sie können die Daten mit dem folgenden Link abrufen:', 
       :dose                       => 'Stärke',
       :drugs                      => 'Medikamente',
       :drugs_atc_codes            => "ATC-Codes, DDD's:",
@@ -167,6 +169,9 @@ einmal.
 Vergleichen Sie einfach und schnell Medikamentenpreise.
 Suchen Sie nach Medikamentname oder Wirkstoff.
       EOS
+      :export                     => 'CSV-Export Datenerfassung',
+      :export_csv                 => 'Resultat als CSV Exportieren',
+      :export_descr               => 'Bitte geben Sie Ihre persönlichen Angaben ein und wählen Sie einen Benutzernamen und ein Passwort.',
       :fachinfo                   => 'Fachinformation',
       :feedback                   => 'Feedback',
       :feedback_alt0              => 'Feedback zu ',
@@ -278,6 +283,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :price_difference           => 'Abweichung vom Festbetrag',
       :price_festbetrag           => 'Festbetrag',
       :price_public               => 'Apothekenverkaufspreis',
+      :proceed_export             => 'CSV-Export',
       :proceed_poweruser          => 'Weiter',
       :product                    => 'Produkt',
       :product_details_for0       => 'Produktdetails für "',
@@ -428,6 +434,11 @@ Medikamenten-Preisvergleichs-Portal Deutschlands.
     dict = File.join(ODDB.config.data_dir, 'captcha', language)
     FileUtils.mkdir_p outdir
     @turing ||= Turing::Challenge.new(:outdir => outdir, :dictionary => dict)
+  end
+  def csv_components
+    [ :product, :active_agents, :size, :price_exfactory, :price_public,
+      :price_festbetrag, :ddd_prices, :company,
+      :package_infos, ]
   end
   def currency_factor
     1.0

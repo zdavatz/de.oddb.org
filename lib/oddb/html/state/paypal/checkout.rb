@@ -2,6 +2,7 @@
 # Html::State::PayPal::Checkout -- de.oddb.org -- 22.01.2008 -- hwyss@ywesee.com
 
 require 'oddb/html/state/global_predefine'
+require 'oddb/html/state/drugs/download_export'
 require 'oddb/html/state/login'
 require 'oddb/html/state/paypal/collect'
 require 'oddb/html/state/paypal/redirect'
@@ -78,11 +79,25 @@ module Checkout
       if((user = @session.user).is_a?(Util::KnownUser))
         reconsider_permissions(user)
       end
-      if(@session.allowed?('view', ODDB.config.auth_domain))
-        if(des = @session.desired_state)
-          state = des
+      if invoice
+        item = invoice.items.first
+        case item.type
+        when :export
+          if @session.allowed?('download', "#{ODDB.config.auth_domain}.#{item.text}") \
+            || invoice.status == 'completed'
+            extend State::Drugs::Events
+            state = _download item.text
+          else
+            ## wait for ipn
+          end
         else
-          state.extend Drugs::Events
+          if(@session.allowed?('view', ODDB.config.auth_domain))
+            if(des = @session.desired_state)
+              state = des
+            else
+              state.extend Drugs::Events
+            end
+          end
         end
       end
       state

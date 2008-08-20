@@ -19,7 +19,7 @@ require 'oddb/html/state/drugs/package'
 require 'oddb/html/state/drugs/patinfo'
 require 'oddb/html/state/drugs/products'
 require 'oddb/html/state/drugs/result'
-require 'oddb/html/util/annotated_list'
+require 'oddb/util/annotated_list'
 require 'ostruct'
 
 module ODDB
@@ -30,7 +30,7 @@ module Events
   def compare_remote
     if((uid = @session.user_input(:uid)) \
        && (package = _remote_package(uid)))
-      result = Util::AnnotatedList.new(package.comparables)
+      result = ODDB::Util::AnnotatedList.new(package.comparables)
       result.origin = package
       result.query = uid
       CompareRemote.new(@session, result)
@@ -38,7 +38,7 @@ module Events
   end
   def _compare(code)
     if(package = _package_by_code(code))
-      result = Util::AnnotatedList.new(package.comparables) 
+      result = ODDB::Util::AnnotatedList.new(package.comparables)
       if(@session.lookandfeel.enabled?(:remote_databases, false))
         result.concat(_remote_comparables(package))
       end
@@ -112,7 +112,7 @@ module Events
     end
   end
   def _products(query)
-    result = Util::AnnotatedList.new
+    result = ODDB::Util::AnnotatedList.new
     result.query = query
     if(query)
       if(query == '0-9')
@@ -173,7 +173,17 @@ module Events
             @session.persistent_user_input(:dstype) || ODDB.config.default_dstype)
   end
   def _search(query, dstype)
-    result = Util::AnnotatedList.new
+    result = _search_local(query, dstype)
+    if(@session.lookandfeel.enabled?(:remote_databases, false))
+      result.concat(_search_remote(query))
+    end
+    Result.new(@session, result)
+  end
+  def _search_by(key, query, result)
+    result.concat ODDB::Drugs::Package.send("search_by_#{key}", query)
+  end
+  def _search_local(query, dstype)
+    result = ODDB::Util::AnnotatedList.new
     result.query = query
     result.dstype = dstype || ODDB.config.default_dstype
     if(query.length < 3)
@@ -198,13 +208,7 @@ module Events
         _search_by(:product, query, result) if result.empty?
       end
     end
-    if(@session.lookandfeel.enabled?(:remote_databases, false))
-      result.concat(_search_remote(query))
-    end
-    Result.new(@session, result)
-  end
-  def _search_by(key, query, result)
-    result.concat ODDB::Drugs::Package.send("search_by_#{key}", query)
+    result
   end
   def _search_remote(query)
     _remote_packages { |remote| remote.remote_packages(query) }

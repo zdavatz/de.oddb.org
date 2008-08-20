@@ -47,9 +47,10 @@ module ODDB
     'paypal_receiver'     => nil,
     'persistence'         => 'odba',
     'prices'              => { 
-      'org.oddb.de.view.365' => 400,
-      'org.oddb.de.view.30'  =>  50,
-      'org.oddb.de.view.1'   =>   5,
+      'org.oddb.de.export.cvs'  => 0.16,
+      'org.oddb.de.view.365'    => 400,
+      'org.oddb.de.view.30'     =>  50,
+      'org.oddb.de.view.1'      =>   5,
     },
     'remote_databases'    => [],
     'run_exporter'        => true,

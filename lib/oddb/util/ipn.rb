@@ -34,6 +34,13 @@ module Ipn
       Util::Yus.set_preference(yus_name, 'poweruser_duration', item.quantity)
       Util::Yus.grant(yus_name, 'login', "#{ODDB.config.auth_domain}.PowerUser")
       Util::Yus.grant(yus_name, 'view', ODDB.config.auth_domain, item.expiry_time)
+    when :export
+      yus_name = invoice.yus_name
+      item.expiry_time = Time.now + (60 * 60 * 24)
+      Util::Yus.grant(yus_name, 'login', "#{ODDB.config.auth_domain}.PowerUser")
+      Util::Yus.grant(yus_name, 'download',
+                      "#{ODDB.config.auth_domain}.#{item.text}",
+                      item.expiry_time)
     end
   end
 end

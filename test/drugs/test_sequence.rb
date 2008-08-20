@@ -103,6 +103,38 @@ module ODDB
         assert_equal(true, @sequence.include?(sub1, 10, 'mg'))
         assert_equal(false, @sequence.include?(sub2, 10, 'mg'))
       end
+      def test_identical
+        other = Sequence.new
+        third = Sequence.new
+        assert_equal(true, @sequence.identical?(other))
+        assert_equal(true, other.identical?(@sequence))
+        assert_equal(true, @sequence.identical?(third))
+        assert_equal(true, third.identical?(@sequence))
+
+        comp1 = flexmock('composition')
+        comp1.should_ignore_missing
+        @sequence.add_composition(comp1)
+        assert_equal(false, @sequence.identical?(other))
+        assert_equal(false, other.identical?(@sequence))
+
+        other.add_composition(comp1)
+        assert_equal(true, @sequence.identical?(other))
+        assert_equal(true, other.identical?(@sequence))
+
+        comp2 = flexmock('other composition')
+        comp2.should_ignore_missing
+        third.add_composition(comp2)
+        assert_equal(false, @sequence.identical?(third))
+        assert_equal(false, third.identical?(@sequence))
+
+        @sequence.add_composition(comp2)
+        other.add_composition(comp2)
+        third.add_composition(comp1)
+        assert_equal(true, @sequence.identical?(other))
+        assert_equal(true, other.identical?(@sequence))
+        assert_equal(false, @sequence.identical?(third))
+        assert_equal(false, third.identical?(@sequence))
+      end
     end
   end
 end

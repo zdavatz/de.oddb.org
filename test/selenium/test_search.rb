@@ -27,6 +27,14 @@ class TestSearch < Test::Unit::TestCase
     currency.should_receive(:rate).with('EUR', 'CHF').and_return(1.6)
     super
   end
+  def setup_autosession(yus)
+    session = flexmock('session')
+    yus.should_receive(:autosession).and_return {  |domain, block|
+      assert_equal 'org.oddb.de', domain
+      block.call session
+    }
+    session
+  end
   def setup_package(name="Amantadin by Producer", atccode='N04BB01')
     product = Drugs::Product.new
     company = Business::Company.new
@@ -760,6 +768,161 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     assert is_text_present('Ja')
     assert is_text_present('N04BB01')
     assert is_text_present('Producer AG')
+  end
+  def test_search__export_csv
+    pack = setup_package
+    ODDB.config.query_limit = 20
+    package = setup_package
+    open "/"
+    assert_equal "DE - ODDB.org | Medikamente | Home | Open Drug Database", get_title
+    type "query", "Amantadin"
+    click "//input[@type='submit']"
+    wait_for_page_to_load "30000"
+    assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", 
+                 get_title
+    assert is_element_present '//input[@name="export_csv"]'
+    click '//input[@name="export_csv"]'
+    wait_for_page_to_load "30000"
+    assert_equal "DE - ODDB.org | Medikamente | CSV-Export | Amantadin | Markenname | Open Drug Database", 
+                 get_title
+
+    assert is_text_present("CSV-Export Datenerfassung")
+    assert is_text_present('Bitte geben Sie Ihre persönlichen Angaben ein und wählen Sie einen Benutzernamen und ein Passwort.')
+
+    assert_equal "E-Mail", get_text("//label[@for='email']")
+    assert is_element_present("email")
+    assert_equal "Passwort", get_text("//label[@for='pass']")
+    assert is_element_present("pass")
+    assert_equal "Bestätigung", get_text("//label[@for='confirm_pass']")
+    assert is_element_present("confirm_pass")
+    assert_equal "Anrede", get_text("//label[@for='salutation']")
+    assert is_element_present("salutation")
+    assert_equal "Nachname", get_text("//label[@for='name_last']")
+    assert is_element_present("name_last")
+    assert_equal "Vorname", get_text("//label[@for='name_first']")
+    assert is_element_present("name_first")
+
+    assert is_text_present("2 x")
+    assert is_text_present("Amantadin_tradename.csv")
+
+    refresh
+    wait_for_page_to_load "30000"
+    assert_equal "DE - ODDB.org | Medikamente | CSV-Export | Amantadin | Markenname | Open Drug Database", 
+                 get_title
+
+    assert is_text_present("CSV-Export Datenerfassung")
+    assert is_text_present('Bitte geben Sie Ihre persönlichen Angaben ein und wählen Sie einen Benutzernamen und ein Passwort.')
+
+    assert_equal "E-Mail", get_text("//label[@for='email']")
+    assert is_element_present("email")
+    assert_equal "Passwort", get_text("//label[@for='pass']")
+    assert is_element_present("pass")
+    assert_equal "Bestätigung", get_text("//label[@for='confirm_pass']")
+    assert is_element_present("confirm_pass")
+    assert_equal "Anrede", get_text("//label[@for='salutation']")
+    assert is_element_present("salutation")
+    assert_equal "Nachname", get_text("//label[@for='name_last']")
+    assert is_element_present("name_last")
+    assert_equal "Vorname", get_text("//label[@for='name_first']")
+    assert is_element_present("name_first")
+
+    assert is_text_present("2 x")
+    assert is_text_present("Amantadin_tradename.csv")
+
+  end
+  def test_search__export_csv__step2_error
+    pack = setup_package
+    ODDB.config.query_limit = 20
+    package = setup_package
+    open "/"
+    assert_equal "DE - ODDB.org | Medikamente | Home | Open Drug Database", get_title
+    type "query", "Amantadin"
+    click "//input[@type='submit']"
+    wait_for_page_to_load "30000"
+    assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", 
+                 get_title
+    assert is_element_present '//input[@name="export_csv"]'
+    click '//input[@name="export_csv"]'
+    wait_for_page_to_load "30000"
+    assert_equal "DE - ODDB.org | Medikamente | CSV-Export | Amantadin | Markenname | Open Drug Database", 
+                 get_title
+
+    assert is_text_present("CSV-Export Datenerfassung")
+    assert is_text_present('Bitte geben Sie Ihre persönlichen Angaben ein und wählen Sie einen Benutzernamen und ein Passwort.')
+
+    @auth.should_receive(:login).and_return { raise Yus::UnknownEntityError }
+    click "//input[@type='submit']"
+    wait_for_page_to_load "30000"
+    assert_equal "DE - ODDB.org | Medikamente | CSV-Export | Amantadin | Markenname | Open Drug Database", 
+                 get_title
+    assert is_text_present("Bitte füllen Sie alle Felder aus.")
+    %w{email pass confirm_pass salutation name_last name_first}.each { |key|
+      assert_equal "error", get_attribute("//label[@for='#{key}']@class")
+    }
+  end
+  def test_search__export_csv__step2
+    yus = flexmock("yus-server")
+    remote = DRb.start_service('druby://localhost:0', yus)
+    yus_session = setup_autosession(yus)
+    yus_session.should_receive(:get_entity_preferences).and_return({})
+    email = "downloader@oddb.org"
+    ODDB.config.auth_server = remote.uri
+
+    pack = setup_package
+    ODDB.config.query_limit = 20
+    package = setup_package
+    open "/"
+    assert_equal "DE - ODDB.org | Medikamente | Home | Open Drug Database", get_title
+    type "query", "Amantadin"
+    click "//input[@type='submit']"
+    wait_for_page_to_load "30000"
+    assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", 
+                 get_title
+    assert is_element_present '//input[@name="export_csv"]'
+    click '//input[@name="export_csv"]'
+    wait_for_page_to_load "30000"
+    assert_equal "DE - ODDB.org | Medikamente | CSV-Export | Amantadin | Markenname | Open Drug Database", 
+                 get_title
+
+    assert is_text_present("CSV-Export Datenerfassung")
+    assert is_text_present('Bitte geben Sie Ihre persönlichen Angaben ein und wählen Sie einen Benutzernamen und ein Passwort.')
+
+    @auth.should_receive(:login).and_return { raise Yus::UnknownEntityError }
+    type "email", email
+    type "pass", "secret"
+    type "confirm_pass", "secret"
+    select "//select[@name='salutation']", "Herr"
+    type "name_last", "Test"
+    type "name_first", "Fritz"
+
+    yus_session.should_receive(:create_entity).with(email, "5ebe2294ecd0e0f08eab7690d2a6ee69")
+    user = mock_user email
+    ODDB.server = server = flexmock("server")
+    server.should_receive(:login).and_return(user)
+    @auth.should_receive(:login).and_return(user)
+
+    click "//input[@type='submit']"
+    wait_for_page_to_load "30000"
+
+    output = @http_server.redirected_output 
+    assert_match /www.sandbox.paypal.com/, output
+  end
+  def test_search__export_csv__direct
+    pack = setup_package
+    user = login 'test.export@oddb.org', ['download', 'org.oddb.de.Amantadin_tradename.csv']
+    ODDB.config.query_limit = 20
+    package = setup_package
+    open "/"
+    assert_equal "DE - ODDB.org | Medikamente | Home | Open Drug Database", get_title
+    type "query", "Amantadin"
+    click "//input[@type='submit']"
+    wait_for_page_to_load "30000"
+    assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Markenname | Open Drug Database", 
+                 get_title
+    assert is_element_present '//input[@name="export_csv"]'
+    click '//input[@name="export_csv"]'
+
+    assert @http_server.attachment
   end
 end
   end

@@ -3,9 +3,11 @@
 
 require 'oddb/html/state/global_predefine'
 require 'oddb/html/state/drugs/atc_browser'
+require 'oddb/html/state/drugs/download_export'
 require 'oddb/html/state/drugs/init'
 require 'oddb/html/state/drugs/login'
 require 'oddb/html/state/limit'
+require 'oddb/html/state/register_export'
 require 'oddb/html/state/register_poweruser'
 require 'oddb/html/state/paypal/checkout'
 require 'oddb/business/invoice'
@@ -24,6 +26,13 @@ class Global < SBSM::State
   def compare
     if(code = @session.user_input(:pzn))
       _compare(code)
+    end
+  end
+  def _download(file)
+    if match = /(.+)_(.+).csv/.match(file)
+      packages = _search_local match[1].tr('-', ' '), match[2]
+      packages.filename = file
+      Drugs::DownloadExport.new(@session, packages)
     end
   end
   def explain_ddd_price
@@ -78,6 +87,27 @@ class Global < SBSM::State
   def patinfo
     if(uid = @session.user_input(:uid))
       _patinfo(uid)
+    end
+  end
+  def proceed_export
+    query = @session.persistent_user_input(:query)
+    dstype = @session.persistent_user_input(:dstype) || ODDB.config.default_dstype
+    result = _search_local(query, dstype)
+    filename = sprintf('%s_%s.csv', query.tr(' ', '-'), dstype)
+    if @session.allowed?('download', "#{ODDB.config.auth_domain}.#{filename}")
+      result.filename = filename
+      Drugs::DownloadExport.new @session, result
+    else
+      lines = result.size
+      price = ODDB.config.prices["org.oddb.de.export.cvs"].to_f
+      unless(lines > 0 && price > 0)
+        @errors.store :days, create_error(:e_empty_result, :query, query)
+        self
+      else
+        invoice = ODDB::Business::Invoice.new
+        item = invoice.add(:export, filename, lines, '', price)
+        State::RegisterExport.new(@session, invoice)
+      end
     end
   end
   def proceed_poweruser

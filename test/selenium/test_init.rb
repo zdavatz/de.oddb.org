@@ -43,7 +43,7 @@ class TestInit < Test::Unit::TestCase
     assert is_element_present("link=Kontakt")
     assert is_element_present("link=Arzneimittel A-Z")
     assert is_element_present("//a[@name='feedback_feed_title']")
-    assert is_text_present("Feedback zu Product in der Handelsform: 10 Tabletten")
+    assert is_text_present("Product in der Handelsform: 10 Tabletten")
   end
   def test_init__mm
     open "/de/drugs/home/flavor/mm"
@@ -57,7 +57,7 @@ class TestInit < Test::Unit::TestCase
     assert is_element_present("link=Kontakt")
     assert is_element_present("link=Arzneimittel A-Z")
     assert !is_element_present("//a[@name='feedback_feed_title']")
-    assert !is_text_present("Feedback zu")
+    assert !is_text_present("in der Handelsform")
   end
 end
   end

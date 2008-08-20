@@ -89,7 +89,7 @@ class Result < Drugs::Global
     @model.total = @model.size
     while(package = @model.shift)
       code = (atc = package.atc) ? atc.code : 'X'
-      (atcs[code] ||= Util::AnnotatedList.new(:atc => atc)).push(package)
+      (atcs[code] ||= ODDB::Util::AnnotatedList.new(:atc => atc)).push(package)
     end
     count = 0
     limit = @session.pagelength

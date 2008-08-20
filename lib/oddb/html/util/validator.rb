@@ -28,7 +28,7 @@ class Validator < SBSM::Validator
              :atc_browser, :collect, :ddd, :delete, :explain_ddd_price,
              :explain_price, :fachinfo, :feedback, :checkout, :compare,
              :compare_remote, :home, :login, :login_, :logout, :new_package,
-             :new_sequence, :package, :package_infos, :patinfo,
+             :new_sequence, :package, :package_infos, :patinfo, :proceed_export,
              :proceed_poweruser, :product, :products, :remote_infos, :search,
              :sequence, :sort, :update ]
   NUMERIC = [ :active_agent, :code_cid, :code_festbetragsgruppe,

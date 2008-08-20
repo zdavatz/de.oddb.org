@@ -21,7 +21,7 @@ module ODDB
       alias :print :<<
     end
     class HTTPServer < WEBrick::HTTPServer
-      attr_accessor :document_root, :redirected_output
+      attr_accessor :document_root, :redirected_output, :attachment
       def method_missing(method, *args, &block)
         @logger.warn "ignoring method: #{method}"
       end
@@ -61,6 +61,8 @@ module ODDB
             resp.status = 303
           elsif(/^location:.*paypal/i.match(output))
             req.server.redirected_output = output
+          elsif(!/content-disposition:\s*attachment/i.match(output))
+            req.server.attachment = output
           end
           resp.rawdata = true
           resp.body = output

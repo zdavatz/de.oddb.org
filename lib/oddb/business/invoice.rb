@@ -6,7 +6,6 @@ require 'oddb/model'
 module ODDB
   module Business
     class Invoice < Model
-      CHARS = ("a".."z").to_a | ("A".."Z").to_a | ("0".."9").to_a
       has_many :items
       attr_accessor :yus_name, :ydim_id, :status, :ipn, :currency
       attr_reader :time
@@ -53,6 +52,9 @@ module ODDB
       end
       def id
         @id ||= Digest::MD5.hexdigest @time.strftime("%c") << @salt << @yus_name
+      end
+      def paid_for?(text)
+        @status == 'completed' && @items.any? { |item| item.text == text }
       end
       def total_brutto
         @items.inject(Util::Money.new(0)) { |memo, item| 

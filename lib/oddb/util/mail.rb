@@ -37,16 +37,26 @@ module ODDB
                    'charset' => config.mail_charset)
         recipients = [recipient].concat config.debug_recipients
         yus = Util::Yus.get_preferences(recipient, :salutation, :name_last)
-        days = invoice.items.first.quantity
-        duration = (days == 1) \
-                 ? lnf.lookup(:days_one_genitive) \
-                 : lnf.lookup(:days_genitive, days)
         parts = [
           lnf.lookup(:poweruser_mail_salut, lnf.lookup(yus[:salutation]), 
                      yus[:name_last]),
-          lnf.lookup(:poweruser_mail_body),
-          lnf.lookup(:poweruser_mail_instr, duration, lnf._event_url(:login)),
         ]
+        invoice.items.each { |item|
+          case item.type
+          when :poweruser
+            days = item.quantity
+            duration = (days == 1) \
+                     ? lnf.lookup(:days_one_genitive) \
+                     : lnf.lookup(:days_genitive, days)
+            parts.push lnf.lookup(:poweruser_mail_body)
+            parts.push lnf.lookup(:poweruser_mail_instr,
+                                  duration, lnf._event_url(:login))
+          when :export
+            parts.push lnf.lookup(:download_export_mail_body)
+            parts.push lnf.lookup(:download_export_mail_instr)
+            parts.push lnf._event_url(:collect, [:invoice, invoice.id])
+          end
+        }
         mpart.body = parts.join("\n\n")
         sendmail(mpart, config.mail_invoice_smtp, recipients)
       end

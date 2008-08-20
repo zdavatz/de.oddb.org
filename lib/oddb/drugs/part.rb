@@ -32,6 +32,24 @@ module ODDB
           @size = size.to_f
         end
       end
+      def to_s(language=:de)
+        parts = []
+        multi = @multi.to_i
+        if(multi > 1)
+          parts.push multi, 'x'
+        end
+        size = @size.to_i
+        if(size > 1)
+          parts.push(size)
+        end
+        if(unit = @unit)
+          parts.push(unit.name.send(language))
+        end
+        if(quantity = @quantity)
+          parts.push 'à', quantity
+        end
+        parts.join(' ')
+      end
     end
   end
 end

@@ -43,7 +43,7 @@ module ODDB
           unless(comp.galenic_form.eql?(other.compositions.at(idx).galenic_form))
             return false
           end
-        }
+        } && true
       end
       def include?(substance, dose=nil, unit=nil)
         compositions.any? { |comp|

@@ -33,6 +33,19 @@ module ODDB
         @substance.group = nil
         assert_nil(@substance.group)
       end
+      def test_merge
+        @substance.name.de = 'Original'
+        other = Substance.new
+        other.name.de = 'Merged'
+        agent = flexmock('ActiveAgent')
+        other.instance_variable_set('@active_agents', [agent])
+        agent.should_receive(:substance=).with(@substance).times(1)
+        agent.should_receive(:save).times(1)
+        agent.should_ignore_missing
+        @substance.merge(other)
+        assert_equal 'Original', @substance.name.de
+        assert_equal ['Original', 'Merged'], @substance.name.all
+      end
     end
   end
 end

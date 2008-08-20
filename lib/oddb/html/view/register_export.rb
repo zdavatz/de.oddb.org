@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Html::View::RegisterPowerUser -- de.oddb.org -- 21.01.2008 -- hwyss@ywesee.com
+# Html::View::RegisterExport -- de.oddb.org -- 28.07.2008 -- hwyss@ywesee.com
 
 require 'oddb/html/view/template'
 require 'oddb/html/view/paypal/register_form'
@@ -7,10 +7,10 @@ require 'oddb/html/view/paypal/register_form'
 module ODDB
   module Html
     module View
-class RegisterPowerUserComposite < HtmlGrid::DivComposite
+class RegisterExportComposite < HtmlGrid::DivComposite
   COMPONENTS = {
-    [0,0] => "poweruser",
-    [0,1] => "poweruser_descr",
+    [0,0] => "export",
+    [0,1] => "export_descr",
     [0,2] => PayPal::RegisterForm,
     [1,2] => :invoice_items,
   }
@@ -20,9 +20,9 @@ class RegisterPowerUserComposite < HtmlGrid::DivComposite
     PayPal::InvoiceItems.new(model.items, @session, self)
   end
 end
-class RegisterPowerUser < Template
+class RegisterExport < Template
   JAVASCRIPTS = ['autofill']
-  CONTENT = RegisterPowerUserComposite
+  CONTENT = RegisterExportComposite
 end
     end
   end
