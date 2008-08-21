@@ -436,9 +436,8 @@ Medikamenten-Preisvergleichs-Portal Deutschlands.
     @turing ||= Turing::Challenge.new(:outdir => outdir, :dictionary => dict)
   end
   def csv_components
-    [ :product, :active_agents, :size, :price_exfactory, :price_public,
-      :price_festbetrag, :ddd_prices, :company,
-      :package_infos, ]
+    [ :pzn, :product, :active_agents, :size, :price_exfactory, :price_public,
+      :price_festbetrag, :ddd_prices, :company, ]
   end
   def currency_factor
     1.0

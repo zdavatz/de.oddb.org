@@ -77,6 +77,9 @@ class Packages
   def self.product(package, language)
     (product = package.product) && product.name
   end
+  def self.pzn(package, lang)
+    package.code(:cid)
+  end
   def self.size(package, language)
     package.parts.collect { |part| part.to_s(language) }.join('+')
   end
