@@ -24,7 +24,7 @@ class RegisterExport < Global
     query = @session.persistent_user_input(:query)
     dstype = @session.persistent_user_input(:dstype) \
       || ODDB.config.default_dstype
-    filename = sprintf('%s_%s.csv', query, dstype)
+    filename = sprintf('%s_%s.csv', query.tr(' ', '-'), dstype)
     if @model.is_a?(ODDB::Business::Invoice) \
       && @model.items.any? { |item| item.text == filename }
       self
