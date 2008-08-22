@@ -296,8 +296,8 @@ module Dimdi
         if(factor = cell(row, 9))
           composition.equivalence_factor = factor
         end
+        composition.sequence = sequence
         composition.save
-        sequence.add_composition(composition)
         sequence.product = product
         sequence.save
       end
@@ -658,7 +658,8 @@ module Dimdi
         ## for now: don't expect multiple compositions
         if(composition.nil?)
           composition = Drugs::Composition.new
-          sequence.add_composition(composition)
+          composition.sequence = sequence
+          composition.save
           sequence.save
         end
         candidate_names = [ name[/^\S+/], name[/^[^-]+/] ]
@@ -788,8 +789,8 @@ module Dimdi
           act.composition = composition
         }
         composition.galenic_form = galform
+        composition.sequence = sequence
         composition.save
-        sequence.add_composition(composition)
         sequence.product = product
         sequence.save
       end

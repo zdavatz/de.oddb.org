@@ -8,7 +8,7 @@ module ODDB
     class Substance < Model
       include Comparable
       belongs_to :group
-      has_many :active_agents
+      has_many :active_agents, delegates(:packages)
       is_coded
       multilingual :name
       def merge(other)

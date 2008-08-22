@@ -13,9 +13,12 @@ module ODDB
         :country => 'country', :value => 'to_s'}, Util::Code
       odba_index :atc, 'atc.code'
       odba_index :name, 'name.all'
-      odba_index :substance, :substances, 'name.all', Drugs::Substance
-      odba_index :company, :company, 'name.all', Business::Company
-      odba_index :product, :product, 'name.all', Drugs::Product
+      odba_index :substance, :substances, 'name.all', Drugs::Substance,
+        :resolve_target => :packages
+      odba_index :company, :company, 'name.all', Business::Company,
+        :resolve_target => :packages
+      odba_index :product, :product, 'name.all', Drugs::Product,
+        :resolve_target => :packages
       serialize :codes, :prices
     end
   end

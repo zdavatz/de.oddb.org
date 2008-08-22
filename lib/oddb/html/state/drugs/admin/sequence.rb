@@ -177,7 +177,8 @@ class Sequence < Global
         cmp_idx = cmp_idx.to_i
         comp = @model.compositions.at(cmp_idx)
         if(comp.nil?)
-          comp = @model.add_composition ODDB::Drugs::Composition.new
+          comp = ODDB::Drugs::Composition.new
+          comp.sequence = @model
         end
         if gfstr.to_s.empty?
           comp.galenic_form = nil

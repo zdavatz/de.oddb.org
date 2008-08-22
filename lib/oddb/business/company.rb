@@ -6,7 +6,7 @@ require 'oddb/model'
 module ODDB
   module Business
     class Company < Model
-      has_many :products
+      has_many :products, delegates(:packages)
       multilingual :name
       def packages
         products.inject([]) { |memo, prod|

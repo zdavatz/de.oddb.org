@@ -9,7 +9,7 @@ module ODDB
     class ActiveAgent < Model
       include Comparable
       belongs_to :substance
-      belongs_to :composition
+      belongs_to :composition, delegates(:packages)
       attr_accessor :dose, :chemical_equivalence
       def initialize(substance, dose, unit="mg")
         @substance = substance

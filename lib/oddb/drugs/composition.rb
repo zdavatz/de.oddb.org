@@ -8,6 +8,7 @@ module ODDB
   module Drugs
     class Composition < Model
       attr_accessor :galenic_form, :equivalence_factor
+      belongs_to :sequence, delegates(:packages)
       has_many :active_agents, on_delete(:cascade)
       has_many :parts
       def active_agent(substance)

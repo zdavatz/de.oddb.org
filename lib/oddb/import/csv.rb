@@ -122,8 +122,8 @@ class ProductInfos < Import
       active_agent.composition = composition
     }
     composition.galenic_form = import_galenic_form(cell(row, 5))
+    composition.sequence = sequence
     composition.save
-    sequence.add_composition(composition)
     sequence.product = product
     create_package(sequence, pzn, name, row)
     sequence.save
@@ -163,8 +163,8 @@ class ProductInfos < Import
               active_agent.composition = composition
             }
             composition.galenic_form = comp.galenic_form
+            composition.sequence = sequence
             composition.save
-            sequence.add_composition(composition)
           }
           sequence.product = product
           sequence.save
@@ -373,7 +373,7 @@ class ProductInfos < Import
     sequence.product
   end
   def product_name(row)
-    prod = cell(row, 1)[/^([A-Z]{2,}\s)+/]
+    prod = cell(row, 1)[/^([A-Z]{2,}\s*)+/]
     comp = cell(row, 9)[/^([\d.]\s|[0-9A-Z])+/]
     "#{prod} #{comp}"
   end
@@ -399,7 +399,8 @@ class ProductInfos < Import
       comp = Drugs::Composition.new
       agent = Drugs::ActiveAgent.new(substance, dose)
       agent.composition = comp
-      seq.add_composition(comp)
+      comp.sequence = seq
+      comp.save
       seq.product = sequence.product
       package.sequence = seq
       package.save
