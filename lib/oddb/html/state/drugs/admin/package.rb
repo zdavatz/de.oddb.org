@@ -56,10 +56,10 @@ class Package < Drugs::Package
   end
   def update
     mandatory = [ :name, :code_cid ]
-    keys = [ :price_public, :price_festbetrag, :code_festbetragsstufe,
-             :code_festbetragsgruppe, :code_zuzahlungsbefreit,
-             :code_prescription, :unit, :sequence, :size, :multi, :composition, 
-             :quantity ]
+    keys = [ :price_exfactory, :price_public, :price_festbetrag,
+             :code_festbetragsstufe, :code_festbetragsgruppe,
+             :code_zuzahlungsbefreit, :code_prescription, :unit, :sequence,
+             :size, :multi, :composition, :quantity ]
     input = user_input(mandatory + keys, mandatory)
     others = ODDB::Drugs::Package.search_by_code(:type    => 'cid',
                                                  :value   => input[:code_cid],
