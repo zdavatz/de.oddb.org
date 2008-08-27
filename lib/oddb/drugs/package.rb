@@ -41,19 +41,41 @@ module ODDB
       rescue StandardError
       end
       def price(type, country='DE')
-        case type
-        when :exfactory
-          price_exfactory(country)
+        case type.to_s
+        when 'zuzahlung'
+          price_zuzahlung(country)
         else
           prices.find { |money| money.is_for?(type, country) }
         end
       end
       def price_exfactory(country='DE')
+        price(:exfactory, country)
+      end
+      def _price_exfactory(country='DE')
         if((price = price(:public, country)) \
            && (code = code(:prescription)) && code.value)
           c = ODDB.config
-          (price - c.pharmacy_premium) * 100 / 
+          efp = (price - c.pharmacy_premium) * 100 /
             (100.0 + c.vat + c.pharmacy_percentage) 
+          efp.type = :exfactory
+          efp.country = country
+          efp
+        end
+      end
+      def price_zuzahlung(country='DE')
+        unless((code = code(:zuzahlungsbefreit)) && code.value)
+          _price_zuzahlung country
+        end
+      end
+      def _price_zuzahlung(country='DE')
+        if(pp = price(:public, country))
+          if pp <= 50
+            Util::Money.five
+          elsif pp <= 100
+            pp * 0.1
+          else
+            Util::Money.ten
+          end
         end
       end
       unless(instance_methods.include?("__sequence_writer__"))

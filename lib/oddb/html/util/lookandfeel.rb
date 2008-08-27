@@ -281,8 +281,10 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :prescription_free          => 'O',
       :prescription_needed        => 'R',
       :price_difference           => 'Abweichung vom Festbetrag',
+      :price_exfactory            => 'Fabrikabgabepreis',
       :price_festbetrag           => 'Festbetrag',
       :price_public               => 'Apothekenverkaufspreis',
+      :price_zuzahlung            => 'Zuzahlung/Selbstbeteiligung',
       :proceed_export             => 'CSV-Export',
       :proceed_poweruser          => 'Weiter',
       :product                    => 'Produkt',
@@ -353,6 +355,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :th_price_exfactory         => 'FAP',
       :th_price_festbetrag        => 'FB',
       :th_price_public            => 'AVP',
+      :th_price_zuzahlung         => 'ZZ',
       :th_product                 => 'Präparat',
       :th_size                    => 'Packungsgrösse',
       :time_format_long           => '%A, %d. %B %Y, %H:%M:%S',
@@ -400,6 +403,7 @@ abruffähig zu veröffentlichen...
       :tt_price_difference        => 'Absolute Differenz zwischen Preis und Festbetrag',
       :tt_price_exfactory         => 'Preis: Fabrikabgabepreis exkl. MwSt. in Euro',
       :tt_price_public            => 'Preis: Apothekenverkaufspreis inkl. MwSt. in Euro',
+      :tt_price_zuzahlung         => 'Preis: Zuzahlung/Selbstbeteiligung in Euro',
       :tt_product                 => 'Präparat ist der Handelsname des Medikaments',
       :unsaved                    => '(unsaved)',
       :update                     => 'Speichern',
@@ -479,10 +483,11 @@ Medikamenten-Preisvergleichs-Portal Deutschlands.
       [6,0] => :price_public,
       [7,0] => :price_festbetrag,
       [8,0] => :ddd_prices,
-      [9,0] => :company,
-      [10,0] => :package_infos,
-      [11,0] => :feedback,
-      [12,0] => :google,
+      [9,0] => :price_zuzahlung,
+      [10,0] => :company,
+      [11,0] => :package_infos,
+      [12,0] => :feedback,
+      [13,0] => :google,
     }
   end
   def tax_factor
@@ -523,6 +528,23 @@ class LookandfeelJustMedical < LookandfeelWrapper
   RESOURCES = {
     :external_css  =>  'http://www.just-medical.com/css/de.oddb.css',
   }
+  def result_components
+    {
+      [0,0] => :fachinfo_link,
+      [1,0] => :patinfo_link,
+      [2,0] => :product,
+      [3,0] => :active_agents,
+      [4,0] => :size,
+      [5,0] => :price_exfactory,
+      [6,0] => :price_public,
+      [7,0] => :price_festbetrag,
+      [8,0] => :ddd_prices,
+      [9,0] => :company,
+      [10,0] => :package_infos,
+      [11,0] => :feedback,
+      [12,0] => :google,
+    }
+  end
 end
 class LookandfeelMeineMedikamente < LookandfeelWrapper
   DICTIONARIES = {

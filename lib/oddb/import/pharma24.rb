@@ -136,18 +136,9 @@ class Pharma24 < Import
         end
         amount = data[:price_public]
         if(amount > 0)
-          either = false
-          if price.nil?
-            package.add_price Util::Money.new(amount, :public, 'DE')
-            either = true
-          elsif resale
-            if price != amount
-              price.amount = amount
-              either = true
-            end
-          end
-          if either
-            package.data_origins.store :price_public, :pharma24
+          update_price package, :public, amount
+          if presc
+            update_price package, :exfactory, package._price_exfactory
           end
         end
         import_size data, package
@@ -156,6 +147,27 @@ class Pharma24 < Import
           product.company = import_company(data)
           product.save
         end
+      end
+    end
+  end
+  def update_price package, type, amount
+    dotype = :"price_#{type}"
+    # if this price has been edited manually we won't overwrite
+    unless((data_origin = package.data_origin(dotype)) \
+       && data_origin.to_s.include?('@'))
+      either = false
+      if(price = package.price(type, 'DE'))
+        if(price != amount)
+          price.amount = amount
+          either = true
+        end
+      else
+        price = Util::Money.new(amount, type, 'DE')
+        package.add_price(price)
+        either = true
+      end
+      if either
+        package.data_origins.store dotype, :pharma24
       end
     end
   end

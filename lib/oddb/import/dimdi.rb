@@ -251,15 +251,20 @@ module Dimdi
       import_sequence(row, product)
     end
     def import_price(package, type, amount)
-      if(price = package.price(type, 'DE'))
-        if(price != amount)
-          price.amount = amount
+      dotype = :"price_#{type}"
+      # if this price has been edited manually we won't overwrite
+      unless((data_origin = package.data_origin(dotype)) \
+         && data_origin.to_s.include?('@'))
+        if(price = package.price(type, 'DE'))
+          if(price != amount)
+            price.amount = amount
+          end
+        else
+          price = Util::Money.new(amount, type, 'DE')
+          package.add_price(price)
         end
-      else
-        price = Util::Money.new(amount, type, 'DE')
-        package.add_price(price)
+        package.data_origins.store dotype, :dimdi
       end
-      package.data_origins.store :"price_#{type}", :dimdi
     end
     def import_sequence(row, product, package=nil)
       ## be simplistic here - the input file can not describe
@@ -459,6 +464,9 @@ module Dimdi
                                         fpgroup, 'DE', @package_date))
       end
       import_price(package, :public, cell(row, 3)) && modified = true
+      if(efp = package._price_exfactory)
+        import_price(package, :exfactory, efp.to_f) && modified = true
+      end
       import_price(package, :festbetrag, cell(row, 4)) && modified = true
       if(level = cell(row, 12))
         if(code = package.code(:festbetragsstufe))
@@ -731,16 +739,28 @@ module Dimdi
         # package.save is called at the end of import_row
       end
       if(amount = cell(row, 7))
-        if(price = package.price(:public, 'DE'))
+        import_price package, :public, amount
+        if(efp = package._price_exfactory)
+          import_price(package, :exfactory, efp.to_f)
+        end
+      end
+      package
+    end
+    def import_price(package, type, amount)
+      dotype = :"price_#{type}"
+      # if this price has been edited manually we won't overwrite
+      unless((data_origin = package.data_origin(dotype)) \
+         && data_origin.to_s.include?('@'))
+        if(price = package.price(type, 'DE'))
           if(price != amount)
             price.amount = amount
           end
         else
-          price = Util::Money.new(amount, :public, 'DE')
+          price = Util::Money.new(amount, type, 'DE')
           package.add_price(price)
         end
+        package.data_origins.store dotype, :dimdi
       end
-      package
     end
     def import_product(package, row)
       name = product_name(row)

@@ -284,20 +284,9 @@ class ProductInfos < Import
     end
     amount = cell(row, 6).to_f
     if(amount > 0)
-      price = package.price(:public)
-      either = false
-      if price.nil?
-        package.add_price Util::Money.new(amount, :public, 'DE')
-        either = true
-      elsif package.data_origin(:price_public) == :csv_product_infos
-        if price != amount
-          price.amount = amount
-          either = true
-        end
-      end
-      if either
-        package.data_origins.store :price_public, :csv_product_infos
-        modified = true
+      import_price(package, :public, amount) && modified = true
+      if efp = package._price_exfactory
+        import_price(package, :exfactory, efp.to_f) && modified = true
       end
     end
     import_dose(row, package) && modified = true
@@ -307,6 +296,23 @@ class ProductInfos < Import
     unless(product.company)
       product.company = import_company(row)
       product.save
+    end
+  end
+  def import_price(package, type, amount)
+    dotype = :"price_#{type}"
+    price = package.price(type)
+    either = false
+    if price.nil?
+      package.add_price Util::Money.new(amount, type, 'DE')
+      either = true
+    elsif package.data_origin(dotype) == :csv_product_infos
+      if price != amount
+        price.amount = amount
+        either = true
+      end
+    end
+    if either
+      package.data_origins.store dotype, :csv_product_infos
     end
   end
   def import_size(row, package)

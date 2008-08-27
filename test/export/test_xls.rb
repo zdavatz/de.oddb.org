@@ -71,6 +71,7 @@ class TestComparisonDeCh < Test::Unit::TestCase
     package.sequence = sequence
     package.add_price(Util::Money.new(16, :public, 'DE'))
     package.add_price(Util::Money.new(20, :festbetrag, 'DE'))
+    package.add_price(Util::Money.new(6.5, :exfactory, 'DE'))
     package.save
     package
   end
@@ -132,7 +133,7 @@ class TestComparisonDeCh < Test::Unit::TestCase
                  "Producer AG (Producer (Schweiz) AG)", "12345",
                  "7680555550012", "Tropfen", "100 mg", 
                  "Amantadin (Amantadinum)", "N04BB01", "B", "SL", 
-                 "-6.85", "-22.84%", "1.00", "9.37", "15.00", "-5.63", "-37.55%" ]
+                 "-6.85", "-22.84%", "1.00", "9.40", "15.00", "-5.60", "-37.31%" ]
     sheet.should_receive(:write).with(1,0, Array).times(1)\
       .and_return { |row, col, cells|
       assert_equal(expected, cells)

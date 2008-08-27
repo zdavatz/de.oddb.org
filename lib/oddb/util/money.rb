@@ -7,13 +7,25 @@ class Money
   attr_reader :credits
   attr_accessor :type, :country
   include Comparable
+  class << self
+    def five
+      @five ||= self.new(5)
+    end
+    def ten
+      @ten ||= self.new(10)
+    end
+  end
   def initialize(amount, type=nil, country=nil)
     self.amount = amount
-    @type, @country = type.to_s.downcase, country.to_s.upcase
+    self.type = type
+    self.country = country
   end
   def amount=(amount)
     @amount = amount.to_f
     @credits = (@amount * 100).round
+  end
+  def country=(country)
+    @country = country.to_s.upcase
   end
   def is_for?(type, country)
     @type == type.to_s.downcase && @country == country.to_s.upcase
@@ -23,6 +35,9 @@ class Money
   end
   def to_s
     sprintf("%1.2f", to_f)
+  end
+  def type=(type)
+    @type = type.to_s.downcase
   end
   def +(other)
     Money.new((@amount || to_f) + other.to_f)

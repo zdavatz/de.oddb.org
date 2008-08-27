@@ -33,8 +33,8 @@ class Validator < SBSM::Validator
              :sequence, :sort, :update ]
   NUMERIC = [ :active_agent, :code_cid, :code_festbetragsgruppe,
               :code_festbetragsstufe, :composition, :days, :equivalence_factor,
-              :multi, :offset, :part, :price_festbetrag, :price_public, :pzn,
-              :sequence, :size ]
+              :multi, :offset, :part, :price_exfactory, :price_festbetrag,
+              :price_public, :pzn, :sequence, :size ]
   PATTERNS = {
     :atc => /[ABCGHJLMNPRSV](\d{2}([A-Z]([A-Z](\d{2})?)?)?)?/,
   }

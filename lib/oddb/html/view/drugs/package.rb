@@ -31,7 +31,7 @@ module PackageMethods
       link.value = agents.first
     else
       link.value = @lookandfeel.lookup(:active_agents, size)
-      link.css_id = "sub_#@list_index"
+      link.css_id = "sub_#{model.atc}_#@list_index"
       link.dojo_title = agents
     end
     link
@@ -136,6 +136,9 @@ module PackageMethods
       span.label = true
       span
     end
+  end
+  def price_zuzahlung(model)
+    adjust_price model.price(:zuzahlung)
   end
   def product(model)
     if(model.is_a?(Remote::Drugs::Package))
@@ -248,8 +251,9 @@ class PackageInnerComposite < HtmlGrid::Composite
     [0,3] => :code_festbetragsstufe,
     [2,3] => :code_festbetragsgruppe,
     [0,4] => :code_zuzahlungsbefreit,
-    [2,4] => :equivalence_factor,
+    [2,4] => :price_zuzahlung,
     [0,5] => :code_prescription,
+    [2,5] => :equivalence_factor,
     [1,6,0] => :fachinfo_link,
     [1,6,1] => :patinfo_link,
   }

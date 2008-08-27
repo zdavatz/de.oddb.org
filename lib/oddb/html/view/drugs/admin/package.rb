@@ -149,21 +149,22 @@ class PackageInnerForm < Drugs::PackageInnerComposite
     [2,0] => :code_cid, 
     [0,1] => :company, 
     [2,1] => :atc,
-    [0,2] => :price_public, 
-    [2,2] => :price_festbetrag,
-    [0,3] => :code_festbetragsstufe,
-    [2,3] => :code_festbetragsgruppe,
-    [0,4] => :code_zuzahlungsbefreit,
-    [2,4] => :sequence,
-    [0,5] => :code_prescription,
-    [1,6,0] => :submit, 
-    [1,6,1] => :delete, 
+    [0,2] => :price_exfactory, 
+    [2,2] => :price_public,
+    [2,3] => :price_festbetrag,
+    [0,4] => :code_festbetragsstufe,
+    [2,4] => :code_festbetragsgruppe,
+    [0,5] => :code_zuzahlungsbefreit,
+    [2,5] => :sequence,
+    [0,6] => :code_prescription,
+    [1,7,0] => :submit, 
+    [1,7,1] => :delete, 
   }
   SYMBOL_MAP = {
     :name   => HtmlGrid::InputText,
   }
   input_text :code_cid, :price_public, :price_festbetrag, :code_festbetragsstufe,
-             :code_festbetragsgruppe, :equivalence_factor
+             :code_festbetragsgruppe, :equivalence_factor, :price_exfactory
   def init
     super
     error_message

@@ -80,7 +80,7 @@ class Package < Drugs::Package
         set = case key
               when :name
                 @model.name.de = value unless(@model.name.de == value)
-              when :price_public, :price_festbetrag
+              when :price_public, :price_festbetrag, :price_exfactory
                 update_price(/price_(.*)/.match(key.to_s)[1].to_sym, value.to_f)
               when :code_cid, :code_festbetragsgruppe, :code_festbetragsstufe
                 update_code(/code_(.*)/.match(key.to_s)[1].to_sym, value)
