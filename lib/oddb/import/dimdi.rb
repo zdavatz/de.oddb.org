@@ -634,7 +634,7 @@ module Dimdi
         end
         part.save if changed
       end
-      if((company = import_company(row)) && product.company != company)
+      if((company = import_company(row)) && product && product.company != company)
         product.company = company
         product.save
       end
