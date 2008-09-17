@@ -5,11 +5,22 @@ require 'sbsm/lookandfeel'
 require 'sbsm/lookandfeelfactory'
 require 'sbsm/lookandfeelwrapper'
 require 'turing'
+require 'fileutils'
 
 module ODDB
   module Html
     module Util
 class Lookandfeel < SBSM::Lookandfeel
+  @@turing_files = {}
+  @@turing_finalizer = proc { |id|
+    if file = @@turing_files.delete(id)
+      path = File.join(ODDB.config.var, 'captcha', file)
+      File.delete(path) if File.exist?(path)
+    end
+  }
+  Thread.new {
+    FileUtils.rm Dir.glob(File.join(ODDB.config.var, 'captcha', '*'))
+  }
   DICTIONARIES = {
     "de" =>  {
       :active_agents0             => '',
@@ -452,8 +463,10 @@ Medikamenten-Preisvergleichs-Portal Deutschlands.
       kcode = $KCODE
       $KCODE = 'NONE'
       challenge = captcha.generate_challenge
+      @@turing_files.store challenge.object_id, challenge.file
       $KCODE = kcode
     }
+    ObjectSpace.define_finalizer challenge, @@turing_finalizer
     challenge
   end
   def legend_components
