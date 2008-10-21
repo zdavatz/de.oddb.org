@@ -10,7 +10,15 @@ module ODDB
 class Redirect < HtmlGrid::Component
   def http_headers 
     invoice = @model.id
-    names = @model.items.collect { |item| item.text }.join(' ,')
+    names = @model.items.collect { |item|
+      txt = item.text
+      case txt
+      when 'unlimited access'
+        'Unlimited Access to de.oddb.org for %i days' % item.quantity
+      else
+        txt
+      end
+    }.join(' ,')
     ret_url = @lookandfeel._event_url(:collect, :invoice => invoice)
     url = 'https://' << ODDB.config.paypal_server << '/cgi-bin/webscr?' \
       << "business=#{ODDB.config.paypal_receiver}&" \
