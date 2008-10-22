@@ -11,6 +11,11 @@ require 'pp'
 module ODDB
   module Import
     module PharmNet
+class RenewableAgent < SimpleDelegator
+  def renew!
+    __setobj__ __getobj__.class.new
+  end
+end
 class TermedRtf < Rtf
   def initialize(term)
     @term = term
@@ -504,7 +509,7 @@ class Import < Import
        && retries > 0)
       sleep opts[:retry_unit] * 4 ** (opts[:retries] - retries)
       retries -= 1
-      agent.history.clear
+      agent.renew!
       @search_form = nil
       retry
     else
@@ -541,15 +546,18 @@ class Import < Import
                                          :reparse => false,
                                          :retries => 3,
                                          :retry_unit => 60 })
+    agent = RenewableAgent.new agent
     if resume = opts[:resume]
       resume = resume.to_s.downcase
       sequences = sequences.select { |sequence| 
-        sequence.name.de.to_s.downcase >= resume
+        (name = sequence.name) && name.de.to_s.downcase >= resume
+      }
+    else
+      sequences = sequences.select { |sequence|
+        sequence.name
       }
     end
-    sequences = sequences.select { |sequence|
-      sequence.name
-    }.sort_by { |sequence|
+    sequences = sequences.sort_by { |sequence|
       sequence.name
     }
     checked = sprintf "Checked %i Sequences from '%s' to '%s'",
@@ -735,8 +743,7 @@ class Import < Import
             sprintf "Searched for '%s' but got result for '%s' - creating new session",
               term, found
           }
-          agent.cookie_jar.clear!
-          agent.history.clear
+          agent.renew!
           @search_form = get_search_form agent
           set_fi_only(@search_form, fi_only)
           page = result_page @search_form, term

@@ -191,12 +191,13 @@ class TestImport < Test::Unit::TestCase
   end
   def setup_search(resultfile='empty_result.html')
     agent = flexmock(WWW::Mechanize.new)
+    flexmock(WWW::Mechanize).should_receive(:new).and_return agent
     setup_agent(agent, resultfile, :get)
     setup_agent(agent, resultfile, :submit) { |form, button| 
       form.action 
     }
     setup_agent(agent, resultfile, :click) { |link| link.href }
-    agent
+    RenewableAgent.new agent
   end
   def setup_agent(agent, resultfile, symbol, &block)
     dir = File.expand_path('data/html/pharmnet', File.dirname(__FILE__))
@@ -386,12 +387,10 @@ class TestImport < Test::Unit::TestCase
   end
   def test_search__unresponsive
     agent = setup_search "result.html"
-    history = ["history"]
-    flexmock(agent.cookie_jar).should_receive(:clear!).times(1)
-    agent.should_receive(:history).times(1).and_return { history }
+    agent = flexmock agent
+    agent.should_receive(:renew!).times(1)
     result = @importer.search agent, 'Aspirin'
     assert_equal(0, result.size)
-    assert_equal([], history)
     assert_equal(["Searched for 'aspirin' but got result for 'Arzneimittelname: Aarane' - creating new session"], 
                  @errors)
   end
@@ -425,6 +424,8 @@ class TestImport < Test::Unit::TestCase
   end
   def test_process__http_500
     agent = flexmock(WWW::Mechanize.new)
+    klass = flexmock(WWW::Mechanize)
+    klass.should_receive(:new).and_return agent
     agent.should_receive(:get).times(3).and_return { 
       raise "500 => Net::HTTPInternalServerError"
     }
@@ -434,7 +435,8 @@ class TestImport < Test::Unit::TestCase
     ODDB.logger = flexmock('logger')
     ODDB.logger.should_ignore_missing
     assert_nothing_raised {
-      @importer.process agent, sequence, :retry_unit => 1, :retries => 2
+      @importer.process PharmNet::RenewableAgent.new(agent),
+                        sequence, :retry_unit => 1, :retries => 2
     }
   end
   def test_process
