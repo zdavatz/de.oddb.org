@@ -81,7 +81,10 @@ module ODDB
         ]
         lines.concat block.call
       rescue StandardError => err
-        lines.push(err.class, err.message, *err.backtrace)
+        lines.push(err.class.to_s, err.message, *err.backtrace)
+        if importer.respond_to?(:report)
+          lines.concat importer.report rescue []
+        end
         raise
       ensure
         subject = sprintf("%s: %s", 

@@ -235,8 +235,10 @@ class Import < Import
       }
       remove_info key, sequence, opts
     end
-  rescue StandardError => error
-    ODDB.logger.error('PharmNet') { error.message }
+  rescue Timeout::Error, StandardError => error
+    ODDB.logger.error('PharmNet') {
+      sprintf("%s: %s", error.class, error.message)
+    }
     @errors.push [ sequence ? sequence.name.de : '', error.message, 
       error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip, url ]
   end
@@ -503,12 +505,20 @@ class Import < Import
     result.each { |data| data.store(:search_term, good) }
     result
   rescue Timeout::Error, StandardError => error
-    ODDB.logger.error('PharmNet') { error.message }
+    ODDB.logger.error('PharmNet') {
+      sprintf("%s: %s", error.class, error.message)
+    }
     retries ||= opts[:retries]
     if((error.is_a?(Timeout::Error) || /ServerError/.match(error.message)) \
        && retries > 0)
-      sleep opts[:retry_unit] * 4 ** (opts[:retries] - retries)
+      seconds = opts[:retry_unit] * 4 ** (opts[:retries] - retries)
+      ODDB.logger.debug('PharmNet') {
+        sprintf("Waiting %i seconds for the server to recover...", seconds)
+      }
+      sleep seconds
       retries -= 1
+      ODDB.logger.debug('PharmNet') {
+        "Renewing Mechanize-agent and starting a new Session" }
       agent.renew!
       @search_form = nil
       retry
@@ -560,47 +570,23 @@ class Import < Import
     sequences = sequences.sort_by { |sequence|
       sequence.name
     }
-    checked = sprintf "Checked %i Sequences from '%s' to '%s'",
-                      sequences.size, sequences.first.name, sequences.last.name
+    count = 0
+    head = sequences.first.name
+    @checked = "Checked 0 Sequences"
     ## let odba cache release unneeded sequences ...
     sequences.collect! { |sequence| sequence.odba_id }
-    while sequence = sequences.shift
-      ## ... and refetch them when necessary
-      process(agent, ODBA.cache.fetch(sequence), opts) rescue ODBA::OdbaError
+    while odba_id = sequences.shift
+      begin
+        ## ... and refetch them when necessary
+        sequence = ODBA.cache.fetch(sequence)
+        count += 1
+        @checked = sprintf "Checked %i Sequences from '%s' to '%s'",
+                          count, head, sequence.name
+        process(agent, sequence, opts)
+      rescue ODBA::OdbaError
+      end
     end
-    fi_sources = { }
-    pi_sources = { }
-    fi_count = pi_count = 0
-    Drugs::Sequence.all { |sequence|
-      if(doc = sequence.fachinfo.de)
-        fi_count += 1
-        fi_sources[doc.source] = true
-      end
-      if(doc = sequence.patinfo.de)
-        pi_count += 1
-        pi_sources[doc.source] = true
-      end
-    }
-    [ checked,
-      "",
-      "Assigned #{@assigned[:fachinfo]} Fachinfos",
-      "Removed #{@removed[:fachinfo]} Fachinfos",
-      "Kept #{@not_removed[:fachinfo]} unconfirmed Fachinfos",
-      "Total: #{fi_sources.size} Fachinfos linked to #{fi_count} Sequences",
-      "",
-      "Assigned #{@assigned[:patinfo]} Patinfos",
-      "Removed #{@removed[:patinfo]} Patinfos",
-      "Kept #{@not_removed[:patinfo]} unconfirmed Patinfos",
-      "Total: #{pi_sources.size} Patinfos linked to #{pi_count} Sequences",
-      "",
-      "Reparsed #@reparsed_fis Fachinfos",
-      "Repaired #@repaired Active Agents",
-      "",
-      "Errors: #{@errors.size}",
-    ].concat(@errors.collect { |name, message, line, link| 
-      sprintf "%s: %s (%s) -> http://gripsdb.dimdi.de%s", 
-              name, message, line, link
-    })
+    report
   end
   def import_rtf(key, agent, url, term, opts = { :reparse => false, 
                                                  :reload  => false})
@@ -686,8 +672,10 @@ class Import < Import
     # assign registration number if really good match
     return if(cutoff < 2) # arbitrary value
     assign_registration sequence, data[:registration]
-  rescue StandardError => error
-    ODDB.logger.error('PharmNet') { error.message }
+  rescue Timeout::Error, StandardError => error
+    ODDB.logger.error('PharmNet') {
+      sprintf("%s: %s", error.class, error.message)
+    }
     @errors.push [ sequence.name.de, error.message, 
       error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip ]
   end
@@ -716,6 +704,41 @@ class Import < Import
       info.chapters.replace doc.chapters
       info.save
     end
+  end
+  def report
+    fi_sources = { }
+    pi_sources = { }
+    fi_count = pi_count = 0
+    Drugs::Sequence.all { |sequence|
+      if(doc = sequence.fachinfo.de)
+        fi_count += 1
+        fi_sources[doc.source] = true
+      end
+      if(doc = sequence.patinfo.de)
+        pi_count += 1
+        pi_sources[doc.source] = true
+      end
+    }
+    [ @checked,
+      "",
+      "Assigned #{@assigned[:fachinfo]} Fachinfos",
+      "Removed #{@removed[:fachinfo]} Fachinfos",
+      "Kept #{@not_removed[:fachinfo]} unconfirmed Fachinfos",
+      "Total: #{fi_sources.size} Fachinfos linked to #{fi_count} Sequences",
+      "",
+      "Assigned #{@assigned[:patinfo]} Patinfos",
+      "Removed #{@removed[:patinfo]} Patinfos",
+      "Kept #{@not_removed[:patinfo]} unconfirmed Patinfos",
+      "Total: #{pi_sources.size} Patinfos linked to #{pi_count} Sequences",
+      "",
+      "Reparsed #@reparsed_fis Fachinfos",
+      "Repaired #@repaired Active Agents",
+      "",
+      "Errors: #{@errors.size}",
+    ].concat(@errors.collect { |name, message, line, link|
+      sprintf "%s: %s (%s) -> http://gripsdb.dimdi.de%s",
+              name, message, line, link
+    })
   end
   def result_page(form, term)
     form.field('term').value = term
