@@ -578,7 +578,7 @@ class Import < Import
     while odba_id = sequences.shift
       begin
         ## ... and refetch them when necessary
-        sequence = ODBA.cache.fetch(sequence)
+        sequence = ODBA.cache.fetch(odba_id)
         count += 1
         @checked = sprintf "Checked %i Sequences from '%s' to '%s'",
                           count, head, sequence.name
