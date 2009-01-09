@@ -49,6 +49,16 @@ module ODDB
         @admin_threads.add(t)
         t
       end
+      def create_product name
+        if prod = ODDB::Drugs::Product.find_by_name(name)
+          "The product already exists. You may edit it at http://de.oddb.org/de/drugs/product/uid/#{prod.uid}"
+        else
+          prod = ODDB::Drugs::Product.new
+          prod.name.de = name
+          prod.save
+          "Success! You may now edit the product at http://de.oddb.org/de/drugs/product/uid/#{prod.uid}"
+        end
+      end
       def generate_dictionary(language, locale)
         ODBA.storage.remove_dictionary(language)
         base = File.join(ODDB.config.data_dir,
