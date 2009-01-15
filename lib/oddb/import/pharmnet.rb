@@ -116,14 +116,14 @@ class PiParser < TermedRtf
     name = nil
     if(/\b#@term\b/i.match buffer)
       name = case buffer 
-             when /wof(ü|Ü|ue)r\s+wird\s+(es|sie)\s+(angewendet|eingenommen)/i,
+             when /wof(ü|Ü|ue)r\s+(wird|werden)\s+(es|sie)\s+(angewendet|eingenommen)/i,
                   /wird\s+angewendet$/i
                'indications'
-             when /Wie\s+ist.+?(anzuwenden|einzunehmen)\?/i
+             when /Wie\s+(ist|sind).+?(anzuwenden|einzunehmen)\?/i
                'application'
              when /vor\s+der\s+(Anwendung|Einnahme)\s+von/i 
                'precautions'
-             when /^([56]\.?\s*)?Wie\s+ist.+?aufzubewahren/i 
+             when /^([56]\.?\s*)?Wie\s+(ist|sind).+?aufzubewahren/i
                'storage'
              when /^Bitte\s.+für\s+Kinder\s+nicht\s+erreichbar/i
                'personal'
@@ -604,27 +604,44 @@ class Import < Import
       @sources.store url, true 
       io = nil
       if(opts[:reload] || !File.exist?(path))
-        ODDB.logger.debug('PharmNet') { 
+        ODDB.logger.debug('PharmNet') {
           sprintf('Downloading %s for %s from %s', key, term, url) }
         file = agent.get url
         file.save path
+        ODDB.logger.debug('PharmNet') {
+          sprintf('Saving %s for %s in %s', key, term, path) }
         io = StringIO.new(file.body)
       else 
+        ODDB.logger.debug('PharmNet') {
+          sprintf('Reading %s for %s from %s', key, term, path) }
+        file = agent.get url
         io = File.open(path)
       end
-      term = term.gsub(/[\s-]/, '.')
-      ODDB.logger.debug('PharmNet') { 
-        sprintf('Parsing %s with term: %s', key, term) }
-      doc = pklass.new(term).import io
-      doc.chapters.shift
+      term = term.downcase.gsub(/[\s-]/, '.')
+      chapters = []
+      new = nil
+      while !term.empty? && chapters.size < 4
+        ODDB.logger.debug('PharmNet') {
+          sprintf('Parsing %s with term: %s', key, term) }
+        io.rewind
+        new = pklass.new(term).import io
+        chapters = new.chapters
+        term = term.gsub /(\A|\.)[^.]*$/, ''
+      end
       ## ensure that chapter-headings are bold
-      doc.chapters.each { |chapter|
+      new.chapters.each { |chapter|
         if((paragraph = chapter.paragraphs.first) \
            && (format = paragraph.formats.first))
           format.augment "b"
         end
       }
-      doc.source = url
+      new.source = url
+      if doc
+        doc.chapters.replace chapters
+        doc.save
+      else
+        doc = new
+      end
     end
     doc
   end

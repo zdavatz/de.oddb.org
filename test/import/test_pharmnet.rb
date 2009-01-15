@@ -804,6 +804,21 @@ bei nicht organbedingtem Bluthochdruck (essentieller Hypertonie) und bei Belastu
                  "additional_information", "personal" ]
     assert_equal(expected, chapters.collect { |ch| ch.name })
   end
+  def test_import_pi__naltrexon
+    @importer = PiParser.new 'naltrexon'
+    path = File.expand_path('data/rtf/pharmnet/naltrexon.pi.rtf',
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "company",
+                 "precautions", "application", "unwanted_effects", "storage",
+                 "date" ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+  end
   def test_import_pi__omeprazol
     @importer = PiParser.new 'omeprazol'
     path = File.expand_path('data/rtf/pharmnet/omeprazol.pi.rtf', 

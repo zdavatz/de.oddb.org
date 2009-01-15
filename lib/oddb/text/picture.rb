@@ -49,6 +49,9 @@ module ODDB
       def filename
         @filename ||= "%s.png" % digest
       end
+      def formats
+        []
+      end
       def image
         Magick::Image.from_blob(blob).first
       end

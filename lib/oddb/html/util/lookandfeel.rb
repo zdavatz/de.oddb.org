@@ -45,6 +45,7 @@ class Lookandfeel < SBSM::Lookandfeel
       :chapter_composition        => 'Zusammensetzung', 
       :chapter_counterindications => 'Gegenanzeigen', 
       :chapter_date               => 'Stand der Information', 
+      :chapter_default            => 'Einleitung',
       :chapter_disposal           => 'Beseitigung', 
       :chapter_dosage             => 'Dosierung', 
       :chapter_driving_ability    => 'Verkehrstüchtigkeit', 

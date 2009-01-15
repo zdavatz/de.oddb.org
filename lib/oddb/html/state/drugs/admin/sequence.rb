@@ -93,8 +93,11 @@ class Sequence < Global
   def _import_rtf(key, seq, url)
     if(url && !url.empty?)
       imp = Import::PharmNet::Import.new
-      document = imp.import_rtf(key, WWW::Mechanize.new, url, seq.name.de)
-      seq.send(key).de = document
+      document = imp.import_rtf(key, WWW::Mechanize.new, url, seq.name.de,
+                                :reparse => true, :reload => true)
+      parent = seq.send(key)
+      parent.de = document
+      parent.save
     end
   end
   def update
