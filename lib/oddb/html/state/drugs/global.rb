@@ -183,10 +183,10 @@ module Events
   def _search_append_products(query, result)
     table = {}
     result.each do |package|
-      table.store package.product, true
+      table.store package.product.uid, true
     end
     products = ODDB::Drugs::Product.search_by_name(query)
-    products.reject! do |prod| table[prod] end
+    products.reject! do |prod| table[prod.uid] end
     products.collect! do |prod|
       Util::KnowItAll.new prod, :active_agents => [], :parts => [], :ddds => []
     end
@@ -195,10 +195,10 @@ module Events
   def _search_append_sequences(query, result)
     table = {}
     result.each do |package|
-      table.store package.sequence, true
+      table.store package.sequence.uid, true
     end
     sequences = ODDB::Drugs::Sequence.search_by_product(query)
-    sequences.reject! do |seq| table[seq] end
+    sequences.reject! do |seq| table[seq.uid] end
     sequences.collect! do |seq|
       Util::KnowItAll.new seq, :active_agents => [], :parts => [], :ddds => []
     end
