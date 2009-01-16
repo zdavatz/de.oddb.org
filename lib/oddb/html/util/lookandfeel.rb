@@ -242,7 +242,7 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :new_package                => 'Neue Packung',
       :new_sequence               => 'Neue Sequenz',
       :no                         => 'Nein',
-      :no_active_agents           => 'Keine Wirkstoffe in der DB',
+      :no_active_agents           => 'Wirkstoffe unbekannt',
       :oddb_ch                    => 'Schweiz',
       :oddb_chde                  => 'Deutschland - Schweiz',
       :oddb_de                    => 'Deutschland',

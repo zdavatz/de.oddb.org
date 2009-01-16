@@ -19,6 +19,7 @@ require 'oddb/html/state/drugs/package'
 require 'oddb/html/state/drugs/patinfo'
 require 'oddb/html/state/drugs/products'
 require 'oddb/html/state/drugs/result'
+require 'oddb/html/util/know_it_all'
 require 'oddb/util/annotated_list'
 require 'ostruct'
 
@@ -179,6 +180,30 @@ module Events
     end
     Result.new(@session, result)
   end
+  def _search_append_products(query, result)
+    table = {}
+    result.each do |package|
+      table.store package.product, true
+    end
+    products = ODDB::Drugs::Product.search_by_name(query)
+    products.reject! do |prod| table[prod] end
+    products.collect! do |prod|
+      Util::KnowItAll.new prod, :active_agents => [], :parts => [], :ddds => []
+    end
+    result.concat products
+  end
+  def _search_append_sequences(query, result)
+    table = {}
+    result.each do |package|
+      table.store package.sequence, true
+    end
+    sequences = ODDB::Drugs::Sequence.search_by_product(query)
+    sequences.reject! do |seq| table[seq] end
+    sequences.collect! do |seq|
+      Util::KnowItAll.new seq, :active_agents => [], :parts => [], :ddds => []
+    end
+    result.concat sequences
+  end
   def _search_by(key, query, result)
     result.concat ODDB::Drugs::Package.send("search_by_#{key}", query)
   end
@@ -206,6 +231,8 @@ module Events
       else
         _search_by(:name, query, result)
         _search_by(:product, query, result) if result.empty?
+        _search_append_sequences(query, result)
+        _search_append_products(query, result)
       end
     end
     result

@@ -13,10 +13,13 @@ module ODDB
       module Drugs
 module PackageMethods
   def active_agents(model)
-    link = nil
+    link = HtmlGrid::Link.new(:no_active_agents, model, @session, self)
     if(code = model.code(:cid, 'DE'))
-      link = HtmlGrid::Link.new(:no_active_agents, model, @session, self)
       link.href = @lookandfeel._event_url(:package, [:pzn, code.value])
+    elsif model.is_a?(ODDB::Drugs::Sequence)
+      link.href = @lookandfeel._event_url(:sequence, [:uid, model.uid])
+    elsif model.is_a?(ODDB::Drugs::Product)
+      link.href = @lookandfeel._event_url(:product, [:uid, model.uid])
     else
       link = HtmlGrid::Value.new(:no_active_agents, model, @session ,self)
     end
@@ -29,7 +32,7 @@ module PackageMethods
     size = agents.size
     if(size == 1)
       link.value = agents.first
-    else
+    elsif size > 1
       link.value = @lookandfeel.lookup(:active_agents, size)
       link.css_id = "sub_#{model.atc}_#@list_index"
       link.dojo_title = agents
