@@ -41,6 +41,14 @@ module ODDB
           }
         end
       end
+      def Updater.import_fachinfos(term, opts = {})
+        importer = Import::PharmNet::Import.new
+        _reported_import(importer) {
+          importer.import_missing(WWW::Mechanize.new, term, opts)
+        }
+      rescue StandardError => error
+        ODDB.logger.error('Updater') { error.message }
+      end
       def Updater.import_missing(name)
         importer = Import::Csv::ProductInfos.new
         Import::Csv::ProductInfos.open { |io|
@@ -83,7 +91,7 @@ module ODDB
       rescue StandardError => err
         lines.push(err.class.to_s, err.message, *err.backtrace)
         if importer.respond_to?(:report)
-          lines.concat importer.report rescue []
+          lines.concat importer.report rescue [$!.message]
         end
         raise
       ensure

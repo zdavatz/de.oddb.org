@@ -19,6 +19,9 @@ class KnowItAll
       @values[name]
     end
   end
+  def respond_to? name
+    @delegate.respond_to?(name) || @values.include?(name)
+  end
 end
     end
   end

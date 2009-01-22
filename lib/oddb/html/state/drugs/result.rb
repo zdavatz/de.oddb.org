@@ -64,10 +64,10 @@ class Result < Drugs::Global
   VIEW = View::Drugs::Result
   def init
     partition!
-    sort_by(:price_public)
-    sort_by(:size)
-    sort_by(:active_agents)
-    sort_by(:product)
+    sort_by(:price_public, 0)
+    sort_by(:size, 0)
+    sort_by(:active_agents, [])
+    sort_by(:product, nil)
     paginate
     sort
   end

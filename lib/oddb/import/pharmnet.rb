@@ -3,6 +3,7 @@
 
 require 'fileutils'
 require 'htmlentities'
+require 'mechanize'
 require 'oddb/import/import'
 require 'oddb/import/rtf'
 require 'oddb/util/mail'
@@ -11,9 +12,40 @@ require 'pp'
 module ODDB
   module Import
     module PharmNet
+class EncodedParser < WWW::Mechanize::Page
+  @@iconv = Iconv.new('utf8', 'latin1')
+  def initialize(uri=nil, response=nil, body=nil, code=nil)
+    body = @@iconv.iconv(body.gsub(/iso-8859-1/i, 'utf-8'))
+    ## HtmlEntities seems to kill the parser, do it manually for now
+    #htmlentities = HTMLEntities.new
+    #body = htmlentities.decode(body)
+    body.gsub! '&aacute;', 'á'
+    body.gsub! '&agrave;', 'à'
+    body.gsub! '&auml;', 'ä'
+    body.gsub! '&eacute;', 'é'
+    body.gsub! '&egrave;', 'è'
+    body.gsub! '&euml;', 'ë'
+    body.gsub! '&iacute;', 'í'
+    body.gsub! '&igrave;', 'ì'
+    body.gsub! '&iuml;', 'ï'
+    body.gsub! '&oacute;', 'ó'
+    body.gsub! '&ograve;', 'ò'
+    body.gsub! '&ouml;', 'ö'
+    body.gsub! '&uacute;', 'ú'
+    body.gsub! '&ugrave;', 'ù'
+    body.gsub! '&uuml;', 'ü'
+    super(uri, response, body, code)
+  end
+end
 class RenewableAgent < SimpleDelegator
+  def initialize agent
+    agent.pluggable_parser.html = EncodedParser
+    super
+  end
   def renew!
-    __setobj__ __getobj__.class.new
+    agent = __getobj__.class.new
+    agent.pluggable_parser.html = EncodedParser
+    __setobj__ agent
   end
 end
 class TermedRtf < Rtf
@@ -237,7 +269,7 @@ class Import < Import
     end
   rescue Timeout::Error, StandardError => error
     ODDB.logger.error('PharmNet') {
-      sprintf("%s: %s", error.class, error.message)
+      sprintf("%s: %s", error.class, error.message) << "\n" << error.backtrace.join("\n")
     }
     @errors.push [ sequence ? sequence.name.de : '', error.message, 
       error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip, url ]
@@ -336,6 +368,33 @@ class Import < Import
       end
     }
     data.store :relevance, max / participants
+  end
+  def create_sequence(term, data)
+    sequence = Drugs::Sequence.new
+    composition = Drugs::Composition.new
+    composition.sequence = sequence
+    galform = import_galenic_form(data[:data][1])
+    composition.galenic_form = galform
+    data[:composition].each do |act|
+      substance = import_substance act[:substance]
+      agent = Drugs::ActiveAgent.new substance, act[:dose]
+      agent.composition = composition
+      agent.save
+    end
+    composition.save
+    product = nil
+    official = data[:data][0][/^[^\d(]+/].strip
+    [term, official].each do |candidate|
+      product ||= Drugs::Product.find_by_name candidate
+    end
+    unless product
+      product = Drugs::Product.new
+      product.name.de = official
+      product.save
+    end
+    sequence.product = product
+    sequence.save
+    sequence
   end
   def exclusive_permutation(participants)
     left = (0...participants).to_a
@@ -439,12 +498,7 @@ class Import < Import
         elsif(!agent.chemical_equivalence)
           agent.chemical_equivalence = Drugs::ActiveAgent.new agent.substance, agent.dose
           agent.chemical_equivalence.save
-          substance = Drugs::Substance.find_by_name detail[:substance]
-          unless(substance)
-            substance = Drugs::Substance.new
-            substance.name.de = detail[:substance]
-            substance.save
-          end
+          substance = import_substance detail[:substance]
           agent.substance = substance
           agent.dose = detail[:dose]
           agent.save
@@ -506,7 +560,7 @@ class Import < Import
     result
   rescue Timeout::Error, StandardError => error
     ODDB.logger.error('PharmNet') {
-      sprintf("%s: %s", error.class, error.message)
+      sprintf("%s: %s", error.class, error.message) << "\n" << error.backtrace.join("\n")
     }
     retries ||= opts[:retries]
     if((error.is_a?(Timeout::Error) || /ServerError/.match(error.message)) \
@@ -588,6 +642,49 @@ class Import < Import
     end
     report
   end
+  def import_galenic_form(description)
+    galform = Drugs::GalenicForm.find_by_description(description)
+    unless galform
+      galform = Drugs::GalenicForm.search_by_description(description).find do |gf|
+        sim = ngram_similarity description, gf.description.de
+        sim > 0.8
+      end
+      if galform
+        galform.description.synonyms.push description
+        galform.save
+      end
+    end
+    unless galform
+      galform = Drugs::GalenicForm.new
+      galform.description.de = description
+      galform.save
+    end
+    galform
+  end
+  def import_missing(agent, term, opts={})
+    @checked = "Searched for FIs/GIs for '#{term}'"
+    agent = RenewableAgent.new agent
+    created = 0
+    if result = get_search_result(agent, term, nil, opts)
+      result.each do |data|
+        sequence = Drugs::Sequence.find_by_code :value => data[:registration]
+        if sequence
+          if opts[:repair]
+            agents = sequence.active_agents
+            relevance = composition_relevance agents, data
+            fix_composition agents, data
+          end
+        else
+          created += 1
+          sequence = create_sequence term, data
+          assign_registration sequence, data[:registration]
+        end
+        assign_info(:fachinfo, agent, data, sequence, opts)
+        assign_info(:patinfo, agent, data, sequence, opts)
+      end
+    end
+    report
+  end
   def import_rtf(key, agent, url, term, opts = { :reparse => false, 
                                                  :reload  => false})
     pklass = case key
@@ -645,6 +742,15 @@ class Import < Import
     end
     doc
   end
+  def import_substance(name)
+    substance = Drugs::Substance.find_by_name name
+    unless(substance)
+      substance = Drugs::Substance.new
+      substance.name.de = name
+      substance.save
+    end
+    substance
+  end
   def ngram_similarity(str1, str2, n=5)
     str1 = u(str1).downcase.gsub(/[\s,.\-\/]+/, '')
     str2 = u(str2).downcase.gsub(/[\s,.\-\/]+/, '')
@@ -691,7 +797,7 @@ class Import < Import
     assign_registration sequence, data[:registration]
   rescue Timeout::Error, StandardError => error
     ODDB.logger.error('PharmNet') {
-      sprintf("%s: %s", error.class, error.message)
+      sprintf("%s: %s", error.class, error.message) << "\n" << error.backtrace.join("\n")
     }
     @errors.push [ sequence.name.de, error.message, 
       error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip ]

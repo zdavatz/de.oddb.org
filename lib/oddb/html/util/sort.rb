@@ -14,8 +14,8 @@ module Sort
       sort_by(key.to_sym)
     end
   end
-  def sort_by(key)
-    sorter = sort_proc(key) || Proc.new { |pac| pac.send(key) || '' }
+  def sort_by(key, default='')
+    sorter = sort_proc(key) || Proc.new { |pac| pac.send(key) || default }
     if(@sortvalue == key)
       @reverse = !@reverse
     else
