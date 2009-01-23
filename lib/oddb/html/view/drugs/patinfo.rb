@@ -33,7 +33,11 @@ end
 class Patinfo < Template
   CONTENT = PatinfoComposite
   def _title
-    super.push(@model.name.send(@session.language))
+    name = @model.name.send(@session.language)
+    if name.nil? && @model.respond_to?(:product)
+      name = @model.product.name.send(@session.language)
+    end
+    super.push name
   end
 end
       end

@@ -241,6 +241,8 @@ class Import < Import
     @not_removed = Hash.new 0
     @repaired = 0
     @reparsed_fis = 0
+    @products_created = 0
+    @sequences_created = 0
     @archive = File.join ODDB.config.var, 'rtf', 'pharmnet'
     @sources = {}
     FileUtils.mkdir_p @archive
@@ -366,6 +368,7 @@ class Import < Import
     data.store :relevance, max / participants
   end
   def create_sequence(term, data)
+    @sequences_created += 1
     sequence = Drugs::Sequence.new
     composition = Drugs::Composition.new
     composition.sequence = sequence
@@ -400,6 +403,7 @@ class Import < Import
       end
     end
     unless product
+      @products_created += 1
       product = Drugs::Product.new
       product.name.de = term_with_company
       product.company = company
@@ -696,24 +700,25 @@ class Import < Import
   end
   def import_missing(agent, term, opts={})
     @checked = "Searched for FIs/GIs for '#{term}'"
+    opts = { :skip_totals => true }.merge opts
     agent = RenewableAgent.new agent
-    created = 0
     if result = get_search_result(agent, term, nil, opts)
       result.each do |data|
         sequence = Drugs::Sequence.find_by_code :value => data[:registration]
         if sequence
           if opts[:repair]
-            company_name = company.name.de.gsub(@stop, '').strip
-            sequence.name.de = [ term.strip, company_name ].join(' ')
+            pname, gfname, cname = data[:data]
+            if product = sequence.product
+              product.company ||= import_company cname
+            end
+            company_name = product.company.name.de.gsub(@stop, '').strip
+            official = pname[/^[^\d(]+/].strip
+            sequence.name.de = [ official, company_name ].join(' ')
             agents = sequence.active_agents
             relevance = composition_relevance agents, data
             fix_composition agents, data
-            if product = sequence.product
-              product.company ||= import_company data[:data][2]
-            end
           end
         else
-          created += 1
           sequence = create_sequence term, data
           assign_registration sequence, data[:registration]
         end
@@ -721,7 +726,7 @@ class Import < Import
         assign_info(:patinfo, agent, data, sequence, opts)
       end
     end
-    report
+    report opts
   end
   def import_rtf(key, agent, url, term, opts = { :reparse => false, 
                                                  :reload  => false})
@@ -866,37 +871,44 @@ class Import < Import
       info.save
     end
   end
-  def report
+  def report opts={}
     fi_sources = { }
     pi_sources = { }
     fi_count = pi_count = 0
-    Drugs::Sequence.all { |sequence|
-      if(doc = sequence.fachinfo.de)
-        fi_count += 1
-        fi_sources[doc.source] = true
-      end
-      if(doc = sequence.patinfo.de)
-        pi_count += 1
-        pi_sources[doc.source] = true
-      end
-    }
+    unless opts[:skip_totals]
+      Drugs::Sequence.all { |sequence|
+        if(doc = sequence.fachinfo.de)
+          fi_count += 1
+          fi_sources[doc.source] = true
+        end
+        if(doc = sequence.patinfo.de)
+          pi_count += 1
+          pi_sources[doc.source] = true
+        end
+      }
+    end
     [ @checked,
       "",
       "Assigned #{@assigned[:fachinfo]} Fachinfos",
       "Removed #{@removed[:fachinfo]} Fachinfos",
       "Kept #{@not_removed[:fachinfo]} unconfirmed Fachinfos",
-      "Total: #{fi_sources.size} Fachinfos linked to #{fi_count} Sequences",
+      ("Total: #{fi_sources.size} Fachinfos linked to #{fi_count} Sequences" \
+        unless opts[:skip_totals]),
       "",
       "Assigned #{@assigned[:patinfo]} Patinfos",
       "Removed #{@removed[:patinfo]} Patinfos",
       "Kept #{@not_removed[:patinfo]} unconfirmed Patinfos",
-      "Total: #{pi_sources.size} Patinfos linked to #{pi_count} Sequences",
+      ("Total: #{pi_sources.size} Patinfos linked to #{pi_count} Sequences" \
+        unless opts[:skip_totals]),
+      "",
+      "Created #@products_created Products",
+      "Created #@sequences_created Sequences",
       "",
       "Reparsed #@reparsed_fis Fachinfos",
       "Repaired #@repaired Active Agents",
       "",
       "Errors: #{@errors.size}",
-    ].concat(@errors.collect { |name, message, line, link|
+    ].compact.concat(@errors.collect { |name, message, line, link|
       sprintf "%s: %s (%s) -> http://gripsdb.dimdi.de%s",
               name, message, line, link
     })
