@@ -93,7 +93,7 @@ class Sequence < Global
   def _import_rtf(key, seq, url)
     if(url && !url.empty?)
       imp = Import::PharmNet::Import.new
-      document = imp.import_rtf(key, WWW::Mechanize.new, url, seq.name.de,
+      document = imp.import_rtf(key, WWW::Mechanize.new, url, seq.product.name.de,
                                 :reparse => true, :reload => true)
       parent = seq.send(key)
       parent.de = document
@@ -112,7 +112,8 @@ class Sequence < Global
     others.delete(@model)
     unless others.empty?
       value = sprintf "'%s' (%s)", input[:registration], 
-                      others.collect { |seq| seq.name.de }.join(', ')
+                      others.collect { |seq|
+                        seq.name.de || seq.product.name.de }.join(', ')
       @errors.store(:registration, 
                     create_error(:e_duplicate_registration, :registration, value))
     end

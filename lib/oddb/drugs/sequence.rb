@@ -7,12 +7,13 @@ module ODDB
   module Drugs
     class Sequence < Model
       belongs_to :atc, delegates(:ddds)
-      belongs_to :product, delegates(:company, :name)
+      belongs_to :product, delegates(:company)
       has_many :compositions, 
         delegates(:active_agents, :doses, :substances),
         on_delete(:cascade)
       has_many :packages, on_delete(:cascade), on_save(:cascade)
       is_coded
+      multilingual :name
       m10l_document :fachinfo
       m10l_document :patinfo
       def comparable?(other)

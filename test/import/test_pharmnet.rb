@@ -273,7 +273,7 @@ class TestImport < Test::Unit::TestCase
     agent = setup_search
     form = @importer.get_search_form(agent)
     page = @importer.result_page(form, 'Aar O S')
-    assert_instance_of WWW::Mechanize::Page, page
+    assert_instance_of EncodedParser, page
     result = @importer.extract_result agent, page
     assert result.empty?
   end
@@ -281,7 +281,7 @@ class TestImport < Test::Unit::TestCase
     agent = setup_search "result.html"
     form = @importer.get_search_form(agent)
     page = @importer.result_page(form, 'Aarane')
-    assert_instance_of WWW::Mechanize::Page, page
+    assert_instance_of EncodedParser, page
     result = @importer.extract_result agent, page
     assert_equal(1, result.size)
     expected = [{
@@ -296,7 +296,7 @@ class TestImport < Test::Unit::TestCase
     agent = setup_search "paged_result_1.html"
     form = @importer.get_search_form(agent)
     page = @importer.result_page(form, 'Aspirin')
-    assert_instance_of WWW::Mechanize::Page, page
+    assert_instance_of EncodedParser, page
     result = @importer.extract_result agent, page
     assert_equal(18, result.size)
     expected = {
@@ -318,7 +318,7 @@ class TestImport < Test::Unit::TestCase
     page = @importer.result_page(form, 'Aarane')
     result = @importer.extract_result agent, page
     page = @importer.get_details agent, page, result.first
-    assert_instance_of WWW::Mechanize::Page, page
+    assert_instance_of EncodedParser, page
     details = @importer.extract_details page
     expected = {
       :patinfo  => "/amispb/doc/2007/08/15/2103159/OBFM262E63A401C7DE6A.rtf",

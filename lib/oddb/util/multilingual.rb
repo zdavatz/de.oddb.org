@@ -56,7 +56,9 @@ module ODDB
         @synonyms.push(synonym).uniq! && synonym
       end
       def all
-        super.concat(@synonyms)
+        terms = super.concat(@synonyms)
+        terms.concat(terms.collect do |term| term.gsub(/[^\w]/, '') end)
+        terms.uniq
       end
       def merge(other)
         @synonyms.concat(other.all).uniq!
@@ -64,3 +66,5 @@ module ODDB
     end
   end
 end
+
+require 'oddb/util/m10l_document'

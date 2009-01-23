@@ -231,11 +231,7 @@ end
 class Import < Import
   attr_reader :errors
   def initialize
-    @stop = /(Pharma(ceuticals|zeutische\s*Fabrik)?
-             |Arzneim(ittel|\.)
-             |GmbH
-             |u\.?\s*Co\.?|Kg
-             )\s*/ie
+    @stop = /(Pharma(ceuticals|zeutische\s*Fabrik)?|Arzneim(ittel|\.)|GmbH|[u&]\.?\s*Co\.?|Kg)\s*/i
     @htmlentities = HTMLEntities.new
     @result_cache = {}
     @distance_cache = {}
@@ -373,7 +369,8 @@ class Import < Import
     sequence = Drugs::Sequence.new
     composition = Drugs::Composition.new
     composition.sequence = sequence
-    galform = import_galenic_form(data[:data][1])
+    pname, gfname, cname = data[:data]
+    galform = import_galenic_form(gfname)
     composition.galenic_form = galform
     data[:composition].each do |act|
       substance = import_substance act[:substance]
@@ -382,16 +379,33 @@ class Import < Import
       agent.save
     end
     composition.save
+    company = import_company cname
     product = nil
-    official = data[:data][0][/^[^\d(]+/].strip
-    [term, official].each do |candidate|
-      product ||= Drugs::Product.find_by_name candidate
+    official = pname[/^[^\d(]+/].strip
+    company_name = company.name.de.gsub(@stop, '').strip
+    official_with_company = [ official, company_name ].join(' ')
+    term_with_company = [ term, company_name ].join(' ')
+    [official_with_company, official, term_with_company, term].each do |cnd|
+      unless product
+        if (candidate = Drugs::Product.find_by_name(cnd)) \
+          && candidate.company == company
+          product = candidate
+        else
+          Drugs::Product.search_by_name(cnd).each do |candidate|
+            if candidate.company == company
+              product = candidate
+            end
+          end
+        end
+      end
     end
     unless product
       product = Drugs::Product.new
-      product.name.de = official
+      product.name.de = term_with_company
+      product.company = company
       product.save
     end
+    sequence.name.de = official_with_company
     sequence.product = product
     sequence.save
     sequence
@@ -642,6 +656,25 @@ class Import < Import
     end
     report
   end
+  def import_company(name)
+    term = clean = name.gsub(@stop, '').strip
+    company = Business::Company.find_by_name(term)
+    while company.nil? && !term.empty?
+      company = Business::Company.search_by_name(term).find do |gf|
+        relevance = ngram_similarity clean, gf.name.de.gsub(@stop, '')
+        relevance > 0.8
+      end
+      term = term.gsub /(^|[^\w])+\w+\s*$/, ''
+    end
+    if company
+      company.name.add_synonym name
+    else
+      company = Business::Company.new
+      company.name.de = name
+    end
+    company.save
+    company
+  end
   def import_galenic_form(description)
     galform = Drugs::GalenicForm.find_by_description(description)
     unless galform
@@ -650,7 +683,7 @@ class Import < Import
         sim > 0.8
       end
       if galform
-        galform.description.synonyms.push description
+        galform.description.add_synonym description
         galform.save
       end
     end
@@ -670,9 +703,14 @@ class Import < Import
         sequence = Drugs::Sequence.find_by_code :value => data[:registration]
         if sequence
           if opts[:repair]
+            company_name = company.name.de.gsub(@stop, '').strip
+            sequence.name.de = [ term.strip, company_name ].join(' ')
             agents = sequence.active_agents
             relevance = composition_relevance agents, data
             fix_composition agents, data
+            if product = sequence.product
+              product.company ||= import_company data[:data][2]
+            end
           end
         else
           created += 1

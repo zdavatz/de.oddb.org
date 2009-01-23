@@ -200,8 +200,11 @@ module Events
     sequences = ODDB::Drugs::Sequence.search_by_product(query)
     sequences.reject! do |seq| table[seq.uid] end
     sequences.collect! do |seq|
-      Util::KnowItAll.new seq, :active_agents => [], :parts => [], :ddds => [],
-                               :sequence => seq
+      parts = seq.compositions.collect do |comp|
+        Util::KnowItAll.new nil, :unit => comp.galenic_form
+      end
+      Util::KnowItAll.new seq, :active_agents => [], :parts => parts,
+                               :ddds => [], :sequence => seq
     end
     result.concat sequences
   end

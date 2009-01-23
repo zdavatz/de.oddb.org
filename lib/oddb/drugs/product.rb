@@ -16,7 +16,7 @@ module ODDB
         sequences.collect { |sequence| sequence.atc }.compact.uniq
       end
       def packages
-        @sequences.inject([]) { |memo, seq|
+        sequences.inject([]) { |memo, seq|
           memo.concat(seq.packages)
         }
       end

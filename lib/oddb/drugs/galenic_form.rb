@@ -9,6 +9,7 @@ module ODDB
     class GalenicForm < Model
       is_coded
       multilingual :description
+      alias :name :description
       belongs_to :group
       def ==(other)
         super || (!@group.nil? && @group == other.group)
