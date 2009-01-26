@@ -225,7 +225,7 @@ class ProductInfos < Import
           import_known(package, name, row, opts)
         end
       elsif(opts[:import_unknown])
-        opts[:agent] ||= WWW::Mechanize.new
+        opts[:agent] ||= PharmNet::RenewableAgent.new(WWW::Mechanize.new)
         import_unknown(opts[:agent], pzn, name, row)
       end
     end

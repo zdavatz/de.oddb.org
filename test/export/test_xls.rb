@@ -121,13 +121,13 @@ class TestComparisonDeCh < Test::Unit::TestCase
     }
     drb = DRb.start_service('druby://localhost:0', remote)
     book = flexmock('workbook')
-    book.should_receive(:add_format).with(Format)
+    book.should_receive(:add_format).with(Spreadsheet::Format)
     book.should_ignore_missing
     flexstub(Spreadsheet::Excel).should_receive(:new).and_return(book)
     sheet = flexmock('worksheet')
     book.should_receive(:add_worksheet).with('Preisvergleich')\
       .times(1).and_return(sheet)
-    sheet.should_receive(:write).with(0,0, Array, Format).times(1)
+    sheet.should_receive(:write).with(0,0, Array, Spreadsheet::Format).times(1)
 
     expected = [ "Amantadin by Producer (Remotadin)", "100 ml", "23.15",
                  "Producer AG (Producer (Schweiz) AG)", "12345",

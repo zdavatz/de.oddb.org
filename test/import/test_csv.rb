@@ -41,7 +41,7 @@ class TestProductInfos < Test::Unit::TestCase
     Drugs::Substance.instances.clear
   end
   def setup_search(resultfile='empty_result.html')
-    agent = flexmock(WWW::Mechanize.new)
+    agent = flexmock(PharmNet::RenewableAgent.new(WWW::Mechanize.new))
     setup_agent(agent, resultfile, :get)
     setup_agent(agent, resultfile, :submit) { |form, button| 
       form.action 

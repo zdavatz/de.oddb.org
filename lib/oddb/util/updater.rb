@@ -79,6 +79,12 @@ module ODDB
         reported_import(Import::Whocc::Guidelines.new, 
                         WWW::Mechanize.new)
       end
+      def Updater.report_fachinfos
+        importer = Import::PharmNet::Import.new
+        _reported_import(importer) {
+          importer.report
+        }
+      end
       def Updater.reported_import(importer, io)
         _reported_import(importer) { importer.import io }
       end

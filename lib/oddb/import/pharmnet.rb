@@ -684,7 +684,7 @@ class Import < Import
     unless galform
       galform = Drugs::GalenicForm.search_by_description(description).find do |gf|
         sim = ngram_similarity description, gf.description.de
-        sim > 0.8
+        sim > 0.75
       end
       if galform
         galform.description.add_synonym description

@@ -145,7 +145,7 @@ module ODDB
       index_keys(:name_keys, 'a', '4')
     end
     class Sequence < Model
-      simulate_database 
+      simulate_database(:product)
     end
     class Substance < Model
       simulate_database(:name)

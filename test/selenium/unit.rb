@@ -3,6 +3,8 @@
 
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
+ENV['LD_LIBRARY_PATH'] = '/usr/local/firefox'
+
 $log_level = 0
 
 if(pid = Kernel.fork)

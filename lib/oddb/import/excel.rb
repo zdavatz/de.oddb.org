@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # Import::Excel -- de.oddb.org -- 12.09.2006 -- hwyss@ywesee.com
 
-require 'parseexcel/parseexcel'
+require 'spreadsheet'
 require 'oddb/import/import'
 
 module ODDB
@@ -10,13 +10,13 @@ module ODDB
       attr_reader :report
       def cell(row, idx)
         if(cell = row[idx])
-          case cell.type
-          when :date
-            cell.date
-          when :numeric
+          case cell
+          when Date, DateTime
+            cell
+          when Numeric
             cell.to_f
           else
-            u(cell.to_s('utf8')).strip
+            u(cell.to_s).strip
           end
         end
       end
@@ -32,7 +32,7 @@ module ODDB
         }
       end
       def parse(io)
-        Spreadsheet::ParseExcel.parse(io)
+        Spreadsheet.open(io)
       end
     end
     class DatedExcel < Excel

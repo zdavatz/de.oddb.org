@@ -17,15 +17,12 @@ module ODDB
       end
       def test_parse__and_cell
         workbook = @import.parse(@input)
-        assert_instance_of(Spreadsheet::ParseExcel::Workbook, workbook)
-        assert_equal(1, workbook.sheet_count)
+        assert_instance_of(Spreadsheet::Excel::Workbook, workbook)
+        assert_equal(1, workbook.worksheets.size)
         worksheet = workbook.worksheet(0)
-        assert_instance_of(Spreadsheet::ParseExcel::Worksheet, worksheet)
-        assert_equal(:text, worksheet.cell(1,0).type)
+        assert_instance_of(Spreadsheet::Excel::Worksheet, worksheet)
         assert_equal(u("PIROXICAM RATIO"), @import.cell(worksheet.row(1), 0))
-        assert_equal(:numeric, worksheet.cell(1,5).type)
         assert_equal(20, @import.cell(worksheet.row(1), 5))
-        assert_equal(:date, worksheet.cell(1,13).type)
         assert_equal(Date.new(2006,7), 
                      @import.cell(worksheet.row(1), 13))
       end

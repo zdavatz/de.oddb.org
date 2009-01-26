@@ -82,7 +82,7 @@ class ComparisonDeCh
   def write_xls(io, data)
     workbook = Spreadsheet::Excel.new(io)
     worksheet = workbook.add_worksheet('Preisvergleich')
-    fmt_title = Format.new(:bold => true)
+    fmt_title = Spreadsheet::Format.new(:bold => true)
     workbook.add_format(fmt_title)
     worksheet.write 0, 0, [
       "Name DE (Name CH)",

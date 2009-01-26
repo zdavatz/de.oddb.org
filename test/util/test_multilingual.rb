@@ -82,11 +82,11 @@ module ODDB
       end
       def test_all
         @ml.de = "de-value"
-        assert_equal(['de-value'], @ml.all)
+        assert_equal(['de-value', 'devalue'], @ml.all)
         @ml.fr = "fr-value"
-        assert_equal(['de-value', 'fr-value'], @ml.all.sort)
+        assert_equal(['de-value', 'devalue', 'fr-value', 'frvalue'], @ml.all.sort)
         @ml.synonyms.push('synonym')
-        assert_equal(['de-value', 'fr-value', 'synonym'], @ml.all.sort)
+        assert_equal(['de-value', 'devalue', 'fr-value', 'frvalue', 'synonym'], @ml.all.sort)
       end
       def test_find
         @ml.de = 'test'

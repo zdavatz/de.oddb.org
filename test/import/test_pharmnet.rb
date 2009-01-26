@@ -188,6 +188,12 @@ class TestImport < Test::Unit::TestCase
       @errors.push msg
     }
     ODDB.logger.should_ignore_missing
+    Drugs::Product.instances.clear
+    Drugs::Sequence.instances.clear
+    Drugs::Package.instances.clear
+    Drugs::GalenicForm.instances.clear
+    Drugs::Substance.instances.clear
+    Business::Company.instances.clear
   end
   def setup_search(resultfile='empty_result.html')
     agent = flexmock(WWW::Mechanize.new)
@@ -254,6 +260,65 @@ class TestImport < Test::Unit::TestCase
       b.name == "WFTYP" && b.value == "NO_RESTRICTION" }
     assert_equal(true, radio.checked)
   end
+  def test_import_company
+    assert_equal [], Business::Company.instances
+    comp1 = @importer.import_company 'Axapharm'
+    assert_instance_of Business::Company, comp1
+    assert_equal 'Axapharm', comp1.name.de
+    assert_equal [comp1], Business::Company.instances
+    comp2 = @importer.import_company 'Pfizer Pharmaceuticals AG'
+    assert_instance_of Business::Company, comp2
+    assert_equal 'Pfizer Pharmaceuticals AG', comp2.name.de
+    assert_equal [comp1, comp2], Business::Company.instances
+    comp3 = @importer.import_company 'Axapharm GmbH'
+    assert_equal comp1, comp3
+    assert_equal ['Axapharm GmbH'], comp1.name.synonyms
+    assert_equal [comp1, comp2], Business::Company.instances
+  end
+  def test_import_galenic_form
+    assert_equal [], Drugs::GalenicForm.instances
+    galform1 = @importer.import_galenic_form 'Tabletten'
+    assert_instance_of Drugs::GalenicForm, galform1
+    assert_equal 'Tabletten', galform1.name.de
+    assert_equal [galform1], Drugs::GalenicForm.instances
+    galform2 = @importer.import_galenic_form 'Kapseln'
+    assert_instance_of Drugs::GalenicForm, galform2
+    assert_equal 'Kapseln', galform2.name.de
+    assert_equal [galform1, galform2], Drugs::GalenicForm.instances
+    galform3 = @importer.import_galenic_form 'Tablette'
+    assert_equal galform1, galform3
+    assert_equal ['Tablette'], galform1.name.synonyms
+    assert_equal [galform1, galform2], Drugs::GalenicForm.instances
+  end
+  def test_import_missing
+    agent = setup_search "result.html"
+    assert_equal [], Business::Company.instances
+    assert_equal [], Drugs::Product.instances
+    assert_equal [], Drugs::Sequence.instances
+    assert_equal [], Drugs::Package.instances
+    assert_equal [], Drugs::Substance.instances
+    report = @importer.import_missing agent, 'Aarane'#, :repair => true
+    assert_equal 1, Drugs::Product.instances.size
+    prod = Drugs::Product.instances.first
+    assert_instance_of Drugs::Product, prod
+    assert_equal 'Aarane Sanofi-Aventis Deutschland', prod.name.de
+    company = prod.company
+    assert_equal 'Sanofi-Aventis Deutschland GmbH', company.name.de
+    assert_equal [company], Business::Company.instances
+    assert_equal 1, prod.sequences.size
+    seq = prod.sequences.first
+    assert_equal [seq], Drugs::Sequence.instances
+    assert_equal nil, seq.code(:registration)
+    assert_equal 1, seq.compositions.size
+    comp = seq.compositions.first
+    assert_equal 2, comp.active_agents.size
+    agent1, agent2 = comp.active_agents
+    sub1, sub2 = agent1.substance, agent2.substance
+    assert_equal 'Reproterolhydrochlorid', sub1.name.de
+    assert_equal 'Natriumcromoglicat (Ph.Eur.)', sub2.name.de
+    assert_equal [sub1, sub2], Drugs::Substance.instances
+    assert_equal [], Drugs::Package.instances
+  end
   def test_import_rtf
     url = "http://gripsdb.dimdi.de/amispb/doc/2136914-20050504/OBFM654A78B701C54FC6.rtf"
     path = File.expand_path('data/rtf/pharmnet/selegilin.rtf', 
@@ -268,6 +333,20 @@ class TestImport < Test::Unit::TestCase
     document = @importer.import_rtf(:fachinfo, agent, url, 'selegilin')
     assert_instance_of Text::Document, document
     assert_equal url, document.source
+  end
+  def test_import_substance
+    assert_equal [], Drugs::Substance.instances
+    sub1 = @importer.import_substance 'Mefenaminsäure'
+    assert_instance_of Drugs::Substance, sub1
+    assert_equal 'Mefenaminsäure', sub1.name.de
+    assert_equal [sub1], Drugs::Substance.instances
+    sub2 = @importer.import_substance 'Sildenafil'
+    assert_instance_of Drugs::Substance, sub2
+    assert_equal 'Sildenafil', sub2.name.de
+    assert_equal [sub1, sub2], Drugs::Substance.instances
+    sub3 = @importer.import_substance 'Mefenaminsäure'
+    assert_equal sub1, sub3
+    assert_equal [sub1, sub2], Drugs::Substance.instances
   end
   def test_result_page__empty_result
     agent = setup_search
