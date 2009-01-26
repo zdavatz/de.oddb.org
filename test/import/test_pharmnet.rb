@@ -222,7 +222,7 @@ class TestImport < Test::Unit::TestCase
                'search_filtered.html'
              when "/websearch/servlet/FlowController/Search?uid=000002"
                (@resultfiles ||= []).shift || resultfile
-             when "http://gripsdb.dimdi.de/websearch/servlet/FlowController/DisplayTitles?index=1&uid=000002"
+             when "/websearch/servlet/FlowController/DisplayTitles?index=1&uid=000002"
                'paged_result_2.html'
              when "/websearch/servlet/FlowController/Documents-display"
                (@displayfiles ||= []).shift || 'display.html'
@@ -274,6 +274,15 @@ class TestImport < Test::Unit::TestCase
     assert_equal comp1, comp3
     assert_equal ['Axapharm GmbH'], comp1.name.synonyms
     assert_equal [comp1, comp2], Business::Company.instances
+  end
+  def test_import_company__find_existing
+    existing = Business::Company.new
+    existing.name.de = 'Pfizer Pharma GmbH'
+    existing.save
+    assert_equal [existing], Business::Company.instances
+    comp1 = @importer.import_company "Pfizer Ltd. '"
+    assert_equal existing, comp1
+    assert_equal [existing], Business::Company.instances
   end
   def test_import_galenic_form
     assert_equal [], Drugs::GalenicForm.instances

@@ -231,7 +231,7 @@ end
 class Import < Import
   attr_reader :errors
   def initialize
-    @stop = /(Pharma(ceuticals|zeutische\s*Fabrik)?|Arzneim(ittel|\.)|GmbH|[u&]\.?\s*Co\.?|Kg)\s*/i
+    @stop = /(Pharma(ceuticals|zeutische\s*Fabrik)?|Arzneim(ittel|\.)|GmbH|[u&]\.?\s*Co\.?|Kg|Ltd\.?|')\s*/i
     @htmlentities = HTMLEntities.new
     @result_cache = {}
     @distance_cache = {}
@@ -367,13 +367,23 @@ class Import < Import
     }
     data.store :relevance, max / participants
   end
-  def create_sequence(term, data)
+  def create_sequence(term, data, company, product, galform)
+    pname, gfname, cname = data[:data]
+    official = pname[/^[^\d(]+/].strip
+    company_name = company.name.de.gsub(@stop, '').strip
+    official_with_company = [ official, company_name ].join(' ')
+    term_with_company = [ term, company_name ].join(' ')
+    unless product
+      @products_created += 1
+      product = Drugs::Product.new
+      product.name.de = term_with_company
+      product.company = company
+      product.save
+    end
     @sequences_created += 1
     sequence = Drugs::Sequence.new
     composition = Drugs::Composition.new
     composition.sequence = sequence
-    pname, gfname, cname = data[:data]
-    galform = import_galenic_form(gfname)
     composition.galenic_form = galform
     data[:composition].each do |act|
       substance = import_substance act[:substance]
@@ -382,33 +392,6 @@ class Import < Import
       agent.save
     end
     composition.save
-    company = import_company cname
-    product = nil
-    official = pname[/^[^\d(]+/].strip
-    company_name = company.name.de.gsub(@stop, '').strip
-    official_with_company = [ official, company_name ].join(' ')
-    term_with_company = [ term, company_name ].join(' ')
-    [official_with_company, official, term_with_company, term].each do |cnd|
-      unless product
-        if (candidate = Drugs::Product.find_by_name(cnd)) \
-          && candidate.company == company
-          product = candidate
-        else
-          Drugs::Product.search_by_name(cnd).each do |candidate|
-            if candidate.company == company
-              product = candidate
-            end
-          end
-        end
-      end
-    end
-    unless product
-      @products_created += 1
-      product = Drugs::Product.new
-      product.name.de = term_with_company
-      product.company = company
-      product.save
-    end
     sequence.name.de = official_with_company
     sequence.product = product
     sequence.save
@@ -488,7 +471,7 @@ class Import < Import
     }.sort.uniq[1..-1]
     if(hrefs)
       hrefs.each_with_index { |href, idx|
-        page = agent.get "http://gripsdb.dimdi.de" + href
+        page = agent.get href
         result.concat _extract_result(page.form("titlesForm").form_node)
       }
     end
@@ -557,9 +540,9 @@ class Import < Import
     form.action = link.href
     form
   end
-  def get_search_result(agent, term, sequence=nil, 
-                        opts = { :info_unrestricted => false, 
-                                 :repair => false, :retries => 3})
+  def get_search_result(agent, term, sequence=nil, opts={})
+    opts = { :info_unrestricted => false,
+             :repair => false, :retries => 3}.merge opts
     good = nil
     term = term.dup
     ODDB.logger.debug('PharmNet') { sprintf('Searching for %s', term) }
@@ -608,6 +591,36 @@ class Import < Import
         result.first
       else
         best_data sequence, result
+      end
+    end
+  end
+  def identify_product(term, data, company)
+    pname, gfname, cname = data[:data]
+    official = pname[/^[^\d(]+/].strip
+    company_name = company.name.de.gsub(@stop, '').strip
+    official_with_company = [ official, company_name ].join(' ')
+    term_with_company = [ term, company_name ].join(' ')
+    [official_with_company, official, term_with_company, term].each do |cnd|
+      if (candidate = Drugs::Product.find_by_name(cnd)) \
+        && candidate.company == company
+        return candidate
+      else
+        Drugs::Product.search_by_name(cnd).each do |candidate|
+          if candidate.company == company
+            return candidate
+          end
+        end
+      end
+    end
+    nil
+  end
+  def identify_sequence(data, product, galform)
+    if product
+      doses = data[:composition].collect do |act| act[:dose] end.compact.sort
+      product.sequences.find do |seq|
+        seq.compositions.size == 1 \
+          && seq.doses.compact.sort == doses \
+          && seq.galenic_forms == [galform]
       end
     end
   end
@@ -668,7 +681,7 @@ class Import < Import
         relevance = ngram_similarity clean, gf.name.de.gsub(@stop, '')
         relevance > 0.8
       end
-      term = term.gsub /(^|[^\w])+\w+\s*$/, ''
+      term = term.gsub /(^|\s)+\S+\s*$/, ''
     end
     if company
       company.name.add_synonym name
@@ -704,7 +717,15 @@ class Import < Import
     agent = RenewableAgent.new agent
     if result = get_search_result(agent, term, nil, opts)
       result.each do |data|
+        company, product, galform = nil
         sequence = Drugs::Sequence.find_by_code :value => data[:registration]
+        unless sequence
+          pname, gfname, cname = data[:data]
+          galform = import_galenic_form gfname
+          company = import_company cname
+          product = identify_product term, data, company
+          sequence = identify_sequence data, product, galform
+        end
         if sequence
           if opts[:repair]
             pname, gfname, cname = data[:data]
@@ -719,9 +740,9 @@ class Import < Import
             fix_composition agents, data
           end
         else
-          sequence = create_sequence term, data
-          assign_registration sequence, data[:registration]
+          sequence = create_sequence term, data, company, product, galform
         end
+        assign_registration sequence, data[:registration]
         assign_info(:fachinfo, agent, data, sequence, opts)
         assign_info(:patinfo, agent, data, sequence, opts)
       end
