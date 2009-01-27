@@ -261,7 +261,7 @@ class Import < Import
       _assign_info key, doc, sequence, opts
     else
       ODDB.logger.debug('PharmNet') { 
-        sprintf("Discarding %s for %s (%s)", key, sequence.name.de, term) 
+        sprintf("Discarding %s for %s (%s)", key, sequence_name(sequence), term)
       }
       remove_info key, sequence, opts
     end
@@ -269,7 +269,7 @@ class Import < Import
     ODDB.logger.error('PharmNet') {
       sprintf("%s: %s", error.class, error.message) << "\n" << error.backtrace.join("\n")
     }
-    @errors.push [ sequence ? sequence.name.de : '', error.message, 
+    @errors.push [ sequence ? sequence_name(sequence) : '', error.message,
       error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip, url ]
   end
   def _assign_info(key, doc, sequence, opts={})
@@ -277,7 +277,7 @@ class Import < Import
     return unless info.empty? || opts[:replace]
 
     ODDB.logger.debug('PharmNet') { 
-      sprintf("Assigning %s to %s", key, sequence.name.de) 
+      sprintf("Assigning %s to %s", key, sequence_name(sequence))
     }
     info.de = doc
     @assigned[key] += 1
@@ -289,14 +289,14 @@ class Import < Import
     if(registration && sequence.code(:registration, 'EU') != registration)
       ODDB.logger.debug('PharmNet') { 
         sprintf('Assigning Registration-Number %s to %s', 
-                registration, sequence.name.de) 
+                registration, sequence_name(sequence))
       }
       conflict = Drugs::Sequence.find_by_code(:value   => registration, 
                                               :type    => 'registration', 
                                               :country => 'EU')
       if(conflict && conflict != sequence)
         raise sprintf("Multiple assignment of Registration-Number %s (%s-%i/%s-%i)",
-                      registration, sequence.name.de, sequence.odba_id, 
+                      registration, sequence_name(sequence), sequence.odba_id,
                       conflict.name.de, conflict.odba_id)
       end
       if(code = sequence.code(:registration, 'EU'))
@@ -578,7 +578,7 @@ class Import < Import
       @search_form = nil
       retry
     else
-      @errors.push [ sequence ? sequence.name.de : '', error.message, 
+      @errors.push [ sequence ? sequence_name(sequence) : '', error.message,
         error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip ]
     end
     nil
@@ -844,7 +844,7 @@ class Import < Import
     return(reparse_fachinfo agent, sequence) if opts[:reparse]
     return unless sequence.fachinfo.empty? || sequence.patinfo.empty? \
                     || opts[:replace] || opts[:remove]
-    data = identify_details(agent, sequence.name.de, sequence, opts)
+    data = identify_details(agent, sequence_name(sequence), sequence, opts)
 
     return(remove_infos sequence, opts) unless data
 
@@ -863,7 +863,7 @@ class Import < Import
     ODDB.logger.error('PharmNet') {
       sprintf("%s: %s", error.class, error.message) << "\n" << error.backtrace.join("\n")
     }
-    @errors.push [ sequence.name.de, error.message, 
+    @errors.push [ sequence_name(sequence), error.message,
       error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip ]
   end
   def remove_info(key, sequence, opts)
@@ -871,7 +871,7 @@ class Import < Import
     if opts[:remove] && info.de
       @removed[key] += 1
       ODDB.logger.debug('PharmNet') { 
-        sprintf('Removing Fachinfo from %s', sequence.name.de) 
+        sprintf('Removing Fachinfo from %s', sequence_name(sequence))
       }
       info.de = nil
       sequence.save
@@ -885,7 +885,7 @@ class Import < Import
   end
   def reparse_fachinfo(agent, sequence)
     if((info = sequence.fachinfo.de) && (source = info.source) \
-       && (doc = import_rtf :fachinfo, agent, source, sequence.name.de,
+       && (doc = import_rtf :fachinfo, agent, source, sequence_name(sequence),
                             :reparse => true))
       @reparsed_fis += 1
       info.chapters.replace doc.chapters
@@ -987,6 +987,9 @@ class Import < Import
     elsif(!/Arzneimittelname:\s#{Regexp.escape(term)}\?/i.match(div.inner_text))
       div.inner_text[/Arzneimittelname:[^?]+/]
     end
+  end
+  def sequence_name sequence
+    sequence.name.de || sequence.product.name.de
   end
   def set_fi_only(form, status="YES")
     form.radiobuttons.find { |b| b.name == "WFTYP" && b.value == status }.check
