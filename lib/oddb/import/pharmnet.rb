@@ -243,6 +243,7 @@ class Import < Import
     @reparsed_fis = 0
     @products_created = 0
     @sequences_created = 0
+    @packages_created = 0
     @archive = File.join ODDB.config.var, 'rtf', 'pharmnet'
     @sources = {}
     FileUtils.mkdir_p @archive
@@ -291,13 +292,15 @@ class Import < Import
         sprintf('Assigning Registration-Number %s to %s', 
                 registration, sequence_name(sequence))
       }
-      conflict = Drugs::Sequence.find_by_code(:value   => registration, 
-                                              :type    => 'registration', 
-                                              :country => 'EU')
-      if(conflict && conflict != sequence)
-        raise sprintf("Multiple assignment of Registration-Number %s (%s-%i/%s-%i)",
-                      registration, sequence_name(sequence), sequence.odba_id,
-                      conflict.name.de, conflict.odba_id)
+      if unique_registration? registration
+        conflict = Drugs::Sequence.find_by_code(:value   => registration,
+                                                :type    => 'registration',
+                                                :country => 'EU')
+        if(conflict && conflict != sequence)
+          raise sprintf("Multiple assignment of Registration-Number %s (%s-%i/%s-%i)",
+                        registration, sequence_name(sequence), sequence.odba_id,
+                        conflict.name.de, conflict.odba_id)
+        end
       end
       if(code = sequence.code(:registration, 'EU'))
         code.value = registration
@@ -308,8 +311,12 @@ class Import < Import
     end
   end
   def best_data(sequence, result)
+    sname = sequence.name
+    unless sname.de
+      sname = sequence.product.name
+    end
     comparison = [
-      sequence.name, 
+      sname,
       (gf = sequence.galenic_forms.first) && gf.description,
       (comp = sequence.company) && comp.name,
     ].collect { |ml| ml ? ml.de : '' }
@@ -645,15 +652,15 @@ class Import < Import
     if resume = opts[:resume]
       resume = resume.to_s.downcase
       sequences = sequences.select { |sequence| 
-        (name = sequence.name) && name.de.to_s.downcase >= resume
+        (name = sequence_name(sequence)) && name.downcase >= resume
       }
     else
       sequences = sequences.select { |sequence|
-        sequence.name
+        sequence_name(sequence)
       }
     end
     sequences = sequences.sort_by { |sequence|
-      sequence.name
+      sequence_name(sequence)
     }
     count = 0
     head = sequences.first.name
@@ -666,7 +673,7 @@ class Import < Import
         sequence = ODBA.cache.fetch(odba_id)
         count += 1
         @checked = sprintf "Checked %i Sequences from '%s' to '%s'",
-                          count, head, sequence.name
+                          count, head, sequence_name(sequence)
         process(agent, sequence, opts)
       rescue ODBA::OdbaError
       end
@@ -718,7 +725,11 @@ class Import < Import
     if result = get_search_result(agent, term, nil, opts)
       result.each do |data|
         company, product, galform = nil
-        sequence = Drugs::Sequence.find_by_code :value => data[:registration]
+        sequence = nil
+        registration = data[:registration]
+        if registration && unique_registration?(registration)
+          sequence = Drugs::Sequence.find_by_code :value => registration
+        end
         unless sequence
           pname, gfname, cname = data[:data]
           galform = import_galenic_form gfname
@@ -745,9 +756,34 @@ class Import < Import
         assign_registration sequence, data[:registration]
         assign_info(:fachinfo, agent, data, sequence, opts)
         assign_info(:patinfo, agent, data, sequence, opts)
+        import_package sequence, data, opts
       end
     end
     report opts
+  end
+  def import_package(sequence, data, opts={})
+    pname, gfname, _ = data[:data]
+    if match = /-\s*OP(\d+)$/i.match(pname)
+      size = match[1].to_i
+      package = sequence.packages.find do |pac|
+        pac.size == size
+      end
+      if package.nil?
+        @packages_created += 1
+        package = Drugs::Package.new
+        package.add_code Util::Code.new(:cid, "oddb#{package.uid}", 'DE')
+        package.name.de = pname
+        part = Drugs::Part.new
+        part.size = size
+        part.unit = import_unit gfname
+        part.package = package
+        part.composition = sequence.compositions.first
+        part.save
+        package.sequence = sequence
+        package.save
+      end
+      package
+    end
   end
   def import_rtf(key, agent, url, term, opts = { :reparse => false, 
                                                  :reload  => false})
@@ -814,6 +850,25 @@ class Import < Import
       substance.save
     end
     substance
+  end
+  def import_unit(name)
+    unit = Drugs::Unit.find_by_name name
+    unless unit
+      unit = Drugs::Unit.search_by_name(name).find do |unt|
+        sim = ngram_similarity name, unt.name.de
+        sim > 0.75
+      end
+      if unit
+        unit.name.add_synonym name
+        unit.save
+      end
+    end
+    unless unit
+      unit = Drugs::Unit.new
+      unit.name.de = name
+      unit.save
+    end
+    unit
   end
   def ngram_similarity(str1, str2, n=5)
     str1 = u(str1).downcase.gsub(/[\s,.\-\/]+/, '')
@@ -924,6 +979,7 @@ class Import < Import
       "",
       "Created #@products_created Products",
       "Created #@sequences_created Sequences",
+      "Created #@packages_created Packages",
       "",
       "Reparsed #@reparsed_fis Fachinfos",
       "Repaired #@repaired Active Agents",
@@ -989,7 +1045,13 @@ class Import < Import
     end
   end
   def sequence_name sequence
-    sequence.name.de || sequence.product.name.de
+    if sequence
+      if name = sequence.name.de
+        name
+      elsif product = sequence.product
+        product.name.de
+      end
+    end
   end
   def set_fi_only(form, status="YES")
     form.radiobuttons.find { |b| b.name == "WFTYP" && b.value == status }.check
@@ -1059,6 +1121,9 @@ class Import < Import
     else
       dists
     end
+  end
+  def unique_registration? code
+    !/^EU/.match code.to_s
   end
 end
     end

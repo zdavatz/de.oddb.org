@@ -31,16 +31,16 @@ class Validator < SBSM::Validator
              :new_sequence, :package, :package_infos, :patinfo, :proceed_export,
              :proceed_poweruser, :product, :products, :remote_infos, :search,
              :sequence, :sort, :update ]
-  NUMERIC = [ :active_agent, :code_cid, :code_festbetragsgruppe,
+  NUMERIC = [ :active_agent, :code_festbetragsgruppe,
               :code_festbetragsstufe, :composition, :days, :equivalence_factor,
               :multi, :offset, :part, :price_exfactory, :price_festbetrag,
-              :price_public, :pzn, :sequence, :size ]
+              :price_public, :sequence, :size ]
   PATTERNS = {
     :atc => /[ABCGHJLMNPRSV](\d{2}([A-Z]([A-Z](\d{2})?)?)?)?/,
   }
-  STRINGS = [ :atc_name, :captcha, :chapter, :code, :company, :dose, :fi_url,
-              :galenic_form, :invoice, :message, :name, :name_first,
-              :name_last, :pi_url, :quantity, :query, :registration,
+  STRINGS = [ :atc_name, :captcha, :chapter, :code, :code_cid, :company, :dose,
+              :fi_url, :galenic_form, :invoice, :message, :name, :name_first,
+              :name_last, :pi_url, :pzn, :quantity, :query, :registration,
               :substance, :uid, :unit ]
   def page(value) 
     if(num = validate_numeric(:page, value))
