@@ -134,15 +134,17 @@ class Packages < View::List
     end
   end
   def code_prescription(model)
-    span = HtmlGrid::Span.new(model, @session, self)
-    if((code = model.code(:prescription)) && code.value)
-      span.value = @lookandfeel.lookup(:prescription_needed)
-      span.css_class = 'prescription'
-    else
-      span.value = @lookandfeel.lookup(:prescription_free)
-      span.css_class = 'otc'
+    if code = model.code(:prescription)
+      span = HtmlGrid::Span.new(model, @session, self)
+      if code.value
+        span.value = @lookandfeel.lookup(:prescription_needed)
+        span.css_class = 'prescription'
+      else
+        span.value = @lookandfeel.lookup(:prescription_free)
+        span.css_class = 'otc'
+      end
+      span
     end
-    span
   end
   def compose_empty_list(offset)
     if(key = @model.error)
@@ -214,10 +216,12 @@ class Packages < View::List
     infos = [ code_festbetragsgruppe(model), 
       code_festbetragsstufe(model), code_zuzahlungsbefreit(model),
       code_prescription(model) ].compact
-    span.value = infos.zip(Array.new(infos.size - 1, ' / '))
-    span.dojo_tooltip = @lookandfeel._event_url(:package_infos, 
-                                                [:pzn, code])
-    span
+    unless infos.empty?
+      span.value = infos.zip(Array.new(infos.size - 1, ' / '))
+      span.dojo_tooltip = @lookandfeel._event_url(:package_infos,
+                                                  [:pzn, code])
+      span
+    end
   end
   def infos_remote(model)
     span = HtmlGrid::Span.new(model, @session, self)

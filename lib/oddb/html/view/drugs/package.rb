@@ -43,10 +43,12 @@ module PackageMethods
     money * @lookandfeel.price_factor if(money)
   end
   def code_boolean(model, key)
-    if((code = model.code(key)) && code.value)
-      @lookandfeel.lookup(:yes)
-    else 
-      @lookandfeel.lookup(:no)
+    if code = model.code(key)
+      if code.value
+        @lookandfeel.lookup(:yes)
+      else
+        @lookandfeel.lookup(:no)
+      end
     end
   end
   def code_festbetragsgruppe(model)

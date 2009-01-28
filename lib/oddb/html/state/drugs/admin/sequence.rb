@@ -106,16 +106,18 @@ class Sequence < Global
     keys = [ :atc_name, :registration, :fi_url, :pi_url, :galenic_form,
       :substance, :dose ]
     input = user_input(mandatory + keys, mandatory)
-    others = ODDB::Drugs::Sequence.search_by_code(:type => 'registration',
-                                                  :value => input[:registration],
-                                                  :country => 'EU')
-    others.delete(@model)
-    unless others.empty?
-      value = sprintf "'%s' (%s)", input[:registration], 
-                      others.collect { |seq|
-                        seq.name.de || seq.product.name.de }.join(', ')
-      @errors.store(:registration, 
-                    create_error(:e_duplicate_registration, :registration, value))
+    unless /^EU/.match input[:registration].to_s
+      others = ODDB::Drugs::Sequence.search_by_code(:type => 'registration',
+                                                    :value => input[:registration],
+                                                    :country => 'EU')
+      others.delete(@model)
+      unless others.empty?
+        value = sprintf "'%s' (%s)", input[:registration],
+                        others.collect { |seq|
+                          seq.name.de || seq.product.name.de }.join(', ')
+        @errors.store(:registration,
+                      create_error(:e_duplicate_registration, :registration, value))
+      end
     end
     _update input
   end
