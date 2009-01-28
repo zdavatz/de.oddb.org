@@ -420,6 +420,7 @@ class TestImport < Test::Unit::TestCase
       :date_fachinfo => Date.new(2007,06,29),
       :date_patinfo => Date.new(2007,06,29),
       :registration => "3159.00.00",
+      :marketable   => true,
     }
     assert_equal expected, details
   end
@@ -440,6 +441,7 @@ class TestImport < Test::Unit::TestCase
       :date_fachinfo => Date.new(2007,06,29),
       :date_patinfo => Date.new(2007,06,29),
       :registration=>"3159.00.00",
+      :marketable   => true,
     }
     assert_equal expected, result.first
     expected = {
@@ -457,6 +459,7 @@ class TestImport < Test::Unit::TestCase
       :date_fachinfo => Date.new(2007,06,29),
       :date_patinfo => Date.new(2007,06,29),
       :registration=>"3159.00.00",
+      :marketable   => true,
     }
     assert_equal expected, result.last
   end
