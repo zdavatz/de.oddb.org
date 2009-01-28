@@ -400,6 +400,7 @@ class Import < Import
     end
     composition.save
     sequence.name.de = official_with_company
+    sequence.marketable = data[:marketable]
     sequence.product = product
     sequence.save
     sequence
@@ -726,41 +727,40 @@ class Import < Import
     agent = RenewableAgent.new agent
     if result = get_search_result(agent, term, nil, opts)
       result.each do |data|
-        if data[:marketable]
-          company, product, galform = nil
-          sequence = nil
-          registration = data[:registration]
-          if registration && unique_registration?(registration)
-            sequence = Drugs::Sequence.find_by_code :value => registration
-          end
-          unless sequence
-            pname, gfname, cname = data[:data]
-            galform = import_galenic_form gfname
-            company = import_company cname
-            product = identify_product term, data, company
-            sequence = identify_sequence data, product, galform
-          end
-          if sequence
-            if opts[:repair]
-              pname, gfname, cname = data[:data]
-              if product = sequence.product
-                product.company ||= import_company cname
-              end
-              company_name = product.company.name.de.gsub(@stop, '').strip
-              official = pname[/^[^\d(]+/].strip
-              sequence.name.de = [ official, company_name ].join(' ')
-              agents = sequence.active_agents
-              relevance = composition_relevance agents, data
-              fix_composition agents, data
-            end
-          else
-            sequence = create_sequence term, data, company, product, galform
-          end
-          assign_registration sequence, data[:registration]
-          assign_info(:fachinfo, agent, data, sequence, opts)
-          assign_info(:patinfo, agent, data, sequence, opts)
-          import_package sequence, data, opts
+        company, product, galform = nil
+        sequence = nil
+        registration = data[:registration]
+        if registration && unique_registration?(registration)
+          sequence = Drugs::Sequence.find_by_code :value => registration
         end
+        unless sequence
+          pname, gfname, cname = data[:data]
+          galform = import_galenic_form gfname
+          company = import_company cname
+          product = identify_product term, data, company
+          sequence = identify_sequence data, product, galform
+        end
+        if sequence
+          if opts[:repair]
+            pname, gfname, cname = data[:data]
+            if product = sequence.product
+              product.company ||= import_company cname
+            end
+            company_name = product.company.name.de.gsub(@stop, '').strip
+            official = pname[/^[^\d(]+/].strip
+            sequence.marketable = data[:marketable]
+            sequence.name.de = [ official, company_name ].join(' ')
+            agents = sequence.active_agents
+            relevance = composition_relevance agents, data
+            fix_composition agents, data
+          end
+        else
+          sequence = create_sequence term, data, company, product, galform
+        end
+        assign_registration sequence, data[:registration]
+        assign_info(:fachinfo, agent, data, sequence, opts)
+        assign_info(:patinfo, agent, data, sequence, opts)
+        import_package sequence, data, opts
       end
     end
     report opts
