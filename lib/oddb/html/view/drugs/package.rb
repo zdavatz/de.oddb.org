@@ -60,6 +60,9 @@ module PackageMethods
   def code_prescription(model)
     code_boolean(model, :prescription)
   end
+  def code_registration(model)
+    model.registration
+  end
   def code_zuzahlungsbefreit(model)
     code_boolean(model, :zuzahlungsbefreit)
   end
@@ -251,16 +254,17 @@ class PackageInnerComposite < HtmlGrid::Composite
     [2,0] => :code_cid, 
     [0,1] => :company, 
     [2,1] => :atc,
-    [0,2] => :price_public, 
-    [2,2] => :price_festbetrag,
-    [0,3] => :code_festbetragsstufe,
-    [2,3] => :code_festbetragsgruppe,
-    [0,4] => :code_zuzahlungsbefreit,
-    [2,4] => :price_zuzahlung,
-    [0,5] => :code_prescription,
-    [2,5] => :equivalence_factor,
-    [1,6,0] => :fachinfo_link,
-    [1,6,1] => :patinfo_link,
+    [0,2] => :code_registration,
+    [0,3] => :price_public,
+    [2,3] => :price_festbetrag,
+    [0,4] => :code_festbetragsstufe,
+    [2,4] => :code_festbetragsgruppe,
+    [0,5] => :code_zuzahlungsbefreit,
+    [2,5] => :price_zuzahlung,
+    [0,6] => :code_prescription,
+    [2,6] => :equivalence_factor,
+    [1,7,0] => :fachinfo_link,
+    [1,7,1] => :patinfo_link,
   }
   CSS_MAP = {
     [1,0] => 'google',

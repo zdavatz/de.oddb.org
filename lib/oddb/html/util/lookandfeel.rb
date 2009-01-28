@@ -92,6 +92,7 @@ class Lookandfeel < SBSM::Lookandfeel
       :code_festbetragsgruppe     => 'Festbetragsgruppe',
       :code_festbetragsstufe      => 'Festbetragsstufe',
       :code_prescription          => 'Rezeptpflichtig',
+      :code_registration          => 'EU-Zulassungsnummer / AMD-Reg.-Nummer',
       :code_zuzahlungsbefreit     => 'Zuzahlungsbefreit',
       :comment                    => 'Anmerkung',
       :company                    => 'Zulassungsinhaber',
