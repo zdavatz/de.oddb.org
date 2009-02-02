@@ -767,8 +767,9 @@ class Import < Import
   end
   def import_package(sequence, data, opts={})
     pname, gfname, _ = data[:data]
-    if match = /^(.*?)\s*-\s*OP(\d+)$/i.match(pname)
-      size = match[2].to_i
+    if match = /^(?<name>.*?)\s*-\s*OP((?<size>\d+)|\((?<multi>\d+)x(?<size>\d+)\))(\((?<unit>[^)]+)\))?$/i.match(pname)
+      size = match[:size].to_i
+      multi = match[:multi] && match[:multi].to_i
       package = sequence.packages.find do |pac|
         pac.size == size
       end
@@ -776,7 +777,7 @@ class Import < Import
         @packages_created += 1
         package = Drugs::Package.new
         package.add_code Util::Code.new(:cid, "oddb#{package.uid}", 'DE')
-        package.name.de = match[1]
+        package.name.de = match[:name]
         part = Drugs::Part.new
         part.size = size
         part.unit = import_unit gfname
