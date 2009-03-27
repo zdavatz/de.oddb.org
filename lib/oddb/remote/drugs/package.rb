@@ -100,7 +100,7 @@ class Package < Remote::Object
     comparables
   end
   def name
-    @name ||= Util::Multilingual.new(:de => @@iconv.iconv(@remote.name_base))
+    @name ||= Util::Multilingual.new(:de => @remote.name_base)
   end
   def parts
     @parts ||= @remote.parts.collect { |part| 

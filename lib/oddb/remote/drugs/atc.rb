@@ -14,7 +14,7 @@ class Atc < Remote::Object
     @ddds = {}
   end
   def name
-    @name ||= Util::Multilingual.new(:de => @@iconv.iconv(@remote.name))
+    @name ||= Util::Multilingual.new(:de => @remote.name)
   end
   def ddds(administration)
     @ddds[administration] ||= @remote.ddds.inject([]) { |memo, (roa, ddd)| 

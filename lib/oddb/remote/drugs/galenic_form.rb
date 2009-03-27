@@ -10,13 +10,13 @@ module ODDB
     module Drugs
 class GalenicForm < Remote::Object
   def description
-    @description ||= Util::Multilingual.new(:de => @@iconv.iconv(@remote.de))
+    @description ||= Util::Multilingual.new(:de => @remote.de)
   end
   def group
     @group ||= ODDB::Drugs::GalenicGroup.find_by_name(groupname)
   end
   def groupname
-    @groupname ||= @remote && @@iconv.iconv(@remote.galenic_group.de)
+    @groupname ||= @remote && @remote.galenic_group.de
   end
 end
     end

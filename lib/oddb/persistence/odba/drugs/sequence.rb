@@ -11,7 +11,7 @@ module ODDB
         :value => 'to_s'}, Util::Code
       odba_index :fachinfo_indications_de, 'fachinfo.de',
                  'chapter("indications").to_s', Text::Document,
-                 :fulltext => true, :dictionary => 'default_german'
+                 :fulltext => true, :dictionary => 'german'
       odba_index :product, :product, 'name.all', Drugs::Product,
         :resolve_target => :sequences
       serialize :codes

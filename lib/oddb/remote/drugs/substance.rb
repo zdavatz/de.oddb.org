@@ -9,7 +9,7 @@ module ODDB
     module Drugs
 class Substance < Remote::Object
   def name
-    @name ||= Util::Multilingual.new(:de => @@iconv.iconv(@remote.de))
+    @name ||= Util::Multilingual.new(:de => @remote.de)
   end
   def <=>(other)
     name <=> other.name

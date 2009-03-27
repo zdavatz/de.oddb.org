@@ -9,7 +9,7 @@ module ODDB
     module Business
 class Company < Remote::Object
   def name
-    @name ||= Util::Multilingual.new(:de => @@iconv.iconv(@remote.name))
+    @name ||= Util::Multilingual.new(:de => @remote.name)
   end
 end
     end

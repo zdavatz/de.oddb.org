@@ -21,7 +21,7 @@ class Part < Remote::Object
                        else
                          comparable_size.unit
                        end
-                @unit = Remote::Drugs::Unit.new(@source, @@iconv.iconv(cstr))
+                @unit = Remote::Drugs::Unit.new(@source, cstr)
               end
   end
 end
