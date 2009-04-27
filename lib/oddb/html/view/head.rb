@@ -61,7 +61,7 @@ class WelcomeHead < Head
       @lookandfeel.lookup(:drugs_fixprices), "\n",
       url_link("http://www.dimdi.de/static/de/amg/fbag/index.htm"),
       "\n\n", @lookandfeel.lookup(:drugs_copay_free), "\n", 
-      url_link("http://www.gkv.info/gkv/index.php?id=445"),
+      url_link("https://www.gkv-spitzenverband.de/Befreiungsliste_Arzneimittel_Versicherte.gkvnet"),
       "\n\n", @lookandfeel.lookup(:drugs_atc_codes), "\n",
       url_link("http://www.whocc.no/atcddd/"),
     ]

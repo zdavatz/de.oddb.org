@@ -40,7 +40,7 @@ class List < HtmlGrid::List
       when "tt_atc"
         link.href = "http://www.whocc.no/atcddd/atcsystem.html"
       when "tt_company"
-        link.href = "http://www.gkv.info/gkv/index.php?id=445"
+        link.href = "https://www.gkv-spitzenverband.de/Befreiungsliste_Arzneimittel_Versicherte.gkvnet"
       when "tt_price_festbetrag"
         link.href = "http://www.dimdi.de/static/de/amg/fbag/index.htm"
       when "tt_price_public", "tt_price_difference"

@@ -79,7 +79,7 @@ class PackageInfos < HtmlGrid::Composite
   end
   def link_zuzahlungsbefreit(model)
     link = HtmlGrid::Link.new(:zuzahlungsbefreit, model, @session, self)
-    link.href = "http://www.gkv.info/gkv/index.php?id=445"
+    link.href = "https://www.gkv-spitzenverband.de/Befreiungsliste_Arzneimittel_Versicherte.gkvnet"
     link
   end
   def opener(code, type)
