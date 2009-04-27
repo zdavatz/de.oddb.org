@@ -21,9 +21,10 @@ module ODDB
         }
       end
       def Updater.import_dimdi_products(date)
-        file = date.strftime("fb%d%m%y.xls")
+        file = date.strftime("fb_%d%m%y.xls")
         Import::Dimdi.download(file) { |io|
-          reported_import(Import::Dimdi::Product.new(date), io)
+          reported_import(Import::Dimdi::Product.new(date), io,
+                          "Update Festbeträge")
         }
       end
       def Updater.import_dimdi_substances(date)
@@ -85,13 +86,12 @@ module ODDB
           importer.report
         }
       end
-      def Updater.reported_import(importer, io)
-        _reported_import(importer) { importer.import io }
+      def Updater.reported_import(importer, io, subject=nil)
+        _reported_import(importer, subject) { importer.import io }
       end
-      def Updater._reported_import(importer, &block)
+      def Updater._reported_import(importer, subject=nil, &block)
         lines = [
-          sprintf("%s: %s#import", 
-                  Time.now.strftime('%c'), importer.class)
+          sprintf("%s: %s#import", Time.now.strftime('%c'), importer.class)
         ]
         lines.concat block.call
       rescue StandardError => err
@@ -102,7 +102,7 @@ module ODDB
         raise
       ensure
         subject = sprintf("%s: %s", 
-                          Time.now.strftime('%c'), importer.class)
+                          Time.now.strftime('%c'), subject || importer.class)
         Mail.notify_admins(subject, lines)
       end
       def Updater.run(today = Date.today)

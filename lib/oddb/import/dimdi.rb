@@ -24,9 +24,9 @@ require 'open-uri'
 module ODDB
   module Import
 module Dimdi
-  DIMDI_PATH = "ftp://ftp.dimdi.de/pub/amg/"
+  DIMDI_PATH = "http://www.dimdi.de/dynamic/de/amg/downloadcenter/fbag/"
   def Dimdi.current_date(url)
-    if(match = /fb(\d\d)(\d\d)(\d\d)\.xls/.match(open(url).read))
+    if(match = /fb_(\d\d)(\d\d)(\d\d)\.xls/.match(open(url).read))
       Date.new(2000 + match[3].to_i, match[2].to_i, match[1].to_i)
     end
   end
