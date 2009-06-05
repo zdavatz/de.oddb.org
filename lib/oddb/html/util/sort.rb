@@ -63,7 +63,7 @@ module PackageSort
     when :product
       Proc.new { |pac| 
         pac.name.send(@session.language) \
-          || pac.product.name.send(@session.language) || '' }
+          || ((prod = pac.product) && prod.name.send(@session.language)) || '' }
     end
   end
 end
