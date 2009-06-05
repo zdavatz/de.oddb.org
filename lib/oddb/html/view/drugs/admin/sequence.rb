@@ -170,8 +170,8 @@ class SequenceInnerForm < HtmlGrid::Composite
     [0,1] => :registration,
     [1,2,0] => :fachinfo_link,
     [1,2,1] => :patinfo_link,
-    [0,3] => :fi_url,
-    [0,4] => :pi_url,
+    [0,3] => :fachinfo_url,
+    [0,4] => :patinfo_url,
     [1,5,0] => :submit, 
     [1,5,1] => :delete, 
   }
@@ -202,18 +202,29 @@ class SequenceInnerForm < HtmlGrid::Composite
     button
   end
   def fachinfo_link(model)
-    if(model.respond_to?(:fachinfo) && model.fachinfo.send(@session.language))
+    url = if model.respond_to?(:fachinfo) \
+             && model.fachinfo.send(@session.language)
+            @lookandfeel._event_url(:fachinfo, [:uid, model.uid])
+          elsif model.respond_to?(:fachinfo_url)
+            model.fachinfo_url
+          end
+    if url
       link = HtmlGrid::Link.new(:square_fachinfo, model, @session, self)
       link.css_class = 'square fachinfo'
-      link.href = @lookandfeel._event_url(:fachinfo, [:uid, model.uid])
+      link.href = url
       link
     end
   end
   def patinfo_link(model)
-    if(model.respond_to?(:patinfo) && model.patinfo.send(@session.language))
+    url = if model.respond_to?(:patinfo) && model.patinfo.send(@session.language)
+            @lookandfeel._event_url(:patinfo, [:uid, model.uid])
+          elsif model.respond_to?(:patinfo_url)
+            model.patinfo_url
+          end
+    if url
       link = HtmlGrid::Link.new(:square_patinfo, model, @session, self)
       link.css_class = 'square patinfo'
-      link.href = @lookandfeel._event_url(:patinfo, [:uid, model.uid])
+      link.href = url
       link
     end
   end

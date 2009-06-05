@@ -254,6 +254,7 @@ class Import < Import
   def assign_info(key, agent, data, sequence, opts)
     return(remove_info key, sequence, opts) unless(url = data[key])
 
+    sequence.send "#{key}_url=", url
     term = data[:search_term]
     doc = import_rtf key, agent, url, term, opts
     doc.date = data[:"date_#{key}"]
@@ -267,6 +268,7 @@ class Import < Import
       remove_info key, sequence, opts
     end
   rescue Timeout::Error, StandardError => error
+    sequence.save
     ODDB.logger.error('PharmNet') {
       sprintf("%s: %s", error.class, error.message) << "\n" << error.backtrace.join("\n")
     }

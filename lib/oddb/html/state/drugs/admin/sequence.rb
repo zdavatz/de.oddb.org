@@ -103,8 +103,8 @@ class Sequence < Global
   def update
     check_model
     mandatory = [ :atc ]
-    keys = [ :atc_name, :registration, :fi_url, :pi_url, :galenic_form,
-      :substance, :dose ]
+    keys = [ :atc_name, :registration, :fachinfo_url, :patinfo_url,
+      :galenic_form, :substance, :dose ]
     input = user_input(mandatory + keys, mandatory)
     unless /^EU/.match input[:registration].to_s
       others = ODDB::Drugs::Sequence.search_by_code(:type => 'registration',
@@ -143,10 +143,14 @@ class Sequence < Global
                   @errors.store :atc, create_error(:e_unknown_atc, :atc, value)
                   nil
                 end
-              when :fi_url
-                _import_rtf(:fachinfo, @model, value)
-              when :pi_url
-                _import_rtf(:patinfo, @model, value)
+              when :fachinfo_url
+                unless value == @model.fachinfo_url
+                  _import_rtf(:fachinfo, @model, value)
+                end
+              when :patinfo_url
+                unless value == @model.patinfo_url
+                  _import_rtf(:patinfo, @model, value)
+                end
               when :registration
                 if(value.empty?)
                   @model.remove_code(@model.registration)

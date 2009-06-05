@@ -6,7 +6,7 @@ require 'oddb/model'
 module ODDB
   module Drugs
     class Sequence < Model
-      attr_accessor :marketable
+      attr_accessor :marketable, :fachinfo_url, :patinfo_url
       belongs_to :atc, delegates(:ddds)
       belongs_to :product, delegates(:company)
       has_many :compositions, 
