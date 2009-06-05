@@ -92,6 +92,7 @@ class Sequence < Global
   end
   def _import_rtf(key, seq, url)
     if(url && !url.empty?)
+      seq.send "#{key}_url=", url
       imp = Import::PharmNet::Import.new
       document = imp.import_rtf(key, WWW::Mechanize.new, url, seq.product.name.de,
                                 :reparse => true, :reload => true)
@@ -99,6 +100,7 @@ class Sequence < Global
       parent.de = document
       parent.save
     end
+  rescue StandardError
   end
   def update
     check_model
