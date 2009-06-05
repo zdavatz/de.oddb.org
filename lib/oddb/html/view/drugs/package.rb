@@ -175,7 +175,7 @@ module PackageMethods
       link = HtmlGrid::Span.new(model, @session, self)
     end
     link.value = model.name.send(@session.language) \
-      || model.product.name.send(@session.language)
+      || ((prod = model.product) && prod.name.send(@session.language))
     link.css_id = "cid_#{model.atc}_#@list_index"
     link.dojo_title = @lookandfeel.lookup(:pzn, model.code(:cid, 'DE'))
     link
