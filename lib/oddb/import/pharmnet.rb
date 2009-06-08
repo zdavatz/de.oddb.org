@@ -254,7 +254,7 @@ class Import < Import
   def assign_info(key, agent, data, sequence, opts)
     return(remove_info key, sequence, opts) unless(url = data[key])
 
-    sequence.send "#{key}_url=", url
+    sequence.send "#{key}_url=", "http://gripsdb.dimdi.de#{url}"
     term = data[:search_term]
     doc = import_rtf key, agent, url, term, opts
     doc.date = data[:"date_#{key}"]
