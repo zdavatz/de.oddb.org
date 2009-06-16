@@ -3,7 +3,6 @@
 
 require 'date'
 require 'mechanize'
-require 'oddb/import/csv'
 require 'oddb/import/dimdi'
 require 'oddb/import/pharma24'
 require 'oddb/import/pharmnet'
@@ -51,13 +50,9 @@ module ODDB
         ODDB.logger.error('Updater') { error.message }
       end
       def Updater.import_missing(name)
-        importer = Import::Csv::ProductInfos.new
-        Import::Csv::ProductInfos.open { |io|
-          _reported_import(importer) {
-            importer.import(io, :pattern => %r{#{name}}i, :import_known => false,
-                                :import_unknown => true)
-          }
-        }
+        name.split('|').each do |term|
+          Updater.import_fachinfos term, :info_unrestricted => true
+        end
       end
       def Updater.import_pharmnet(opts = {})
         opts = { :replace => true,  :reload  => false, 
