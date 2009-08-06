@@ -554,7 +554,8 @@ class Import < Import
   end
   def get_search_result(agent, term, sequence=nil, opts={})
     opts = { :info_unrestricted => false,
-             :repair => false, :retries => 3}.merge opts
+             :repair => false, :retries => 3,
+             :retry_unit => 60 }.merge opts
     good = nil
     term = term.dup
     ODDB.logger.debug('PharmNet') { sprintf('Searching for %s', term) }
