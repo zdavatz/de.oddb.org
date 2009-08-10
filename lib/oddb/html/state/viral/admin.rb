@@ -17,8 +17,9 @@ module Admin
     email = @session.user.email
     newstate = search
     code = user_input(:code)
+    model = newstate.model
     if(atc = ODDB::Drugs::Atc.find_by_code(code))
-      packages = newstate.model.find { |list| list.atc.nil? }
+      packages = model.find { |list| list.atc.nil? }
       packages.each { |package| 
         if((seq = package.sequence) && seq.atc.nil?)
           seq.atc = atc
@@ -26,7 +27,9 @@ module Admin
           seq.save
         end
       }
-      packages.atc = atc
+      ## do a completely new search to get everything sorted properly
+      model.query = nil
+      newstate = newstate.search
     else
       @errors.store :atc_assign, create_error(:e_unknown_atc, :atc_assign, code)
     end

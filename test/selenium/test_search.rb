@@ -380,13 +380,15 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     ODDB.config.query_limit = 20
   end
   def test_search__admin_atc
+    existing = setup_package
     package = setup_package
     package.sequence.atc = nil
     user = login_admin
     open "/de/drugs/search/query/Amantadin"
     assert_equal "DE - ODDB.org | Medikamente | Suchen | Amantadin | Preisvergleich | Open Drug Database", 
                  get_title
-    assert !is_text_present('Amantadin (N04BB01) - 1 Präparate')
+    assert is_text_present('Amantadin (N04BB01) - 1 Präparate')
+    assert is_text_present('ATC-Code nicht bekannt - 1 Präparate')
     assert is_element_present("atc-assign")
     assert is_element_present("atc-assign-toggle")
     assert is_element_present("atc-assign-form")
@@ -399,7 +401,8 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     wait_for_page_to_load "30000"
 
     assert is_text_present('Der ATC-Code "N04BB02" ist nicht bekannt.')
-    assert !is_text_present('Amantadin (N04BB01) - 1 Präparate')
+    assert is_text_present('Amantadin (N04BB01) - 1 Präparate')
+    assert is_text_present('ATC-Code nicht bekannt - 1 Präparate')
     assert is_element_present("atc-assign")
     assert is_element_present("atc-assign-toggle")
     assert is_element_present("atc-assign-form")
@@ -409,7 +412,8 @@ Ihr Such-Stichwort hat zu keinem Suchergebnis geführt. Bitte überprüfen Sie d
     submit "atc-assign-form"
     wait_for_page_to_load "30000"
 
-    assert is_text_present('Amantadin (N04BB01) - 1 Präparate')
+    assert is_text_present('Amantadin (N04BB01) - 2 Präparate')
+    assert !is_text_present('ATC-Code nicht bekannt')
     assert !is_element_present("atc-assign")
     assert !is_element_present("atc-assign-toggle")
     assert !is_element_present("atc-assign-form")
