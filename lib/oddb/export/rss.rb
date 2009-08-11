@@ -24,7 +24,7 @@ class Exporter
       File.open(tmp, 'w') { |io|
         io.puts rss(items, session)
       }
-      File.mv(tmp, path)
+      File.rename(tmp, path)
     }
   end
   def rss items, session

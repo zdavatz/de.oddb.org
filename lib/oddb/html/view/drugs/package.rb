@@ -100,12 +100,16 @@ module PackageMethods
     end
   end
   def feedback(model)
-    if(@lookandfeel.enabled?(:feedback) && (code = model.code(:cid, 'DE')))
+    if @lookandfeel.enabled?(:feedback)
       link = HtmlGrid::Link.new(:feedback_short, model, @session, self)
-      link.href = @lookandfeel._event_url(:feedback, [:pzn, code.value])
+      if code = model.code(:cid, 'DE')
+        link.href = @lookandfeel._event_url(:feedback, [:pzn, code.value])
+      else
+        link.href = @lookandfeel._event_url(:feedback, [:uid, model.uid])
+      end
       link.css_class = 'feedback square'
       link.set_attribute('title', @lookandfeel.lookup(:feedback_alt, 
-        model.name))
+        model.name.send(@session.language)))
       link
     end
   end
@@ -206,6 +210,7 @@ module PackageMethods
     css
   end
   def size(model)
+    return unless model.respond_to?(:parts)
     model.parts.collect { |part|
       parts = [] 
       multi = part.multi.to_i

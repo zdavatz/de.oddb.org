@@ -12,6 +12,7 @@ module ODDB
       has_many :compositions, 
         delegates(:active_agents, :doses, :substances),
         on_delete(:cascade)
+      has_many :feedbacks, on_delete(:cascade)
       has_many :packages, on_delete(:cascade), on_save(:cascade)
       is_coded
       multilingual :name

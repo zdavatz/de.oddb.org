@@ -42,7 +42,7 @@ class Feedback < Global
     direct_event
   end
   def _feedback(code)
-    if(@model.code(:cid, 'DE') == code)
+    if(@model.code(:cid, 'DE') == code || @model.uid == code)
       self
     else
       super

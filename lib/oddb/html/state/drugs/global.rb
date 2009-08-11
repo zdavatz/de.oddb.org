@@ -82,8 +82,8 @@ module Events
     end
   end
   def _feedback(code)
-    if(package = _package_by_code(code))
-      Feedback.new(@session, package)
+    if(item = _package_by_code(code) || _sequence_by_code(code))
+      Feedback.new(@session, item)
     end
   end
   def limited?(*args)
@@ -243,6 +243,9 @@ module Events
   end
   def _search_remote(query)
     _remote_packages { |remote| remote.remote_packages(query) }
+  end
+  def _sequence_by_code(code)
+    ODDB::Drugs::Sequence.find_by_uid(code)
   end
 end
 class Global < State::Global

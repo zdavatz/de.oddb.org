@@ -213,7 +213,11 @@ class FeedbackComposite < HtmlGrid::DivComposite
     FeedbackList.new(model.feedbacks.reverse, @session, self)
   end
   def feedback_for(model)
-    @lookandfeel.lookup(:feedback_for, model.name, size(model))
+    if size = size(model)
+      @lookandfeel.lookup(:feedback_for, model.name, size)
+    else
+      @lookandfeel.lookup(:feedback_for_sequence, model.name)
+    end
   end
   def feedback_form(model)
     FeedbackForm.new(model.current, @session, self)

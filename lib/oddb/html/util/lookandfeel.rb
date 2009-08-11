@@ -193,6 +193,8 @@ Suchen Sie nach Medikamentname oder Wirkstoff.
       :feedback_for0              => 'Feedback zu ',
       :feedback_for1              => ' in der Handelsform: ',
       :feedback_for2              => '',
+      :feedback_for_sequence0     => 'Feedback zu ',
+      :feedback_for_sequence1     => '',
       :feedback_by0               => 'Feedback von ', 
       :feedback_by1               => '<br/>erstellt am: ', 
       :feedback_by2               => '', 

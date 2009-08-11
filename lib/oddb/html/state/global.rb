@@ -52,7 +52,7 @@ class Global < SBSM::State
     end
   end
   def feedback
-    if(code = @session.user_input(:pzn))
+    if(code = @session.user_input(:pzn) || @session.user_input(:uid))
       _feedback(code)
     end
   end
