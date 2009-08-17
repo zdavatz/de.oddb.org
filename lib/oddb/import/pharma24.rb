@@ -69,21 +69,25 @@ class Pharma24 < Import
   end
   def extract_data page
     data = []
-    (page/'tr[/td/h2/a]').each { |row| 
-      link, = row/'h2/a'
+    all_tables = page/'table[h2/a]'
+    duplicates = []
+    all_tables.each do |table|
+      duplicates.concat table/'table[h2/a]'
+    end
+    (all_tables - duplicates).each do |table|
+      link, = table/'h2/a'
       prod = {
         :name => utf8(link.innerText),
         :url  => link.attributes['href'],
       }
-      details = row.next_sibling
-      if price = (details/:strong).first
+      if price = (table/:strong).first
         prod.store :price_public, price.innerText.tr(',', '.').to_f
       end
-      if prescription = (details/'td[text()="Abgabehinweis:"]').first
+      if prescription = (table/'td[text()="Abgabehinweis:"]').first
         prod.store :code_prescription, 
                    !!/Rezeptpflichtig/.match(prescription.next_sibling.innerText)
       end
-      if content = (details/'td[text()="Packungsinhalt:"]').first
+      if content = (table/'td[text()="Packungsinhalt:"]').first
         size_str = content.next_sibling.innerText
         if match = /\s*(.*)\s+(\S+)\s+(\S+)\s*$/.match(size_str)
           size = utf8 match[1]
@@ -95,11 +99,11 @@ class Pharma24 < Import
           prod.update :size => size, :unit => unit, :unitname => name
         end
       end
-      if company = (details/'a[@class="liste"]').first
+      if company = (table/'a[@class="liste"]').first
         prod.store :company, utf8(company.innerText)
       end
       data.push prod
-    }
+    end
     data
   end
   def report
@@ -114,6 +118,9 @@ class Pharma24 < Import
     url = "#@host/advanced_search_result.php?keywords=#{term}"
     page = agent.get url
     extract_data page
+  rescue NoMethodError => err
+    err.message << " url: #{url}"
+    raise err
   end
   def update_package agent, package, opts={}
     price = package.price(:public)

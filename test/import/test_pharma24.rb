@@ -7,6 +7,7 @@ $: << File.expand_path('../../lib', File.dirname(__FILE__))
 require 'test/unit'
 require 'flexmock'
 require 'mechanize'
+require 'oddb/config'
 require 'oddb/import/pharma24'
 require 'stub/model'
 
@@ -48,19 +49,6 @@ class TestPharma24 < Test::Unit::TestCase
     ]
     assert_equal expected, urls
   end
-  def test_get_alphabetical
-    agent = flexmock(WWW::Mechanize.new)
-    url = 'http://www.apotheke-online-internet.de/ac.html'
-    page = setup_page agent, url
-    agent.should_receive(:get).with(url).and_return(page)  
-    2.upto(77) { |num|
-      url = "http://www.apotheke-online-internet.de/a/ac-page-#{num}.html"
-      page = setup_page agent, url
-      agent.should_receive(:get).with(url).and_return(page)  
-    }
-    urls = @importer.get_alphabetical agent, 'a', 'c'
-    assert_equal 2285, urls.size
-  end
   def test_update_package
     pac = Drugs::Package.new
     pac.add_code Util::Code.new(:cid, 1337397, 'DE')
@@ -89,6 +77,35 @@ class TestPharma24 < Test::Unit::TestCase
     company = pac.company
     assert_instance_of Business::Company, company
     assert_equal 'Dr D Lohmann Ph.  &  Med.', company.name.de
+  end
+  def test_update_package__2009
+    pac = Drugs::Package.new
+    pac.add_code Util::Code.new(:cid, 842756, 'DE')
+    pac.sequence = seq = Drugs::Sequence.new
+    seq.product = Drugs::Product.new
+    agent = flexmock(WWW::Mechanize.new)
+    url = 'http://www.apotheke-online-internet.de/advanced_search_result.php?keywords=842756'
+    agent.should_receive(:get).with(url).and_return { 
+      setup_page agent, url, '842756.html'
+    }
+    @importer.update_package(agent, pac)
+    price = pac.price :public
+    assert_instance_of Util::Money, price
+    assert_equal 164.33, price
+    assert_equal :pharma24, pac.data_origin(:price_public)
+    assert_equal 'TOPAMAX 100 mg Filmtabletten', pac.name.de
+    code = pac.code :prescription
+    assert_instance_of Util::Code, code
+    assert_equal true, code.value
+    part = pac.parts.first
+    assert_equal 50, part.size
+    unit = part.unit
+    assert_instance_of Drugs::Unit, unit
+    assert_equal 'Filmtabletten', unit.name.de
+    assert_nil part.quantity
+    company = pac.company
+    assert_instance_of Business::Company, company
+    assert_equal 'Beragena', company.name.de
   end
 end
   end
