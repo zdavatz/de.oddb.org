@@ -118,7 +118,16 @@ class Pharma24 < Import
     url = "#@host/advanced_search_result.php?keywords=#{term}"
     page = agent.get url
     extract_data page
-  rescue NoMethodError => err
+  rescue Zlib::GzipFile::Error => err
+    retries ||= 3
+    if retries > 0
+      retries -= 1
+      retry
+    else
+      err.message << " after 3 retries - url: #{url}"
+      raise err
+    end
+  rescue StandardError => err
     err.message << " url: #{url}"
     raise err
   end
