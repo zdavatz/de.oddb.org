@@ -3,6 +3,7 @@
 
 require 'oddb/drugs/sequence'
 require 'oddb/persistence/odba/model'
+require 'oddb/text/document'
 
 module ODDB
   module Drugs
