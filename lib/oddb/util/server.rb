@@ -68,6 +68,9 @@ module ODDB
       def generate_dictionaries
         generate_dictionary('german', 'de_DE@euro')
       end
+      def invalidate(*odba_ids)
+        ODBA.cache.invalidate! *odba_ids
+      end
       def ipn(notification)
         Util::Ipn.process notification
         nil # don't return the invoice back across drb - it's not defined in yipn

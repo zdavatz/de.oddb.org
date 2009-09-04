@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+$: << File.expand_path('../lib', File.dirname(__FILE__))
+$KCODE = 'u'
+
+require 'drb'
+require 'oddb/config'
+require 'oddb/drugs'
+require 'oddb/persistence'
+require 'oddb/util'
+require 'encoding/character/utf-8'
+
+module ODDB
+  module Util
+    Updater.import_gkv
+  end
+end

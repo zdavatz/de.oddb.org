@@ -1,0 +1,17 @@
+Zuzahlungsbefreite Arzneimittel nach � 31 Abs. 3 Satz 4 SGB V
+sortiert nach Arzneimittelname
+Produktstand   01.09.2009
+größe                                                                                                                                                                                                                                                                                                                                                         inkl.MwSt
+Wirkstoff(e)                    Wirkstärke               Packungs-)n(                                                                    Arzneimittelname                          PZN           Hersteller                                                                                                                                 Darreichungsform                Apothekenverkaufspreis
+ABSEAMED 10000I.E./1ML                4000741      MEDICE ARZN.GMBH&CO.KG    Epoetin alfa                             10000   I.E.              6X1     ml           Fertigspritzen                                            611,53
+ABSEAMED 1000I.E./0.5ML               4000646      MEDICE ARZN.GMBH&CO.KG    Epoetin alfa                               1000   I.E.           6X0.5     ml           Fertigspritzen                                             64,20
+ABSEAMED 2000I.E./1ML                  4000652      MEDICE ARZN.GMBH&CO.KG    Epoetin alfa                               2000   I.E.              6X1     ml           Fertigspritzen                                            119,04
+ABSEAMED 3000I.E./0.3ML               4000669      MEDICE ARZN.GMBH&CO.KG    Epoetin alfa                               3000   I.E.           6X0.3     ml           Fertigspritzen                                            173,94
+ABSEAMED 4000I.E./0.4ML               4000681      MEDICE ARZN.GMBH&CO.KG    Epoetin alfa                               4000   I.E.           6X0.4     ml           Fertigspritzen                                            228,83
+ABSEAMED 5000I.E./0.5ML               4000698      MEDICE ARZN.GMBH&CO.KG    Epoetin alfa                               5000   I.E.           6X0.5     ml           Fertigspritzen                                            283,70
+ABSEAMED 6000I.E./0.6ML               4000729      MEDICE ARZN.GMBH&CO.KG    Epoetin alfa                               6000   I.E.           6X0.6     ml           Fertigspritzen                                            338,57
+ABSEAMED 8000I.E./0.8ML               4000735      MEDICE ARZN.GMBH&CO.KG    Epoetin alfa                               8000   I.E.           6X0.8     ml           Fertigspritzen                                            448,34
+ACC 200                                              3867219      HEXAL AG                                     Acetylcystein                               200   mg                 50     St            Brausetabletten                                          12,74
+ACC 200                                              3867225      HEXAL AG                                     Acetylcystein                               200   mg               100     St            Brausetabletten                                          15,42
+ACC 200                                              4789763      HEXAL AG                                     Acetylcystein                               200   mg                 20     St            Brausetabletten                                          11,01
+Seite 1 von 1095

@@ -4,6 +4,7 @@
 require 'date'
 require 'mechanize'
 require 'oddb/import/dimdi'
+require 'oddb/import/gkv'
 require 'oddb/import/pharma24'
 require 'oddb/import/pharmnet'
 require 'oddb/import/whocc'
@@ -32,15 +33,6 @@ module ODDB
           reported_import(Import::Dimdi::Substance.new(date), io)
         }
       end
-      def Updater.import_dimdi_zuzahlungsbefreiung(today)
-        url = "http://www.gkv.info/gkv/index.php?id=445"
-        if match = /zuzahlungsbefreiung_excel_\d+.xls/i.match(open(url).read)
-          url = "http://www.gkv.info/gkv/fileadmin/user_upload/Projekte/arzneimittelzuzahlungsbefreiung/#{match}"
-          Import::Dimdi.download_latest(url, today) { |io|
-            reported_import(Import::Dimdi::ZuzahlungsBefreiung.new, io)
-          }
-        end
-      end
       def Updater.import_fachinfos(term, opts = {})
         importer = Import::PharmNet::Import.new
         _reported_import(importer) {
@@ -48,6 +40,14 @@ module ODDB
         }
       rescue StandardError => error
         ODDB.logger.error('Updater') { error.message }
+      end
+      def Updater.import_gkv(opts = {})
+        importer = Import::Gkv.new
+        if url = importer.latest_url(WWW::Mechanize.new, opts)
+          importer.download_latest url, opts do |fh|
+            reported_import(importer, fh)
+          end
+        end
       end
       def Updater.import_missing(name)
         name.split('|').each do |term|
@@ -106,7 +106,9 @@ module ODDB
           import_dimdi_galenic_forms(date)
           import_dimdi_products(date)
         end
-        import_dimdi_zuzahlungsbefreiung(today)
+        IO.popen File.join(ODDB.config.oddb_dir, 'jobs/gkv') do |io|
+          # wait for importer to exit
+        end
         case today.day
         when 1
           import_pharmnet

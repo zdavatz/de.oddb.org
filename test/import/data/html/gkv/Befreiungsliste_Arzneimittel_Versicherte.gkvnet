@@ -1,0 +1,477 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="de">
+<head id="headTag"><meta name="ROBOTS" content="ALL" />
+
+
+
+    
+	<!-- Stylesheets einbinden 	//-->
+	<link rel="Stylesheet" type="text/css" media="all" href='http://www.gkv-spitzenverband.de/templates/CSS/ITSG.style.css' />
+	<link rel="Stylesheet" type="text/css" media="screen, projection" href='http://www.gkv-spitzenverband.de/templates/CSS/ITSG.layout.css' />
+	<link rel="Stylesheet" type="text/css" media="screen, projection" href='http://www.gkv-spitzenverband.de/templates/CSS/ITSG.navigation.css' />
+	<link rel="Stylesheet" type="text/css" media="print" href='http://www.gkv-spitzenverband.de/templates/CSS/ITSG.print.css' />
+	
+	
+
+    <!--[if lt IE 6]>
+        <style type="text/css" media="screen, projection">@import url('http://www.gkv-spitzenverband.de/templates/CSS/ITSG.layout_IE5_IE55.css');</style>
+    <![endif]-->
+    
+<title>
+	Befreiungsliste Arzneimittel
+</title></head>
+<body id="bodyContainer"><div class="IEbodyContainer"><a id="PageTop"></a>
+<form name="aspnetForm" method="post" action="publish/Befreiungsliste_Arzneimittel_Versicherte.aspx?ActiveID=1202" id="aspnetForm">
+<div>
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwULLTIwNTM3MDA0NzUPZBYEAgEPZBYCZg9kFgJmDxYCHgRUZXh0BSU8bWV0YSBuYW1lPSJST0JPVFMiIGNvbnRlbnQ9IkFMTCIgLz4KZAIDD2QWCgIBD2QWBgIBDw8WAh4LTmF2aWdhdGVVcmwFLGh0dHA6Ly93d3cuZ2t2LXNwaXR6ZW52ZXJiYW5kLmRlL0hvbWUuZ2t2bmV0ZGQCBQ8PFgIeCEltYWdlVXJsBRYvdXBsb2FkL2hlYWRlcjJfMTEuZ2lmZGQCBw9kFgJmD2QWAgIDDxYCHgtfIUl0ZW1Db3VudAIDFgZmD2QWAgIBDw8WBh8ABQtWZXJzaWNoZXJ0ZR8BBRMvVmVyc2ljaGVydGUuZ2t2bmV0HgdUb29sVGlwZWRkAgIPZBYCAgEPDxYGHwAFG1p1emFobHVuZ2VuIHVuZCBCZWZyZWl1bmdlbh8BBSMvWnV6YWhsdW5nZW5fdW5kX0JlZnJlaXVuZ2VuLmdrdm5ldB8EZWRkAgQPZBYCAgEPDxYKHwAFHEJlZnJlaXVuZ3NsaXN0ZSBBcnpuZWltaXR0ZWwfAQUwL0JlZnJlaXVuZ3NsaXN0ZV9BcnpuZWltaXR0ZWxfVmVyc2ljaGVydGUuZ2t2bmV0HwRlHghDc3NDbGFzcwUHY3VycmVudB4EXyFTQgICZGQCAw9kFgICAQ8WAh8DAg0WGmYPZBYEAgEPZBYCAgEPDxYEHwEFDC9Ib21lLmdrdm5ldB8EZWQWAgIBDw8WAh8ABQRIb21lZGQCAw8WAh8DAv////8PZAIBD2QWBAIBD2QWAgIBDw8WBB8BBRUvV2lyX3VlYmVyX3Vucy5na3ZuZXQfBGVkFgICAQ8PFgIfAAUNV2lyIMO8YmVyIHVuc2RkAgMPFgIfAwL/////D2QCAg9kFgQCAQ9kFgICAQ8PFgQfAQUfL1ByZXNzZW1pdHRlaWx1bmdlbl8yMDA5Lmdrdm5ldB8EZWQWAgIBDw8WAh8ABQZQcmVzc2VkZAIDDxYCHwMC/////w9kAgMPZBYEAgEPZBYCAgEPDxYEHwEFGi9Qb2xpdGlrX1N0YXJ0c2VpdGUuZ2t2bmV0HwRlZBYCAgEPDxYCHwAFB1BvbGl0aWtkZAIDDxYCHwMC/////w9kAgQPZBYEAgEPZBYCAgEPDxYIHwEFEy9WZXJzaWNoZXJ0ZS5na3ZuZXQfBGUfBQUNIHNlbGVjdGVkTm9kZR8GAgJkFgRmDw8WAh8CBT1odHRwczovL21lZGlhLmdrdm5ldC5kZS9wdWJsaWMvbm9peF9UcmVlVmlld0NvbGxhcHNlSW1hZ2UuZ2lmZGQCAQ8PFgIfAAULVmVyc2ljaGVydGVkZAIDDxYCHwMCBRYKAgEPZBYEAgEPDxYEHwEFEy9SYXRfdW5kX1RhdC5na3ZuZXQfBGVkFgRmDw8WAh4HVmlzaWJsZWhkZAIBDw8WAh8ABQlSYXQgJiBUYXRkZAIDDxYCHwMC/////w9kAgIPZBYEAgEPDxYIHwEFIy9adXphaGx1bmdlbl91bmRfQmVmcmVpdW5nZW4uZ2t2bmV0HwRlHwUFDHNlbGVjdGVkTm9kZR8GAgJkFgRmDw8WAh8CBT1odHRwczovL21lZGlhLmdrdm5ldC5kZS9wdWJsaWMvbm9peF9UcmVlVmlld0NvbGxhcHNlSW1hZ2UuZ2lmZGQCAQ8PFgIfAAUbWnV6YWhsdW5nZW4gdW5kIEJlZnJlaXVuZ2VuZGQCAw8WAh8DAgMWBgIBD2QWBAIBDw8WCB8BBTAvQmVmcmVpdW5nc2xpc3RlX0Fyem5laW1pdHRlbF9WZXJzaWNoZXJ0ZS5na3ZuZXQfBGUfBQUMc2VsZWN0ZWROb2RlHwYCAmQWBGYPDxYEHwIFPWh0dHBzOi8vbWVkaWEuZ2t2bmV0LmRlL3B1YmxpYy9ub2l4X1RyZWVWaWV3Q29sbGFwc2VJbWFnZS5naWYfB2hkZAIBDw8WAh8ABRxCZWZyZWl1bmdzbGlzdGUgQXJ6bmVpbWl0dGVsZGQCAw8WBB8DAv////8PHwdoZAICD2QWBAIBDw8WBB8BBR0vWnV6YWhsdW5nc2JlZnJlaXVuZ2VuLmdrdm5ldB8EZWQWBGYPDxYCHwdoZGQCAQ8PFgIfAAUhWnV6YWhsdW5ncyZzaHk7JiM4MjAzO2JlZnJlaXVuZ2VuZGQCAw8WAh8DAv////8PZAIDD2QWBAIBDw8WBB8BBRgvRWlnZW5iZXRlaWxpZ3VuZy5na3ZuZXQfBGVkFgRmDw8WAh8HaGRkAgEPDxYCHwAFEEVpZ2VuYmV0ZWlsaWd1bmdkZAIDDxYCHwMC/////w9kAgMPZBYEAgEPDxYEHwEFEy9LbGluaWtzdWNoZS5na3ZuZXQfBGVkFgRmDw8WAh8HaGRkAgEPDxYCHwAFC0tsaW5pa3N1Y2hlZGQCAw8WAh8DAv////8PZAIED2QWBAIBDw8WBB8BBRMvUGZsZWdlc3VjaGUuZ2t2bmV0HwRlZBYEZg8PFgIfB2hkZAIBDw8WAh8ABQtQZmxlZ2VzdWNoZWRkAgMPFgIfAwL/////D2QCBQ9kFgQCAQ8PFgQfAQUhL1ZlcnNpY2hlcnRlX0JlaXRyYWdzcmVjaHQuZ2t2bmV0HwRlZBYEZg8PFgIfB2hkZAIBDw8WAh8ABQ1CZWl0cmFnc3JlY2h0ZGQCAw8WAh8DAv////8PZAIFD2QWBAIBD2QWAgIBDw8WBB8BBRcvR0tWX3dhc19pc3RfZGFzLmdrdm5ldB8EZWQWAgIBDw8WAh8ABT1HZXNldHpsaWNoZSBLcmFua2VuJnNoeTsmIzgyMDM7dmVyJnNoeTsmIzgyMDM7c2ljaGVydW5nIChHS1YpZGQCAw8WAh8DAv////8PZAIGD2QWBAIBD2QWAgIBDw8WBB8BBRcvVmVydHJhZ3NwYXJ0bmVyLmdrdm5ldB8EZWQWAgIBDw8WAh8ABSdWZXJzb3JndW5ncyZzaHk7JiM4MjAzO2JlcmVpY2hlIGRlciBHS1ZkZAIDDxYCHwMC/////w9kAgcPZBYEAgEPZBYCAgEPDxYEHwEFJi9nZXNldHpsaWNoZV9QZmxlZ2V2ZXJzaWNoZXJ1bmcuZ2t2bmV0HwRlZBYCAgEPDxYCHwAFKkdlc2V0emxpY2hlIFBmbGVnZSZzaHk7JiM4MjAzO3ZlcnNpY2hlcnVuZ2RkAgMPFgIfAwL/////D2QCCA9kFgQCAQ9kFgICAQ8PFgQfAQUML0RWS0EuZ2t2bmV0HwRlZBYCAgEPDxYCHwAFMkR0LiBWZXJiaW5kdW5nc3N0ZWxsZSBLcmFua2VudmVyc2ljaGVydW5nIC1BdXNsYW5kZGQCAw8WAh8DAv////8PZAIJD2QWBAIBD2QWAgIBDw8WBB8BBRwvTWVkaXppbmlzY2hlcl9EaWVuc3QuZ2t2bmV0HwRlZBYCAgEPDxYCHwAFFE1lZGl6aW5pc2NoZXIgRGllbnN0ZGQCAw8WAh8DAv////8PZAIKD2QWBAIBD2QWAgIBDw8WBB8BBSwvTG9naW5fZnVlcl9kaWVfZ2VzY2h1ZXR6dGVuX0JlcmVpY2hlLmdrdm5ldB8EZWQWAgIBDw8WAh8ABQxLYXNzZW56dWdhbmdkZAIDDxYCHwMC/////w9kAgsPZBYEAgEPZBYCAgEPDxYEHwEFIi9TdGF0dXRvcnlfaGVhbHRoX2luc3VyYW5jZS5na3ZuZXQfBGVkFgICAQ8PFgIfAAUWSW5mb3JtYXRpb24gaW4gRW5nbGlzaGRkAgMPFgIfAwL/////D2QCDA9kFgQCAQ9kFgICAQ8PFgQfAQU0L01pdHRlaWx1bmdlbl9hbl9kZW5fR0tWX1NwaXR6ZW52ZXJiYW5kX2h0dHBzLmdrdm5ldB8EZWQWAgIBDw8WAh8ABQdLb250YWt0ZGQCAw8WAh8DAv////8PZAIFD2QWAgIBD2QWCAIDDw8WAh8BBeMBaHR0cDovL2FzcC5yZWFkc3BlYWtlci5uZXQvY2dpLWJpbi9zcGlidW5kcnNvbmU/Y3VzdG9tZXJpZD0xMDA0Njg2Jmxhbmc9ZGUmdXJsPWh0dHBzOi8vd3d3Lmdrdi1zcGl0emVudmVyYmFuZC5kZS9CZWZyZWl1bmdzbGlzdGVfQXJ6bmVpbWl0dGVsX1ZlcnNpY2hlcnRlLmdrdm5ldD9VUkw9L0JlZnJlaXVuZ3NsaXN0ZV9BcnpuZWltaXR0ZWxfVmVyc2ljaGVydGUuZ2t2bmV0JkFjdGl2ZUlEPTEyMDJkZAIHDw8WBB8ABQxNZXJrbGlzdGUoMCkfAQUxaHR0cDovL3d3dy5na3Ytc3BpdHplbnZlcmJhbmQuZGUvTWVya2xpc3RlLmdrdm5ldGRkAgkPZBYCZg8WAh8DAgUWCmYPZBYCAgEPDxYGHwEFIH4vTmV3c19BbnplaWdlLmdrdm5ldD9OZXdzSUQ9OTYzHwAFMk1pbmlzdGVyaXVtOiBKZWRlciBJbXBmd2lsbGlnZSBzb2xsIGdlaW1wZnQgd2VyZGVuHwQFKFplaWdlIGRpZSBOZXdzIHZvbTogOC8xNi8yMDA5IDQ6MzQ6MDAgUE1kZAIBD2QWAgIBDw8WBh8BBSB+L05ld3NfQW56ZWlnZS5na3ZuZXQ/TmV3c0lEPTk2Mh8ABS1TY2htaWR0IHdlaHJ0IHNpY2ggZ2VnZW4gS3JpdGlrIGFuIEltcGZrb3N0ZW4fBAUoWmVpZ2UgZGllIE5ld3Mgdm9tOiA4LzE0LzIwMDkgMTowNTowMCBQTWRkAgIPZBYCAgEPDxYGHwEFIH4vTmV3c19BbnplaWdlLmdrdm5ldD9OZXdzSUQ9OTYxHwAFTVp1c2FtbWVuZmFzc3VuZyAxNzo0NSBVaHI6IEthc3NlbiB6YWhsZW4gZXJzdGUgSW1wZndlbGxlIGdlZ2VuIFNjaHdlaW5lZ3JpcHBlHwQFKFplaWdlIGRpZSBOZXdzIHZvbTogOC8xMy8yMDA5IDU6NTI6MDAgUE1kZAIDD2QWAgIBDw8WBh8BBSB+L05ld3NfQW56ZWlnZS5na3ZuZXQ/TmV3c0lEPTk2MB8ABSlBbnR3b3J0IHp1IFNjaG1pZHRzIERpZW5zdGZhaHJ0ZW4gc3DDpHRlch8EBShaZWlnZSBkaWUgTmV3cyB2b206IDgvMTMvMjAwOSA1OjIzOjAwIFBNZGQCBA9kFgICAQ8PFgYfAQUgfi9OZXdzX0FuemVpZ2UuZ2t2bmV0P05ld3NJRD05NTkfAAUyVm9yYmVyZWl0dW5nZW4gZsO8ciBNYXNzZW4tSW1wZnVuZyB1bnRlciBaZWl0ZHJ1Y2sfBAUoWmVpZ2UgZGllIE5ld3Mgdm9tOiA4LzEzLzIwMDkgNTowNTowMCBQTWRkAg0PZBYCAgUPDxYCHwEFPmh0dHA6Ly93d3cuZ2t2LXNwaXR6ZW52ZXJiYW5kLmRlL0dlc2NoYWVmdHNiZXJpY2h0XzIwMDguZ2t2bmV0ZGQCBw9kFgJmDw8WAh8ABRdBa3R1YWxpc2llcnQ6IDgvMTcvMjAwOWRkAgkPZBYEAgMPDxYCHwEFjwFodHRwOi8vYXNwLnJlYWRzcGVha2VyLm5ldC9jZ2ktYmluL3NwaWJ1bmRyc29uZT9jdXN0b21lcmlkPTEwMDQ2ODYmYW1wO2xhbmc9ZGUmYW1wO3VybD1odHRwczovLy9CZWZyZWl1bmdzbGlzdGVfQXJ6bmVpbWl0dGVsX1ZlcnNpY2hlcnRlLmdrdm5ldGRkAg0PZBYGAgEPDxYCHwdnZBYCAgEPFgIfAAUcQmVmcmVpdW5nc2xpc3RlIEFyem5laW1pdHRlbGQCAw8PFgIfB2dkFgICAQ8WAh8ABVFodHRwczovL3d3dy5na3Ytc3BpdHplbnZlcmJhbmQuZGUvQmVmcmVpdW5nc2xpc3RlX0Fyem5laW1pdHRlbF9WZXJzaWNoZXJ0ZS5na3ZuZXRkAgUPDxYCHwdnZBYCAgEPFgIfAAUXTW9uZGF5LCBBdWd1c3QgMTcsIDIwMDlkZL1muuHph5bMIwWbkUSv6SJexuRg" />
+</div>
+
+<div>
+
+	<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+	<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" />
+</div>
+    
+    
+    <div id="header">
+		<div id="logo">
+            <a id="Header_HyperLinkLogo" title="Zur Startseite" href="http://www.gkv-spitzenverband.de/Home.gkvnet"><img id="Header_Image1" class="noLogoSubline" src="https://media.gkvnet.de/public/noix_logo.gkv-verband.wslogo.gif" alt="" style="border-width:0px;" /></a>
+        </div>
+
+        
+
+        <div id="headerTabs">
+            <img id="Header_ImageHeader" src="/upload/header2_11.gif" alt="" style="border-width:0px;" />
+        </div>
+    </div>
+    
+    <div id="subHeader">
+        <div id="Header_Breadcrumb_locatorPanel">
+	
+    <div id="breadcrumb">
+        <span class="hidden printable">Sie befinden sich hier: </span>       
+        
+        
+                                
+                <a id="Header_Breadcrumb_locatorRepeater_ctl00_levelLink" href="/Versicherte.gkvnet" target="_top">Versicherte</a>
+            
+                <img src='http://www.gkv-spitzenverband.de/templates/images/arrows.gif' alt="" />
+                                    
+                <a id="Header_Breadcrumb_locatorRepeater_ctl02_levelLink" href="/Zuzahlungen_und_Befreiungen.gkvnet" target="_top">Zuzahlungen und Befreiungen</a>
+            
+                <img src='http://www.gkv-spitzenverband.de/templates/images/arrows.gif' alt="" />
+                                    
+                <a id="Header_Breadcrumb_locatorRepeater_ctl04_levelLink" class="current" href="/Befreiungsliste_Arzneimittel_Versicherte.gkvnet" target="_top">Befreiungsliste Arzneimittel</a>
+            
+        
+        &nbsp;
+    </div>
+
+</div>
+
+    </div>
+
+
+    <div id="leftNavBoxBorder">
+        <div id="leftNavBox" class="showContainer">
+            
+            
+    <div id="leftNav">
+        <a href="#NavigationEnd" id="NavigationStart" title="Überspringe die Navigation"></a>
+        
+	    <ul class="RootNode">
+		    
+					    <li>
+						    <div id="hauptNavigation_navigationRepeater_ctl00_pnlGroup" class="navGroup">
+	
+						        <a id="hauptNavigation_navigationRepeater_ctl00_lnkLink" href="/Home.gkvnet"><img id="hauptNavigation_navigationRepeater_ctl00_imgLink" src="https://media.gkvnet.de/public/noix_TreeViewExpandImage.gif" alt="" style="border-width:0px;" /><span id="hauptNavigation_navigationRepeater_ctl00_lblLink">Home</span><span class="hidden">.</span></a>
+						    
+</div>
+						    
+						    
+					    </li>
+			    
+					    <li>
+						    <div id="hauptNavigation_navigationRepeater_ctl01_pnlGroup" class="navGroup">
+	
+						        <a id="hauptNavigation_navigationRepeater_ctl01_lnkLink" href="/Wir_ueber_uns.gkvnet"><img id="hauptNavigation_navigationRepeater_ctl01_imgLink" src="https://media.gkvnet.de/public/noix_TreeViewExpandImage.gif" alt="" style="border-width:0px;" /><span id="hauptNavigation_navigationRepeater_ctl01_lblLink">Wir über uns</span><span class="hidden">.</span></a>
+						    
+</div>
+						    
+						    
+					    </li>
+			    
+					    <li>
+						    <div id="hauptNavigation_navigationRepeater_ctl02_pnlGroup" class="navGroup">
+	
+						        <a id="hauptNavigation_navigationRepeater_ctl02_lnkLink" href="/Pressemitteilungen_2009.gkvnet"><img id="hauptNavigation_navigationRepeater_ctl02_imgLink" src="https://media.gkvnet.de/public/noix_TreeViewExpandImage.gif" alt="" style="border-width:0px;" /><span id="hauptNavigation_navigationRepeater_ctl02_lblLink">Presse</span><span class="hidden">.</span></a>
+						    
+</div>
+						    
+						    
+					    </li>
+			    
+					    <li>
+						    <div id="hauptNavigation_navigationRepeater_ctl03_pnlGroup" class="navGroup">
+	
+						        <a id="hauptNavigation_navigationRepeater_ctl03_lnkLink" href="/Politik_Startseite.gkvnet"><img id="hauptNavigation_navigationRepeater_ctl03_imgLink" src="https://media.gkvnet.de/public/noix_TreeViewExpandImage.gif" alt="" style="border-width:0px;" /><span id="hauptNavigation_navigationRepeater_ctl03_lblLink">Politik</span><span class="hidden">.</span></a>
+						    
+</div>
+						    
+						    
+					    </li>
+			    
+					    <li>
+						    <div id="hauptNavigation_navigationRepeater_ctl04_pnlGroup" class="navGroup">
+	
+						        <a id="hauptNavigation_navigationRepeater_ctl04_lnkLink" class=" selectedNode" href="/Versicherte.gkvnet"><img id="hauptNavigation_navigationRepeater_ctl04_imgLink" src="https://media.gkvnet.de/public/noix_TreeViewCollapseImage.gif" alt="" style="border-width:0px;" /><span id="hauptNavigation_navigationRepeater_ctl04_lblLink">Versicherte</span><span class="hidden">.</span></a>
+						    
+</div>
+						    
+						    
+								    <ul class="Node2">
+							    
+								    <li>
+								    	<div class="navGroup">
+                                            <a id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl01_lnkLink" href="/Rat_und_Tat.gkvnet"><span id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl01_lblLink">Rat & Tat</span><span class="hidden">.</span></a>
+                                        </div>
+                                        
+                                        
+                                    </li>
+							    
+								    <li>
+								    	<div class="navGroup">
+                                            <a id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl02_lnkLink" class="selectedNode" href="/Zuzahlungen_und_Befreiungen.gkvnet"><img id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl02_imgLink" src="https://media.gkvnet.de/public/noix_TreeViewCollapseImage.gif" alt="" style="border-width:0px;" /><span id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl02_lblLink">Zuzahlungen und Befreiungen</span><span class="hidden">.</span></a>
+                                        </div>
+                                        
+                                        
+                                                <ul class="Node3">
+                                            
+                                                <li>
+                                                    <div class="navGroup">
+                                                        <a id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl02_navigationLevel3Repeater_ctl01_lnkLink" class="selectedNode" href="/Befreiungsliste_Arzneimittel_Versicherte.gkvnet"><span id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl02_navigationLevel3Repeater_ctl01_lblLink">Befreiungsliste Arzneimittel</span><span class="hidden">.</span></a>
+                                                    </div>
+                                                    
+                                                    
+                                                </li>
+                                            
+                                                <li>
+                                                    <div class="navGroup">
+                                                        <a id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl02_navigationLevel3Repeater_ctl02_lnkLink" href="/Zuzahlungsbefreiungen.gkvnet"><span id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl02_navigationLevel3Repeater_ctl02_lblLink">Zuzahlungs&shy;&#8203;befreiungen</span><span class="hidden">.</span></a>
+                                                    </div>
+                                                    
+                                                    
+                                                </li>
+                                            
+                                                <li>
+                                                    <div class="navGroup">
+                                                        <a id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl02_navigationLevel3Repeater_ctl03_lnkLink" href="/Eigenbeteiligung.gkvnet"><span id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl02_navigationLevel3Repeater_ctl03_lblLink">Eigenbeteiligung</span><span class="hidden">.</span></a>
+                                                    </div>
+                                                    
+                                                    
+                                                </li>
+                                            
+                                                </ul>
+                                            
+                                    </li>
+							    
+								    <li>
+								    	<div class="navGroup">
+                                            <a id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl03_lnkLink" href="/Kliniksuche.gkvnet"><span id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl03_lblLink">Kliniksuche</span><span class="hidden">.</span></a>
+                                        </div>
+                                        
+                                        
+                                    </li>
+							    
+								    <li>
+								    	<div class="navGroup">
+                                            <a id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl04_lnkLink" href="/Pflegesuche.gkvnet"><span id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl04_lblLink">Pflegesuche</span><span class="hidden">.</span></a>
+                                        </div>
+                                        
+                                        
+                                    </li>
+							    
+								    <li>
+								    	<div class="navGroup">
+                                            <a id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl05_lnkLink" href="/Versicherte_Beitragsrecht.gkvnet"><span id="hauptNavigation_navigationRepeater_ctl04_navigationLevel2Repeater_ctl05_lblLink">Beitragsrecht</span><span class="hidden">.</span></a>
+                                        </div>
+                                        
+                                        
+                                    </li>
+							    
+								    </ul>
+							    
+					    </li>
+			    
+					    <li>
+						    <div id="hauptNavigation_navigationRepeater_ctl05_pnlGroup" class="navGroup">
+	
+						        <a id="hauptNavigation_navigationRepeater_ctl05_lnkLink" href="/GKV_was_ist_das.gkvnet"><img id="hauptNavigation_navigationRepeater_ctl05_imgLink" src="https://media.gkvnet.de/public/noix_TreeViewExpandImage.gif" alt="" style="border-width:0px;" /><span id="hauptNavigation_navigationRepeater_ctl05_lblLink">Gesetzliche Kranken&shy;&#8203;ver&shy;&#8203;sicherung (GKV)</span><span class="hidden">.</span></a>
+						    
+</div>
+						    
+						    
+					    </li>
+			    
+					    <li>
+						    <div id="hauptNavigation_navigationRepeater_ctl06_pnlGroup" class="navGroup">
+	
+						        <a id="hauptNavigation_navigationRepeater_ctl06_lnkLink" href="/Vertragspartner.gkvnet"><img id="hauptNavigation_navigationRepeater_ctl06_imgLink" src="https://media.gkvnet.de/public/noix_TreeViewExpandImage.gif" alt="" style="border-width:0px;" /><span id="hauptNavigation_navigationRepeater_ctl06_lblLink">Versorgungs&shy;&#8203;bereiche der GKV</span><span class="hidden">.</span></a>
+						    
+</div>
+						    
+						    
+					    </li>
+			    
+					    <li>
+						    <div id="hauptNavigation_navigationRepeater_ctl07_pnlGroup" class="navGroup">
+	
+						        <a id="hauptNavigation_navigationRepeater_ctl07_lnkLink" href="/gesetzliche_Pflegeversicherung.gkvnet"><img id="hauptNavigation_navigationRepeater_ctl07_imgLink" src="https://media.gkvnet.de/public/noix_TreeViewExpandImage.gif" alt="" style="border-width:0px;" /><span id="hauptNavigation_navigationRepeater_ctl07_lblLink">Gesetzliche Pflege&shy;&#8203;versicherung</span><span class="hidden">.</span></a>
+						    
+</div>
+						    
+						    
+					    </li>
+			    
+					    <li>
+						    <div id="hauptNavigation_navigationRepeater_ctl08_pnlGroup" class="navGroup">
+	
+						        <a id="hauptNavigation_navigationRepeater_ctl08_lnkLink" href="/DVKA.gkvnet"><img id="hauptNavigation_navigationRepeater_ctl08_imgLink" src="https://media.gkvnet.de/public/noix_TreeViewExpandImage.gif" alt="" style="border-width:0px;" /><span id="hauptNavigation_navigationRepeater_ctl08_lblLink">Dt. Verbindungsstelle Krankenversicherung -Ausland</span><span class="hidden">.</span></a>
+						    
+</div>
+						    
+						    
+					    </li>
+			    
+					    <li>
+						    <div id="hauptNavigation_navigationRepeater_ctl09_pnlGroup" class="navGroup">
+	
+						        <a id="hauptNavigation_navigationRepeater_ctl09_lnkLink" href="/Medizinischer_Dienst.gkvnet"><img id="hauptNavigation_navigationRepeater_ctl09_imgLink" src="https://media.gkvnet.de/public/noix_TreeViewExpandImage.gif" alt="" style="border-width:0px;" /><span id="hauptNavigation_navigationRepeater_ctl09_lblLink">Medizinischer Dienst</span><span class="hidden">.</span></a>
+						    
+</div>
+						    
+						    
+					    </li>
+			    
+					    <li>
+						    <div id="hauptNavigation_navigationRepeater_ctl10_pnlGroup" class="navGroup">
+	
+						        <a id="hauptNavigation_navigationRepeater_ctl10_lnkLink" href="/Login_fuer_die_geschuetzten_Bereiche.gkvnet"><img id="hauptNavigation_navigationRepeater_ctl10_imgLink" src="https://media.gkvnet.de/public/noix_TreeViewExpandImage.gif" alt="" style="border-width:0px;" /><span id="hauptNavigation_navigationRepeater_ctl10_lblLink">Kassenzugang</span><span class="hidden">.</span></a>
+						    
+</div>
+						    
+						    
+					    </li>
+			    
+					    <li>
+						    <div id="hauptNavigation_navigationRepeater_ctl11_pnlGroup" class="navGroup">
+	
+						        <a id="hauptNavigation_navigationRepeater_ctl11_lnkLink" href="/Statutory_health_insurance.gkvnet"><img id="hauptNavigation_navigationRepeater_ctl11_imgLink" src="https://media.gkvnet.de/public/noix_TreeViewExpandImage.gif" alt="" style="border-width:0px;" /><span id="hauptNavigation_navigationRepeater_ctl11_lblLink">Information in English</span><span class="hidden">.</span></a>
+						    
+</div>
+						    
+						    
+					    </li>
+			    
+					    <li>
+						    <div id="hauptNavigation_navigationRepeater_ctl12_pnlGroup" class="navGroup">
+	
+						        <a id="hauptNavigation_navigationRepeater_ctl12_lnkLink" href="/Mitteilungen_an_den_GKV_Spitzenverband_https.gkvnet"><img id="hauptNavigation_navigationRepeater_ctl12_imgLink" src="https://media.gkvnet.de/public/noix_TreeViewExpandImage.gif" alt="" style="border-width:0px;" /><span id="hauptNavigation_navigationRepeater_ctl12_lblLink">Kontakt</span><span class="hidden">.</span></a>
+						    
+</div>
+						    
+						    
+					    </li>
+			    
+        </ul>
+	
+    
+	<a id="NavigationEnd" title=""></a>
+
+</div>
+         
+            <!-- ISI_LISTEN_START -->
+            <div id="content">
+                <h1><b>Befreiungsliste Arzneimittel</b>&nbsp;&nbsp;</h1><p>Bei der Verordnung von Arzneimitteln, deren Apothekenverkaufspreise inkl. MwSt. den Wert der jeweiligen Zuzahlungsbefreiungrenze nicht &uuml;berschreiten, sind Versicherte seit dem 1. Juli 2006 von der gesetzlichen Zuzahlung nach &sect; 31 Abs. 3 Satz 1 SGB V befreit.</p><p>Der GKV-Spitzenverband&nbsp;legt regelm&auml;&szlig;ig f&uuml;r bestimmte zu Lasten der Krankenkassen abgegebene Arzneimittel&nbsp;die Zuzahlungsbefreiungsgrenzen fest.<br class="isi_pause" /><br class="isi_pause" />Wir ver&ouml;ffentlichen hier s&auml;mtliche jeweils aktuell zuzahlungsbefreiten Arzneimittel. Preismeldungen von Arzneimittelanbietern, Marktein- oder austritte sind stets zum <b>1. und 15. eines Monats</b> m&ouml;glich. Eine <b>Aktualisierung</b> der Zuzahlungsbefreiungsliste <b>erfolgt</b>&nbsp;daher <b>jeweils im Laufe der auf einen Stichtag folgenden Woche</b>.</p><p>&nbsp;</p><p><span class="pdf"><a href="/upload/Zuzahlungsbefreit_sort_Name_090815_8351.pdf" target="_blank">Liste der zuzahlungsbefreiten Arzneimittel (Stand: 15. August 2009)</a></span><br class="isi_pause" />Alphabetisch nach Handelsnamen sortierte Fertigarzneimittel&uuml;bersicht mit den Angaben Pharmazentralnummer (PZN), Hersteller, Wirkstoff, Wirkst&auml;rke, Packungsgr&ouml;&szlig;e, Darreichungsform und Apothekenverkaufspreis<br class="isi_pause" /></p><h3>Suchmaschinen&nbsp;</h3><p>Bei der Suche nach einem zuzahlungsbefreiten Arzneimittel unterst&uuml;tzen Sie&nbsp;Suchmaschinen, die von&nbsp;den Verb&auml;nden der&nbsp;Kranken- und Pflegekassen auf Bundesebene angeboten werden.</p><p><a href="http://www.aok.de/bund/rd/192157.php" target="_blank">www.aok.de/bund/rd/192157.php</a></p><p><a href="http://www.ikk.de/ikk/generator/ikk/service-und-beratung/arzneimittelsuche/74936,i=l.html"></a></p><p><a href="http://www.bkk.de/bkk/powerslave,id,1081,nodeid,1081.html" target="_blank"></a></p><p>&nbsp;</p>
+            </div>
+            <!-- ISI_LISTEN_STOP -->
+
+            
+            <div id="container" class="center">
+	
+                
+                
+    <div id="newsBoxSiteFunctions">
+        <h3 style="margin-left: 1.1em;">
+            <img id="NewsBox_Image1" class="icon" src="https://media.gkvnet.de/public/SpiBu/noix_css.Seite.vorlesen.gif" alt="" style="border-width:0px;" />
+
+            <a id="NewsBox_lnkSiteRead" class="SiteReadMerkliste" href="http://asp.readspeaker.net/cgi-bin/spibundrsone?customerid=1004686&amp;lang=de&amp;url=https://www.gkv-spitzenverband.de/Befreiungsliste_Arzneimittel_Versicherte.gkvnet?URL=/Befreiungsliste_Arzneimittel_Versicherte.gkvnet&amp;ActiveID=1202" target="_blank">Seite vorlesen</a>
+            <br />
+            <img id="NewsBox_Image2" class="icon" src="https://media.gkvnet.de/public/SpiBu/noix_css.Merkliste.gif" alt="" style="border-width:0px;" />
+            <a id="NewsBox_lnkMerkListe" class="SiteReadMerkliste" href="http://www.gkv-spitzenverband.de/Merkliste.gkvnet" target="_self">Merkliste(0)</a>
+        </h3>
+    </div>
+   
+    <h1>dpa meldet ...</h1>
+    <div id="newsBox">
+        
+<p>
+<a id="NewsBox_dpaTicker_Repeater1_ctl00_HLink1" title="Zeige die News vom: 8/16/2009 4:34:00 PM" href="News_Anzeige.gkvnet?NewsID=963">Ministerium: Jeder Impfwillige soll geimpft werden</a>
+</p>
+
+
+<p>
+<a id="NewsBox_dpaTicker_Repeater1_ctl01_HLink1" title="Zeige die News vom: 8/14/2009 1:05:00 PM" href="News_Anzeige.gkvnet?NewsID=962">Schmidt wehrt sich gegen Kritik an Impfkosten</a>
+</p>
+
+
+<p>
+<a id="NewsBox_dpaTicker_Repeater1_ctl02_HLink1" title="Zeige die News vom: 8/13/2009 5:52:00 PM" href="News_Anzeige.gkvnet?NewsID=961">Zusammenfassung 17:45 Uhr: Kassen zahlen erste Impfwelle gegen Schweinegrippe</a>
+</p>
+
+
+<p>
+<a id="NewsBox_dpaTicker_Repeater1_ctl03_HLink1" title="Zeige die News vom: 8/13/2009 5:23:00 PM" href="News_Anzeige.gkvnet?NewsID=960">Antwort zu Schmidts Dienstfahrten später</a>
+</p>
+
+
+<p>
+<a id="NewsBox_dpaTicker_Repeater1_ctl04_HLink1" title="Zeige die News vom: 8/13/2009 5:05:00 PM" href="News_Anzeige.gkvnet?NewsID=959">Vorbereitungen für Massen-Impfung unter Zeitdruck</a>
+</p>
+
+
+
+    </div>
+
+<div class="left balkenRotMarginalie">
+    <div id="NewsBox_pnlSearch" onkeypress="javascript:return WebForm_FireDefaultButton(event, 'NewsBox_btnSucheStarten')">
+		
+    <span id="NewsBox_lblSuche" class="bold">Suche:</span><br />
+    <div class="floatLeft"><input name="NewsBox$txtSuchText" type="text" id="NewsBox_txtSuchText" style="width:109px;" /></div>
+    <div><input type="submit" name="NewsBox$btnSucheStarten" value="" id="NewsBox_btnSucheStarten" class="floatRight buttonPfeil" /></div>
+    
+	</div>
+</div>
+
+    <div id="NewsBox_pnlGB" class="broschuere">
+		
+        <br /><br />
+        <img id="NewsBox_imgBroschuere" src="https://media.gkvnet.de/public/GKV-GB_web-Titel_106x150_621.gif" alt="" style="border-width:0px;" /><br /><br />
+        <h1>Geschäftsbericht </h1>
+        <a id="NewsBox_lnkGBDownload" href="upload/GKV-GB_web_5611.pdf" target="_blank">Download</a><br />
+        <a id="NewsBox_lnkGBBestellen" href="http://www.gkv-spitzenverband.de/Geschaeftsbericht_2008.gkvnet">Bestellen</a>
+    
+	</div>
+
+            
+</div>
+        </div>
+    </div>
+    
+     <div id="footer" class="showContainer">
+        <div id="FooterAktDateID" class="right">
+            <span id="FooterAktDate_lblAktDate" class="aktDate right">Aktualisiert: 8/17/2009</span>         
+        </div>
+        
+        
+
+<div id="footerLinks">
+    
+    
+    <a href="javascript:printpr()" class="sitePrint" title="Startet das drucken mit einer Druckvorschau per JavaScript. Alternativ verwenden Sie bitte die Druckfunktion Ihres Browsers">Seite drucken</a>
+    <a href="#PageTop" class="siteTop">Seitenanfang</a>
+    
+    <a id="Footer_lnkImpressum" href="Impressum.gkvnet" target="_self">Impressum</a>
+    <a id="Footer_lnkDatenschutz" href="Datenschutz.gkvnet" target="_self">Datenschutz</a>
+    <a id="Footer_lnkSitemap" href="Sitemap.gkvnet" target="_self">Sitemap</a></div>    
+    
+
+
+<script type="text/vbscript" language="vbscript">
+<!-- // Visual Basic-Hilfsprogramm ist zur Ermittlung ob ActiveX aktiv ist...
+    function VBisActiveXavailable()
+        on error resume next
+        activeXOK = isobject(CreateObject("Scripting.FileSystemObject"))
+        if (activeXOK = true) Then
+            VBisActiveXavailable = "true"
+        else 
+            VBisActiveXavailable = "false" 
+        end If 
+    end function
+//-->
+</script>
+<script type="text/javascript" language="javascript">
+<!--
+    function printpr() {
+        var browser = navigator.userAgent.toLowerCase();
+        var ganzzahl = parseInt(navigator.appVersion);
+
+        if (document.all && navigator.appVersion.substring(22, 23) == 4 && VBisActiveXavailable()=="true") {
+            //IE 4 und 5.0 Bugfix
+            self.focus();
+            var OLECMDID_PRINT = 6;
+            var OLECMDEXECOPT_DONTPROMPTUSER = 2;
+            var OLECMDEXECOPT_PROMPTUSER = 1;
+            var WebBrowser = '<object id="WebBrowser1" width="0" height="0" classid="CLSID:8856F961-340A-11D0-A96B-00C04FD705A2"></object>';
+            document.body.insertAdjacentHTML('beforeEnd', WebBrowser);
+            WebBrowser1.ExecWB(OLECMDID_PRINT, OLECMDEXECOPT_DONTPROMPTUSER);
+            WebBrowser1.outerHTML = '';
+        } else if((ganzzahl == 4) && (browser.indexOf("msie 6.0") !=-1)  && VBisActiveXavailable()=="true") {
+            //IE 6.0 Druckvorschau
+            var OLECMDID = 7;
+            var PROMPT = 1;
+            var WebBrowser = '<OBJECT ID="WebBrowser1" WIDTH=0 HEIGHT=0 CLASSID="CLSID:8856F961-340A-11D0-A96B-00C04FD705A2"></OBJECT>';
+            document.body.insertAdjacentHTML('beforeEnd', WebBrowser); WebBrowser1.ExecWB(OLECMDID, PROMPT); WebBrowser1.outerHTML = "";
+        }
+        else {
+            self.print();
+        }
+    }
+//-->
+</script>
+
+<div id="PrintInfo" class="hidden">
+    <div id="Footer_PrintInfo_pnlTitel">
+	
+        <b>Titel:</b> Befreiungsliste Arzneimittel
+    
+</div>
+    <div id="Footer_PrintInfo_pnlURL" class="nowrap">
+	
+        <b>Original-URL:</b>  https://www.gkv-spitzenverband.de/Befreiungsliste_Arzneimittel_Versicherte.gkvnet
+    
+</div>
+    <div id="Footer_PrintInfo_pnlDate" class="nowrap">
+	
+        <b>Letze Änderung:</b> Monday, August 17, 2009
+    
+</div>
+       
+</div>
+         
+    </div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['aspnetForm'];
+if (!theForm) {
+    theForm = document.aspnetForm;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="/WebResource.axd?d=kE1H7GWWMcO7VkA63UESDw2&amp;t=633695423097958846" type="text/javascript"></script>
+</form>
+</div></body>   
+
+</html>
