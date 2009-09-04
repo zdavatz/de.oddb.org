@@ -45,7 +45,7 @@ module ODDB
         importer = Import::Gkv.new
         if url = importer.latest_url(WWW::Mechanize.new, opts)
           importer.download_latest url, opts do |fh|
-            reported_import(importer, fh)
+            reported_import(importer, fh, 'Zubef')
           end
         end
       end

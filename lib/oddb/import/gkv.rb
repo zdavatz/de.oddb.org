@@ -417,14 +417,14 @@ class Gkv < Import
   end
   def report
     [
-      sprintf("Imported %3i FB-Entries on %s:",
+      sprintf("Imported %3i Zubef-Entries on %s:",
               @count, Date.today.strftime("%d.%m.%Y")),
-      sprintf("Visited  %3i existing FB-Entries", @existing),
+      sprintf("Visited  %3i existing Zubef-Entries", @existing),
       sprintf("Visited  %3i existing Companies",
               @existing_companies),
       sprintf("Visited  %3i existing Substances",
               @existing_substances),
-      sprintf("Created  %3i new FB-Entries", @created),
+      sprintf("Created  %3i new Zubef-Entries", @created),
 =begin
       sprintf("Created  %3i new Products", @created_products),
       sprintf("Created  %3i new Sequences", @created_sequences),
