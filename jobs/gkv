@@ -3,6 +3,7 @@
 $: << File.expand_path('../lib', File.dirname(__FILE__))
 $KCODE = 'u'
 
+require 'rubygems'
 require 'drb'
 require 'oddb/config'
 require 'oddb/drugs'
