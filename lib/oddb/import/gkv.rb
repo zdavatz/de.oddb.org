@@ -31,6 +31,8 @@ class GkvHandler < Rpdf2txt::SimpleHandler
       #  to the tail
       data[9] ||= nil
       @rows.push data
+    else
+      @rows.push :doubtful
     end
     reset
   end
@@ -57,7 +59,7 @@ class Gkv < Import
     @existing = 0
     @existing_companies = 0
     @existing_substances = 0
-    @unknown_packages = 0
+    @doubtful_pzns = []
   end
   def download_latest(url, opts={}, &block)
     opts = {:date => Date.today}.merge(opts)
@@ -96,6 +98,11 @@ class Gkv < Import
     report
   end
   def import_row(row)
+    if row == :doubtful
+      @doubtful_pzns.push @created_pzn if @created_pzn
+      @created_pzn = nil
+      return
+    end
     @count += 1
     package = import_package(row)
     return if package.nil?
@@ -112,12 +119,6 @@ class Gkv < Import
       code = Util::Code.new(:zuzahlungsbefreit, true, 'DE')
       package.add_code(code)
     end
-=begin
-    unless sequence = package.sequence
-      product = import_product(package, row)
-      package.sequence = sequence = import_sequence(product, package, row)
-    end
-=end
     sequence = package.sequence
     product = sequence.product if sequence
     part = package.parts.first
@@ -147,16 +148,17 @@ class Gkv < Import
       end
       save(part) if changed
     end
-    if((company = import_company(row)) && product && product.company != company)
+    if(product && (company = import_company(row)) && product.company != company)
       product.company = company
       save product
     end
-    #import_active_agent(sequence, row, 3)
-    #import_active_agent(sequence, row, 10)
-    #import_active_agent(sequence, row, 13)
+    if sequence
+      import_active_agent(sequence, row, 3)
+      import_active_agent(sequence, row, 10)
+      import_active_agent(sequence, row, 13)
+    end
     save package
   end
-=begin
   def import_active_agent(sequence, row, offset)
     name = row.at(offset)
     sane = sanitize_substance_name(name)
@@ -215,18 +217,17 @@ class Gkv < Import
       end
     end
   end
-=end
   def import_company(row)
     if name = row.at(2)
       cname = company_name(name)
       company = Business::Company.find_by_name(cname)
       if(company)
         @existing_companies += 1
-      #else
-      #  @created_companies += 1
-      #  company = Business::Company.new
-      #  company.name.de = cname
-      #  save company
+      else
+        @created_companies += 1
+        company = Business::Company.new
+        company.name.de = cname
+        save company
       end
       company
     end
@@ -243,12 +244,9 @@ class Gkv < Import
     package = Drugs::Package.find_by_code(:type => 'cid',
                                           :value => pzn,
                                           :country => 'DE')
-    if package.nil?
-      @unknown_packages += 1
-      return
-    end
-=begin
+    @created_pzn = nil
     if(package.nil?)
+      @created_pzn = pzn
       package = Drugs::Package.new
       package.add_code(Util::Code.new(:cid, pzn, 'DE'))
       part = Drugs::Part.new
@@ -258,7 +256,6 @@ class Gkv < Import
       package.sequence = import_sequence(product, package, row)
       # save(package) is called at the end of import_row
     end
-=end
     if(amount = row.at(9))
       import_price package, :public, amount.tr(',', '.').to_f
       if(efp = package._price_exfactory)
@@ -283,7 +280,6 @@ class Gkv < Import
       package.data_origins.store dotype, :gkv
     end
   end
-=begin
   def import_product(package, row)
     name = product_name(row)
     search = name.dup
@@ -352,7 +348,6 @@ class Gkv < Import
       substance
     end
   end
-=end
   def postprocess
     Drugs::Package.search_by_code(:type => 'zuzahlungsbefreit',
                                   :value => 'true',
@@ -416,26 +411,27 @@ class Gkv < Import
     end
   end
   def report
+    doubtfuls = @doubtful_pzns.collect do |pzn|
+      "http://de.oddb.org/de/drugs/package/pzn/#{pzn}"
+    end
     [
-      sprintf("Imported %3i Zubef-Entries on %s:",
+      sprintf("Imported %5i Zubef-Entries on %s:",
               @count, Date.today.strftime("%d.%m.%Y")),
-      sprintf("Visited  %3i existing Zubef-Entries", @existing),
-      sprintf("Visited  %3i existing Companies",
+      sprintf("Visited  %5i existing Zubef-Entries", @existing),
+      sprintf("Visited  %5i existing Companies",
               @existing_companies),
-      sprintf("Visited  %3i existing Substances",
+      sprintf("Visited  %5i existing Substances",
               @existing_substances),
-      sprintf("Created  %3i new Zubef-Entries", @created),
-=begin
-      sprintf("Created  %3i new Products", @created_products),
-      sprintf("Created  %3i new Sequences", @created_sequences),
-      sprintf("Created  %3i new Companies", @created_companies),
-      sprintf("Created  %3i new Substances", @created_substances),
-      sprintf("Assigned %3i Chemical Equivalences",
+      sprintf("Created  %5i new Zubef-Entries", @created),
+      sprintf("Created  %5i new Products", @created_products),
+      sprintf("Created  %5i new Sequences", @created_sequences),
+      sprintf("Created  %5i new Companies", @created_companies),
+      sprintf("Created  %5i new Substances", @created_substances),
+      sprintf("Assigned %5i Chemical Equivalences",
               @assigned_equivalences),
-=end
-      sprintf("Assigned %3i Companies", @assigned_companies),
-      sprintf("Ignored  %3i Unknown Packages", @unknown_packages),
-    ]
+      sprintf("Assigned %5i Companies", @assigned_companies),
+      sprintf("Created  %5i Incomplete Packages:", doubtfuls.size),
+    ].concat doubtfuls
   end
   def sanitize_substance_name(str)
     str.to_s.downcase.gsub(/[^a-z]/, '')
