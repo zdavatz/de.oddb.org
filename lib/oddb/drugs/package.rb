@@ -17,7 +17,7 @@ module ODDB
       multilingual :name
       def cascading_name(language)
         str = name.send language
-        if str.nil? && sequence
+        if str.to_s.empty? && sequence
           str = sequence.name.send language
         end
         str

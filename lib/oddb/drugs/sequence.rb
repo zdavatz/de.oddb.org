@@ -20,7 +20,7 @@ module ODDB
       m10l_document :patinfo
       def cascading_name(language)
         str = name.send language
-        if str.nil? && product
+        if str.to_s.empty? && product
           str = product.name.send language
         end
         str
