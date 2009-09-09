@@ -366,14 +366,15 @@ class PackageComposite < HtmlGrid::DivComposite
   CSS_MAP = { 0 => 'before-searchbar', 4 => 'divider' }
   def breadcrumbs(model)
     [ @lookandfeel.lookup(:package_details_for, 
-                          model.name.send(@session.language)) ]
+                          model.cascading_name(@session.language)) ]
   end
   def name(model)
-    name = [model.name]
+    lang = @session.language
+    parts = [model.cascading_name lang]
     if(company = model.company)
-      name.push(' - ', company.name)
+      parts.push(' - ', company.name.send(lang))
     end
-    name
+    parts
   end
   def parts(model)
     Parts.new(model.parts, @session, self)
@@ -390,7 +391,7 @@ class Package < Template
   CONTENT = PackageComposite
   def _title
     if @model.saved?
-      super[0..-2].push(@model.name.send(@session.language))
+      super[0..-2].push(@model.cascading_name(@session.language))
     else
       super.push(@lookandfeel.lookup(:new_package))
     end

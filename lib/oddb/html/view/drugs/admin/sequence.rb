@@ -265,9 +265,10 @@ class SequenceComposite < HtmlGrid::DivComposite
   CSS_ID_MAP = [ 'snapback', 'result-search', 'title' ]
   CSS_MAP = { 0 => 'before-searchbar', 4 => 'divider' }
   def name(model)
-    name = [model.name]
+    lang = @session.language
+    name = [model.cascading_name(lang)]
     if(company = model.company)
-      name.push(' - ', company.name)
+      name.push(' - ', company.name.send(lang))
     end
     name
   end
@@ -280,7 +281,7 @@ class SequenceComposite < HtmlGrid::DivComposite
     prd.href = @lookandfeel._event_url(:product, :uid => model.product.uid)
     [ super, div, prd, div,
       @lookandfeel.lookup(:sequence_details_for, 
-                          model.name.send(@session.language)) ]
+                          model.cascading_name(@session.language)) ]
   end
 end
 class Sequence < Template

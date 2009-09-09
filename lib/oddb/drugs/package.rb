@@ -15,6 +15,13 @@ module ODDB
       has_many :prices
       is_coded
       multilingual :name
+      def cascading_name(language)
+        str = name.send language
+        if str.nil? && sequence
+          str = sequence.name.send language
+        end
+        str
+      end
       def comparable?(other)
         return false unless(other.is_a?(Package))
         csizes = comparable_size.collect { |psize|

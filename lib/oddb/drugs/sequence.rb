@@ -18,6 +18,13 @@ module ODDB
       multilingual :name
       m10l_document :fachinfo
       m10l_document :patinfo
+      def cascading_name(language)
+        str = name.send language
+        if str.nil? && product
+          str = product.name.send language
+        end
+        str
+      end
       def comparable?(other)
         other.is_a?(Sequence) && compositions == other.compositions
       end
