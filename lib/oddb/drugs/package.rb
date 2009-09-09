@@ -18,7 +18,7 @@ module ODDB
       def cascading_name(language)
         str = name.send language
         if str.to_s.empty? && sequence
-          str = sequence.name.send language
+          str = sequence.cascading_name language
         end
         str
       end
