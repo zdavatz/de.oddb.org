@@ -30,6 +30,7 @@ module ODDB
     'invoice_server'      => 'druby://localhost:12375',
     'pharmacy_percentage' => 3,
     'pharmacy_premium'    => 8.1,
+    'http_proxies'        => [],
     'http_server'         => 'http://localhost',
     'log_file'            => STDERR,
     'log_file_export'     => STDERR,

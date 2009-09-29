@@ -39,11 +39,19 @@ class EncodedParser < WWW::Mechanize::Page
 end
 class RenewableAgent < SimpleDelegator
   def initialize agent
-    agent.pluggable_parser.html = EncodedParser
     super
+    renew!
   end
   def renew!
     agent = __getobj__.class.new
+    proxies = ODDB.config.http_proxies
+    host, port = proxies.at rand(proxies.size)
+    if host
+      ODDB.logger.debug('PharmNet') {
+        "Using proxy server #{host}:#{port}"
+      }
+      agent.set_proxy host, port
+    end
     agent.pluggable_parser.html = EncodedParser
     __setobj__ agent
   end
@@ -1062,7 +1070,11 @@ class Import < Import
     end
   end
   def set_fi_only(form, status="YES")
-    form.radiobuttons.find { |b| b.name == "WFTYP" && b.value == status }.check
+    form.radiobuttons.each do |b|
+      if b.name == "WFTYP" && b.value == status
+        b.check
+      end
+    end
   end
   def suitable_data(comparison, selection, opts = {})
     max = 0
