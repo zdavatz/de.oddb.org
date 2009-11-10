@@ -45,7 +45,6 @@ end
 class Gkv < Import
   def initialize
     super
-    @system = DRb::DRbObject.new(nil, ODDB.config.server_url)
     @assigned_companies = 0
     @assigned_equivalences = 0
     @confirmed_pzns = {}
@@ -438,7 +437,6 @@ class Gkv < Import
   end
   def save(obj)
     obj.save
-    @system.invalidate obj.uid
   end
   def process_page rows
     rows.each do |row|

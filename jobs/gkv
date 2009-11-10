@@ -11,8 +11,15 @@ require 'oddb/persistence'
 require 'oddb/util'
 require 'encoding/character/utf-8'
 
-module ODDB
-  module Util
-    Updater.import_gkv
+system = DRb::DRbObject.new(nil, ODDB.config.server_url)
+DRb.start_service
+begin
+  system.peer_cache ODBA.cache
+  module ODDB
+    module Util
+      Updater.import_gkv
+    end
   end
+ensure
+  system.unpeer_cache ODBA.cache
 end

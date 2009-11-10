@@ -68,9 +68,6 @@ module ODDB
       def generate_dictionaries
         generate_dictionary('german', 'de_DE@euro')
       end
-      def invalidate(*odba_ids)
-        ODBA.cache.invalidate! *odba_ids
-      end
       def ipn(notification)
         Util::Ipn.process notification
         nil # don't return the invoice back across drb - it's not defined in yipn
@@ -82,6 +79,9 @@ module ODDB
       def logout(session)
         ODDB.auth.logout(session)
       rescue DRb::DRbError, RangeError, NameError
+      end
+      def peer_cache cache
+        ODBA.peer cache
       end
       def run_at(hour, &block)
         Thread.new {
@@ -101,6 +101,9 @@ module ODDB
       end
       def run_updater
         @updater = run_at(ODDB.config.update_hour) { Updater.run }
+      end
+      def unpeer_cache cache
+        ODBA.unpeer cache
       end
       def update_feedback_rss_feed
         async {
