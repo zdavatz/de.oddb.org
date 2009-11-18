@@ -17,25 +17,28 @@ module ODDB
       def Updater.import_dimdi_galenic_forms(date)
         file = date.strftime("darform_%d%m%y.xls")
         Import::Dimdi.download(file) { |io|
-          reported_import(Import::Dimdi::GalenicForm.new(date), io)
+          reported_import(Import::Dimdi::GalenicForm.new(date), io,
+                          :filetype => 'XLS')
         }
       end
       def Updater.import_dimdi_products(date)
         file = date.strftime("fb_%d%m%y.xls")
         Import::Dimdi.download(file) { |io|
           reported_import(Import::Dimdi::Product.new(date), io,
-                          "Update Festbeträge")
+                         :subject => "Update Festbeträge",
+                         :filetype => 'XLS')
         }
       end
       def Updater.import_dimdi_substances(date)
         file = date.strftime("wirkkurz_%d%m%y.xls")
         Import::Dimdi.download(file) { |io|
-          reported_import(Import::Dimdi::Substance.new(date), io)
+          reported_import(Import::Dimdi::Substance.new(date), io,
+                          :filetype => 'XLS')
         }
       end
       def Updater.import_fachinfos(term, opts = {})
         importer = Import::PharmNet::Import.new
-        _reported_import(importer) {
+        _reported_import(importer, :filetype => 'HTML') {
           importer.import_missing(WWW::Mechanize.new, term, opts)
         }
       rescue StandardError => error
@@ -45,7 +48,8 @@ module ODDB
         importer = Import::Gkv.new
         if url = importer.latest_url(WWW::Mechanize.new, opts)
           importer.download_latest url, opts do |fh|
-            reported_import(importer, fh, 'Zubef')
+            reported_import(importer, fh,
+                            :subject => 'Zubef', :filetype => 'PDF')
           end
         end
       end
@@ -60,7 +64,7 @@ module ODDB
                  :reparse => false, :retries => 3,
                  :retry_unit => 60 }.update opts
         importer = Import::PharmNet::Import.new
-        _reported_import(importer) {
+        _reported_import(importer, :filetype => 'HTML') {
           importer._import(WWW::Mechanize.new, Drugs::Sequence.all, opts)
         }
       rescue StandardError => error
@@ -68,12 +72,12 @@ module ODDB
       end
       def Updater.import_product_infos
         Import::Csv::ProductInfos.download_latest { |io|
-          reported_import(Import::Csv::ProductInfos.new, io)
+          reported_import(Import::Csv::ProductInfos.new, io, :filetype => 'CSV')
         }
       end
       def Updater.import_whocc_guidelines
         reported_import(Import::Whocc::Guidelines.new, 
-                        WWW::Mechanize.new)
+                        WWW::Mechanize.new, :filetype => 'HTML')
       end
       def Updater.report_fachinfos
         importer = Import::PharmNet::Import.new
@@ -84,7 +88,7 @@ module ODDB
       def Updater.reported_import(importer, io, subject=nil)
         _reported_import(importer, subject) { importer.import io }
       end
-      def Updater._reported_import(importer, subject=nil, &block)
+      def Updater._reported_import(importer, args={}, &block)
         lines = [
           sprintf("%s: %s#import", Time.now.strftime('%c'), importer.class)
         ]
@@ -96,8 +100,10 @@ module ODDB
         end
         raise
       ensure
-        subject = sprintf("%s: %s", 
-                          Time.now.strftime('%c'), subject || importer.class)
+        ft = args[:filetype]
+        fmt = ft ? "%s: %s (%s)" : "%s: %s"
+        subject = sprintf(fmt, Time.now.strftime('%c'),
+                          args[:subject] || importer.class, ft)
         Mail.notify_admins(subject, lines)
       end
       def Updater.run(today = Date.today)
