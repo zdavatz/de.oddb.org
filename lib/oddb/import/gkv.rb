@@ -30,7 +30,7 @@ class GkvHandler < Rpdf2txt::SimpleHandler
       ## ensure consistent row-length, so we can append additional substances
       #  to the tail
       data[9] ||= nil
-      @rows.push data
+      @rows.push data.strip
     else
       @rows.push :doubtful
     end
