@@ -9,7 +9,7 @@ require 'oddb/util/job'
 module ODDB
   module Util
     Job.run do
-      Updater.import_gkv
+      Updater.import_pharmnet
     end
   end
 end
