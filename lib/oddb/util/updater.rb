@@ -117,7 +117,9 @@ module ODDB
         end
         case today.day
         when 1
-          import_pharmnet
+          IO.popen File.join(ODDB.config.oddb_dir, 'jobs/pharmnet') do |io|
+            # wait for importer to exit
+          end
         when 15
           update_prices
         end
