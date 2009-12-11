@@ -4,12 +4,26 @@ $: << File.expand_path('../lib', File.dirname(__FILE__))
 $KCODE = 'u'
 
 require 'rubygems'
+require 'optparse'
 require 'oddb/util/job'
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: #$0 [options]"
+
+  opts.on("-r", "--resume PRODUCT", "Resume at PRODUCT") do |product|
+    options[:resume] = product
+  end
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end.parse!
 
 module ODDB
   module Util
     Job.run do
-      Updater.import_pharmnet
+      Updater.import_pharmnet options
     end
   end
 end
