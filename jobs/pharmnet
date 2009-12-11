@@ -5,13 +5,12 @@ $KCODE = 'u'
 
 require 'rubygems'
 require 'optparse'
-require 'oddb/util/job'
 
 options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: #$0 [options]"
 
-  opts.on("-r", "--resume PRODUCT", "Resume at PRODUCT") do |product|
+  opts.on("-r", "--resume \"PRODUCT\"", "Resume at PRODUCT") do |product|
     options[:resume] = product
   end
   opts.on_tail("-h", "--help", "Show this message") do
@@ -19,6 +18,8 @@ OptionParser.new do |opts|
     exit
   end
 end.parse!
+
+require 'oddb/util/job'
 
 module ODDB
   module Util
