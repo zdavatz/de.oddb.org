@@ -6,23 +6,23 @@ $KCODE = 'u'
 require 'rubygems'
 require 'optparse'
 
-options = {}
-OptionParser.new do |opts|
-  opts.banner = "Usage: #$0 [options]"
-
-  opts.on("-r", "--resume \"PRODUCT\"", "Resume at PRODUCT") do |product|
-    options[:resume] = product
-  end
-  opts.on_tail("-h", "--help", "Show this message") do
-    puts opts
-    exit
-  end
-end.parse!
-
-require 'oddb/util/job'
-
 module ODDB
   module Util
+    options = {}
+    OptionParser.new do |opts|
+      opts.banner = "Usage: #$0 [options]"
+
+      opts.on("-r", "--resume \"PRODUCT\"", "Resume at PRODUCT") do |product|
+        options[:resume] = product
+      end
+      opts.on_tail("-h", "--help", "Show this message") do
+        puts opts
+        exit
+      end
+    end.parse!
+
+    require 'oddb/util/job'
+
     Job.run do
       Updater.import_pharmnet options
     end
