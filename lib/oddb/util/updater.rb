@@ -112,12 +112,14 @@ module ODDB
           import_dimdi_galenic_forms(date)
           import_dimdi_products(date)
         end
-        IO.popen File.join(ODDB.config.oddb_dir, 'jobs/gkv') do |io|
+        cmd = 'jobs/gkv log_file=log/gkv.log'
+        IO.popen File.join(ODDB.config.oddb_dir, cmd) do |io|
           # wait for importer to exit
         end
         case today.day
         when 1
-          IO.popen File.join(ODDB.config.oddb_dir, 'jobs/pharmnet') do |io|
+          cmd = 'jobs/pharmnet log/pharmnet.log'
+          IO.popen File.join(ODDB.config.oddb_dir, cmd) do |io|
             # wait for importer to exit
           end
         when 15
