@@ -118,7 +118,7 @@ module ODDB
         end
         case today.day
         when 1
-          cmd = 'jobs/pharmnet log/pharmnet.log'
+          cmd = 'jobs/pharmnet log_file=log/pharmnet.log'
           IO.popen File.join(ODDB.config.oddb_dir, cmd) do |io|
             # wait for importer to exit
           end
