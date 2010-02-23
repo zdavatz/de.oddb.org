@@ -4,5 +4,5 @@
 require 'drb'
 
 module ODDB
-  @exporter = DRb::DRbObject.new(nil, @config.server_url_export)
+  Exporter = DRb::DRbObject.new(nil, @config.server_url_export)
 end

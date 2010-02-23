@@ -64,6 +64,9 @@ module ODDB
     class Multilingual
       include OddbUri
     end
+    class M10lDocument
+      export '@canonical'
+    end
   end
   module Business
     class Company
@@ -111,11 +114,45 @@ module ODDB
       export '@group'
     end
   end
+  module Text
+    class Document
+      export '@chapters', '@date', '@source'
+    end
+    class Chapter
+      include OddbUri
+    end
+    class Paragraph
+      include OddbUri
+      def to_yaml_properties
+        [ '@text', '@formats' ]
+      end
+    end
+    class Picture
+      include OddbUri
+    end
+    class Table
+      include OddbUri
+    end
+    class Format
+      include OddbUri
+    end
+  end
   module Export
     module Yaml
 class Drugs
   def export(io)
     ODDB::Drugs::Product.all { |product| io.puts product.to_yaml }
+    nil
+  end
+end
+class Fachinfos
+  def export(io)
+    fachinfos = []
+    ODDB::Drugs::Sequence.all do |seq| fachinfos.push seq.fachinfo end
+    fachinfos.delete_if do |fachinfo| fachinfo.empty? end
+    fachinfos.uniq!
+    fachinfos.each do |fachinfo| io.puts fachinfo.to_yaml end
+    nil
   end
 end
     end

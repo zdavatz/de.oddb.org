@@ -31,10 +31,23 @@ module ODDB
           }
         end
       end
+      def Server.remote_export_fachinfo_yaml
+        if(uri = ODDB.config.remote_databases.first)
+          remote = DRb::DRbObject.new(nil, uri)
+          safe_export(Export::Yaml::Fachinfos) { |exporter|
+            remote.remote_export("fachinfos.de.oddb.yaml") { |path|
+              File.open(path, 'w') { |io| exporter.export(io) }
+            }
+          }
+        end
+      end
       def Server.run(today = Date.today)
         on_monthday(1, today) {
           remote_export_chde
         }
+        on_monthday(2, today) do
+          remote_export_fachinfo_yaml
+        end
       end
       def Server.on_monthday(day, today = Date.today, &block)
         if(today.day == day)
