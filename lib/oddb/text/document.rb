@@ -8,7 +8,7 @@ module ODDB
     ## to migrate Document to be a subclass of Model:
     #  Drugs::Sequence.all { |seq| need = false; [:fachinfo, :patinfo].each { |key| if(ml = seq.instance_variable_get("@#{key}")); need = true; seq.instance_variable_set("@#{key}", nil); if(doc = ml.de); info = seq.send(key); if(prev = doc.instance_variable_get('@previous_sources')); info.previous_sources[:de] = prev; doc.instance_eval { remove_instance_variable('@previous_sources') }; end; if((source = doc.source) && (saved = Text::Document.find_by_source(source))); doc = saved; end; info.de = doc; info.save; info.de.save; end; end }; seq.save if need }
     class Document < Model
-      attr_accessor :source, :date
+      attr_accessor :source, :date, :title
       attr_reader :chapters
       def initialize
         @chapters = []

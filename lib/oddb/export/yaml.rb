@@ -116,7 +116,7 @@ module ODDB
   end
   module Text
     class Document
-      export '@chapters', '@date', '@source'
+      export '@title', '@chapters', '@date', '@source'
     end
     class Chapter
       include OddbUri
@@ -129,6 +129,10 @@ module ODDB
     end
     class Picture
       include OddbUri
+      def to_yaml_map(map)
+        super
+        map.add('path', path)
+      end
     end
     class Table
       include OddbUri
@@ -148,8 +152,18 @@ end
 class Fachinfos
   def export(io)
     fachinfos = []
-    ODDB::Drugs::Sequence.all do |seq| fachinfos.push seq.fachinfo end
-    fachinfos.delete_if do |fachinfo| fachinfo.empty? end
+    ODDB::Drugs::Sequence.all do |seq|
+      fachinfo = seq.fachinfo
+      # export sequence names as title
+      unless fachinfo.empty?
+        fachinfo.canonical.each do |key, doc|
+          if (doc = fachinfo.send(key)) && (name = seq.cascading_name(key))
+            doc.title = name
+          end
+        end
+        fachinfos.push fachinfo
+      end
+    end
     fachinfos.uniq!
     fachinfos.each do |fachinfo| io.puts fachinfo.to_yaml end
     nil
