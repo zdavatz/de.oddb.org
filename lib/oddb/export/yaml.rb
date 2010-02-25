@@ -152,20 +152,30 @@ end
 class Fachinfos
   def export(io)
     fachinfos = []
+    ## Documents may be garbage-collected during this export. That's why we'll
+    #  keep names in a separate table on the stack, and assign them just before
+    #  calling #to_yaml
+    names = {}
     ODDB::Drugs::Sequence.all do |seq|
       fachinfo = seq.fachinfo
       # export sequence names as title
       unless fachinfo.empty?
+        lnms = names[fachinfo.oid] ||= {}
         fachinfo.canonical.each do |key, doc|
           if (doc = fachinfo.send(key)) && (name = seq.cascading_name(key))
-            doc.title = name
+            lnms[key] = name
           end
         end
         fachinfos.push fachinfo
       end
     end
     fachinfos.uniq!
-    fachinfos.each do |fachinfo| io.puts fachinfo.to_yaml end
+    fachinfos.each do |fachinfo|
+      fachinfo.canonical.each do |key, doc|
+        doc.title = names[fachinfo.oid][key]
+      end
+      io.puts fachinfo.to_yaml
+    end
     nil
   end
 end
