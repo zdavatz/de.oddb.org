@@ -112,18 +112,20 @@ module ODDB
           import_dimdi_galenic_forms(date)
           import_dimdi_products(date)
         end
-        cmd = 'jobs/gkv log_file=log/gkv.log'
-        IO.popen File.join(ODDB.config.oddb_dir, cmd) do |io|
-          # wait for importer to exit
-        end
+        run_logged_job 'gkv'
         case today.day
         when 1
-          cmd = 'jobs/pharmnet log_file=log/pharmnet.log'
-          IO.popen File.join(ODDB.config.oddb_dir, cmd) do |io|
-            # wait for importer to exit
-          end
+          run_logged_job 'pharmnet'
         when 15
           update_prices
+        end
+      end
+      def Updater.run_logged_job job
+        dir = ODDB.config.oddb_dir
+        cmd = File.join dir, 'jobs', job
+        log = File.join dir, 'log', job
+        IO.popen "#{cmd} log_file=#{log}" do |io|
+          # wait for importer to exit
         end
       end
       def Updater.update_prices(packages = Drugs::Package.all,
