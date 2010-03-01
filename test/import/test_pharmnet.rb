@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # Import::TestPharmNet -- de.oddb.org -- 15.10.2007 -- hwyss@ywesee.com
 
+gem 'mechanize', '< 0.7'
+
 $: << File.expand_path('..', File.dirname(__FILE__))
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
@@ -214,9 +216,9 @@ class TestImport < Test::Unit::TestCase
       name = case argument
              when "http://www.pharmnet-bund.de/dynamic/de/am-info-system/index.html"
                'index.html'
-             when "http://gripsdb.dimdi.de/websearch/servlet/Gate#__DEFANCHOR__"
+             when "https://portal.dimdi.de/websearch/servlet/Gate#__DEFANCHOR__"
                'gate.html'
-             when "/websearch/servlet/FlowController/AcceptFZK?uid=000002"
+             when "/websearch/servlet/FlowController/AcceptFZK?uid=0"
                'search.html'
              when "/websearch/servlet/FlowController/DisplaySearchForm?uid=000002"
                'search_filtered.html'
@@ -245,7 +247,7 @@ class TestImport < Test::Unit::TestCase
     agent = setup_search
     form = @importer.get_search_form(agent)
     assert_instance_of(WWW::Mechanize::Form, form)
-    assert_equal("/websearch/servlet/FlowController/Search?uid=000002", 
+    assert_equal("/websearch/servlet/FlowController/Search?uid=1", 
                  form.action)
     radio = form.radiobuttons.find { |b| b.name == "WFTYP" && b.value == "YES" }
     @importer.set_fi_only(form)

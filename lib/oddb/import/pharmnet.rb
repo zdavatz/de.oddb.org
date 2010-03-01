@@ -550,11 +550,6 @@ class Import < Import
     page = form.submit
     link = page.links.find { |l| /(?<!nicht )akzeptieren/i.match l.text }
     page = link.click
-    link = page.links.find { |l| /filter einblenden/i.match l.text }
-    form = page.form("search_form")
-    form.field("setExpressions").value = "addLimits"
-    form.action = link.href
-    page = form.submit
     form = page.form("search_form")
     link = page.links.find { |l| l.attributes["id"] == 'goME' }
     form.action = link.href

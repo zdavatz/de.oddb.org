@@ -64,7 +64,7 @@ module ODDB
                  :reparse => false, :retries => 3,
                  :retry_unit => 60 }.update opts
         importer = Import::PharmNet::Import.new
-        _reported_import(importer, :filetype => 'HTML') {
+        _reported_import(importer, {:filetype => 'HTML'}, {:skip_totals => true}) {
           importer._import(WWW::Mechanize.new, Drugs::Sequence.all, opts)
         }
       rescue StandardError => error
@@ -88,17 +88,22 @@ module ODDB
       def Updater.reported_import(importer, io, subject=nil)
         _reported_import(importer, subject) { importer.import io }
       end
-      def Updater._reported_import(importer, args={}, &block)
+      def Updater._reported_import(importer, args={}, error_args={}, &block)
         lines = [
           sprintf("%s: %s#import", Time.now.strftime('%c'), importer.class)
         ]
         lines.concat block.call
-      rescue StandardError => err
+      rescue Exception => err
         lines.push(err.class.to_s, err.message, *err.backtrace)
         if importer.respond_to?(:report)
-          lines.concat importer.report rescue [$!.message]
+          report = if importer.method(:report).arity == 0
+                     importer.report
+                   else
+                     importer.report(error_args)
+                   end rescue [$!.message]
+          lines.concat report
         end
-        raise
+        raise err
       ensure
         ft = args[:filetype]
         fmt = ft ? "%s: %s (%s)" : "%s: %s"
