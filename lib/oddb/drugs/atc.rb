@@ -40,7 +40,7 @@ module ODDB
         end
       end
       def products
-        sequences.collect { |sequence| sequence.product }.uniq
+        sequences.collect { |sequence| sequence.product }.compact.uniq
       end
       def to_s
         @code.to_s
