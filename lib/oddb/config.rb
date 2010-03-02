@@ -54,6 +54,8 @@ module ODDB
       'org.oddb.de.view.1'      =>   5,
     },
     'remote_databases'    => [],
+    'remote_export_dir'   => nil,
+    'remote_export_server'=> 'druby://localhost:10005',
     'run_exporter'        => true,
     'run_updater'         => true,
     'server_name'         => 'de.oddb.org',

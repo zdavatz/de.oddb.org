@@ -11,35 +11,30 @@ require 'oddb/util/mail'
 module ODDB
   module Export
     module Server
-      def Server.remote_export_chde
-        if(uri = ODDB.config.remote_databases.first)
+      def Server.remote_export exporter_class, file_name, *args
+        if (uri = ODDB.config.remote_export_server) \
+          && (dir = ODDB.config.remote_export_dir)
           remote = DRb::DRbObject.new(nil, uri)
-          safe_export(Export::Xls::ComparisonDeCh) { |exporter|
-            remote.remote_export("chde.xls") { |path|
-              File.open(path, 'w+') { |io| exporter.export(uri, io) }
-            }
-          }
+          safe_export(exporter_class) do |exporter|
+            remote.remote_safe_export(dir, file_name) do |path|
+              File.open(path, 'w') do |io|
+                args.push io
+                exporter.export *args
+              end
+            end
+          end
+        end
+      end
+      def Server.remote_export_chde
+        if uri = ODDB.config.remote_databases.first
+          remote_export Export::Xls::ComparisonDeCh, 'chde.xls', uri
         end
       end
       def Server.remote_export_yaml
-        if(uri = ODDB.config.remote_databases.first)
-          remote = DRb::DRbObject.new(nil, uri)
-          safe_export(Export::Yaml::Drugs) { |exporter|
-            remote.remote_export("de.oddb.yaml") { |path|
-              File.open(path, 'w') { |io| exporter.export(io) }
-            }
-          }
-        end
+        remote_export Export::Yaml::Drugs, 'de.oddb.yaml'
       end
       def Server.remote_export_fachinfo_yaml
-        if(uri = ODDB.config.remote_databases.first)
-          remote = DRb::DRbObject.new(nil, uri)
-          safe_export(Export::Yaml::Fachinfos) { |exporter|
-            remote.remote_export("fachinfos.de.oddb.yaml") { |path|
-              File.open(path, 'w') { |io| exporter.export(io) }
-            }
-          }
-        end
+        remote_export Export::Yaml::Fachinfos, 'fachinfos.de.oddb.yaml'
       end
       def Server.run(today = Date.today)
         on_monthday(1, today) {
