@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 
 $: << File.expand_path('../lib', File.dirname(__FILE__))
+$KCODE = 'u'
 
+require 'rubygems'
 require 'oddb/config'
 require 'oddb/drugs'
 require 'oddb/util'
