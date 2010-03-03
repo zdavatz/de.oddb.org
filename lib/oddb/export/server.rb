@@ -4,6 +4,7 @@
 require 'date'
 require 'drb'
 require 'oddb/config'
+require 'oddb/export/csv'
 require 'oddb/export/xls'
 require 'oddb/export/yaml'
 require 'oddb/util/mail'
@@ -11,6 +12,12 @@ require 'oddb/util/mail'
 module ODDB
   module Export
     module Server
+      def Server.export_csv
+        pacs = Drugs::Package.all
+        components = [ :pzn, :product, :active_agents, :size, :price_exfactory,
+                       :price_public, :price_festbetrag, :ddd_prices, :company ]
+        remote_export Csv::Packages, 'de.oddb.csv', pacs, components, :de
+      end
       def Server.remote_export exporter_class, file_name, *args
         if (uri = ODDB.config.remote_export_server) \
           && (dir = ODDB.config.remote_export_dir)

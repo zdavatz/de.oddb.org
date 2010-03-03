@@ -18,8 +18,8 @@ class DownloadExport < HtmlGrid::Component
     }
   end
   def to_html(context)
-    Export::Csv::Packages.export @model, @lookandfeel.csv_components, 
-                                 @session.language
+    Export::Csv::Packages.new.export @model, @lookandfeel.csv_components,
+                                     @session.language
   end
 end
       end

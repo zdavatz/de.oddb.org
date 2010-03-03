@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+$: << File.expand_path('../lib', File.dirname(__FILE__))
+
+require 'oddb/config'
+require 'oddb/drugs'
+require 'oddb/util'
+require 'oddb/export'
+require 'oddb/util/job'
+require 'encoding/character/utf-8'
+
+module ODDB
+  module Util
+    Job.run :readonly => true do
+      Export::Server.export_csv
+    end
+  end
+end

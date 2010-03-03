@@ -7,9 +7,9 @@ module ODDB
   module Export
     module Csv
 class Packages
-  def self.export(packages, components, language = :de)
+  def export(packages, components, language = :de, io=nil)
     atcs = partition packages
-    FasterCSV.generate { |csv|
+    str = FasterCSV.generate { |csv|
       atcs.each { |list|
         csv << atc_line(list.atc, language)
         list.each { |pac|
@@ -17,8 +17,13 @@ class Packages
         }
       }
     }
+    if io
+      io << str
+    else
+      str
+    end
   end
-  def self.atc_line(atc, language)
+  def atc_line(atc, language)
     if atc
       result = [atc.code]
       if name = atc.name
@@ -29,10 +34,10 @@ class Packages
       ['ATC-Code nicht bekannt']
     end
   end
-  def self.active_agents(package, lang)
+  def active_agents(package, lang)
     package.active_agents.join('|')
   end
-  def self.ddd_prices(package, language)
+  def ddd_prices(package, language)
     ddds = []
     package.ddds.each_with_index { |ddd, idx|
       ddds.push sprintf("%s (%s)", package.dose_price(ddd.dose), 
@@ -40,7 +45,7 @@ class Packages
     }
     ddds.join '|'
   end
-  def self.package_line(package, components, language)
+  def package_line(package, components, language)
     components.collect { |key|
       value = if respond_to?(key)
                 self.send key, package, language
@@ -55,7 +60,7 @@ class Packages
       end
     }
   end
-  def self.partition(packages)
+  def partition(packages)
     atcs = {}
     packages.each { |package|
       code = (atc = package.atc) ? atc.code : 'X'
@@ -65,22 +70,22 @@ class Packages
       packages
     }
   end
-  def self.price_exfactory(package, lang)
+  def price_exfactory(package, lang)
     package.price(:exfactory)
   end
-  def self.price_festbetrag(package, lang)
+  def price_festbetrag(package, lang)
     package.price(:festbetrag)
   end
-  def self.price_public(package, lang)
+  def price_public(package, lang)
     package.price(:public)
   end
-  def self.product(package, language)
+  def product(package, language)
     (product = package.product) && product.name
   end
-  def self.pzn(package, lang)
+  def pzn(package, lang)
     package.code(:cid)
   end
-  def self.size(package, language)
+  def size(package, language)
     package.parts.collect { |part| part.to_s(language) }.join('+')
   end
 end
