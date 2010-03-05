@@ -2,11 +2,13 @@
 # Html::State::Drugs::Global -- de.oddb.org -- 27.10.2006 -- hwyss@ywesee.com
 
 require 'oddb/html/state/global_predefine'
+require 'oddb/html/state/download'
 require 'oddb/html/state/drugs/atc_browser'
 require 'oddb/html/state/drugs/download_export'
 require 'oddb/html/state/drugs/init'
 require 'oddb/html/state/drugs/login'
 require 'oddb/html/state/limit'
+require 'oddb/html/state/register_download'
 require 'oddb/html/state/register_export'
 require 'oddb/html/state/register_poweruser'
 require 'oddb/html/state/paypal/checkout'
@@ -21,6 +23,7 @@ class Global < SBSM::State
   LIMIT = false
   GLOBAL_MAP = {
     :atc_browser => Drugs::AtcBrowser,
+    :downloads   => Drugs::Downloads,
     :login       => Drugs::Login,
   }
   def compare
@@ -29,7 +32,10 @@ class Global < SBSM::State
     end
   end
   def _download(file)
-    if match = /(.+)_(.+).csv/.match(file)
+    path = File.join ODDB.config.export_dir, file
+    if File.exist?(path)
+      Download.new(@session, path)
+    elsif match = /(.+)_(.+).csv/.match(file)
       packages = _search_local match[1].tr('-', ' '), match[2]
       packages.filename = file
       Drugs::DownloadExport.new(@session, packages)
@@ -89,6 +95,32 @@ class Global < SBSM::State
       _patinfo(uid)
     end
   end
+  def proceed_download
+    keys = [:downloads, :months, :compression]
+    input = user_input keys, keys
+    compression = input[:compression][/[^_]+$/]
+    unless error?
+      invoice = ODDB::Business::Invoice.new
+      input[:downloads].each do |filename, status|
+        if status == '1'
+          months = input[:months][filename]
+          prices = ODDB.config.prices["org.oddb.de.download.#{months}"] || {}
+          price = prices[filename].to_f / months.to_i
+          item = invoice.add :download, filename, months, '', price,
+                             :compression => compression
+          unless price > 0
+            @errors.store "months[#{filename}]",
+                          create_error(:e_empty_result, :months, '0')
+          end
+        end
+      end
+    end
+    if error?
+      self
+    else
+      State::RegisterDownload.new(@session, invoice)
+    end
+  end
   def proceed_export
     query = @session.persistent_user_input(:query)
     dstype = @session.persistent_user_input(:dstype) || ODDB.config.default_dstype
@@ -99,7 +131,7 @@ class Global < SBSM::State
       Drugs::DownloadExport.new @session, result
     else
       lines = result.size
-      price = ODDB.config.prices["org.oddb.de.export.cvs"].to_f
+      price = ODDB.config.prices["org.oddb.de.export.csv"].to_f
       unless(lines > 0 && price > 0)
         @errors.store :days, create_error(:e_empty_result, :query, query)
         self

@@ -100,6 +100,49 @@ module PayPal
       input
     end
   end
+  class ExtendedRegisterForm < HtmlGrid::Form
+    include HtmlGrid::ErrorMessage
+    COMPONENTS = {
+      [0,0]  =>  :email,
+      [0,1]  =>  :pass,
+      [3,1]  =>  :confirm_pass,
+      [0,2]  =>  :salutation,
+      [0,3]  =>  :name_last,
+      [0,4]  =>  :name_first,
+      [0,5]  =>  :company_name,
+      [0,6]  =>  :address,
+      [0,7]  =>  :postal_code,
+      [0,8]  =>  :city,
+      [0,9]  =>  :phone,
+      [0,10] =>  :business_area,
+      [1,11] =>  :submit,
+    }
+    CSS_CLASS = 'invoice'
+    EVENT = :checkout
+    LABELS = true
+    LEGACY_INTERFACE = false
+    SYMBOL_MAP = {
+      :business_area=>  HtmlGrid::Select,
+      :salutation   =>  HtmlGrid::Select,
+      :pass         =>  HtmlGrid::Pass,
+      :confirm_pass =>  HtmlGrid::Pass,
+    }
+    def init
+      @model = @session.user
+      super
+      error_message
+    end
+    def email(model, session=@session)
+      input = HtmlGrid::InputText.new(:email, model, @session, self)
+      url = @lookandfeel._event_url(:ajax_autofill, {:email => nil})
+      if(@session.logged_in?)
+        input.set_attribute('disabled', true)
+      else
+        input.set_attribute('onChange', "autofill(this.form, 'email', '#{url}');")
+      end
+      input
+    end
+  end
 end
     end
   end

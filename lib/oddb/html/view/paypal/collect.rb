@@ -15,14 +15,24 @@ class ReturnDownloads < HtmlGrid::List
 	LEGACY_INTERFACE = false
 	OMIT_HEADER = true
 	STRIPED_BG = false
+  include State::PayPal::Download
 	def download_link(model)
-		if(model.expired?)
+    invoice = @container.model
+		if model.expired?
 			time = model.expiry_time
 			timestr = (time) \
 				? time.strftime(@lookandfeel.lookup(:time_format_long)) \
 				: @lookandfeel.lookup(:paypal_e_invalid_time)
 			@lookandfeel.lookup(:paypal_e_expired, model.text, timestr)
-    elsif(@session.allowed?('view', ODDB.config.auth_domain))
+    elsif @session.allowed?('download',
+                            "#{ODDB.config.auth_domain}.#{model.text}") \
+            || invoice.status == 'completed'
+      link = HtmlGrid::Link.new(:paypal_download, model, @session, self)
+      args = [ :invoice, invoice.id,
+               :file, compressed_download(model)]
+      link.href = link.value = @lookandfeel._event_url(:collect, args)
+      link
+    elsif @session.allowed?('view', ODDB.config.auth_domain)
       @lookandfeel.lookup(:paypal_explain_poweruser)
     else
 			link = HtmlGrid::Link.new(:paypal_explain_login1, model, @session, self)

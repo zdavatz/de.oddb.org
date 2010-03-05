@@ -11,6 +11,7 @@ require 'oddb/html/state/drugs/ajax/package_infos'
 require 'oddb/html/state/drugs/ajax/remote_infos'
 require 'oddb/html/state/drugs/atc_guidelines'
 require 'oddb/html/state/drugs/compare'
+require 'oddb/html/state/drugs/downloads'
 require 'oddb/html/state/drugs/init'
 require 'oddb/html/state/drugs/login'
 require 'oddb/html/state/drugs/fachinfo'
@@ -90,7 +91,7 @@ module Events
     super && !@session.allowed?('view', ODDB.config.auth_domain)
   end
   def navigation
-    [:products, :atc_browser].concat(super)
+    [:products, :atc_browser, :downloads].concat(super)
   end
   def _package(code)
     if(package = _package_by_code(code))

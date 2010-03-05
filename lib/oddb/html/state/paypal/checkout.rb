@@ -5,6 +5,7 @@ require 'oddb/html/state/global_predefine'
 require 'oddb/html/state/drugs/download_export'
 require 'oddb/html/state/login'
 require 'oddb/html/state/paypal/collect'
+require 'oddb/html/state/paypal/download'
 require 'oddb/html/state/paypal/redirect'
 require 'oddb/html/util/known_user'
 require 'oddb/html/view/ajax/json'
@@ -20,6 +21,7 @@ class AjaxCheckout < Global
 end
 module Checkout
   include State::LoginMethods
+  include Download
   def ajax_autofill
     email = @session.user_input(:email)
     prefs = {}
@@ -67,41 +69,6 @@ module Checkout
   end
   def checkout_keys
     checkout_mandatory()
-  end
-  def collect
-    if(@session.is_crawler?)
-      trigger :home
-    else
-      invoice = Business::Invoice.find_by_id(@session.user_input(:invoice))
-      state = PayPal::Collect.new(@session, invoice)
-      # since the permissions of the current User may have changed, we
-      # need to reconsider his viral modules
-      if((user = @session.user).is_a?(Util::KnownUser))
-        reconsider_permissions(user)
-      end
-      if invoice
-        item = invoice.items.first
-        case item.type
-        when :export
-          if @session.allowed?('download', "#{ODDB.config.auth_domain}.#{item.text}") \
-            || invoice.status == 'completed'
-            extend State::Drugs::Events
-            state = _download item.text
-          else
-            ## wait for ipn
-          end
-        else
-          if(@session.allowed?('view', ODDB.config.auth_domain))
-            if(des = @session.desired_state)
-              state = des
-            else
-              state.extend Drugs::Events
-            end
-          end
-        end
-      end
-      state
-    end
   end
   def create_user(input)
     hash = input.dup 

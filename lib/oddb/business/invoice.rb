@@ -10,11 +10,11 @@ module ODDB
       attr_accessor :yus_name, :ydim_id, :status, :ipn, :currency
       attr_reader :time
       class Item
-        attr_reader :type, :text, :quantity, :price, :vat, :time
+        attr_reader :type, :text, :quantity, :price, :vat, :time, :data
         attr_accessor :expiry_time
-        def initialize(type, text, quantity, unit, price)
-          @type, @text, @quantity, @unit, @price \
-            = type, text, quantity.to_i, unit.to_s, price.to_f
+        def initialize(type, text, quantity, unit, price, data={})
+          @type, @text, @quantity, @unit, @price, @data \
+            = type, text, quantity.to_i, unit.to_s, price.to_f, data
           @time = Time.now
         end
         def expired?

@@ -169,8 +169,10 @@ div#home-search {
 div#home-search input[type=text] {
   width: 200px;
 }
-div#legend, tr.groupheader, div.groupheader {
+div#legend, tr.groupheader, div.groupheader, th.groupheader {
   background-color: #cf9;
+  color: black;
+  font-weight: normal;
 }
 div#legend table {
   margin: 2px;
@@ -219,6 +221,9 @@ div#navigation a:visited:hover,
 div#navigation a:link:hover,
 th a, th a:visited:hover, th a:link:hover {
   color: blue;
+}
+div.padded {
+  padding: 4px;
 }
 div.pager {
   float: right;
@@ -362,6 +367,11 @@ table.invoice.items {
 }
 td {
   padding: 4px;
+}
+td input {
+  vertical-align: middle;
+  margin: 0px;
+  padding: 0px;
 }
 td#alphaheader, div.divider {
   padding: 4px;

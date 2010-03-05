@@ -41,8 +41,21 @@ module ODDB
           lnf.lookup(:poweruser_mail_salut, lnf.lookup(yus[:salutation]), 
                      yus[:name_last]),
         ]
+        instructed = false
         invoice.items.each { |item|
           case item.type
+          when :download
+            unless instructed
+              parts.push lnf.lookup(:download_mail_body)
+              parts.push lnf.lookup(:download_mail_instr)
+            end
+            instructed = true
+            parts.push lnf._event_url(:collect, [:invoice, invoice.id,
+                                                 :file, item.text])
+          when :export
+            parts.push lnf.lookup(:download_export_mail_body)
+            parts.push lnf.lookup(:download_export_mail_instr)
+            parts.push lnf._event_url(:collect, [:invoice, invoice.id])
           when :poweruser
             days = item.quantity
             duration = (days == 1) \
@@ -51,10 +64,6 @@ module ODDB
             parts.push lnf.lookup(:poweruser_mail_body)
             parts.push lnf.lookup(:poweruser_mail_instr,
                                   duration, lnf._event_url(:login))
-          when :export
-            parts.push lnf.lookup(:download_export_mail_body)
-            parts.push lnf.lookup(:download_export_mail_instr)
-            parts.push lnf._event_url(:collect, [:invoice, invoice.id])
           end
         }
         mpart.body = parts.join("\n\n")

@@ -8,6 +8,7 @@ require 'oddb/export/csv'
 require 'oddb/export/xls'
 require 'oddb/export/yaml'
 require 'oddb/util/mail'
+require 'zip/zip'
 
 module ODDB
   module Export
@@ -16,39 +17,25 @@ module ODDB
         pacs = Drugs::Package.all
         components = [ :pzn, :product, :active_agents, :size, :price_exfactory,
                        :price_public, :price_festbetrag, :ddd_prices, :company ]
-        remote_export Csv::Packages, 'de.oddb.csv', pacs, components, :de
+        safe_export Csv::Packages, 'de.oddb.csv', pacs, components, :de
       end
-      def Server.remote_export exporter_class, file_name, *args
-        if (uri = ODDB.config.remote_export_server) \
-          && (dir = ODDB.config.remote_export_dir)
-          remote = DRb::DRbObject.new(nil, uri)
-          safe_export(exporter_class) do |exporter|
-            remote.remote_safe_export(dir, file_name) do |path|
-              File.open(path, 'w') do |io|
-                args.push io
-                exporter.export *args
-              end
-            end
-          end
-        end
-      end
-      def Server.remote_export_chde
+      def Server.export_chde
         if uri = ODDB.config.remote_databases.first
-          remote_export Export::Xls::ComparisonDeCh, 'chde.xls', uri
+          safe_export Export::Xls::ComparisonDeCh, 'chde.xls', uri
         end
       end
-      def Server.remote_export_yaml
-        remote_export Export::Yaml::Drugs, 'de.oddb.yaml'
+      def Server.export_yaml
+        safe_export Export::Yaml::Drugs, 'de.oddb.yaml'
       end
-      def Server.remote_export_fachinfo_yaml
-        remote_export Export::Yaml::Fachinfos, 'fachinfos.de.oddb.yaml'
+      def Server.export_fachinfo_yaml
+        safe_export Export::Yaml::Fachinfos, 'fachinfos.de.oddb.yaml'
       end
       def Server.run(today = Date.today)
         on_monthday(1, today) {
-          remote_export_chde
+          export_chde
         }
         on_monthday(2, today) do
-          remote_export_fachinfo_yaml
+          export_fachinfo_yaml
         end
       end
       def Server.on_monthday(day, today = Date.today, &block)
@@ -56,17 +43,50 @@ module ODDB
           block.call
         end
       end
-      def Server.safe_export(exporter, &block)
-        block.call(exporter.new)
+      def Server.safe_export(exporter_class, name, *args, &block)
+        dir = ODDB.config.export_dir or raise "Please configure 'export_dir'"
+        FileUtils.mkdir_p(dir)
+        Tempfile.open(name, dir) { |fh|
+          exporter = exporter_class.new
+          args.push fh
+          exporter.export *args
+          fh.close
+          newpath = File.join(dir, name)
+          FileUtils.mv(fh.path, newpath)
+          FileUtils.chmod(0644, newpath)
+          compress(dir, name)
+        }
+        name
       rescue StandardError => err
         subject = sprintf("%s: %s", 
-                          Time.now.strftime('%c'), exporter)
+                          Time.now.strftime('%c'), exporter_class)
         lines = [
           sprintf("%s: %s#export", 
-                  Time.now.strftime('%c'), exporter)
+                  Time.now.strftime('%c'), exporter_class)
         ]
         lines.push(err.class, err.message, *err.backtrace)
         Util::Mail.notify_admins(subject, lines)
+      end
+      def Server.compress(dir, name)
+        FileUtils.mkdir_p(dir)
+        Dir.chdir(dir)
+        tmp_name = name + '.tmp'
+        gz_name = tmp_name + '.gz'
+        zip_name = tmp_name + '.zip'
+        gzwriter = 	Zlib::GzipWriter.open(gz_name)
+        zipwriter = Zip::ZipOutputStream.open(zip_name)
+        zipwriter.put_next_entry(name)
+        File.open(name, "r") { |fh|
+          fh.each { |line|
+            gzwriter << line
+            zipwriter.puts(line)
+          }
+        }
+        gzwriter.close if(gzwriter)
+        zipwriter.close if(zipwriter)
+        FileUtils.mv(gz_name, name + '.gz')
+        FileUtils.mv(zip_name, name + '.zip')
+        name
       end
     end
   end

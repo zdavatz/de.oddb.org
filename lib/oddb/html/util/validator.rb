@@ -11,6 +11,9 @@ class Validator < SBSM::Validator
               :item_good_experience, :item_good_impression, :item_recommended,
               :item_helps, ]
   ENUMS = {
+    :business_area => [ nil, 'ba_hospital', 'ba_pharma', 'ba_insurance',
+                        'ba_doctor', 'ba_health', 'ba_info' ],
+    :compression   => [ 'compr_zip', 'compr_gz' ],
     :display   => ['paged', 'grouped'],
     :dstype    => ['tradename', 'compare', 'substance', 'company',
                    'indication'],
@@ -22,26 +25,28 @@ class Validator < SBSM::Validator
       'price_public', 'product', 'size', 
     ],
   }
-  EVENTS = [ :ajax_autofill, :ajax_create_active_agent, :ajax_create_composition,
-             :ajax_create_part, :ajax_delete_active_agent, 
-             :ajax_delete_composition, :ajax_delete_part, :atc_assign,
-             :atc_browser, :collect, :ddd, :delete, :explain_ddd_price,
-             :explain_price, :fachinfo, :feedback, :checkout, :compare,
-             :compare_remote, :home, :login, :login_, :logout, :new_package,
-             :new_sequence, :package, :package_infos, :patinfo, :proceed_export,
+  EVENTS = [ :ajax_autofill, :ajax_create_active_agent,
+             :ajax_create_composition, :ajax_create_part,
+             :ajax_delete_active_agent, :ajax_delete_composition,
+             :ajax_delete_part, :atc_assign, :atc_browser, :checkout, :collect,
+             :compare, :compare_remote, :ddd, :delete, :downloads,
+             :explain_ddd_price, :explain_price, :fachinfo, :feedback, :home,
+             :login, :login_, :logout, :new_package, :new_sequence, :package,
+             :package_infos, :patinfo, :proceed_download, :proceed_export,
              :proceed_poweruser, :product, :products, :remote_infos, :search,
              :sequence, :sort, :update ]
   NUMERIC = [ :active_agent, :code_festbetragsgruppe,
               :code_festbetragsstufe, :composition, :days, :equivalence_factor,
-              :multi, :offset, :part, :price_exfactory, :price_festbetrag,
-              :price_public, :sequence, :size ]
+              :months, :multi, :offset, :part, :price_exfactory,
+              :price_festbetrag, :price_public, :sequence, :size  ]
   PATTERNS = {
     :atc => /[ABCGHJLMNPRSV](\d{2}([A-Z]([A-Z](\d{2})?)?)?)?/,
   }
-  STRINGS = [ :atc_name, :captcha, :chapter, :code, :code_cid, :company, :dose,
-              :fachinfo_url, :galenic_form, :invoice, :message, :name,
-              :name_first, :name_last, :patinfo_url, :pzn, :quantity, :query,
-              :registration, :substance, :uid, :unit ]
+  STRINGS = [ :address, :atc_name, :captcha, :chapter, :city, :code, :code_cid,
+              :company, :company_name, :dose, :downloads, :fachinfo_url, :file,
+              :galenic_form, :invoice, :message, :name, :name_first,
+              :name_last, :patinfo_url, :phone, :postal_code, :pzn, :quantity,
+              :query, :registration, :substance, :uid, :unit ]
   def page(value) 
     if(num = validate_numeric(:page, value))
       # pages are 1-based for the human user
