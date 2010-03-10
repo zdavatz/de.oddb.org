@@ -50,11 +50,13 @@ module ODDB
     'persistence'         => 'odba',
     'prices'              => { 
       'org.oddb.de.download.1'    => {
+        'chde.xls'                => 600,
         'de.oddb.csv'             => 500,
         'de.oddb.yaml'            => 600,
         'fachinfos.de.oddb.yaml'  => 800,
       },
       'org.oddb.de.download.12'   => {
+        'chde.xls'                => 2000,
         'de.oddb.csv'             => 2000,
         'de.oddb.yaml'            => 2500,
         'fachinfos.de.oddb.yaml'  => 1400,
