@@ -63,19 +63,14 @@ class DownloadList < View::List
     [radio, "EUR %4.2f" % model.price(months)]
   end
 end
-class DownloadsComposite < HtmlGrid::DivForm
+class DownloadsForm < HtmlGrid::DivForm
   COMPONENTS = {
-    [0,0] => InlineSearch,
-    [0,1] => "downloads",
-    [0,2] => :download_info,
-    [0,3] => DownloadList,
-    [0,4] => :compression_label,
-    [0,5] => :compression,
-    [0,6] => :submit,
+    [0,0] => DownloadList,
+    [0,1] => :compression_label,
+    [0,2] => :compression,
+    [0,3] => :submit,
   }
-  CSS_ID_MAP = [ 'result-search', 'title' ]
-  CSS_MAP = { 1 => 'result', 2 => 'explain', 4 => 'padded',
-              5 => 'padded', 6 => 'padded' }
+  CSS_MAP = { 1 => 'padded', 2 => 'padded', 3 => 'padded' }
   EVENT = :proceed_download
   SYMBOL_MAP = {
     :compression       => HtmlGrid::Select,
@@ -85,6 +80,16 @@ class DownloadsComposite < HtmlGrid::DivForm
     label.set_attribute 'for', :compression
     label
   end
+end
+class DownloadsComposite < HtmlGrid::DivComposite
+  COMPONENTS = {
+    [0,0] => InlineSearch,
+    [0,1] => "downloads",
+    [0,2] => :download_info,
+    [0,3] => DownloadsForm,
+  }
+  CSS_ID_MAP = [ 'result-search', 'title' ]
+  CSS_MAP = { 1 => 'result', 2 => 'explain' }
   def download_info model
     link = HtmlGrid::Link.new(:download_info, model, @session, self)
     link.href = 'http://wiki.oddb.org/wiki.php?pagename=ODDB.Stammdaten'
