@@ -14,8 +14,8 @@ class DownloadList < View::List
     [0,0] => :name,
     [1,0] => :price_1,
     [2,0] => :price_12,
-    [3,0] => :data_description,
-    [4,0] => :example,
+    [3,0] => :download_description,
+    [4,0] => :download_example,
   }
   DEFAULT_HEAD_CLASS = 'groupheader'
   STRIPED_BG = true
@@ -23,6 +23,18 @@ class DownloadList < View::List
   def init
     super
     error_message
+  end
+  def download_description model
+    link = HtmlGrid::Link.new :download_description, model, @session, self
+    path = File.join 'datadesc', model.name + '.txt'
+    link.href = @lookandfeel.resource_global(:downloads, path)
+    link
+  end
+  def download_example model
+    link = HtmlGrid::Link.new :download_example, model, @session, self
+    path = File.join 'examples', model.name
+    link.href = @lookandfeel.resource_global(:downloads, path)
+    link
   end
   def name model
     size = model.size

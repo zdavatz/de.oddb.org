@@ -119,6 +119,8 @@ class Lookandfeel < SBSM::Lookandfeel
       :contact_url                => 'http://wiki.oddb.org/wiki.php/ODDB/Kontakt',
       :create_active_agent        => 'Wirkstoff hinzufügen',
       :create_composition         => 'Bestandteil hinzufügen',
+      :download_description       => 'Datenbeschrieb',
+      :download_example           => 'Beispiel-Download',
       :days                       => 'Tage', 
       :days0                      => '', 
       :days1                      => ' Tage', 
@@ -466,6 +468,7 @@ Medikamenten-Preisvergleichs-Portal Deutschlands.
   RESOURCES = {
     :logo       => 'logo.png', 
     :css        => 'oddb.css',
+    :downloads  =>  'downloads',
     :javascript => 'javascript',
     :rss        => 'rss',
     :rss_img    => 'livemarks16.png',

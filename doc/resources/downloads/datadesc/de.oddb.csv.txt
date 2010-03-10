@@ -1,0 +1,43 @@
+Datenbeschrieb oddb.csv
+
+Version: 1.0
+Erstellt: 10.03.2010 (1.0) durch hwyss@ywesee.com
+
+## Struktur ##
+Encoding: UTF-8
+Record-Separator: \n
+Field-Separator:  ,
+
+Es kommen zwei Record-Arten vor: ATC-Record und Produkt-Record
+
+ATC-Record: alle folgenden Produkt-Records gehören zu diesem ATC-Code
+00: code              (1-7), NOT NULL           -> Atc-Code. siehe Glossar (AtcCode)
+01: de                (*)                       -> Bezeichnung
+
+Produkt-Record:
+00: pzn               (Integer)                 -> Pharmazentralnummer der Packung
+01: product           (*)                       -> Hauptname des Produkts
+02: active_agents     (*)                       -> Wirkstoffe, getrennt durch "|"
+03: size              (*)                       -> Packungsgrösse
+04: price_exfactory   (Float)                   -> Fabrikabgabepreis
+05: price_public      (Float)                   -> Apothekenverkaufspreis
+06: price_festbetrag  (Float)                   -> Festbetrag (DIMDI)
+07: ddd_prices        (*)                       -> Tages-dosis Preise, getrennt durch "|"
+08: company           (*)                       -> Name der Herstellerfirma
+
+## Glossar ##
+* AtcCode:
+Anatomisch-Therapeutisch-Chemischer Code der durch die WHO vergeben wird. Hat 5 Ebenen:
+Level 1: C       -> Anatomische Gruppierung,    z.B. A:       Alimentäres System und Stoffwechsel
+Level 2: +NN     -> Therapeutische Gruppierung, z.B. A02:     Mittel bei Säure bedingten Erkrankungen
+Level 3:   +C    -> Therapeutische Untergruppe, z.B. A02A:    Antacida
+Level 4:    +C   -> Chemische Gruppierung,      z.B. A02AA:   Magnesium-haltige Verbindungen
+Level 5:     +NN -> Wirkstoff(-Kombination),    z.B. A02AA01: Magnesiumcarbonat
+
+* Version
+Versionsnummern bezeichnen Änderungen nach dem Schema "Major.Minor.Documentation"
+- Major:         Komplett neuer Aufbau des Exports
+- Minor:         Kleinere Änderungen am Export (z.B. Refactoring von Adressangaben in eine Address2-Klasse)
+- Documentation: Ergänzungen und Änderungen im Datenbeschrieb, die keine Änderung des Exports als Ursache haben.
+Die komplette Version-History ist zu finden unter:
+http://scm.ywesee.com/?p=oddb.org;a=history;f=doc/resources/downloads/datadesc/oddb.csv.txt

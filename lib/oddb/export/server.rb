@@ -4,6 +4,7 @@
 require 'date'
 require 'drb'
 require 'oddb/config'
+require File.join('oddb', 'persistence', ODDB.config.persistence, 'export')
 require 'oddb/export/csv'
 require 'oddb/export/xls'
 require 'oddb/export/yaml'
@@ -19,7 +20,7 @@ module ODDB
                        :price_public, :price_festbetrag, :ddd_prices, :company ]
         safe_export Csv::Packages, 'de.oddb.csv', pacs, components, :de
       end
-      def Server.export_chde
+      def Server.export_chde_xls
         if uri = ODDB.config.remote_databases.first
           safe_export Export::Xls::ComparisonDeCh, 'chde.xls', uri
         end
@@ -32,7 +33,7 @@ module ODDB
       end
       def Server.run(today = Date.today)
         on_monthday(1, today) {
-          export_chde
+          export_chde_xls
         }
         on_monthday(2, today) do
           export_fachinfo_yaml

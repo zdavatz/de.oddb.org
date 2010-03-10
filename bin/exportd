@@ -8,30 +8,11 @@ require 'logger'
 require 'oddb/config'
 require 'oddb/drugs'
 require 'oddb/util'
+require 'oddb/persistence'
 require 'oddb/export'
 require 'encoding/character/utf-8'
 
 module ODDB
-  require File.join('oddb', 'persistence', @config.persistence)
-  require File.join('oddb', 'persistence', @config.persistence, 'export')
-  persistence = nil
-  case @config.persistence
-  when 'odba'
-    DRb.install_id_conv ODBA::DRbIdConv.new
-    @persistence = ODDB::Persistence::ODBA
-  when 'og'
-    DRb.install_id_conv DRb::TimerIdConv.new
-    Og.setup({
-      :name     => @config.db_name,
-      :user     => @config.db_user,
-      :password => @config.db_auth,
-      :store    => @config.db_backend,
-      :evolve_schema => true,
-      :evolve_schema_cautious => false,
-    })
-    @persistence = ODDB::Persistence::Og
-  end
-
   log_file = @config.log_file_export
   if(log_file.is_a?(String))
     FileUtils.mkdir_p(File.dirname(log_file))

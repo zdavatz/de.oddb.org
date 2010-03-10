@@ -1,0 +1,65 @@
+Datenbeschrieb fachinfos.de.oddb.yaml
+
+Version:  1.0
+Erstellt: 10.03.2010 (1.0) durch hwyss@ywesee.com
+
+## Struktur ##
+Encoding: UTF-8
+
+Top-Level:
+- 1 YAML-Document pro Util::M10lDocument. Siehe Glossar (M10lDocument)
+
+Util::M10lDocument:
+- oid              (Integer, NOT NULL)             -> Unique Identifier
+- previous_sources (Hash (Symbol, Array(String))   -> Liste ehemaliger Text-Quellen
+- canonical        (Hash (Symbol, Text::Document)) -> Aktuelle Dokumente
+
+
+Text::Document:
+- oid              (Integer, NOT NULL)             -> Unique Identifier
+- chapters         (Array (Text::Chapter))         -> Kapitel des Dokuments
+- date             (Datum (YYYY-MM-DD))            -> Datum des Dokuments gemäss PharmNet
+- source           (String)                        -> Text-Quelle
+- title            (String)                        -> Titel des Dokuments (Name des Präparats)
+
+Text::Chapter:
+- name             (String)                        -> Bezeichnung des Kapitels
+- paragraphs       (Array (Text::Paragraph,        -> Abschnitte des Kapitels
+                           Text::Table oder
+                           Text::Picture)
+
+Text::Paragraph:
+- text             (String)                        -> Text des Abschnitts
+- formats          (Array (Text::Format))          -> Formatierungen des Abschnitts
+
+Text::Format:
+- start            (Integer, NOT NULL)             -> Anfang des Geltungsbereichs dieser Formatierung (0-based, es werden Unicode Code-points gezählt und nicht Bytes)
+- end              (Integer, NOT NULL)             -> Ende des Geltungsbereichs (analog zu 'start', -1 bedeutet bis zum Ende des Texts)
+- values           (Array (String))                -> Formatierungen analog zu Tags in Html 4.0 Transitional
+
+Text::Table:
+- rows             (Array (Array (Text::Paragraph)))
+
+Text::Picture:
+- path             (String)                        -> Pfad zum Bild auf http://de.oddb.org/
+
+## Glossar ##
+* Hash
+Hash-Table. Unsortierte, indexierte Collection.
+
+* Symbol:
+Interne Repräsentation eines Namens. In anderen Programmiersprachen auch Atom.
+
+* Util::M10lDocument
+Struktur zur gruppierung mehrsprachiger Dokumente
+
+* YAML
+Yet Another Markup Language. Offener Standard, beschrieben unter http://www.yaml.org
+
+* Version
+Versionsnummern bezeichnen Änderungen nach dem Schema "Major.Minor.Documentation"
+- Major:         Komplett neuer Aufbau des Exports
+- Minor:         Kleinere Änderungen am Export (z.B. Refactoring von Adressangaben in eine Address2-Klasse)
+- Documentation: Ergänzungen und Änderungen im Datenbeschrieb, die keine Änderung des Exports als Ursache haben.
+Die komplette Version-History ist zu finden unter:
+http://scm.ywesee.com/?p=oddb.org;a=history;f=doc/resources/downloads/datadesc/de.oddb.yaml.txt
