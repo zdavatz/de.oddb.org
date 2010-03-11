@@ -237,13 +237,22 @@ class PiParser < TermedRtf
   end
 end
 class Import < Import
+  ERROR_EXPLANATIONS = {
+    "execution expired"                          => "the server stopped responding.",
+    "503 => Net::HTTPServiceUnavailable"         => "the server is unavailable: http://en.wikipedia.org/wiki/HTTP_503#5xx_Server_Error",
+    "Invalid RTF-File: Text before rtf-version"  => "the link pointed to a file that could not be parsed as RTF (probably a PDF)",
+    "Multiple assignment of Registration-Number" => <<-EOS,
+there is already a Registration in the system with this Registration-Number.
+The two Registrations should probably be merged manually.
+    EOS
+  }
   attr_reader :errors
   def initialize
     @stop = /(Pharma(ceuticals|zeutische\s*Fabrik)?|Arzneim(ittel|\.)|GmbH|[u&]\.?\s*Co\.?|Kg|Ltd\.?|')\s*/i
     @htmlentities = HTMLEntities.new
     @result_cache = {}
     @distance_cache = {}
-    @errors = []
+    @errors = {}
     @assigned = Hash.new 0
     @removed = Hash.new 0
     @not_removed = Hash.new 0
@@ -280,8 +289,8 @@ class Import < Import
     ODDB.logger.error('PharmNet') {
       sprintf("%s: %s", error.class, error.message) << "\n" << error.backtrace.join("\n")
     }
-    @errors.push [ sequence ? sequence_name(sequence) : '', error.message,
-      error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip, url ]
+    (@errors[error.message[0,42]] ||= []).push [ sequence ? sequence_name(sequence) : '', 
+      error.message, error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip, url ]
   end
   def _assign_info(key, doc, sequence, opts={})
     info = sequence.send(key)
@@ -594,8 +603,8 @@ class Import < Import
       @search_form = nil
       retry
     else
-      @errors.push [ sequence ? sequence_name(sequence) : '', error.message,
-        error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip ]
+      (@errors[error.message[0,42]] ||= []).push [ sequence ? sequence_name(sequence) : '',
+        error.message, error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip ]
     end
     nil
   end
@@ -929,8 +938,8 @@ class Import < Import
     ODDB.logger.error('PharmNet') {
       sprintf("%s: %s", error.class, error.message) << "\n" << error.backtrace.join("\n")
     }
-    @errors.push [ sequence_name(sequence), error.message,
-      error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip ]
+    (@errors[error.message[0,42]] ||= {}).push [ sequence_name(sequence),
+      error.message, error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip ]
   end
   def remove_info(key, sequence, opts)
     info = sequence.send(key)
@@ -974,7 +983,7 @@ class Import < Import
         end
       }
     end
-    [ @checked,
+    lines = [ @checked,
       "",
       "Assigned #{@assigned[:fachinfo]} Fachinfos",
       "Removed #{@removed[:fachinfo]} Fachinfos",
@@ -995,11 +1004,22 @@ class Import < Import
       "Reparsed #@reparsed_fis Fachinfos",
       "Repaired #@repaired Active Agents",
       "",
-      "Errors: #{@errors.size}",
-    ].compact.concat(@errors.collect { |name, message, line, link|
-      sprintf "%s: %s (%s) -> http://gripsdb.dimdi.de%s",
-              name, message, line, link
-    })
+      "Errors: #{@errors.values.inject(0) do |inj, errs| inj + errs.size end}",
+    ].compact
+    errors = []
+    @errors.sort.each do |key, instances|
+      heading = "#{instances.size} x #{key}"
+      lines.push " - #{heading}"
+      errors.push "", "#{heading}:"
+      if msg = ERROR_EXPLANATIONS[key]
+        errors.push "This means that #{msg}"
+      end
+      errors.concat(instances.collect do |name, message, line, link|
+        sprintf "%s: %s (%s) -> http://gripsdb.dimdi.de%s",
+                name, message, line, link
+      end)
+    end
+    lines.concat errors
   end
   def result_page(form, term)
     form.field('term').value = term
