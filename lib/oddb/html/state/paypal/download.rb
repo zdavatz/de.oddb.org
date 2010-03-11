@@ -1,8 +1,11 @@
+require 'oddb/util/download'
+
 module ODDB
   module Html
     module State
       module PayPal
 module Download
+  include ODDB::Util::Download
   def collect
     if(@session.is_crawler?)
       trigger :home
@@ -18,7 +21,11 @@ module Download
         downloads = invoice.items.select do |itm| itm.type == :download end
         file, item = nil
         if file = @session.user_input(:file)
-          uncompressed = File.basename file, File.extname(file)
+          uncompressed = if ODDB.config.download_uncompressed.include?(file)
+                           file
+                         else
+                           File.basename file, File.extname(file)
+                         end
           item = invoice.items.find do |itm| itm.text == uncompressed end
         end
         if item || downloads.size <= 1
@@ -46,13 +53,6 @@ module Download
       end
       state
     end
-  end
-  def compressed_download(item)
-    file = item.text
-    if (data = item.data) && (compression = data[:compression])
-      file += '.' << compression
-    end
-    file
   end
 end
       end

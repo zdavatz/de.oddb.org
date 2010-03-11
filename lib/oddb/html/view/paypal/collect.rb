@@ -3,6 +3,7 @@
 
 require 'oddb/html/view/search'
 require 'oddb/html/view/template'
+require 'oddb/util/download'
 
 module ODDB
   module Html
@@ -15,7 +16,7 @@ class ReturnDownloads < HtmlGrid::List
 	LEGACY_INTERFACE = false
 	OMIT_HEADER = true
 	STRIPED_BG = false
-  include State::PayPal::Download
+  include ODDB::Util::Download
 	def download_link(model)
     invoice = @container.model
 		if model.expired?

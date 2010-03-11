@@ -11,14 +11,17 @@ class Downloads < Drugs::Global
     def initialize name
       @name = name
     end
-    def price times=1
-      ODDB.config.prices["org.oddb.de.download.#{times}"][name]
-    end
     def file_path
       File.join ODDB.config.export_dir, @name
     end
+    def price times=1
+      ODDB.config.prices["org.oddb.de.download.#{times}"][name]
+    end
     def size
-      File.size file_path + '.gz'
+      File.size uncompressed? ? file_path : file_path + '.gz'
+    end
+    def uncompressed?
+      ODDB.config.download_uncompressed.include? name
     end
   end
   DIRECT_EVENT = :downloads

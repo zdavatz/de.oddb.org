@@ -34,7 +34,7 @@ module Ipn
       if item.type == :download
         date = Date.today >> item.quantity
         time = Time.local date.year, date.month, date.day,
-                          time.hour, dime.minute, time.second
+                          time.hour, time.min, time.sec
       end
       item.expiry_time = time
       Util::Yus.grant(yus_name, 'login', "#{ODDB.config.auth_domain}.PowerUser")

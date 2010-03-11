@@ -5,6 +5,7 @@ require 'rmail'
 require 'net/smtp'
 require 'oddb/config'
 require 'oddb/html/util/lookandfeel'
+require 'oddb/util/download'
 require 'oddb/util/yus'
 
 module ODDB
@@ -50,8 +51,9 @@ module ODDB
               parts.push lnf.lookup(:download_mail_instr)
             end
             instructed = true
-            parts.push lnf._event_url(:collect, [:invoice, invoice.id,
-                                                 :file, item.text])
+            parts.push lnf._event_url(:collect,
+                                      [:invoice, invoice.id,
+                                       :file, Download.compressed_download(item)])
           when :export
             parts.push lnf.lookup(:download_export_mail_body)
             parts.push lnf.lookup(:download_export_mail_instr)

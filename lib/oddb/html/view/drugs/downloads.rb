@@ -16,18 +16,27 @@ class DownloadList < View::List
     [2,0] => :price_12,
     [3,0] => :download_description,
     [4,0] => :download_example,
+    [5,0] => :download_howto,
   }
   DEFAULT_HEAD_CLASS = 'groupheader'
   STRIPED_BG = true
   SORT_HEADER = false
+  EXTERNAL_DATADESCS = {
+    'compendium_de.oddb.org.firefox.epub' => 'http://www.openebook.org/specs.htm',
+    'compendium_de.oddb.org.htc.prc' => 'http://www.mobipocket.com/dev/article.asp?BaseFolder=prcgen&File=mobiformat.htm',
+    'compendium_de.oddb.org.kindle.mobi' => 'http://www.mobipocket.com/dev/article.asp?BaseFolder=prcgen&File=mobiformat.htm',
+    'compendium_de.oddb.org.stanza.epub' => 'http://www.openebook.org/specs.htm',
+  }
   def init
     super
     error_message
   end
   def download_description model
     link = HtmlGrid::Link.new :download_description, model, @session, self
-    path = File.join 'datadesc', model.name + '.txt'
-    link.href = @lookandfeel.resource_global(:downloads, path)
+    link.href = EXTERNAL_DATADESCS.fetch model.name do
+      path = File.join 'datadesc', model.name + '.txt'
+      @lookandfeel.resource_global(:downloads, path)
+    end
     link
   end
   def download_example model
@@ -35,6 +44,14 @@ class DownloadList < View::List
     path = File.join 'examples', model.name
     link.href = @lookandfeel.resource_global(:downloads, path)
     link
+  end
+  def download_howto model
+    if url = @lookandfeel.lookup("download_howto_url_#{model.name}")
+      link = HtmlGrid::Link.new :download_howto, model, @session, self
+      link.href = url
+      link.value = @lookandfeel.lookup "download_howto_#{model.name}"
+      link
+    end
   end
   def name model
     size = model.size
@@ -55,12 +72,14 @@ class DownloadList < View::List
     radio_price model, 12
   end
   def radio_price model, months
-    radio = HtmlGrid::InputRadio.new "months[#{model.name}]",
-                                     model, @session, self
-    radio.value = months
-    selected = @session.user_input(:months) || {}
-    radio.set_attribute 'checked', months == (selected[model.name] || 1).to_i
-    [radio, "EUR %4.2f" % model.price(months)]
+    if price = model.price(months)
+      radio = HtmlGrid::InputRadio.new "months[#{model.name}]",
+                                       model, @session, self
+      radio.value = months
+      selected = @session.user_input(:months) || {}
+      radio.set_attribute 'checked', months == (selected[model.name] || 1).to_i
+      [radio, "EUR %4.2f" % price]
+    end
   end
 end
 class DownloadsForm < HtmlGrid::DivForm
