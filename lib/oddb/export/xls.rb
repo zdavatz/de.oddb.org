@@ -3,6 +3,7 @@
 
 require 'fileutils'
 require 'spreadsheet/excel'
+require 'oddb/currency'
 require 'oddb/remote/drugs/package'
 require 'oddb/util/comparison'
 
@@ -10,7 +11,6 @@ module ODDB
   module Export
     module Xls
 class ComparisonDeCh
-  @@iconv = Iconv.new('latin1//IGNORE//TRANSLIT', 'utf8')
   def export(drb_uri, io)
     write_xls(io, collect_comparables(drb_uri))
   end
@@ -38,7 +38,7 @@ class ComparisonDeCh
   def collect_cell(local, remote, format = "%s (%s)", &block)
     lval = block.call(local) rescue StandardError
     rval = block.call(remote) rescue StandardError
-    @@iconv.iconv(lval == rval ? lval : sprintf(format, lval, rval))
+    lval == rval ? lval : sprintf(format, lval, rval)
   end
   def currency_rate
     @currency_rate ||= Currency.rate('EUR', 'CHF')
@@ -101,7 +101,7 @@ class ComparisonDeCh
       "FAP CH exkl. MwSt",
       "Preisunterschied FAP in CHF ",
       "Preisunterschied FAP in % (normalisiert)",
-    ].collect { |str| @@iconv.iconv str }, fmt_title
+    ], fmt_title
     data.sort_by { |local, remote| 
       local.name.de || local.product.name.de
     }.each_with_index { |(local, remote), idx|

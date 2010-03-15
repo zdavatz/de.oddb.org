@@ -5,6 +5,7 @@ $KCODE = 'u'
 
 require 'drb'
 require 'oddb/config'
+require 'oddb/currency'
 require 'oddb/drugs'
 require 'oddb/persistence'
 require 'oddb/util'
@@ -12,7 +13,6 @@ require 'encoding/character/utf-8'
 
 module ODDB
   @auth = DRbObject.new(nil, @config.auth_server)
-  Currency = DRbObject.new(nil, @config.currency_rates)
 
   begin
     server = ODDB::Util::Server.new

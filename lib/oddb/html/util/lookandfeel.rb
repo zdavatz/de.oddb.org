@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # Html::Util::Lookandfeel -- de.oddb.org -- 27.10.2006 -- hwyss@ywesee.com
 
+require 'oddb/currency'
 require 'sbsm/lookandfeel'
 require 'sbsm/lookandfeelfactory'
 require 'sbsm/lookandfeelwrapper'
