@@ -149,34 +149,62 @@ class Drugs
     nil
   end
 end
-class Fachinfos
+class Infos
   def export(io)
-    fachinfos = []
+    raise "please specify which type of document you want to export" unless infotype
+    infos = []
     ## Documents may be garbage-collected during this export. That's why we'll
     #  keep names in a separate table on the stack, and assign them just before
     #  calling #to_yaml
     names = {}
     ODDB::Drugs::Sequence.all do |seq|
-      fachinfo = seq.fachinfo
+      info = seq.send infotype
       # export sequence names as title
-      unless fachinfo.empty?
-        lnms = names[fachinfo.oid] ||= {}
-        fachinfo.canonical.each do |key, doc|
-          if (doc = fachinfo.send(key)) && (name = seq.cascading_name(key))
+      unless info.empty?
+        lnms = names[info.oid] ||= {}
+        info.canonical.each do |key, doc|
+          if (doc = info.send(key)) && (name = identify_name(seq, key))
             lnms[key] = name
           end
         end
-        fachinfos.push fachinfo
+        infos.push info
       end
     end
-    fachinfos.uniq!
-    fachinfos.each do |fachinfo|
-      fachinfo.canonical.each do |key, doc|
-        doc.title = names[fachinfo.oid][key]
+    infos.uniq!
+    infos.each do |info|
+      info.canonical.each do |key, doc|
+        doc.title = names[info.oid][key]
       end
-      io.puts fachinfo.to_yaml
+      io.puts info.to_yaml
     end
     nil
+  end
+end
+class Fachinfos < Infos
+  def infotype
+    :fachinfo
+  end
+  def identify_name seq, lang
+    seq.cascading_name(lang)
+  end
+end
+class Patinfos < Infos
+  def infotype
+    :patinfo
+  end
+  def identify_name seq, lang
+    names = seq.packages.collect do |pac| u pac.cascading_name(lang) end.uniq
+    if names.size == 1
+      return names.first
+    end
+    name = ''
+    pos = 0
+    while(chars = names.collect do |nm| nm[pos,1] end.uniq; chars.size == 1) do
+      pos += 1
+      name << chars.first
+    end 
+    name.gsub! /\([^\)]+$/u, ''
+    name.strip
   end
 end
     end

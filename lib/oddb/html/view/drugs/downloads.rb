@@ -26,6 +26,10 @@ class DownloadList < View::List
     'compendium_de.oddb.org.htc.prc' => 'http://www.mobipocket.com/dev/article.asp?BaseFolder=prcgen&File=mobiformat.htm',
     'compendium_de.oddb.org.kindle.mobi' => 'http://www.mobipocket.com/dev/article.asp?BaseFolder=prcgen&File=mobiformat.htm',
     'compendium_de.oddb.org.stanza.epub' => 'http://www.openebook.org/specs.htm',
+    'patinfos_de.oddb.org.firefox.epub' => 'http://www.openebook.org/specs.htm',
+    'patinfos_de.oddb.org.htc.prc' => 'http://www.mobipocket.com/dev/article.asp?BaseFolder=prcgen&File=mobiformat.htm',
+    'patinfos_de.oddb.org.kindle.mobi' => 'http://www.mobipocket.com/dev/article.asp?BaseFolder=prcgen&File=mobiformat.htm',
+    'patinfos_de.oddb.org.stanza.epub' => 'http://www.openebook.org/specs.htm',
   }
   def init
     super

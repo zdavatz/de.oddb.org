@@ -29,14 +29,18 @@ module ODDB
         safe_export Export::Yaml::Drugs, 'de.oddb.yaml'
       end
       def Server.export_fachinfo_yaml
-        safe_export Export::Yaml::Fachinfos, 'fachinfos.de.oddb.yaml'
+        safe_export Export::Yaml::Fachinfos, "fachinfos.de.oddb.yaml"
+      end
+      def Server.export_patinfo_yaml
+        safe_export Export::Yaml::Patinfos, "patinfos.de.oddb.yaml"
       end
       def Server.run(today = Date.today)
         on_monthday(1, today) {
           export_chde_xls
         }
         on_monthday(2, today) do
-          export_fachinfo_yaml
+          export_info_yaml :fachinfo
+          export_info_yaml :patinfo
         end
       end
       def Server.on_monthday(day, today = Date.today, &block)
