@@ -927,6 +927,22 @@ bei nicht organbedingtem Bluthochdruck (essentieller Hypertonie) und bei Belastu
                  "additional_information", "personal" ]
     assert_equal(expected, chapters.collect { |ch| ch.name })
   end
+  def test_import_pi__paroxetin
+    @importer = PiParser.new 'paroxetin.isis'
+    path = File.expand_path('data/rtf/pharmnet/paroxetin.pi.rtf', 
+                            File.dirname(__FILE__))
+    document = nil
+    File.open(path) { |fh|
+      document = @importer.import(fh)
+    }
+    assert_instance_of(Text::Document, document)
+    chapters = document.chapters
+    expected = [ "default", "composition", "indications", "precautions",
+                 "application", "unwanted_effects", "storage",
+                 "additional_information", "company",
+                 ]
+    assert_equal(expected, chapters.collect { |ch| ch.name })
+  end
   def test_import_pi__selegilin
     @importer = PiParser.new 'selegilin'
     path = File.expand_path('data/rtf/pharmnet/selegilin.pi.rtf', 

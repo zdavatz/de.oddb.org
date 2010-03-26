@@ -159,7 +159,7 @@ class PiParser < TermedRtf
              when /wof(ü|Ü|ue)r\s+(wird|werden)\s+(es|sie)\s+(angewendet|eingenommen)/i,
                   /wird\s+angewendet$/i
                'indications'
-             when /Wie\s+(ist|sind).+?(anzuwenden|einzunehmen)\?/i
+             when /^(3\.?\s*)?Wie\s+(ist|sind).+?(anzuwenden|einzunehmen)\?/i
                'application'
              when /vor\s+der\s+(Anwendung|Einnahme)\s+von/i 
                'precautions'
@@ -199,7 +199,7 @@ class PiParser < TermedRtf
              when /^(Hersteller.+)?Pharmazeutischer\s+Unternehmer/i,
                   /^Pharmazeutischer\s+Hersteller/i
                'company'
-             when /^Stand\b/, /wurde\s+zuletzt\s+überarbeitet/i
+             when /^\s*Stand\b/, /wurde\s+zuletzt\s+überarbeitet/i
                'date'
              when /^(Sehr\s+geehrte|Liebe)r?\s+Patient/i, 
                   /^Bitte\s.+für\s+Kinder\s+nicht\s+erreichbar/i
@@ -211,14 +211,16 @@ class PiParser < TermedRtf
       chapter = @document.chapter(name)
       if(chapter.nil?)
         @document.add_chapter Text::Chapter.new(name)
-      elsif(chapter.paragraphs.size == 1 \
-            && /^\d+/.match(chapter.paragraphs.first)) 
-        ## some PI insert a document-overview after the composition, in which
-        #  case we have an erroneous chapter, identified by only consisting of
-        #  a heading. In that case:
-        composition.append chapter
-        @document.remove_chapter chapter
-        @document.add_chapter Text::Chapter.new(name)
+      else
+        pars = chapter.paragraphs.select do |par| !par.to_s.strip.empty? end
+        if(pars.size == 1 && /^\d+/.match(pars.first))
+          ## some PI insert a document-overview after the composition, in which
+          #  case we have an erroneous chapter, identified by only consisting of
+          #  a heading. In that case:
+          composition.append chapter
+          @document.remove_chapter chapter
+          @document.add_chapter Text::Chapter.new(name)
+        end
       end
     end
     super
@@ -232,7 +234,8 @@ class PiParser < TermedRtf
       init if /Recyclinglogo/.match(current_chapter.to_s)
     end
     if @buffer.empty? && @buffer.is_a?(Text::Paragraph)
-      value.gsub! /^([P][A-Z0-9]{1,2})?\s*/, ''
+      value.gsub! /^([P][A-Z0-9]{1,2})?\b/, ''
+      value.lstrip!
     end
   end
 end
@@ -258,6 +261,7 @@ The two Registrations should probably be merged manually.
     @not_removed = Hash.new 0
     @repaired = 0
     @reparsed_fis = 0
+    @reparsed_pis = 0
     @products_created = 0
     @sequences_created = 0
     @packages_created = 0
@@ -654,6 +658,7 @@ The two Registrations should probably be merged manually.
                                         :remove  => false, 
                                         :repair  => false,
                                         :reparse => false,
+                                        :reparse_patinfo => false,
                                         :retries => 3,
                                         :retry_unit => 60 })
     Util::Mail.notify_admins sprintf("%s: %s", Time.now.strftime('%c'),
@@ -664,6 +669,7 @@ The two Registrations should probably be merged manually.
                                          :remove  => false, 
                                          :repair  => false,
                                          :reparse => false,
+                                         :reparse_patinfo => false,
                                          :retries => 3,
                                          :retry_unit => 60 })
     agent = RenewableAgent.new agent
@@ -821,9 +827,14 @@ The two Registrations should probably be merged manually.
       @sources.store url, true 
       io = nil
       if(opts[:reload] || !File.exist?(path))
+        uri = URI.parse url
+        uri.scheme = 'http'
+        if uri.host.to_s.empty?
+          uri.host = 'gripsdb.dimdi.de'
+        end
         ODDB.logger.debug('PharmNet') {
-          sprintf('Downloading %s for %s from %s', key, term, url) }
-        file = agent.get url
+          sprintf('Downloading %s for %s from %s', key, term, uri.to_s) }
+        file = agent.get uri.to_s
         file.save path
         ODDB.logger.debug('PharmNet') {
           sprintf('Saving %s for %s in %s', key, term, path) }
@@ -831,7 +842,6 @@ The two Registrations should probably be merged manually.
       else 
         ODDB.logger.debug('PharmNet') {
           sprintf('Reading %s for %s from %s', key, term, path) }
-        file = agent.get url
         io = File.open(path)
       end
       term = term.downcase.gsub(/[\s-]/, '.')
@@ -913,10 +923,12 @@ The two Registrations should probably be merged manually.
                                         :remove  => false, 
                                         :repair  => false,
                                         :reparse => false,
+                                        :reparse_patinfo => false,
                                         :retries => 3,
                                         :retry_unit => 60 })
 
-    return(reparse_fachinfo agent, sequence) if opts[:reparse]
+    return(reparse_fachinfo agent, sequence) if opts[:reparse] && !opts[:reparse_patinfo]
+    return(reparse_patinfo agent, sequence) if opts[:reparse_patinfo]
     return unless sequence.fachinfo.empty? || sequence.patinfo.empty? \
                     || opts[:replace] || opts[:remove]
     data = identify_details(agent, sequence_name(sequence), sequence, opts)
@@ -967,6 +979,15 @@ The two Registrations should probably be merged manually.
       info.save
     end
   end
+  def reparse_patinfo(agent, sequence)
+    if((info = sequence.patinfo.de) && (source = info.source) \
+       && (doc = import_rtf :patinfo, agent, source, sequence_name(sequence),
+                            :reparse => true))
+      @reparsed_pis += 1
+      info.chapters.replace doc.chapters
+      info.save
+    end
+  end
   def report opts={}
     fi_sources = { }
     pi_sources = { }
@@ -1002,6 +1023,7 @@ The two Registrations should probably be merged manually.
       "Created #@packages_created Packages",
       "",
       "Reparsed #@reparsed_fis Fachinfos",
+      "Reparsed #@reparsed_pis Patinfos",
       "Repaired #@repaired Active Agents",
       "",
       "Errors: #{@errors.values.inject(0) do |inj, errs| inj + errs.size end}",
