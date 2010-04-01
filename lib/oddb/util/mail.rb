@@ -7,6 +7,7 @@ require 'oddb/config'
 require 'oddb/html/util/lookandfeel'
 require 'oddb/util/download'
 require 'oddb/util/yus'
+require 'oddb/util/smtp_tls'
 
 module ODDB
   module Util
@@ -23,7 +24,7 @@ module ODDB
         header.add('Content-Type', 'text/plain', nil, 
                    'charset' => config.mail_charset)
         mpart.body = lines.join("\n")
-        sendmail(mpart, config.smtp_from, recipients)
+        sendmail(mpart, config.smtp_user, recipients)
       end
       def Mail.notify_invoice(invoice)
         config = ODDB.config
@@ -72,12 +73,14 @@ module ODDB
         sendmail(mpart, config.mail_invoice_smtp, recipients)
       end
       def Mail.sendmail(mpart, from, recipients)
-        smtp = Net::SMTP.new(ODDB.config.smtp_server)
-        smtp.start {
+        config = ODDB.config
+        Net::SMTP.start(config.smtp_server, config.smtp_port,
+                        config.smtp_domain, config.smtp_user, config.smtp_pass,
+                        config.smtp_authtype) do |smtp|
           recipients.each { |recipient|
             smtp.sendmail(mpart.to_s, from, recipient)
           }
-        }
+        end
       end
     end
   end
