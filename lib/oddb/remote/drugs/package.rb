@@ -29,7 +29,9 @@ class Package < Remote::Object
     }
   end
   def atc
-    @atc ||= Remote::Drugs::Atc.new(@source, @remote.atc_class)
+    @atc ||= if atc = @remote.atc_class
+               Remote::Drugs::Atc.new(@source, atc)
+             end
   end
   def code(type, country='CH')
     case type
@@ -72,7 +74,7 @@ class Package < Remote::Object
     comparables = []
     doses = active_agents.collect { |act| act.dose }
     if(doses.size == 1 \
-       && (atc = ODDB::Drugs::Atc.find_by_code(self.atc.code)))
+       && (atc = self.atc && ODDB::Drugs::Atc.find_by_code(self.atc.code)))
       descriptions = galenic_forms.collect { |form| form.description.de }
       groupnames = galenic_forms.collect { |form| form.groupname }
       range = (size*0.75)..(size*1.25)
