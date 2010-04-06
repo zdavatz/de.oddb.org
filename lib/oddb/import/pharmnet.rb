@@ -950,7 +950,7 @@ The two Registrations should probably be merged manually.
     ODDB.logger.error('PharmNet') {
       sprintf("%s: %s", error.class, error.message) << "\n" << error.backtrace.join("\n")
     }
-    (@errors[error.message[0,42]] ||= {}).push [ sequence_name(sequence),
+    (@errors[error.message[0,42]] ||= []).push [ sequence_name(sequence),
       error.message, error.backtrace.find { |ln| /pharmnet/.match ln }.to_s.strip ]
   end
   def remove_info(key, sequence, opts)
@@ -1036,6 +1036,7 @@ The two Registrations should probably be merged manually.
       if msg = ERROR_EXPLANATIONS[key]
         errors.push "This means that #{msg}"
       end
+      errors.push ''
       errors.concat(instances.collect do |name, message, line, link|
         sprintf "%s: %s (%s) -> http://gripsdb.dimdi.de%s",
                 name, message, line, link
