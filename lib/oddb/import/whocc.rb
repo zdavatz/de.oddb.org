@@ -47,7 +47,7 @@ class Whocc < Importer
       html.gsub(/\s+/, ' ').gsub(/\s*<br\s*\/?>\s*/, "\n").strip
     end
   end
-  def import(agent=Mechanize.new)
+  def import(agent=WWW::Mechanize.new)
     while(code = @codes.shift)
       @count += 1
       import_code(agent, code)
