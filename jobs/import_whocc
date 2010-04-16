@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+$: << File.expand_path('../lib', File.dirname(__FILE__))
+
+require 'oddb/util/job'
+require 'oddb/util/updater'
+require 'oddb/import/whocc'
+
+module ODDB
+  module Util
+    Job.run do
+      Updater._reported_import Import::Whocc.new do |importer|
+        importer.import
+      end
+    end
+  end
+end
