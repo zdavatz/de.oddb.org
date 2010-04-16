@@ -4,7 +4,7 @@
 require 'fileutils'
 require 'htmlentities'
 require 'mechanize'
-require 'oddb/import/import'
+require 'oddb/import/importer'
 require 'oddb/import/rtf'
 require 'oddb/util/mail'
 require 'pp'
@@ -239,7 +239,7 @@ class PiParser < TermedRtf
     end
   end
 end
-class Import < Import
+class Importer < Importer
   ERROR_EXPLANATIONS = {
     "execution expired"                          => "the server stopped responding.",
     "503 => Net::HTTPServiceUnavailable"         => "the server is unavailable: http://en.wikipedia.org/wiki/HTTP_503#5xx_Server_Error",

@@ -1,55 +1,10 @@
-#!/usr/bin/env ruby
-# Import::Whocc -- de.oddb.org -- 17.11.2006 -- hwyss@ywesee.com
-
-require 'oddb/drugs/atc'
-require 'oddb/drugs/ddd'
-require 'oddb/drugs/dose'
-require 'oddb/import/xml'
+require 'mechanize'
+require 'oddb/drugs'
+require 'oddb/import/importer'
 
 module ODDB
   module Import
-    module Whocc
-class Atc < Xml
-  def import_document(doc)
-    REXML::XPath.each(doc, '//rs:data/rw:row', 
-      "rs" => 'urn:schemas-microsoft-com:rowset',
-      "rw" => '#RowsetSchema') { |row|
-      code = row.attributes['ATCCode']
-      atc = Drugs::Atc.find_by_code(code) || Drugs::Atc.new(code)
-      atc.name.de = row.attributes['Name']
-      atc.save
-    }
-  end
-end
-class Ddd < Xml
-  UNIT_REPLACEMENTS = {
-    'TSD E' => 'TsdI.E.',
-    'MIO E' => 'MioI.E.',
-  }
-  def import_document(doc)
-    REXML::XPath.each(doc, '//rs:data/rw:row', 
-      "rs" => 'urn:schemas-microsoft-com:rowset',
-      "rw" => '#RowsetSchema') { |row|
-      attrs = row.attributes
-      code = attrs['ATCCode']
-      atc = Drugs::Atc.find_by_code(code) || Drugs::Atc.new(code)
-      adm = attrs['AdmCode']
-      comment = attrs['DDDComment']
-      ddd = atc.ddds.find { |candidate|
-        adm == candidate.administration \
-          && comment == candidate.comment
-      } || Drugs::Ddd.new(adm)
-      ddd.comment = comment
-      unit = attrs['UnitType']
-      unit = UNIT_REPLACEMENTS.fetch(unit, unit)
-      ddd.dose = Drugs::Dose.new(attrs['DDD'], unit)
-      ddd.atc = atc
-      ddd.save
-      atc.save
-    }
-  end
-end
-class Guidelines < Import
+class Whocc < Importer
   attr_reader :codes
   class CodeHandler
     ATC_TOP_LEVEL = %w{A B C D G H J L M N P R S V}
@@ -65,14 +20,18 @@ class Guidelines < Import
     end
     def shift
       code = @queue.shift
-      @visited.push(code)
+      @visited.push(code) if code
       code
     end
   end
-  @@query_re = /query=([A-Z0-9]+)/
+  @@query_re = /code=([A-Z0-9]+)/
+  UNIT_REPLACEMENTS = {
+    'TSD E' => 'TsdI.E.',
+    'MIO E' => 'MioI.E.',
+  }
   def initialize
     super
-    @url = 'http://www.whocc.no/atcddd/database/index.php'
+    @url = 'http://www.whocc.no/atc_ddd_index/'
     @codes = CodeHandler.new
     @count = 0
     @created = 0
@@ -80,12 +39,15 @@ class Guidelines < Import
     @guidelines = 0
   end
   def extract_text(node)
-    unless(node.containers.any? { |br| br.name != 'br' })
-      node.inner_html.gsub(/\s+/, ' ').gsub(/\s*<br\s*\/?>\s*/, "\n")
+    unless(node.children.any? { |br| br.element? && br.name != 'br' })
+      html = node.inner_html
+      if RUBY_VERSION < '1.9'
+        html.gsub! /\240/, ''
+      end
+      html.gsub(/\s+/, ' ').gsub(/\s*<br\s*\/?>\s*/, "\n").strip
     end
   end
-  def import(agent)
-    login(agent)
+  def import(agent=Mechanize.new)
     while(code = @codes.shift)
       @count += 1
       import_code(agent, code)
@@ -103,8 +65,8 @@ class Guidelines < Import
     atc
   end
   def import_code(agent, get_code)
-    page = agent.get(@url + "?query=%s&showdescription=yes" % get_code)
-    (page/"//b/a").each { |link|
+    page = agent.get(@url + "?code=%s&showdescription=yes" % get_code)
+    (page/"//b/a").each do |link|
       if(match = @@query_re.match(link.attributes['href']))
         code = match[1] 
         if(code == get_code)
@@ -113,17 +75,40 @@ class Guidelines < Import
         end
         @codes.push(code)
       end
-    }
-    (page/"//ul//a").each { |link|
+    end
+    (page/"//ul//a").each do |link|
       if(match = @@query_re.match(link.attributes['href']))
         code = match[1] 
-        import_atc(code, link)
+        atc = import_atc(code, link)
+        import_ddds atc, link.parent.parent
       end
-    }
+    end
+  end
+  def import_ddds(atc, row)
+    code = nil
+    begin
+      code, link, dose, unit, adm, comment = row.children.collect do |td|
+        extract_text(td).to_s end
+      comment = comment.empty? ? nil: comment
+      return unless code.empty? || code == atc.code
+      unless dose.empty?
+        ddd = atc.ddds.find do |candidate|
+          adm == candidate.administration \
+            && comment == candidate.comment
+        end
+        ddd  ||= Drugs::Ddd.new(adm)
+        ddd.comment = comment
+        unit = UNIT_REPLACEMENTS.fetch(unit, unit)
+        ddd.dose = Drugs::Dose.new(dose, unit)
+        ddd.atc = atc
+        ddd.save
+        atc.save
+      end
+    end while row = row.next_sibling
   end
   def import_ddd_guidelines(atc, table)
-    guidelines = (table/'td').collect { |td| 
-      extract_text(td) }.join if(table)
+    guidelines = (table/'td').collect do |td|
+      extract_text(td) end.join if(table)
     if(atc.ddd_guidelines.en != guidelines)
       @ddd_guidelines += 1
       atc.ddd_guidelines.en = guidelines
@@ -133,14 +118,15 @@ class Guidelines < Import
   def import_guidelines(atc, link)
     node = link.parent
     while(node.name != 'p')
-      node = node.next_sibling
+      node = node.next_sibling or return
     end
-    tables = (node/'/table').remove
-    table = tables.find { |tab| 
-      tab.respond_to?(:attributes) \
-        && tab.attributes['bgcolor'] == '#cccccc'
-    }
-    modified = import_ddd_guidelines(atc, table)
+    ## nokogiri fixes the faulty html of whocc.no, and moves the table element
+    #  out of the p-container.
+    table = node.next_sibling
+    modified = false
+    if table.name == 'table' && table[:bgcolor] == '#cccccc'
+      modified = import_ddd_guidelines(atc, table)
+    end
     guidelines = extract_text(node)
     if(atc.guidelines.en != guidelines)
       @guidelines += 1
@@ -148,15 +134,6 @@ class Guidelines < Import
       atc.guidelines.en = guidelines
     end
     modified
-  end
-  def login(agent)
-    msg = "Please configure your access to #@url in ODDB.config.credentials['whocc']"
-    credentials = ODDB.config.credentials['whocc'] or raise msg
-    page = agent.get(@url)
-    form = page.form(nil) # unnamed form
-    form.username = credentials['username']
-    form.password = credentials['password']
-    agent.submit(form)
   end
   def report
     [
@@ -167,6 +144,5 @@ class Guidelines < Import
     ]
   end
 end
-    end
   end
 end

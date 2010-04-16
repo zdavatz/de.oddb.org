@@ -5,7 +5,7 @@ require 'rpdf2txt/default_handler'
 require 'rpdf2txt/parser'
 require 'mechanize'
 require 'open-uri'
-require 'oddb/import/import'
+require 'oddb/import/importer'
 require 'oddb/util/money'
 require 'drb'
 
@@ -42,7 +42,7 @@ class GkvHandler < Rpdf2txt::SimpleHandler
     reset
   end
 end
-class Gkv < Import
+class Gkv < Importer
   def initialize
     super
     @assigned_companies = 0

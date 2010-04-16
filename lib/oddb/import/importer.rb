@@ -1,12 +1,9 @@
-#!/usr/bin/env ruby
-# Import::Import -- de.oddb.org -- 23.02.2007 -- hwyss@ywesee.com
-
 require 'encoding/character/utf-8'
 require 'iconv'
 
 module ODDB
   module Import
-    class Import
+    class Importer
       @@iconv = Iconv.new('utf8//IGNORE//TRANSLIT', 'latin1')
       @@lower = /^(and|for|in(cl)?|on|plain|with)$/i
       attr_accessor :report
@@ -16,7 +13,7 @@ module ODDB
       end
       def capitalize_all(str)
         ## benchmarked fastest against an append (<<) solution
-        str.split(/\b/).collect { |part| 
+        str.split(/\b/).collect { |part|
           @@lower.match(part) ? part.downcase : part.capitalize }.join
       end
       def company_name(cname)

@@ -2,11 +2,11 @@
 # Import::Excel -- de.oddb.org -- 12.09.2006 -- hwyss@ywesee.com
 
 require 'spreadsheet'
-require 'oddb/import/import'
+require 'oddb/import/importer'
 
 module ODDB
   module Import
-    class Excel < Import
+    class Excel < Importer
       attr_reader :report
       def cell(row, idx)
         if(cell = row[idx])

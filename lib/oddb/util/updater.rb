@@ -92,7 +92,7 @@ module ODDB
         lines = [
           sprintf("%s: %s#import", Time.now.strftime('%c'), importer.class)
         ]
-        lines.concat block.call
+        lines.concat block.call(importer)
       rescue Exception => err
         lines.push(err.class.to_s, err.message, *err.backtrace)
         if importer.respond_to?(:report)

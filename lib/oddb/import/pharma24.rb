@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
 # Import::Pharma24 -- de.oddb.org -- 21.04.2008 -- hwyss@ywesee.com
 
-require 'oddb/import/import'
+require 'oddb/import/importer'
 require 'oddb/util/money'
 
 module ODDB
   module Import
-class Pharma24 < Import
+class Pharma24 < Importer
   def initialize
     @count = 0
     @created_companies = 0
