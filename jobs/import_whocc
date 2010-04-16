@@ -2,6 +2,7 @@
 
 $: << File.expand_path('../lib', File.dirname(__FILE__))
 
+require 'rubygems'
 require 'oddb/util/job'
 require 'oddb/util/updater'
 require 'oddb/import/whocc'
