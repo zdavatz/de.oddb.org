@@ -117,10 +117,11 @@ module ODDB
           import_dimdi_galenic_forms(date)
           import_dimdi_products(date)
         end
-        run_logged_job 'gkv'
+        run_logged_job 'import_gkv'
         case today.day
         when 1
-          run_logged_job 'pharmnet'
+          run_logged_job 'import_pharmnet'
+          run_logged_job 'import_whocc'
         when 15
           update_prices
         end
