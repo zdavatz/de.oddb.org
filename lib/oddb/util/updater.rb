@@ -37,7 +37,7 @@ module ODDB
         }
       end
       def Updater.import_fachinfos(term, opts = {})
-        importer = Import::PharmNet::Import.new
+        importer = Import::PharmNet::Importer.new
         _reported_import(importer, :filetype => 'HTML') {
           importer.import_missing(WWW::Mechanize.new, term, opts)
         }
@@ -63,7 +63,7 @@ module ODDB
                  :remove  => false, :repair  => false,
                  :reparse => false, :retries => 3,
                  :retry_unit => 60 }.update opts
-        importer = Import::PharmNet::Import.new
+        importer = Import::PharmNet::Importer.new
         _reported_import(importer, {:filetype => 'HTML'}, {:skip_totals => true}) {
           importer._import(WWW::Mechanize.new, Drugs::Sequence.all, opts)
         }
@@ -80,7 +80,7 @@ module ODDB
                         WWW::Mechanize.new, :filetype => 'HTML')
       end
       def Updater.report_fachinfos
-        importer = Import::PharmNet::Import.new
+        importer = Import::PharmNet::Importer.new
         _reported_import(importer) {
           importer.report
         }
