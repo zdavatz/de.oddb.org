@@ -12,7 +12,7 @@ require 'pp'
 module ODDB
   module Import
     module PharmNet
-class EncodedParser < WWW::Mechanize::Page
+class EncodedParser < Mechanize::Page
   @@iconv = Iconv.new('utf8', 'latin1')
   def initialize(uri=nil, response=nil, body=nil, code=nil)
     body = @@iconv.iconv(body.gsub(/iso-8859-1/i, 'utf-8'))
@@ -454,7 +454,7 @@ The two Registrations should probably be merged manually.
     data = {}
     _extract_newest_link(data, :fachinfo, "Fachinformation", page)
     _extract_newest_link(data, :patinfo, "Gebrauchsinformation", page)
-    table = (page/"table[@border=1]").first or return data
+    table = (page/"table[@border='1']").first or return data
     rows = (table/"tr")[1..-1] || []
     composition = rows.collect { |row|
       spans = row/"span"

@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 # Import::TestPharmNet -- de.oddb.org -- 15.10.2007 -- hwyss@ywesee.com
 
-gem 'mechanize', '< 0.7'
-
 $: << File.expand_path('..', File.dirname(__FILE__))
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
@@ -181,7 +179,7 @@ class TestImport < Test::Unit::TestCase
   include FlexMock::TestCase
   def setup
     ODDB.config.var = File.expand_path('var', File.dirname(__FILE__))
-    @importer = Import.new
+    @importer = Importer.new
     @errors = []
     ODDB.logger = flexmock('logger')
     ODDB.logger.should_receive(:error).and_return { |type, block|
@@ -198,14 +196,14 @@ class TestImport < Test::Unit::TestCase
     Business::Company.instances.clear
   end
   def setup_search(resultfile='empty_result.html')
-    agent = flexmock(WWW::Mechanize.new)
-    flexmock(WWW::Mechanize).should_receive(:new).and_return agent
+    agent = flexmock(Mechanize.new)
+    flexmock(Mechanize).should_receive(:new).and_return agent
     setup_agent(agent, resultfile, :get)
     setup_agent(agent, resultfile, :submit) { |form, button| 
       form.action 
     }
     setup_agent(agent, resultfile, :click) { |link| link.href }
-    RenewableAgent.new agent
+    agent
   end
   def setup_agent(agent, resultfile, symbol, &block)
     dir = File.expand_path('data/html/pharmnet', File.dirname(__FILE__))
@@ -222,7 +220,8 @@ class TestImport < Test::Unit::TestCase
                'search.html'
              when "/websearch/servlet/FlowController/DisplaySearchForm?uid=000002"
                'search_filtered.html'
-             when "/websearch/servlet/FlowController/Search?uid=000002"
+             when "/websearch/servlet/FlowController/Search?uid=000002",
+                  "/websearch/servlet/FlowController/Search?uid=1"
                (@resultfiles ||= []).shift || resultfile
              when "/websearch/servlet/FlowController/DisplayTitles?index=1&uid=000002"
                'paged_result_2.html'
@@ -246,14 +245,14 @@ class TestImport < Test::Unit::TestCase
   def test_get_search_form
     agent = setup_search
     form = @importer.get_search_form(agent)
-    assert_instance_of(WWW::Mechanize::Form, form)
+    assert_instance_of(Mechanize::Form, form)
     assert_equal("/websearch/servlet/FlowController/Search?uid=1", 
                  form.action)
     radio = form.radiobuttons.find { |b| b.name == "WFTYP" && b.value == "YES" }
     @importer.set_fi_only(form)
     assert_equal(true, radio.checked)
     field = form.field('term')
-    assert_instance_of(WWW::Mechanize::Field, field)
+    assert_instance_of(Mechanize::Form::Text, field)
 
     ## if the sequence has incomplete active_agents, get all results
     @importer.set_fi_only(form, "NO_RESTRICTION")
@@ -360,7 +359,7 @@ class TestImport < Test::Unit::TestCase
     assert_equal [sub1, sub2], Drugs::Substance.instances
   end
   def test_result_page__empty_result
-    agent = setup_search
+    agent = RenewableAgent.new setup_search
     form = @importer.get_search_form(agent)
     page = @importer.result_page(form, 'Aar O S')
     assert_instance_of EncodedParser, page
@@ -368,7 +367,7 @@ class TestImport < Test::Unit::TestCase
     assert result.empty?
   end
   def test_result_page
-    agent = setup_search "result.html"
+    agent = RenewableAgent.new setup_search("result.html")
     form = @importer.get_search_form(agent)
     page = @importer.result_page(form, 'Aarane')
     assert_instance_of EncodedParser, page
@@ -383,7 +382,7 @@ class TestImport < Test::Unit::TestCase
     assert_equal expected, result
   end
   def test_result_page__paged
-    agent = setup_search "paged_result_1.html"
+    agent = RenewableAgent.new setup_search("paged_result_1.html")
     form = @importer.get_search_form(agent)
     page = @importer.result_page(form, 'Aspirin')
     assert_instance_of EncodedParser, page
@@ -403,7 +402,7 @@ class TestImport < Test::Unit::TestCase
     assert_equal expected, result.last
   end
   def test_get_details
-    agent = setup_search "result.html"
+    agent = RenewableAgent.new setup_search("result.html")
     form = @importer.get_search_form(agent)
     page = @importer.result_page(form, 'Aarane')
     result = @importer.extract_result agent, page
@@ -427,7 +426,7 @@ class TestImport < Test::Unit::TestCase
     assert_equal expected, details
   end
   def test_search__paged
-    agent = setup_search "paged_result_1.html"
+    agent = RenewableAgent.new setup_search("paged_result_1.html")
     result = @importer.search agent, 'Aspirin'
     assert_equal 18, result.size
     expected = {
@@ -466,9 +465,9 @@ class TestImport < Test::Unit::TestCase
     assert_equal expected, result.last
   end
   def test_search__cached
-    agent = setup_search "paged_result_1.html"
+    agent = RenewableAgent.new setup_search("paged_result_1.html")
     result = @importer.search agent, 'Aspirin'
-    agent2= flexmock(WWW::Mechanize.new)
+    agent2= flexmock(Mechanize.new)
     agent2.should_receive(:get).and_return { 
       raise "the search for aspirin should be cached" }
     agent2.should_receive(:submit).and_return { 
@@ -479,7 +478,7 @@ class TestImport < Test::Unit::TestCase
     assert_equal result, result2
   end
   def test_search__unresponsive
-    agent = setup_search "result.html"
+    agent = RenewableAgent.new setup_search("result.html")
     agent = flexmock agent
     agent.should_receive(:renew!).times(1)
     result = @importer.search agent, 'Aspirin'
@@ -489,7 +488,7 @@ class TestImport < Test::Unit::TestCase
   end
   def test_process__no_suitable_fachinfo_found__no_active_agents
     @resultfiles = %w{empty_result.html result.html}
-    agent = setup_search
+    agent = RenewableAgent.new setup_search
     sequence = flexmock(Drugs::Sequence.new)
     sequence.should_receive(:name)\
       .and_return(Util::Multilingual.new(:de => 'Aar O S'))
@@ -501,7 +500,7 @@ class TestImport < Test::Unit::TestCase
   end
   def test_process__no_suitable_fachinfo_found
     @resultfiles = %w{empty_result.html result.html}
-    agent = setup_search
+    agent = RenewableAgent.new setup_search
     sequence = flexmock(Drugs::Sequence.new)
     sequence.should_receive(:name)\
       .and_return(Util::Multilingual.new(:de => 'Aar O S'))
@@ -516,8 +515,8 @@ class TestImport < Test::Unit::TestCase
     assert sequence.fachinfo.empty?
   end
   def test_process__http_500
-    agent = flexmock(WWW::Mechanize.new)
-    klass = flexmock(WWW::Mechanize)
+    agent = flexmock(Mechanize.new)
+    klass = flexmock(Mechanize)
     klass.should_receive(:new).and_return agent
     agent.should_receive(:get).times(3).and_return { 
       raise "500 => Net::HTTPInternalServerError"
@@ -533,7 +532,7 @@ class TestImport < Test::Unit::TestCase
     }
   end
   def test_process
-    agent = setup_search "result.html"
+    agent = RenewableAgent.new setup_search("result.html")
     sequence = flexmock(Drugs::Sequence.new)
     sequence.should_receive(:name)\
       .and_return(Util::Multilingual.new(:de => 'Aarane'))
@@ -562,7 +561,7 @@ class TestImport < Test::Unit::TestCase
   end
   def test_process__many
     @displayfiles = %w{display2.html display3.html display1.html} * 6
-    agent = setup_search "paged_result_1.html"
+    agent = RenewableAgent.new setup_search("paged_result_1.html")
     sequence = flexmock(Drugs::Sequence.new)
     sequence.should_receive(:name)\
       .and_return(Util::Multilingual.new(:de => 'Aspirin Protect'))
