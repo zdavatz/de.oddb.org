@@ -402,14 +402,6 @@ The two Registrations should probably be merged manually.
     official = pname[/^[^\d(]+/].strip
     company_name = company.name.de.gsub(@stop, '').strip
     official_with_company = [ official, company_name ].join(' ')
-    term_with_company = [ term, company_name ].join(' ')
-    unless product
-      @products_created += 1
-      product = Drugs::Product.new
-      product.name.de = term_with_company
-      product.company = company
-      product.save
-    end
     @sequences_created += 1
     sequence = Drugs::Sequence.new
     composition = Drugs::Composition.new
@@ -641,7 +633,12 @@ The two Registrations should probably be merged manually.
         end
       end
     end
-    nil
+    ## if we can't find a product, we'll have to create a new one.
+    @products_created += 1
+    product = Drugs::Product.new
+    product.name.de = term_with_company
+    product.company = company
+    product.save
   end
   def identify_sequence(data, product, galform)
     if product
