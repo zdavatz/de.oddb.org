@@ -119,7 +119,7 @@ module ODDB
         Mail.notify_admins(subject, lines)
       end
       def Updater.run(today = Date.today)
-        import_dimdi
+        run_logged_job 'import_dimdi'
         run_logged_job 'import_gkv'
         case today.day
         when 1

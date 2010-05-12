@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+$: << File.expand_path('../lib', File.dirname(__FILE__))
+$KCODE = 'u'
+
+require 'rubygems'
+require 'oddb/util/job'
+
+module ODDB
+  module Util
+    Job.run do
+      Updater.import_dimdi
+    end
+  end
+end
