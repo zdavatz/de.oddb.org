@@ -24,10 +24,10 @@ require 'open-uri'
 module ODDB
   module Import
 module Dimdi
-  DIMDI_PATH = "http://www.dimdi.de/dynamic/de/amg/downloadcenter/fbag/"
+  DIMDI_PATH = "http://www.dimdi.de/static/de/amg/fbag/"
   def Dimdi.current_date(url)
-    if(match = /fb_(\d\d)(\d\d)(\d\d)\.xls/.match(open(url).read))
-      Date.new(2000 + match[3].to_i, match[2].to_i, match[1].to_i)
+    if(match = /festbetraege-(\d{4})(\d{2})\.xls/.match(open(url).read))
+      Date.new(match[1].to_i, match[2].to_i)
     end
   end
   def Dimdi.download(file, &block)
@@ -155,6 +155,11 @@ module Dimdi
         sub.save
       end
     end
+    def create_product name
+      product = Drugs::Product.new
+      product.name.de = name
+      product.save
+    end
     def delete_sequence(sequence)
       product = sequence.product
       if(product.sequences.size == 1)
@@ -204,12 +209,9 @@ module Dimdi
       if(!package)
         ## new package and possibly new product
         import_product(row, product, name)
-      #elsif(!product)
-        ## known package but unknown product
-      #  rename_product(row, package, name)
-      #elsif(product != package.product)
-        ## product-name has changed
-      #  move_package(row, product, package, name)
+      elsif(!product && !package.product)
+        package.sequence.product = create_product name
+        update_package row, package
       else
         ## update package-data
         update_package(row, package)
@@ -244,9 +246,7 @@ module Dimdi
         @existing += 1
       else
         @created += 1
-        #product = Drugs::Product.new
-        #product.name.de = name
-        #product.save
+        product = create_product name
       end
       import_sequence(row, product)
     end

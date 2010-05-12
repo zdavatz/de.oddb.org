@@ -14,15 +14,22 @@ module ODDB
   module Util
     module Updater
       DIMDI_INDEX = "http://www.dimdi.de/static/de/amg/fbag/index.htm"
+      def Updater.import_dimdi
+        if(date = Import::Dimdi.current_date(DIMDI_INDEX))
+          import_dimdi_substances(date)
+          import_dimdi_galenic_forms(date)
+          import_dimdi_products(date)
+        end
+      end
       def Updater.import_dimdi_galenic_forms(date)
-        file = date.strftime("darform_%d%m%y.xls")
+        file = date.strftime("darreichungsformen-%Y%m.xls")
         Import::Dimdi.download(file) { |io|
           reported_import(Import::Dimdi::GalenicForm.new(date), io,
                           :filetype => 'XLS')
         }
       end
       def Updater.import_dimdi_products(date)
-        file = date.strftime("fb_%d%m%y.xls")
+        file = date.strftime("festbetraege-%Y%m.xls")
         Import::Dimdi.download(file) { |io|
           reported_import(Import::Dimdi::Product.new(date), io,
                          :subject => "Update Festbeträge",
@@ -30,7 +37,7 @@ module ODDB
         }
       end
       def Updater.import_dimdi_substances(date)
-        file = date.strftime("wirkkurz_%d%m%y.xls")
+        file = date.strftime("wirkstoffkuerzel-%Y%m.xls")
         Import::Dimdi.download(file) { |io|
           reported_import(Import::Dimdi::Substance.new(date), io,
                           :filetype => 'XLS')
@@ -112,11 +119,7 @@ module ODDB
         Mail.notify_admins(subject, lines)
       end
       def Updater.run(today = Date.today)
-        if(date = Import::Dimdi.current_date(DIMDI_INDEX))
-          import_dimdi_substances(date)
-          import_dimdi_galenic_forms(date)
-          import_dimdi_products(date)
-        end
+        import_dimdi
         run_logged_job 'import_gkv'
         case today.day
         when 1
