@@ -90,7 +90,8 @@ module ODDB
       end
       def Updater._reported_import(importer, args={}, error_args={}, &block)
         lines = [
-          sprintf("%s: %s#import", Time.now.strftime('%c'), importer.class)
+          sprintf("%s: %s %s#import", Time.now.strftime('%c'),
+                  ODDB.config.server_name, importer.class)
         ]
         lines.concat block.call(importer)
       rescue Exception => err
@@ -106,8 +107,8 @@ module ODDB
         raise err
       ensure
         ft = args[:filetype]
-        fmt = ft ? "%s: %s (%s)" : "%s: %s"
-        subject = sprintf(fmt, Time.now.strftime('%c'),
+        fmt = ft ? "%s: %s %s (%s)" : "%s: %s %s"
+        subject = sprintf(fmt, Time.now.strftime('%c'), ODDB.config.server_name,
                           args[:subject] || importer.class, ft)
         Mail.notify_admins(subject, lines)
       end
