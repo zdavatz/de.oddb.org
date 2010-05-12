@@ -185,7 +185,9 @@ class PackageInnerForm < Drugs::PackageInnerComposite
     button
   end
   def sequence(model)
-    SequenceSelect.new("sequence", model, @session, self)
+    if model.product
+      SequenceSelect.new("sequence", model, @session, self)
+    end
   end
 end
 class PackageForm < HtmlGrid::DivComposite
@@ -215,11 +217,18 @@ class PackageComposite < Drugs::PackageComposite
   CSS_MAP = { 0 => 'before-searchbar' }
   def breadcrumbs(model)
     div = @lookandfeel.lookup(:breadcrumb_divider)
-    seq = HtmlGrid::Link.new(:sequence, model, @session, self)
-    seq.href = @lookandfeel._event_url(:sequence, :uid => model.sequence.uid)
-    prd = HtmlGrid::Link.new(:product, model, @session, self)
-    prd.href = @lookandfeel._event_url(:product, :uid => model.product.uid)
-    [ prd, div, seq, div ].concat super
+    steps = []
+    if sequence = model.sequence
+      seq = HtmlGrid::Link.new(:sequence, model, @session, self)
+      seq.href = @lookandfeel._event_url(:sequence, :uid => sequence.uid)
+      steps = [ seq, div ]
+    end
+    if product = model.product
+      prd = HtmlGrid::Link.new(:product, model, @session, self)
+      prd.href = @lookandfeel._event_url(:product, :uid => product.uid)
+      steps = [ prd, div ].concat steps
+    end
+    steps.concat super
   end
   def partline(part, idx)
     # here in the Admin-Section we want the parts displayed differently, through Parts

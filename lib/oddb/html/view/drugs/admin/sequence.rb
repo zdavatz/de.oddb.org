@@ -277,11 +277,14 @@ class SequenceComposite < HtmlGrid::DivComposite
   end
   def snapback(model)
     div = @lookandfeel.lookup(:breadcrumb_divider)
-    prd = HtmlGrid::Link.new(:product, model, @session, self)
-    prd.href = @lookandfeel._event_url(:product, :uid => model.product.uid)
-    [ super, div, prd, div,
-      @lookandfeel.lookup(:sequence_details_for, 
-                          model.cascading_name(@session.language)) ]
+    steps = [ super ]
+    if product = model.product
+      prd = HtmlGrid::Link.new(:product, model, @session, self)
+      prd.href = @lookandfeel._event_url(:product, :uid => product.uid)
+      steps.push div, prd
+    end
+    steps.push div, @lookandfeel.lookup(:sequence_details_for, 
+                                        model.cascading_name(@session.language))
   end
 end
 class Sequence < Template

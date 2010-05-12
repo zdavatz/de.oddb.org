@@ -104,7 +104,6 @@ module ODDB
                    end rescue [$!.message]
           lines.concat report
         end
-        raise err
       ensure
         ft = args[:filetype]
         fmt = ft ? "%s: %s %s (%s)" : "%s: %s %s"
