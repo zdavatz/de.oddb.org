@@ -206,15 +206,22 @@ module Dimdi
                                             :country => 'DE')
       name = product_name(row)
       product = Drugs::Product.find_by_name(name)
-      if(!package)
+      if !package
         ## new package and possibly new product
-        import_product(row, product, name)
-      elsif(!product && !package.product)
-        package.sequence.product = create_product name
-        update_package row, package
+        import_product row, product, name
+      elsif !package.product
+        product ||= create_product name
+        if package.sequence.nil?
+          import_sequence row, product, package
+        else
+          seq = package.sequence
+          seq.product = product
+          seq.save
+          update_package row, package
+        end
       else
         ## update package-data
-        update_package(row, package)
+        update_package row, package
       end
     end
     def import_package(row, sequence, unitname)
