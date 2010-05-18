@@ -126,7 +126,7 @@ module ODDB
           run_logged_job 'import_pharmnet'
           run_logged_job 'import_whocc'
         when 15
-          update_prices
+          run_logged_job 'import_pharma24'
         end
       end
       def Updater.run_logged_job job
