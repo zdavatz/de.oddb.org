@@ -56,12 +56,15 @@ class Pharma24 < Importer
     end
     part.save
   end
+  def interesting_tables node
+    (node/'table').find_all do |inner_node| !(inner_node/'h2/a').empty? end.to_a
+  end
   def get_alphabetical agent, fst, snd
     url = "#@host/#{fst}#{snd}.html"
     page = agent.get url
     data = extract_data page
     while (link = (page/'//a[@class="pageResults"]').last) \
-            && link.innerText == '[n?chste?>>]'
+            && link.inner_text == '[n?chste?>>]'
       page = agent.get link.attributes['href']
       data.concat extract_data(page)
     end
@@ -69,40 +72,50 @@ class Pharma24 < Importer
   end
   def extract_data page
     data = []
-    all_tables = page/'table[h2/a]'
+    ## this should be page/'table[h2/a]'
+    #  -> but Nokogiri apparently can't handle that
+    all_tables = interesting_tables page
     duplicates = []
     all_tables.each do |table|
-      duplicates.concat table/'table[h2/a]'
+      duplicates.concat interesting_tables(table)
     end
     (all_tables - duplicates).each do |table|
       link, = table/'h2/a'
-      prod = {
-        :name => utf8(link.innerText),
-        :url  => link.attributes['href'],
-      }
-      if price = (table/:strong).first
-        prod.store :price_public, price.innerText.tr(',', '.').to_f
-      end
-      if prescription = (table/'td[text()="Abgabehinweis:"]').first
-        prod.store :code_prescription, 
-                   !!/Rezeptpflichtig/.match(prescription.next_sibling.innerText)
-      end
-      if content = (table/'td[text()="Packungsinhalt:"]').first
-        size_str = content.next_sibling.innerText
-        if match = /\s*(.*)\s+(\S+)\s+(\S+)\s*$/.match(size_str)
-          size = utf8 match[1]
-          unit = utf8 match[2]
-          name = utf8 match[3]
-          if size.empty?
-            size, unit, name = unit, name, nil
-          end
-          prod.update :size => size, :unit => unit, :unitname => name
+      if link
+        prod = {
+          :name => utf8(link.inner_text),
+          :url  => link.attribute('href').to_s,
+        }
+        if price = (table/:strong).first
+          prod.store :price_public, price.inner_text.tr(',', '.').to_f
         end
+        ## should be (table/'td[text()="Abgabehinweis:"]').first
+        #  -> but Nokogiri apparently can't handle that
+        if prescription = td_with_text(table, "Abgabehinweis:")
+          td, = prescription.xpath('following-sibling::td')
+          prod.store :code_prescription,
+                     !!/Rezeptpflichtig/.match(td.inner_text)
+        end
+        ## should be (table/'td[text()="Packungsinhalt:"]').first
+        #  -> but Nokogiri apparently can't handle that
+        if content = td_with_text(table, "Packungsinhalt:")
+          td, = content.xpath('following-sibling::td')
+          size_str = td.inner_text
+          if match = /\s*(.*)\s+(\S+)\s+(\S+)\s*$/.match(size_str)
+            size = utf8 match[1]
+            unit = utf8 match[2]
+            name = utf8 match[3]
+            if size.empty?
+              size, unit, name = unit, name, nil
+            end
+            prod.update :size => size, :unit => unit, :unitname => name
+          end
+        end
+        if company = (table/'a[@class="liste"]').first
+          prod.store :company, utf8(company.inner_text)
+        end
+        data.push prod
       end
-      if company = (table/'a[@class="liste"]').first
-        prod.store :company, utf8(company.innerText)
-      end
-      data.push prod
     end
     data
   end
@@ -130,6 +143,12 @@ class Pharma24 < Importer
   rescue StandardError => err
     err.message << " url: #{url}"
     raise err
+  end
+  def td_with_text table, text
+    nodes = (table/'td').find_all do |node|
+      node.text.strip == text
+    end
+    nodes.first
   end
   def update_package agent, package, opts={}
     price = package.price(:public)
