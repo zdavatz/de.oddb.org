@@ -8,9 +8,11 @@ This file
 
 	/usr/lib/ruby/site_ruby/1.8/encoding/character/utf-8.rb
 
-also needs a 
+also needs a
 
 	require 'rubygems'
+
+to get rid of the "Internal Server Error" of Apache. 
 
 I also commened out the following lines 
 
