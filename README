@@ -1,5 +1,24 @@
 de.oddb.org - OpenDrugDatabase for Germany
 ==========================================
+Below notes go by timeline. The most uptodate is on top.
+
+10:00.25.8.2010
+
+There is a difference in the data structure of
+
+	/var/www/de.oddb.org/lib/oddb
+
+between thinpower and the my local machine _*after*_ I done a 
+git pull. There must be some files missing that where not added with
+
+	git add
+
+The files that seem to be missing on my local machine are
+
+	business.rb
+	text.rb
+
+09:00.25.8.2010
 
 Trying to setup de.oddb.org results in the following error:
 
