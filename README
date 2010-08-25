@@ -2,6 +2,28 @@ de.oddb.org - OpenDrugDatabase for Germany
 ==========================================
 Below notes go by timeline. The most uptodate is on top.
 
+15:30 - 25.08.2010
+
+I am getting on after importing the DB with zcat (same like with oddb.org) I run 
+
+	sudo bin/oddbd
+
+It results in
+
+	FEHLER:  Relation »target_id_oddb_drugs_package_code« existiert bereits
+
+	FEHLER:  Relation »target_id_oddb_drugs_package_substance« existiert bereits
+
+	FEHLER:  Relation »target_id_oddb_drugs_atc_code« existiert bereits
+
+	FEHLER:  Relation »target_id_oddb_drugs_sequence_atc« existiert bereits
+
+	.software/de.oddb.org/bin/oddbd:30: undefined method `error' for nil:NilClass (NoMethodError)
+
+This looks like de.oddb.org is waiting for a service but I do not know
+what kind of service it could be. It may also be just another strange
+error.
+
 13:52 - 25.08.2010
 
 I added 		
