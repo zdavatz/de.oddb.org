@@ -2,6 +2,18 @@ de.oddb.org - OpenDrugDatabase for Germany
 ==========================================
 Below notes go by timeline. The most uptodate is on top.
 
+11:00.25.8.2010
+
+The following directory also did not exist on my local machine:
+
+	/usr/lib/ruby/site_ruby/1.8/fixes
+
+instead my local machine has the directory
+
+	/usr/lib/ruby/site_ruby/1.8/oddb/fixes
+
+but above directory is not on thinpower.
+
 10:00.25.8.2010
 
 There is a difference in the data structure of
