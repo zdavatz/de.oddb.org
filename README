@@ -2,7 +2,60 @@ de.oddb.org - OpenDrugDatabase for Germany
 ==========================================
 Below notes go by timeline. The most uptodate is on top.
 
-11:00.25.8.2010
+13:52 - 25.08.2010
+
+I added 		
+
+	require 'rubygems'
+
+to the following files on my local machine
+
+	/usr/lib/ruby/site_ruby/1.8/oddb/fixes/singular.rb
+
+In the following file
+
+	/usr/lib/ruby/site_ruby/1.8/oddb/model.rb
+
+I changed
+
+	require 'facets/module/basename'
+
+to
+
+	require 'facet/module/basename'
+
+this made the following error go away:
+
+	/usr/lib/ruby/site_ruby/1.8/rubygems/custom_require.rb:31:in `gem_original_require': no such file to load -- facets/module/basename (LoadError)
+        from /usr/lib/ruby/site_ruby/1.8/rubygems/custom_require.rb:31:in `require'
+        from /usr/lib/ruby/site_ruby/1.8/oddb/model.rb:6
+        from /usr/lib/ruby/site_ruby/1.8/oddb/drugs/active_agent.rb:4:in `require'
+        from /usr/lib/ruby/site_ruby/1.8/oddb/drugs/active_agent.rb:4
+        from /usr/lib/ruby/site_ruby/1.8/oddb/drugs.rb:1:in `require'
+        from /usr/lib/ruby/site_ruby/1.8/oddb/drugs.rb:1
+        from bin/oddbd:9:in `require'
+        from bin/oddbd:9	
+
+Now I am getting
+
+	/usr/lib/ruby/site_ruby/1.8/DBD/Pg/Pg.rb:118:in `initialize': FATAL:  Datenbank >>oddb<< existiert nicht (DBI::OperationalError)
+        from /usr/lib/ruby/site_ruby/1.8/DBD/Pg/Pg.rb:62:in `new'
+        from /usr/lib/ruby/site_ruby/1.8/DBD/Pg/Pg.rb:62:in `connect'
+        from /usr/lib/ruby/site_ruby/1.8/dbi.rb:424:in `connect'
+        from /usr/lib/ruby/site_ruby/1.8/dbi.rb:215:in `connect'
+        from /usr/lib/ruby/site_ruby/1.8/odba/connection_pool.rb:60:in `_connect'
+        from /usr/lib/ruby/site_ruby/1.8/odba/connection_pool.rb:59:in `times'
+        from /usr/lib/ruby/site_ruby/1.8/odba/connection_pool.rb:59:in `_connect'
+        from /usr/lib/ruby/site_ruby/1.8/odba/connection_pool.rb:56:in `connect'
+         ... 7 levels...
+        from /usr/lib/ruby/site_ruby/1.8/oddb/persistence.rb:4
+        from /usr/lib/ruby/site_ruby/1.8/rubygems/custom_require.rb:31:in `gem_original_require'
+        from /usr/lib/ruby/site_ruby/1.8/rubygems/custom_require.rb:31:in `require'
+        from bin/oddbd:10
+		
+I guess I need the DB now.
+
+11:00 - 25.08.2010
 
 The following directory also did not exist on my local machine:
 
@@ -14,7 +67,7 @@ instead my local machine has the directory
 
 but above directory is not on thinpower.
 
-10:00.25.8.2010
+10:00 - 25.08.2010
 
 There is a difference in the data structure of
 
@@ -30,7 +83,7 @@ The files that seem to be missing on my local machine are
 	business.rb
 	text.rb
 
-09:00.25.8.2010
+09:00 - 25.08.2010
 
 Trying to setup de.oddb.org results in the following error:
 
