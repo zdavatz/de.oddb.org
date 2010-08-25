@@ -1,5 +1,20 @@
-de.oddb.org - OpenDurgDatabase for Germany
+de.oddb.org - OpenDrugDatabase for Germany
 ==========================================
+
+Trying to setup de.oddb.org results in the following error:
+
+	/usr/lib/ruby/site_ruby/1.8/oddb/fixes/singular.rb:4:in `require': no such file to load -- active_support/inflector (LoadError)
+        from /usr/lib/ruby/site_ruby/1.8/oddb/fixes/singular.rb:4
+        from /usr/lib/ruby/site_ruby/1.8/oddb/model.rb:4:in `require'
+        from /usr/lib/ruby/site_ruby/1.8/oddb/model.rb:4
+        from /usr/lib/ruby/site_ruby/1.8/oddb/drugs/active_agent.rb:4:in `require'
+        from /usr/lib/ruby/site_ruby/1.8/oddb/drugs/active_agent.rb:4
+        from /usr/lib/ruby/site_ruby/1.8/oddb/drugs.rb:1:in `require'
+        from /usr/lib/ruby/site_ruby/1.8/oddb/drugs.rb:1
+        from bin/oddbd:9:in `require'
+        from bin/oddbd:9
+
+Debugging now.	
 
 Date: 2008-08-09-11:08
 
