@@ -2,6 +2,29 @@ de.oddb.org - OpenDrugDatabase for Germany
 ==========================================
 Below notes go by timeline. The most uptodate is on top.
 
+16.23 - 25.08.2010
+
+This file
+
+	/usr/lib/ruby/site_ruby/1.8/encoding/character/utf-8.rb
+
+also needs a 
+
+	require 'rubygems'
+
+I also commened out the following lines 
+
+	#    server = ODDB::Util::Server.new
+	#    logger.info('start') {
+	#      sprintf("starting oddb-server on %s", url) }
+	#    logger.error('fatal') { error }
+
+in
+
+	bin/oddb
+
+that makes de.oddb.org startup but I can not yet search. Apache still delivers some strange errors.
+
 15:30 - 25.08.2010
 
 I am getting on after importing the DB with zcat (same like with oddb.org) I run 
