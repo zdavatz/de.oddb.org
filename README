@@ -2,6 +2,26 @@ de.oddb.org - OpenDrugDatabase for Germany
 ==========================================
 Below notes go by timeline. The most uptodate is on top.
 
+11.02 - 26.08.2010
+
+changing
+
+	#    logger.error('fatal') { error }
+	        p error
+
+in
+
+	bin/oddbd
+
+and getting the following output
+
+	#<NameError: uninitialized constant ODDB::Util::Server>
+	bin/oddbd:18: uninitialized constant ODDB::Util::Server (NameError)
+
+after running
+
+	sudo bin/oddbd
+
 08.06 - 26.08.2010
 
 	bin/exportd
