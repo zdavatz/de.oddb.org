@@ -2,6 +2,27 @@ de.oddb.org - OpenDrugDatabase for Germany
 ==========================================
 Below notes go by timeline. The most uptodate is on top.
 
+08.06 - 26.08.2010
+
+	bin/exportd
+
+seems to run just fine once I installed
+
+	fastercsv
+
+The version online is 1.4.0. My local version of fastercsv is 1.5.3. My 
+
+	bin/oddbd
+
+crashes right after
+
+	FEHLER:  Relation »target_id_oddb_drugs_atc_code« existiert bereits
+	FEHLER:  Relation »target_id_oddb_drugs_sequence_atc« existiert bereits
+
+this is shortly before this message should come (as it does with bin/exportd)
+
+	I, [2010-08-26T08:03:37.025071 #26182]  INFO -- start: starting export-server on druby://localhost:11001
+
 16.23 - 25.08.2010
 
 This file
