@@ -53,7 +53,7 @@ module ODDB
       end
       def Updater.import_gkv(opts = {})
         importer = Import::Gkv.new
-        if url = importer.latest_url(WWW::Mechanize.new, opts)
+        if url = importer.latest_url(Mechanize.new, opts)
           importer.download_latest url, opts do |fh|
             reported_import(importer, fh,
                             :subject => 'Zubef', :filetype => 'PDF')
@@ -141,7 +141,7 @@ module ODDB
                                 opts={:all => false})
         importer = Import::Pharma24.new
         _reported_import(importer) {
-          importer.import WWW::Mechanize.new, packages
+          importer.import Mechanize.new, packages
         }
       rescue StandardError => error
         ODDB.logger.error('Updater') { error.message }
