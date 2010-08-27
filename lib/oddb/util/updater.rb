@@ -46,7 +46,7 @@ module ODDB
       def Updater.import_fachinfos(term, opts = {})
         importer = Import::PharmNet::Importer.new
         _reported_import(importer, :filetype => 'HTML') {
-          importer.import_missing(WWW::Mechanize.new, term, opts)
+          importer.import_missing(Mechanize.new, term, opts)
         }
       rescue StandardError => error
         ODDB.logger.error('Updater') { error.message }
@@ -72,7 +72,7 @@ module ODDB
                  :retry_unit => 60 }.update opts
         importer = Import::PharmNet::Importer.new
         _reported_import(importer, {:filetype => 'HTML'}, {:skip_totals => true}) {
-          importer._import(WWW::Mechanize.new, Drugs::Sequence.all, opts)
+          importer._import(Mechanize.new, Drugs::Sequence.all, opts)
         }
       rescue StandardError => error
         ODDB.logger.error('Updater') { error.message }
@@ -84,7 +84,7 @@ module ODDB
       end
       def Updater.import_whocc_guidelines
         reported_import(Import::Whocc::Guidelines.new, 
-                        WWW::Mechanize.new, :filetype => 'HTML')
+                        Mechanize.new, :filetype => 'HTML')
       end
       def Updater.report_fachinfos
         importer = Import::PharmNet::Importer.new
