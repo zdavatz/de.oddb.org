@@ -2,6 +2,28 @@ de.oddb.org - OpenDrugDatabase for Germany
 ==========================================
 Below notes go by timeline. The most uptodate is on top.
 
+08.30 - 30.08.2010
+
+This commit made the difference to start-up de.oddb.org.
+
+	http://scm.ywesee.com/?p=oddb/.git;a=commit;h=d59aaecbf23461cf5c677e3c49d492600909af74
+
+The plain ODDB Library was only setup to work with the new version of
+ch.oddb.org. So all the files from 
+
+	/var/www/de.oddb.org/lib/oddb/ 
+	
+where linked to 
+
+	/usr/lib/ruby/site_ruby/1.8/oddb/
+
+But the goal is to install the ODDB-Library seperatly for de.oddb.org
+and ch.oddb.org. The config.rb file has also been replaced by the
+config.rb from /var/www/de.oddb.org/lib/oddb/ as the .config.rb was
+setup for ch.oddb.org - see this commit:
+
+	http://scm.ywesee.com/?p=oddb/.git;a=blobdiff;f=lib/oddb/config.rb;h=280cedcb751c467a58178d5c2eb24efaa2541ab2;hp=35b9efca3430ba8a6e5f83068bba117d40cc381a;hb=8e9cbd2848bd20e18ef158ea520476a183053a34;hpb=70d736e9325049dcb565f995081d65fb6298af3a
+
 11.02 - 26.08.2010
 
 changing
