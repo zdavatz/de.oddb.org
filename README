@@ -4,6 +4,29 @@ Below notes go by timeline. The most uptodate is on top.
 
 08.30 - 30.08.2010
 
+Running
+
+	sudo ./export_fachinfos
+
+results in
+
+	/usr/lib/ruby/1.8/net/smtp.rb:562:in `check_auth_args': both user and secret are required (ArgumentError)
+        from /home/zeno/.software/de.oddb.org/lib/oddb/util/smtp_tls.rb:8:in `do_start'
+        from /usr/lib/ruby/1.8/net/smtp.rb:377:in `start'
+        from /usr/lib/ruby/1.8/net/smtp.rb:315:in `start'
+        from /usr/lib/ruby/site_ruby/1.8/oddb/util/mail.rb:77:in `sendmail'
+        from /usr/lib/ruby/site_ruby/1.8/oddb/util/mail.rb:27:in `notify_admins'
+        from /home/zeno/.software/de.oddb.org/lib/oddb/export/server.rb:73:in `safe_export'
+        from /home/zeno/.software/de.oddb.org/lib/oddb/export/server.rb:32:in `export_fachinfo_yaml'
+        from ./export_fachinfo_yaml:17
+        from /usr/lib/ruby/site_ruby/1.8/oddb/util/job.rb:16:in `call'
+        from /usr/lib/ruby/site_ruby/1.8/oddb/util/job.rb:16:in `run'
+        from ./export_fachinfo_yaml:16
+
+There must be a configuration somewhere that sets the Mail-sending method. Looking into this now.
+
+08.15 - 30.08.2010
+
 This commit made the difference to start-up de.oddb.org.
 
 	http://scm.ywesee.com/?p=oddb/.git;a=commit;h=d59aaecbf23461cf5c677e3c49d492600909af74
