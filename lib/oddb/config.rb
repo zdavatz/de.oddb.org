@@ -16,6 +16,7 @@ module ODDB
     'auth_domain'           => 'org.oddb.de',
     'auth_server'           => 'drbssl://localhost:9997',
     'config'			          => default_config_files,
+    'country'               => 'DE',
     'credentials'           => {},
     'currency_rates'        => 'druby://localhost:10999',
     'data_dir'              => File.expand_path('data', oddb_dir),
