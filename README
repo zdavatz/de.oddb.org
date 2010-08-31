@@ -2,6 +2,22 @@ de.oddb.org - OpenDrugDatabase for Germany
 ==========================================
 Below notes go by timeline. The most uptodate is on top.
 
+16.36 - 30.08.2010
+
+Always execute the the jobs of de.oddb.org from ../jobs otherwise the
+scripts will create a var directory in the jobs directory. And you don't
+want that!
+
+I also noted that if you do not use the plain ODDB Library from the scm
+but only the files from 
+
+	de.oddb.org/lib/oddb/
+
+then you will have to add some files from the pure ODDB-Library. Follow the
+errors you get when you start-up
+
+	bin/oddb
+
 08.30 - 30.08.2010
 
 Running
