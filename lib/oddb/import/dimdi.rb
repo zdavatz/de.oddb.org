@@ -24,7 +24,7 @@ require 'open-uri'
 module ODDB
   module Import
 module Dimdi
-  DIMDI_PATH = "http://www.dimdi.de/static/de/amg/fbag/"
+  DIMDI_PATH = "http://www.dimdi.de/dynamic/de/amg/fbag/downloadcenter/2010/3-quartal/"
   def Dimdi.current_date(url)
     if(match = /festbetraege-(\d{4})(\d{2})\.xls/.match(open(url).read))
       Date.new(match[1].to_i, match[2].to_i)
