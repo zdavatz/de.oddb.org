@@ -2,6 +2,26 @@ de.oddb.org - OpenDrugDatabase for Germany
 ==========================================
 Below notes go by timeline. The most uptodate is on top.
 
+10.14 - 01.09.2010
+
+The 
+
+	/var/www/de.oddb.org/lib/oddb/drugs/sequence.rb
+
+should not be overwritten with the 
+
+	sequence.rb (68 lines of code)
+
+file from the pure
+	
+	ODDB (64 lines of code)
+
+Library, or the Painfo.yaml and Fachinfo.yaml will fail with a 
+
+	undefined method `cascading_name' for #<ODDB::Drugs::Sequence:0xb5080fec>
+
+error.
+
 16.36 - 30.08.2010
 
 Always execute the the jobs of de.oddb.org from ../jobs otherwise the
