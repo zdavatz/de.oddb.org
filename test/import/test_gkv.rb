@@ -55,7 +55,7 @@ class TestGkv < Test::Unit::TestCase
   end
   def setup_page(url, html)
     response = {'content-type' => 'text/html'}
-    WWW::Mechanize::Page.new(URI.parse(url), response, html, 200)
+    Mechanize::Page.new(URI.parse(url), response, html, 200)
   end
   def simulate_import
     handler = GkvHandler.new @import.method(:process_page)
@@ -68,7 +68,7 @@ class TestGkv < Test::Unit::TestCase
     @import.report
   end
   def test_latest_url
-    agent = flexmock(WWW::Mechanize.new)
+    agent = flexmock(Mechanize.new)
     url = 'https://www.gkv-spitzenverband.de/Befreiungsliste_Arzneimittel_Versicherte.gkvnet'
     path = File.join @html_dir, 'Befreiungsliste_Arzneimittel_Versicherte.gkvnet'
     page = setup_page url, File.read(path)
