@@ -2,6 +2,27 @@ de.oddb.org - OpenDrugDatabase for Germany
 ==========================================
 Below notes go by timeline. The most uptodate is on top.
 
+14.34 - 01.09.2010
+
+For exporting the chde.xls the
+
+	readonlyd
+
+has to run at ch.oddb.org on localhost:10013. Also the
+currencyd has to run on localhost:10999
+
+I also had to change the require path for 
+
+	multilingual
+
+from
+
+	oddb.org/src/remote/galenic_group.rb:#require 'oddb/util/multilingual'
+
+to
+
+	/oddb.org/src/remote/galenic_group.rb:require 'src/remote/multilingual'
+
 10.14 - 01.09.2010
 
 The 
