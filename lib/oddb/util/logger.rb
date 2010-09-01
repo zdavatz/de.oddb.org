@@ -1,3 +1,4 @@
+require 'fileutils'
 require 'logger'
 require 'oddb/config'
 
