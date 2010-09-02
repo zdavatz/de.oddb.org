@@ -2,6 +2,16 @@ de.oddb.org - OpenDrugDatabase for Germany
 ==========================================
 Below notes go by timeline. The most uptodate is on top.
 
+15:21 - 02.09.2010
+
+Granting PowerUser and Admin privileges:
+
+	yus_grant email@ywesee.com login org.oddb.de.PowerUser
+
+and
+
+	yus_grant email@ywesee.com login org.oddb.de.Admin
+
 14.34 - 01.09.2010
 
 For exporting the chde.xls the
