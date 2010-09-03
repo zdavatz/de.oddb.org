@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # index.rbx -- de.oddb.org -- hwyss@ywesee.com
 
+require 'rubygems'
 require 'sbsm/request'
 require 'encoding/character/utf-8'
 
