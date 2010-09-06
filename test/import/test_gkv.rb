@@ -53,9 +53,9 @@ class TestGkv < Test::Unit::TestCase
     FileUtils.rm_r @pdf_dir if File.exist?(@pdf_dir)
     super
   end
-  def setup_page(url, html)
+  def setup_page(url, html, mech=nil)
     response = {'content-type' => 'text/html'}
-    Mechanize::Page.new(URI.parse(url), response, html, 200)
+    Mechanize::Page.new(URI.parse(url), response, html, 200, mech)
   end
   def simulate_import
     handler = GkvHandler.new @import.method(:process_page)
@@ -71,7 +71,7 @@ class TestGkv < Test::Unit::TestCase
     agent = flexmock(Mechanize.new)
     url = 'https://www.gkv-spitzenverband.de/Befreiungsliste_Arzneimittel_Versicherte.gkvnet'
     path = File.join @html_dir, 'Befreiungsliste_Arzneimittel_Versicherte.gkvnet'
-    page = setup_page url, File.read(path)
+    page = setup_page url, File.read(path), agent
     agent.should_receive(:get).with(url).and_return(page)
     expected = 'https://www.gkv-spitzenverband.de/upload/Zuzahlungsbefreit_sort_Name_090815_8351.pdf'
     assert_equal expected, @import.latest_url(agent)
