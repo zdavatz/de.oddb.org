@@ -15,15 +15,6 @@ module ODDB
   module Import
 class TestGkv < Test::Unit::TestCase
   include FlexMock::TestCase
-  class Invalidator
-    attr_reader :invalidated
-    def initialize
-      @invalidated = []
-    end
-    def invalidate *odba_ids
-      @invalidated.concat odba_ids
-    end
-  end
   def setup
     Drugs::Atc.instances.clear
     Drugs::Package.instances.clear
@@ -31,8 +22,7 @@ class TestGkv < Test::Unit::TestCase
     Drugs::Sequence.instances.clear
     Drugs::Substance.instances.clear
     Business::Company.instances.clear
-    @invalidator = Invalidator.new
-    svc = DRb.start_service 'druby://localhost:0', @invalidator
+    svc = DRb.start_service 'druby://localhost:0'
     ODDB.config.server_url = svc.uri
     @import = Gkv.new
     dir = File.expand_path('var', File.dirname(__FILE__))
@@ -103,11 +93,8 @@ class TestGkv < Test::Unit::TestCase
     ## simulate a call to @import.import
     report = simulate_import
 
-    assert_equal 2, @invalidator.invalidated.size
-    assert_equal 2, @invalidator.invalidated.uniq.size
-
     assert_instance_of(Array, report)
-    assert_equal(1, Drugs::Product.instances.size)
+    assert_equal(3, Drugs::Product.instances.size)
     assert_equal(true, Drugs::Product.instances.include?(product))
     assert_equal(1, product.sequences.size)
     sequence = product.sequences.first
@@ -124,7 +111,7 @@ class TestGkv < Test::Unit::TestCase
     assert_instance_of(Util::Code, code)
     assert_equal(true, code.value)
     confirmed = @import.instance_variable_get('@confirmed_pzns')
-    assert_equal(1, confirmed.size)
+    assert_equal(11, confirmed.size)
     #assert_equal(2, Business::Company.instances.size)
     #comp = Business::Company.instances.first
     #assert_equal('Ratiopharm GmbH', comp.name.de)
@@ -132,15 +119,11 @@ class TestGkv < Test::Unit::TestCase
     # do it again, nothing should change
     existing.code(:zuzahlungsbefreit).value = false
 
-    @invalidator.invalidated.clear
     ## simulate a call to @import.import
     report = simulate_import
 
-    assert_equal 2, @invalidator.invalidated.size
-    assert_equal 2, @invalidator.invalidated.uniq.size
-
     assert_instance_of(Array, report)
-    assert_equal(1, Drugs::Product.instances.size)
+    assert_equal(3, Drugs::Product.instances.size)
     assert_equal(true, Drugs::Product.instances.include?(product))
     assert_equal(1, product.sequences.size)
     sequence = product.sequences.first
@@ -157,7 +140,7 @@ class TestGkv < Test::Unit::TestCase
     assert_instance_of(Util::Code, code)
     assert_equal(true, code.value)
     confirmed = @import.instance_variable_get('@confirmed_pzns')
-    assert_equal(1, confirmed.size)
+    assert_equal(11, confirmed.size)
     #assert_equal(2, Business::Company.instances.size)
     #comp = Business::Company.instances.first
     #assert_equal('Ratiopharm GmbH', comp.name.de)
@@ -175,7 +158,7 @@ class TestGkv < Test::Unit::TestCase
     assert_nil(existing.code(:zuzahlungsbefreit))
     report = simulate_import
     assert_instance_of(Array, report)
-    assert_equal(1, Drugs::Product.instances.size)
+    assert_equal(3, Drugs::Product.instances.size)
     assert_equal(true, Drugs::Product.instances.include?(product))
     assert_equal(1, product.sequences.size)
     sequence = product.sequences.first
@@ -196,7 +179,7 @@ class TestGkv < Test::Unit::TestCase
     # do it again, nothing should change
     report = simulate_import
     assert_instance_of(Array, report)
-    assert_equal(1, Drugs::Product.instances.size)
+    assert_equal(3, Drugs::Product.instances.size)
     assert_equal(true, Drugs::Product.instances.include?(product))
     assert_equal(1, product.sequences.size)
     sequence = product.sequences.first
