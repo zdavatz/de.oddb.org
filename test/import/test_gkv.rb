@@ -63,7 +63,7 @@ class TestGkv < Test::Unit::TestCase
     path = File.join @html_dir, 'Befreiungsliste_Arzneimittel_Versicherte.gkvnet'
     page = setup_page url, File.read(path), agent
     agent.should_receive(:get).with(url).and_return(page)
-    expected = 'https://www.gkv-spitzenverband.de/upload/Zuzahlungsbefreit_sort_Name_090815_8351.pdf'
+    expected = 'https://www.gkv-spitzenverband.de/upload/Zuzahlungsbefreit_sort_Name_100901_14383.pdf'
     assert_equal expected, @import.latest_url(agent)
   end
   def test_download_latest

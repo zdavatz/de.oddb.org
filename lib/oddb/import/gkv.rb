@@ -85,7 +85,7 @@ class Gkv < Importer
     host = 'https://www.gkv-spitzenverband.de'
     url = '/Befreiungsliste_Arzneimittel_Versicherte.gkvnet'
     page = agent.get host + url
-    if link = (page/'span[@class=pdf]/a').first
+    if link = (page/'a[@class=pdf]').first
       host + link.attributes["href"]
     end
   end
