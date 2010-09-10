@@ -58,6 +58,20 @@ module ODDB
             reported_import(importer, fh,
                             :subject => 'Zubef', :filetype => 'PDF')
           end
+        else
+          # This is temporary solution.
+          # This should be composed in reporting email or logging process.
+          host = 'https://www.gkv-spitzenverband.de'
+          url = '/Befreiungsliste_Arzneimittel_Versicherte.gkvnet'
+
+          print "WARNING: Updater.import_gkv did nothing. It looks failing in grabbing PDF link.\n" 
+          print "Check HTML source code at " + host + url + "\n"
+
+          print "Probably you have to modify Gkv#latest_url method, in particular, "
+          print "this part: link = (page/'a[@class=pdf]')\n"
+          print "20100910 masa\n"
+
+          return nil
         end
       end
       def Updater.import_missing(name)

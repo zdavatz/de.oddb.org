@@ -66,6 +66,15 @@ class TestGkv < Test::Unit::TestCase
     expected = 'https://www.gkv-spitzenverband.de/upload/Zuzahlungsbefreit_sort_Name_100901_14383.pdf'
     assert_equal expected, @import.latest_url(agent)
   end
+  def test_latest_url_missing_link
+    agent = flexmock(Mechanize.new)
+    url = 'https://www.gkv-spitzenverband.de/Befreiungsliste_Arzneimittel_Versicherte.gkvnet'
+    html = "<html><body>hogehoge</body></html>"
+    page = setup_page url, html, agent
+    agent.should_receive(:get).with(url).and_return(page)
+    expected = nil
+    assert_equal nil, @import.latest_url(agent)
+  end
   def test_download_latest
     called = false
     @import.download_latest @path do |fh|
