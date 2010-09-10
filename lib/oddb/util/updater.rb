@@ -53,7 +53,7 @@ module ODDB
       end
       def Updater.import_gkv(opts = {})
         importer = Import::Gkv.new
-        if url = importer.latest_url(Mechanize.new, opts)
+        if url = opts[:pdf] || importer.latest_url(Mechanize.new, opts)
           importer.download_latest url, opts do |fh|
             reported_import(importer, fh,
                             :subject => 'Zubef', :filetype => 'PDF')
