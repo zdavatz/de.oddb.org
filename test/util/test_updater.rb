@@ -34,11 +34,22 @@ module ODDB
       end
       def test_run
         today = Date.new(2006,10)
+        job_dir = File.join ODDB.config.oddb_dir, 'jobs'
+        log_dir = File.join ODDB.config.oddb_dir, 'log'
+        cmds = %w{import_dimdi import_gkv import_pharmnet import_whocc}
+        flexmock(IO).should_receive(:popen).times(4).and_return do |popen, block|
+          cmd = cmds.shift
+          assert_equal "#{job_dir}/#{cmd} log_file=#{log_dir}/#{cmd}", popen
+        end
+        @updater.run(today)
+      end
+      def test_import_dimdi
+        today = Date.new(2006,10)
         flexmock(Util::Mail).should_receive(:notify_admins)\
           .with(String, Array).times(3)
         dimdi = flexmock(Import::Dimdi)
         dimdi.should_receive(:current_date).and_return today
-        dimdi_files = %w{wirkkurz_011006.xls darform_011006.xls fb_011006.xls}
+        dimdi_files = %w{wirkstoffkuerzel-200610.xls darreichungsformen-200610.xls festbetraege-200610.xls}
         download = StringIO.new('downloaded from dimdi')
         dimdi.should_receive(:download).times(3).and_return do |file, block|
           assert_equal dimdi_files.shift, file
@@ -47,22 +58,16 @@ module ODDB
         flexmock(Import::Dimdi::GalenicForm).new_instances.should_receive(:import).with(download).times(1).and_return []
         flexmock(Import::Dimdi::Product).new_instances.should_receive(:import).with(download).times(1).and_return []
         flexmock(Import::Dimdi::Substance).new_instances.should_receive(:import).with(download).times(1).and_return []
-        job_dir = File.join ODDB.config.oddb_dir, 'jobs'
-        log_dir = File.join ODDB.config.oddb_dir, 'log'
-        cmds = %w{import_gkv import_pharmnet import_whocc}
-        flexmock(IO).should_receive(:popen).and_return do |popen, block|
-          cmd = cmds.shift
-          assert_equal "#{job_dir}/#{cmd} log_file=#{log_dir}/#{cmd}", popen
-        end
-        @updater.run(today)
+
+        @updater.import_dimdi
       end
-      def test_run__errors
+      def test_import_dimdi__errors
         today = Date.new(2006,10)
         flexmock(Util::Mail).should_receive(:notify_admins)\
           .with(String, Array).times(0)
         dimdi = flexmock(Import::Dimdi)
         dimdi.should_receive(:current_date).and_return today
-        dimdi_files = %w{wirkkurz_011006.xls darform_011006.xls fb_011006.xls}
+        dimdi_files = %w{wirkstoffkuerzel-200610.xls darreichungsformen-200610.xls festbetraege-200610.xls}
         download = StringIO.new('downloaded from dimdi')
         dimdi.should_receive(:download).times(1).and_return do |file, block|
           assert_equal dimdi_files.shift, file
@@ -75,17 +80,19 @@ module ODDB
           cmd = cmds.shift
           assert_equal "#{job_dir}/#{cmd} log_file=#{log_dir}/#{cmd}", popen
         end
+
         assert_raises RuntimeError do
-          @updater.run(today)
+          @updater.import_dimdi
         end
+ 
       end
-      def test_run__later_errors
+      def test_import_dimdi__later_errors
         today = Date.new(2006,10)
         flexmock(Util::Mail).should_receive(:notify_admins)\
           .with(String, Array).times(3)
         dimdi = flexmock(Import::Dimdi)
         dimdi.should_receive(:current_date).and_return today
-        dimdi_files = %w{wirkkurz_011006.xls darform_011006.xls fb_011006.xls}
+        dimdi_files = %w{wirkstoffkuerzel-200610.xls darreichungsformen-200610.xls festbetraege-200610.xls}
         download = StringIO.new('downloaded from dimdi')
         dimdi.should_receive(:download).times(3).and_return do |file, block|
           assert_equal dimdi_files.shift, file
@@ -94,16 +101,11 @@ module ODDB
         flexmock(Import::Dimdi::GalenicForm).new_instances.should_receive(:import).with(download).times(1).and_return do raise 'import error' end
         flexmock(Import::Dimdi::Product).new_instances.should_receive(:import).with(download).times(1).and_return do raise 'import error' end
         flexmock(Import::Dimdi::Substance).new_instances.should_receive(:import).with(download).times(1).and_return do raise 'import error' end
-        job_dir = File.join ODDB.config.oddb_dir, 'jobs'
-        log_dir = File.join ODDB.config.oddb_dir, 'log'
-        cmds = %w{import_gkv import_pharmnet import_whocc}
-        flexmock(IO).should_receive(:popen).and_return do |popen, block|
-          cmd = cmds.shift
-          assert_equal "#{job_dir}/#{cmd} log_file=#{log_dir}/#{cmd}", popen
-        end
+ 
         assert_nothing_raised do
-          @updater.run(today)
+          @updater.import_dimdi
         end
+
       end
     end
   end
