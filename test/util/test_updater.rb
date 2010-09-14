@@ -107,6 +107,24 @@ module ODDB
         end
 
       end
+      def test_import_gkv
+        today = Date.new(2006,10)
+        flexmock(Util::Mail).should_receive(:notify_admins)\
+          .with(String, Array).times(1)
+        gkv = flexmock(Import::Gkv).new_instances
+        gkv.should_receive(:current_date).and_return today
+        pdf_url = 'https://www.gkv-spitzenverband.de/upload/Zuzahlungsbefreit_sort_Name_100901_14383.pdf'
+        gkv.should_receive(:latest_url).and_return(pdf_url)
+        download = StringIO.new('downloaded from gkv')
+        gkv.should_receive(:download_latest).times(1).and_return do |url, opt, block|
+          assert_equal pdf_url, url
+          block.call download
+        end
+        gkv.should_receive(:import).with(download).times(1).and_return []
+
+        @updater.import_gkv
+
+      end
     end
   end
 end
