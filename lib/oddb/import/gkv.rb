@@ -59,6 +59,7 @@ class Gkv < Importer
     @existing_companies = 0
     @existing_substances = 0
     @doubtful_pzns = []
+    @missingname_uids = []  # UIDs of products which has no name
   end
   def download_latest(url, opts={}, &block)
     opts = {:date => Date.today}.merge(opts)
@@ -360,22 +361,26 @@ class Gkv < Importer
     } unless(@confirmed_pzns.empty?)
     Drugs::Product.all { |product|
       unless(product.company)
-        keys = product.name.de.split
-        key = keys.pop
-        if(key == 'Comp')
+        unless(product.name.de)
+          @missingname_uids.push product.odba_id
+        else
+          keys = product.name.de.split
           key = keys.pop
-        end
-        company = Business::Company.find_by_name(key)
-        if(company.nil?)
-          companies = Business::Company.search_by_name(key)
-          if(companies.size == 1)
-            company = companies.pop
+          if(key == 'Comp')
+            key = keys.pop
           end
-        end
-        if(company)
-          @assigned_companies += 1
-          product.company = company
-          save product
+          company = Business::Company.find_by_name(key)
+          if(company.nil?)
+            companies = Business::Company.search_by_name(key)
+            if(companies.size == 1)
+              company = companies.pop
+            end
+          end
+          if(company)
+            @assigned_companies += 1
+            product.company = company
+            save product
+          end
         end
       end
     }
@@ -413,6 +418,9 @@ class Gkv < Importer
     doubtfuls = @doubtful_pzns.collect do |pzn|
       "http://de.oddb.org/de/drugs/package/pzn/#{pzn}"
     end
+    missingnames = @missingname_uids.collect do |uid|
+      "http://de.oddb.org/de/drugs/product/uid/#{uid}"
+    end
     [
       sprintf("Imported %5i Zubef-Entries on %s:",
               @count, Date.today.strftime("%d.%m.%Y")),
@@ -430,7 +438,10 @@ class Gkv < Importer
               @assigned_equivalences),
       sprintf("Assigned %5i Companies", @assigned_companies),
       sprintf("Created  %5i Incomplete Packages:", doubtfuls.size),
-    ].concat doubtfuls
+    ].concat(doubtfuls) +
+    [
+      sprintf("Created  %5i Product(s) without a name (missing product name):", missingnames.size),
+    ].concat(missingnames)
   end
   def sanitize_substance_name(str)
     str.to_s.downcase.gsub(/[^a-z]/, '')
