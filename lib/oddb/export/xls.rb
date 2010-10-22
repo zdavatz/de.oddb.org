@@ -36,7 +36,7 @@ class ComparisonDeCh
             }.first))
           data.push [comparable, package]
         end
-      rescue
+      rescue NoMethodError => err
         # This is a temporary solution for a NoMethodError bug
         # See the bug http://dev.ywesee.com/wiki.php/Masa/20101020-debug-importChdeXls#DebugChde
         @error_data.push("http://ch.oddb.org/en/gcc/compare/ean13/" + package.code(:ean).value)
