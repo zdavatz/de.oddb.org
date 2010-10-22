@@ -11,6 +11,8 @@ module ODDB
   module Export
     module Xls
 class ComparisonDeCh
+  attr_reader :error_data
+  attr_reader :backtrace_info
   def export(drb_uri, io)
     write_xls(io, collect_comparables(drb_uri))
   end
@@ -23,13 +25,21 @@ class ComparisonDeCh
       package = Remote::Drugs::Package.new(drb_uri, remote,
                                            1.0 / currency_rate, 
                                            tax_factor)
-      if(package.price(:public) \
-         && (comparable = package.local_comparables.select { |pac|
-            pac.price(:public)
-          }.sort_by { |pac|
-            pac.price(:public)
-          }.first))
-        data.push [comparable, package]
+      begin
+        if(package.price(:public) \
+          && (comparable = package.local_comparables.select { |pac|
+              pac.price(:public)
+            }.sort_by { |pac|
+              pac.price(:public)
+            }.first))
+          data.push [comparable, package]
+        end
+      rescue
+        # This is a temporary solution for a NoMethodError bug
+        # See the bug http://dev.ywesee.com/wiki.php/Masa/20101020-debug-importChdeXls#DebugChde
+        @error_data.push("http://ch.oddb.org/en/gcc/compare/ean13/" + package.code(:ean).value)
+        @backtrace_info.push("\nhttp://ch.oddb.org/en/gcc/compare/ean13/" + package.code(:ean).value)
+        @backtrace_info.concat err.backtrace
       end
       nil # don't return data from the block across drb
     }
