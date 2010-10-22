@@ -64,7 +64,7 @@ module ODDB
           # See the bug http://dev.ywesee.com/wiki.php/Masa/20101020-debug-importChdeXls#DebugChde
           if(exporter_class ==  Export::Xls::ComparisonDeCh)
             unless(exporter.error_data.empty?)
-              message = "\nBut the chde.xls file was generated successfully.\n\n"
+              message = "\nThe chde.xls file was generated successfully.\n\n"
               message += "The following data was not able to be compared due to a NoMethodError:\n"
               backtrace_info = "The original backtrace information:\n" + exporter.backtrace_info.join("\n").to_s + "\n"
               raise NoMethodError, message + exporter.error_data.join("\n").to_s + "\n\n" + backtrace_info
