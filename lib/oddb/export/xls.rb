@@ -21,6 +21,8 @@ class ComparisonDeCh
   end
   def collect_comparables(drb_uri)
     data = []
+    @error_data = []
+    @backtrace_info = []
     DRb::DRbObject.new(nil, drb_uri).remote_each_package { |remote|
       package = Remote::Drugs::Package.new(drb_uri, remote,
                                            1.0 / currency_rate, 
