@@ -6,15 +6,10 @@ $KCODE = 'u'
 require 'rubygems'
 require 'oddb/util/job'
 
-$opts = if ARGV[0] != "" 
-          {:pdf => ARGV[0]} 
-       else
-          {}
-       end
 module ODDB
   module Util
     Job.run do 
-      Updater.import_gkv $opts
+      Updater.import_gkv 
     end
   end
 end
