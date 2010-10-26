@@ -201,30 +201,32 @@ module Dimdi
       end
     end
     def import_row(row)
-      @package_date = cell(row, 13) || @date
-      @count += 1
-      pzn = u(cell(row, 0).to_i.to_s)
-      package = Drugs::Package.find_by_code(:type    => 'cid',
+      if(value = cell(row, 0))
+        @package_date = cell(row, 13) || @date
+        @count += 1
+        pzn = u(value.to_i.to_s)
+        package = Drugs::Package.find_by_code(:type    => 'cid',
                                             :value   => pzn,
                                             :country => 'DE')
-      name = product_name(row)
-      product = Drugs::Product.find_by_name(name)
-      if !package
-        ## new package and possibly new product
-        import_product row, product, name
-      elsif !package.product
-        product ||= create_product name
-        if package.sequence.nil?
-          import_sequence row, product, package
+        name = product_name(row)
+        product = Drugs::Product.find_by_name(name)
+        if !package
+          ## new package and possibly new product
+          import_product row, product, name
+        elsif !package.product
+          product ||= create_product name
+          if package.sequence.nil?
+            import_sequence row, product, package
+          else
+            seq = package.sequence
+            seq.product = product
+            seq.save
+            update_package row, package
+          end
         else
-          seq = package.sequence
-          seq.product = product
-          seq.save
+          ## update package-data
           update_package row, package
         end
-      else
-        ## update package-data
-        update_package row, package
       end
     end
     def import_package(row, sequence, unitname)
