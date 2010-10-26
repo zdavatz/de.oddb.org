@@ -75,24 +75,27 @@ module Dimdi
       @existing = 0
     end
     def import_row(row)
-      @count += 1
       abbr = cell(row, 0)
-      description = capitalize_all(cell(row, 1))
-      galenic_form = Drugs::GalenicForm.find_by_code(:value => abbr, 
+      value = cell(row, 1)
+      if(abbr != nil && value != nil)
+        @count += 1
+        description = capitalize_all(value)
+        galenic_form = Drugs::GalenicForm.find_by_code(:value => abbr, 
                                                      :type => "galenic_form",
                                                      :country => 'DE')
-      galenic_form ||= Drugs::GalenicForm.find_by_description(description)
-      if(galenic_form)
-        @existing += 1
-      else
-        @created += 1
-        galenic_form = Drugs::GalenicForm.new
-        galenic_form.description.de = description
-      end
-      galenic_form.add_code(Util::Code.new("galenic_form", 
+        galenic_form ||= Drugs::GalenicForm.find_by_description(description)
+        if(galenic_form)
+          @existing += 1
+        else
+          @created += 1
+          galenic_form = Drugs::GalenicForm.new
+          galenic_form.description.de = description
+        end
+        galenic_form.add_code(Util::Code.new("galenic_form", 
                                            abbr, 'DE', @date))
-      galenic_form.save
-      galenic_form
+        galenic_form.save
+        galenic_form
+      end
     end
     def postprocess
       {
