@@ -2,6 +2,12 @@ de.oddb.org - OpenDrugDatabase for Germany
 ==========================================
 Below notes go by timeline. The most uptodate is on top.
 
+11:15 - 26.10.2010
+
+If you want to import a PDF directly, do
+
+  $ jobs/import_gkv pdf=http://www.xxx.com/abc.pdf
+
 15:21 - 02.09.2010
 
 Granting PowerUser and Admin privileges:
