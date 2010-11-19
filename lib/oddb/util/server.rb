@@ -50,6 +50,10 @@ module ODDB
         t
       end
       def grant_download(*arg)
+        # This method is for bin/admin sub-command
+        usage = "Usage:\n" +
+          "  Set  grant: grant_download 'email address', 'file', Time.local(20yy,mm,dd)\n" +
+          "  Show grant: grant_download 'email address'\n" 
         email = arg[0]
         file  = arg[1]
         expiry_time = arg[2]
@@ -69,8 +73,8 @@ module ODDB
             'No registration for ' + email
           end
         else
-          'help'
-        end
+          usage
+       end
       end
       def create_product name
         if prod = ODDB::Drugs::Product.find_by_name(name)
