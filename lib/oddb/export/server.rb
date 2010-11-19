@@ -34,6 +34,26 @@ module ODDB
       def Server.export_patinfo_yaml
         safe_export Export::Yaml::Patinfos, "patinfos.de.oddb.yaml"
       end
+      def Server.report_download
+        # Note: if the day is in new month from the last week,
+        # it may not include all the log information.
+        subject = sprintf("de.ODDB.org Report - Download-Statistics - %s", 
+                          Time.now.strftime('%m/%Y'))
+        time = Time.now
+        log_dir = File.join(ODDB.config.download_log_dir, time.year.to_s)
+        log_file = File.join(log_dir, time.month.to_s + '.log')
+        begin
+          lines = File.readlines(log_file)
+        rescue StandardError => e
+          lines = [
+             "Nothing to Report.",
+             nil,
+             e.class,
+             e.message
+          ] + e.backtrace
+        end
+        Util::Mail.notify_admins(subject, lines)
+      end
       def Server.run(today = Date.today)
         on_monthday(1, today) {
           export_chde_xls
@@ -42,9 +62,18 @@ module ODDB
           export_info_yaml :fachinfo
           export_info_yaml :patinfo
         end
+        on_weekday(0, today) do
+          report_download
+        end
       end
       def Server.on_monthday(day, today = Date.today, &block)
         if(today.day == day)
+          block.call
+        end
+      end
+      def Server.on_weekday(wday, today = Date.today, &block)
+        # 0-6, 0:Sunday
+        if(today.wday == wday)
           block.call
         end
       end
