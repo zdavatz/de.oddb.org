@@ -31,6 +31,15 @@ class Global < SBSM::State
       _compare(code)
     end
   end
+  def grant_download
+    email = @session.user_input(:email)
+    file = @session.user_input(:file)
+    if email && file && user = ODDB::Business::GrantDownload.find_by_email(email)
+      unless user.expired?(@session.user_input(:file))
+        _download(@session.user_input(:file))
+      end
+    end
+  end
   def _download(file)
     path = File.join ODDB.config.export_dir, file
     if File.exist?(path)

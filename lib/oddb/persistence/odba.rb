@@ -8,6 +8,7 @@ require 'odba/drbwrapper'
 
 require 'oddb/persistence/odba/business/company'
 require 'oddb/persistence/odba/business/invoice'
+require 'oddb/persistence/odba/business/grant_download'
 require 'oddb/persistence/odba/drugs/atc'
 require 'oddb/persistence/odba/drugs/galenic_form'
 require 'oddb/persistence/odba/drugs/galenic_group'

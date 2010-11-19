@@ -34,7 +34,7 @@ class Validator < SBSM::Validator
              :login, :login_, :logout, :new_package, :new_sequence, :package,
              :package_infos, :patinfo, :proceed_download, :proceed_export,
              :proceed_poweruser, :product, :products, :remote_infos, :search,
-             :sequence, :sort, :update ]
+             :sequence, :sort, :update, :grant_download ]
   NUMERIC = [ :active_agent, :code_festbetragsgruppe,
               :code_festbetragsstufe, :composition, :days, :equivalence_factor,
               :months, :multi, :offset, :part, :price_exfactory,

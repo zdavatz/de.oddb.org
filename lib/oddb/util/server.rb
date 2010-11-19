@@ -49,6 +49,29 @@ module ODDB
         @admin_threads.add(t)
         t
       end
+      def grant_download(*arg)
+        email = arg[0]
+        file  = arg[1]
+        expiry_time = arg[2]
+        if arg.length == 3      # register
+          unless user = ODDB::Business::GrantDownload.find_by_email(email)
+            user = ODDB::Business::GrantDownload.new(email)
+          end
+          user.grant_download(file, expiry_time)
+          user.save
+          ODDB.config.http_server + '/de/temp/grant_download/email/' + email + '/file/' + file
+        elsif arg.length == 1   # search
+          if user = ODDB::Business::GrantDownload.find_by_email(email)
+            grant_list = user.grant_list.sort_by{|filename, expirytime| expirytime}.reverse
+            str = grant_list[0..3].map{|x| x[1].strftime("%Y%m%d") + ', ' + x[0]}.join("\n")
+            "grant list(total:" + grant_list.length.to_s + "): " + email + "\n" + str
+          else
+            'No registration for ' + email
+          end
+        else
+          'help'
+        end
+      end
       def create_product name
         if prod = ODDB::Drugs::Product.find_by_name(name)
           "The product already exists. You may edit it at http://de.oddb.org/de/drugs/product/uid/#{prod.uid}"
