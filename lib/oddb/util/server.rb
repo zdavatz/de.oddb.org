@@ -64,7 +64,7 @@ module ODDB
           if user = ODDB::Business::GrantDownload.find_by_email(email)
             grant_list = user.grant_list.sort_by{|filename, expirytime| expirytime}.reverse
             str = grant_list[0..3].map{|x| x[1].strftime("%Y%m%d") + ', ' + x[0]}.join("\n")
-            "grant list(total:" + grant_list.length.to_s + "): " + email + "\n" + str
+            "grant list(total:" + grant_list.length.to_s + "): odba_id: " + user.uid.to_s + "\n" + str
           else
             'No registration for ' + email
           end

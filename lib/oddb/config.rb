@@ -26,6 +26,7 @@ module ODDB
     'db_backend'            => :psql,
     'debug_recipients'      => [],
     'dojo_debug'            => false,
+    'download_log_dir'      => File.expand_path('log/download', oddb_dir),
     'download_uncompressed' => [
       'compendium_de.oddb.org.firefox.epub',
       'compendium_de.oddb.org.htc.prc',
