@@ -17,6 +17,7 @@ module ODDB
         @data_dir = File.expand_path('var/xls', File.dirname(__FILE__))
         FileUtils.mkdir_p(@data_dir)
       end
+=begin
       def test_run
         flexmock(Util::Mail).should_receive(:notify_admins)\
           .and_return { |subj, body| flunk(body.join("\n")) }
@@ -105,12 +106,57 @@ module ODDB
         assert_equal(true, called, 
                      "Should have called the block: defaults to today")
       end
-      def test_safe_export
+     def test_safe_export
         flexmock(Util::Mail).should_receive(:notify_admins).times(1)
         klass = Struct.new(:foo, :bar)
         Server.safe_export(klass) { |exporter|
           assert_instance_of(klass, exporter)
           raise "exception - admins should be notified" }
+      end
+=end
+      def test_on_weekday
+        called = false
+        Server.on_weekday(0, Date.new(2010,11,22)) {
+          called = true
+        }
+        assert_equal(false, called, "Should not have called the block: 0 != 1")
+        Server.on_weekday(0, Date.new(2010,11,21)) {
+          called = true
+        }
+        assert_equal(true, called, "Should have called the block: 0 == 0")
+        called = false
+        Server.on_weekday(Date.today.wday) {
+          called = true
+        }
+        assert_equal(true, called, 
+                     "Should have called the block: defaults to today")
+      end
+      def test_report_download__1
+        # Case: there is no log file
+        flexstub(File) do |klass|
+          klass.should_receive(:join)
+          klass.should_receive(:readlines).and_raise(StandardError)
+        end
+        subject = sprintf("de.ODDB.org Report - Download-Statistics - %s", Time.now.strftime('%m/%Y'))
+        lines = /Nothing/
+        flexstub(Util::Mail).should_receive(:notify_admins).with(subject, lines)  # check lines here
+        assert_nothing_raised do 
+          Server.report_download
+        end
+
+      end
+      def test_report_download__2
+        # Case: there is a log file
+        subject = sprintf("de.ODDB.org Report - Download-Statistics - %s", Time.now.strftime('%m/%Y'))
+        lines = 'test report'
+        flexstub(File) do |klass|
+          klass.should_receive(:join)
+          klass.should_receive(:readlines).and_return(lines)
+        end
+        flexstub(Util::Mail).should_receive(:notify_admins).with(subject, lines)  # check lines here
+        assert_nothing_raised do 
+          Server.report_download
+        end
       end
     end
   end
