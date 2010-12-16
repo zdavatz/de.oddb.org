@@ -21,6 +21,26 @@ module ODDB
         FileUtils.rm_r(@xls_dir) if(File.exist?(@xls_dir))
         @config.should_receive(:var).and_return(@var)
       end
+      def set_time_temporarily(year, month)
+        flexstub(Time) do |timeclass|
+          timeclass.should_receive(:now).and_return do
+            flexmock do |nowobj|
+              nowobj.should_receive(:month).and_return(month)
+              nowobj.should_receive(:year).and_return(year)
+            end
+          end
+        end
+      end
+      def test_download_path
+        set_time_temporarily(2010, 4)
+        download_path = "http://www.dimdi.de/dynamic/de/amg/fbag/downloadcenter/2010/2-quartal/"
+        assert_equal(download_path, Dimdi.download_path)
+      end
+      def test_download_path2
+        set_time_temporarily(2009, 3)
+        download_path = "http://www.dimdi.de/dynamic/de/amg/fbag/downloadcenter/2009/1-quartal/"
+        assert_equal(download_path, Dimdi.download_path)
+      end
       def test_current_date
         path = File.join(@data_dir, 'html', 'dimdi_index.html')
         assert_equal(Date.new(2010,4), Dimdi.current_date(path))

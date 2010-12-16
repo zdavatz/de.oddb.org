@@ -24,14 +24,19 @@ require 'open-uri'
 module ODDB
   module Import
 module Dimdi
-  DIMDI_PATH = "http://www.dimdi.de/dynamic/de/amg/fbag/downloadcenter/2010/4-quartal/"
+  DIMDI_PATH = "http://www.dimdi.de/dynamic/de/amg/fbag/downloadcenter/"
+  def Dimdi.download_path
+    quater = ((Time.now.month-1)/3+1).to_s
+    year  = Time.now.year.to_s
+    return DIMDI_PATH + year + "/" + quater + "-quartal/"
+  end
   def Dimdi.current_date(url)
     if(match = /festbetraege-(\d{4})(\d{2})\.xls/.match(open(url).read))
       Date.new(match[1].to_i, match[2].to_i)
     end
   end
   def Dimdi.download(file, &block)
-    url = File.join(DIMDI_PATH, file)
+    url = File.join(download_path, file)
     xls_dir = File.join(ODDB.config.var, 'xls')
     FileUtils.mkdir_p(xls_dir)
     dest = File.join(xls_dir, file)
