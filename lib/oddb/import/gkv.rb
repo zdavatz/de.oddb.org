@@ -86,8 +86,12 @@ class Gkv < Importer
     host = 'https://www.gkv-spitzenverband.de'
     url = '/Befreiungsliste_Arzneimittel_Versicherte.gkvnet'
     page = agent.get host + url
-    if link = (page/'a[@class=pdf]').first
-      host + link.attributes["href"]
+    file_base_name = "Zuzahlungsbefreit"
+    link = (page/'a').map{|tag| tag['href']}.grep(/#{file_base_name}/)
+    if link.length == 1 and link.to_s.match(/\.pdf/)
+      return host + link.to_s
+    else
+      return nil
     end
   end
   def import fh, opts={}
