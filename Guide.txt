@@ -1,3 +1,19 @@
 = Guide for installing de.oddb.org 
 
+Just for Reference, also see this Guide:
 
+* http://choddb.rubyforge.org/Guide_txt.html
+
+== Install the following gems
+
+  1.  currency
+  2.  htmlgrid
+  3.  odba
+  4.  oddb.org
+  5.  rclconf
+  6.  rpdf2txt
+  7.  sbsm
+  8.  swissmedic-diff
+  9.  ydim
+  10. yus
+  11. de.oddb
