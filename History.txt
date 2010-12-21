@@ -1,0 +1,5 @@
+=== 2.0.0 / 21.12.2010
+
+* Version 2.0 of oddb.org. Running live at http://de.oddb.org
+
+  * Birthday!
