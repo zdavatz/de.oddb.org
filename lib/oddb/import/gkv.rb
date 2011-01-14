@@ -179,7 +179,7 @@ class Gkv < Importer
       agent.dose = dose
       save agent
       substance = agent.substance
-      if(substance.name != name)
+      if(name && substance.name != name)
         substance.name.add_synonym(name) && save(substance)
       end
     elsif(substance = import_substance(name))
