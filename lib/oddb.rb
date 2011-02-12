@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # ODDB -- de.oddb.org -- 27.10.2006 -- hwyss@ywesee.com
 
-VERSION = '2.0.0'
+VERSION = '2.0.1'
 
 module ODDB
   ODDB_VERSION =
