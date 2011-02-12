@@ -5,6 +5,7 @@ require 'hoe'
 require 'lib/hoe/git.rb'
 
 Hoe.plugin :git
+Hoe.plugins.delete :clean
 
 # Hoe.plugin :compiler
 # Hoe.plugin :cucumberfeatures
