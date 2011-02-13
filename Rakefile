@@ -2,7 +2,8 @@
 
 require 'rubygems'
 require 'hoe'
-require 'lib/hoe/git.rb'
+
+## To run 'rake git:manifest' you will need the 'hoe-git' gem.
 
 Hoe.plugin :git
 Hoe.plugins.delete :clean
