@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# ODDB -- de.oddb.org -- 27.10.2006 -- hwyss@ywesee.com
+# ODDB -- de.oddb.org -- 13.02.2011 -- zdavatz@ywesee.com
 
 VERSION = '2.0.1'
 
