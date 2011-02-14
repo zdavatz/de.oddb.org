@@ -26,8 +26,8 @@ Hoe.spec 'de.oddb' do
   # (delete this comment too, of course)
 
 developer('Masaomi Hatakeyama, Zeno R.R. Davatz', 'mhatakeyama@ywesee.com, zdavatz@ywesee.com')
-
-  # self.rubyforge_name = 'de.oddbx' # if different than 'de.oddb'
+self.local_rdoc_dir = 'rdoc'
+self.rubyforge_name = 'deoddb' # is different than gem name 'de.oddb'
 end
 
 # vim: syntax=ruby
