@@ -1,3 +1,10 @@
+=== 2.0.1 / 14.02.2011
+
+* Updated Rakefile 
+  
+  * doc dir no longer gets deleted when running rake publish_docs
+  * Thanks for the help Ben Bleything
+
 === 2.0.0 / 21.12.2010
 
 * Version 2.0 of oddb.org. Running live at http://de.oddb.org
