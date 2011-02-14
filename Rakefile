@@ -6,7 +6,6 @@ require 'hoe'
 ## To run 'rake git:manifest' you will need the 'hoe-git' gem.
 
 Hoe.plugin :git
-Hoe.plugins.delete :clean
 
 # Hoe.plugin :compiler
 # Hoe.plugin :cucumberfeatures
