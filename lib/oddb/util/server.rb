@@ -10,6 +10,7 @@ require 'oddb/util/updater'
 require 'oddb/export/rss'
 require 'paypal'
 require 'sbsm/drbserver'
+require 'fileutils'
 
 module ODDB
   module Util
@@ -48,6 +49,40 @@ module ODDB
         t.priority = priority
         @admin_threads.add(t)
         t
+      end
+      def atcless
+        out_dir  = File.expand_path('../../../log', File.dirname(__FILE__))
+        FileUtils.mkdir_p out_dir
+        out_file = File.join(out_dir, 'atcless')
+
+        open(out_file,"w") do |out|
+          out.print "Total ATCs: ", ODDB::Drugs::Atc.all.length, "\n"
+          out.print "Total products: ", ODDB::Drugs::Product.all.length, "\n"
+          all_sequences = 0
+          all_packages  = 0
+          atcless_sequences = []
+          ODDB::Drugs::Product.all.each do |product|
+            all_sequences += product.sequences.length
+            product.sequences.each do |sequence|
+              all_packages += sequence.packages.length
+              unless sequence.atc
+                if sequence.fachinfo.to_s == ""
+                  atcless_sequences << [sequence.cascading_name('de'), '']
+                else
+                  atcless_sequences << [sequence.cascading_name('de'), 'FI']
+                end
+              end
+            end
+          end
+          out.print "Total sequences: ", all_sequences, "\n"
+          out.print "Total sequences without ATC: ", atcless_sequences.uniq.length, "\n"
+          out.print "Total packages: ", all_packages, "\n"
+          out.print "\n"
+          out.print "ATC less sequence list\n"
+          atcless_sequences.uniq.sort.each_with_index do |seq, i|
+            out.print i+1, "\t", seq[1], "\t", seq[0], "\n"
+          end
+        end
       end
       def grant_download(*arg)
         # This method is for bin/admin sub-command
