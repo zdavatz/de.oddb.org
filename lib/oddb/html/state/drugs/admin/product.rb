@@ -37,6 +37,9 @@ class Product < Global
       unless(set.nil?)
         @model.data_origins.store :company, @session.user.email
         @model.save
+        @model.sequences.each do |seq|
+          seq.product = @model
+        end
       end
     end
     self
