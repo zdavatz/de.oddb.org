@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# Util::Server -- de.oddb.org -- 18.05.2011 -- mhatakeyama@ywesee.com
 # Util::Server -- de.oddb.org -- 01.09.2006 -- hwyss@ywesee.com
 
 require 'oddb/html/util/known_user'
@@ -179,6 +180,15 @@ module ODDB
             ODDB.logger.error('rss_feed') { error.backtrace.pretty_inspect }
           end
         }
+      end
+      def delete_all_active_agent_but_first
+        ODDB::Drugs::Package.all.each do |pack|
+          if pack.code(:zuzahlungsbefreit)
+            while pack.active_agents[1]
+              pack.active_agents[1].delete
+            end
+          end
+        end
       end
     end
   end
