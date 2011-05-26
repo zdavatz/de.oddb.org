@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
-# Util::TestServer -- de.oddb.org -- 22.11.2006 -- hwyss@ywesee.com
+# ODDB::Util::TestServer -- de.oddb.org -- 26.05.2011 -- mhatakeyama@ywesee.com
+# ODDB::Util::TestServer -- de.oddb.org -- 22.11.2006 -- hwyss@ywesee.com
 
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
@@ -42,7 +43,7 @@ module ODDB
         t = @server._admin('foo', result)
         assert_instance_of(Thread, t)
         t.join
-        assert_match("test/util/test_server.rb:37:in `test_admin__3': some error", result)
+        assert_match("test/util/test_server.rb:38:in `test_admin__3': some error", result)
       end
       def test_grant_download__1
         # Case: Usage 
@@ -88,6 +89,24 @@ module ODDB
         ODDB.config.http_server = 'http://de.oddb.org'
         result = "http://de.oddb.org/de/temp/grant_download/email/aaa@bbb.ccc/file/test.dat"
         assert_equal(result, @server.grant_download('aaa@bbb.ccc', 'test.dat', Time.local(2010,12,31)))
+      end
+      def test_delete_all_active_agent_but_first
+        active_agent = flexmock('active_agent')
+        package = flexmock('package', 
+                           :code => 'code',
+                           :active_agents => [active_agent, active_agent]
+                          )
+        flexmock(active_agent, :package => package)
+        def active_agent.delete
+          self.package.active_agents.delete_at(1)
+        end
+        flexmock(ODDB::Drugs::Package, :all => [package])
+        assert_equal([package], @server.delete_all_active_agent_but_first)
+      end
+      def test_save_all_package
+        package = flexmock('package', :save => nil)
+        flexmock(ODDB::Drugs::Package, :all => [package])
+        assert_equal('Done', @server.save_all_package)
       end
     end
   end
