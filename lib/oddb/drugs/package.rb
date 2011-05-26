@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
-# Drugs::Package -- de.oddb.org -- 14.11.2006 -- hwyss@ywesee.com
+# ODDB::Drugs::Package -- de.oddb.org -- 26.05.2011 -- mhatakeyama@ywesee.com
+# ODDB::Drugs::Package -- de.oddb.org -- 14.11.2006 -- hwyss@ywesee.com
 
 require 'oddb/model'
+require 'oddb/util/money'
 
 module ODDB
   module Drugs

@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
-# Import::Gkv -- de.oddb.org -- 17.08.2009 -- hwyss@ywesee.com
+# ODDB::Import::Gkv -- de.oddb.org -- 26.05.2011 -- mhatakeyama@ywesee.com
+# ODDB::Import::Gkv -- de.oddb.org -- 17.08.2009 -- hwyss@ywesee.com
 
 require 'rpdf2txt/default_handler'
 require 'rpdf2txt/parser'
@@ -37,6 +38,7 @@ class GkvHandler < Rpdf2txt::SimpleHandler
     reset
   end
   def send_page
+    send_line_break
     @callback.call @rows
     @rows = []
     reset
@@ -451,6 +453,7 @@ class Gkv < Importer
     str.to_s.downcase.gsub(/[^a-z]/, '')
   end
   def save(obj)
+    obj.save
     obj.save
   end
   def process_page rows

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
-# Util::Server -- de.oddb.org -- 18.05.2011 -- mhatakeyama@ywesee.com
-# Util::Server -- de.oddb.org -- 01.09.2006 -- hwyss@ywesee.com
+# ODDB::Util::Server -- de.oddb.org -- 26.05.2011 -- mhatakeyama@ywesee.com
+# ODDB::Util::Server -- de.oddb.org -- 01.09.2006 -- hwyss@ywesee.com
 
 require 'oddb/html/util/known_user'
 require 'oddb/html/util/session'
@@ -189,6 +189,17 @@ module ODDB
             end
           end
         end
+      end
+      def save_all_package
+        total = ODDB::Drugs::Package.all.length
+        i = 1
+        ODDB::Drugs::Package.all.each do |pack|
+          #print i, "/", total, "\n"
+          pack.save
+          pack.save
+          i += 1
+        end
+        'Done'
       end
     end
   end
