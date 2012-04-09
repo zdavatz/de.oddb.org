@@ -1,9 +1,12 @@
 #!/usr/bin/env ruby
+# ODDB::Import::Gkv -- de.oddb.org -- 09.04.2012 -- yasaka@ywesee.com
 # ODDB::Import::Gkv -- de.oddb.org -- 26.05.2011 -- mhatakeyama@ywesee.com
 # ODDB::Import::Gkv -- de.oddb.org -- 17.08.2009 -- hwyss@ywesee.com
 
 require 'rpdf2txt/default_handler'
 require 'rpdf2txt/parser'
+require 'openssl'
+OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 require 'mechanize'
 require 'open-uri'
 require 'oddb/import/importer'
@@ -71,6 +74,7 @@ class Gkv < Importer
     dest = File.join(pdf_dir, file)
     archive = File.join(ODDB.config.var, 'pdf/gkv',
                 sprintf("%s-%s", opts[:date].strftime("%Y.%m.%d"), file))
+    # htts verify none
     content = open(url).read
     if(!File.exist?(dest) || content.size != File.size(dest))
       open(archive, 'w') { |local|
@@ -85,7 +89,7 @@ class Gkv < Importer
     ODDB.logger.error('Gkv') { error.message }
   end
   def latest_url agent, opts={}
-    host = 'https://www.gkv-spitzenverband.de'
+    host = 'https://www.gkv-spitzenverband.de' # https verify none
     url = '/Befreiungsliste_Arzneimittel_Versicherte.gkvnet'
     page = agent.get host + url
     file_base_name = "Zuzahlungsbefreit"
